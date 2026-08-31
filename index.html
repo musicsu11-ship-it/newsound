@@ -310,7 +310,10 @@ const $$ = (s) => Array.from(document.querySelectorAll(s));
 
 /* ---------- 접속 설정 ----------
    여기에 값을 직접 넣어두면 설정 화면 없이 바로 접속합니다. */
-const BAKED = { url:'', anonKey:'' };
+const BAKED = {
+  url:'https://lixuhimwutyiqshzamtp.supabase.co',
+  anonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpeHVoaW13dXR5aXFzaHphbXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMjk5MzUsImV4cCI6MjEwMzcwNTkzNX0.6Du-Koz6SOyKuB2KiUfETq4qBZ78ytSiyHgBkgEYgLE'
+};
 function getConfig(){
   if(BAKED.url && BAKED.anonKey) return BAKED;
   try{ return JSON.parse(localStorage.getItem('sb_cfg')||'null') || {url:'',anonKey:''}; }
