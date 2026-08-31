@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>새소리단 · 활동 플랫폼</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --surface:#ffffff; --surface-2:#f0f3fa; --border:#e2e7f0;
+    --text:#1c2434; --muted:#63708a; --brand:#2f6bff; --brand-weak:#e7eeff;
+    --ok:#1f9d55; --ok-weak:#e4f6ec; --warn:#c67a00; --warn-weak:#fbf0dd;
+    --danger:#d33; --danger-weak:#fde7e7;
+    --shadow:0 1px 2px rgba(20,30,60,.06),0 8px 24px rgba(20,30,60,.08);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0f1420; --surface:#161d2c; --surface-2:#1d263a; --border:#2a3549;
+      --text:#e8ecf5; --muted:#9aa7bf; --brand:#5b8bff; --brand-weak:#1b2540;
+      --ok:#3fbe73; --ok-weak:#16311f; --warn:#e0a33a; --warn-weak:#33260f;
+      --danger:#ef5a5a; --danger-weak:#3a1a1a;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.55; -webkit-font-smoothing:antialiased}
+  a{color:var(--brand)}
+  button{font-family:inherit}
+  code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:.92em}
+  .app{display:grid; grid-template-columns:252px 1fr; min-height:100vh}
+
+  .side{background:var(--surface); border-right:1px solid var(--border); padding:18px 14px;
+    display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh; overflow-y:auto}
+  .brand{display:flex; align-items:center; gap:10px; padding:6px 8px 14px}
+  .brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#7aa2ff);
+    display:grid;place-items:center;color:#fff;font-size:18px;flex:none}
+  .brand b{font-size:16px}
+  .brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:500}
+  .nav-group{font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:14px 8px 4px}
+  .nav-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;
+    color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:14px}
+  .nav-btn:hover{background:var(--surface-2)}
+  .nav-btn.active{background:var(--brand-weak);color:var(--brand);font-weight:600}
+  .nav-btn .ic{width:18px;text-align:center;flex:none}
+  .side .spacer{flex:1;min-height:14px}
+  .visits{display:flex;gap:14px;padding:9px 12px;margin-bottom:8px;border:1px solid var(--border);
+    border-radius:12px;background:var(--surface-2)}
+  .visits div{flex:1}
+  .visits b{display:block;font-size:16px;font-variant-numeric:tabular-nums;line-height:1.25}
+  .visits span{font-size:11px;color:var(--muted)}
+  .who{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px}
+  .who b{display:block}
+  .who .role{color:var(--muted);font-size:12px}
+
+  .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 14px;border-radius:10px;
+    cursor:pointer;font-size:14px;font-weight:600}
+  .btn:hover{border-color:var(--brand)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:6px 10px;font-size:12.5px}
+  .btn.danger{color:var(--danger);border-color:var(--danger-weak)}
+  label.field{display:block;margin-bottom:12px;font-size:13px;font-weight:600}
+  label.field .req{color:var(--danger)}
+  input,select,textarea{width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--border);border-radius:9px;
+    background:var(--surface-2);color:var(--text);font-size:14px;font-family:inherit}
+  textarea{min-height:90px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--brand-weak);border-color:var(--brand)}
+  .hint{font-weight:400;color:var(--muted);font-size:12px;margin-top:3px}
+  .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+  .main{padding:26px clamp(16px,4vw,44px);max-width:1120px;width:100%}
+  .page-head{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+  .page-head h1{margin:0 0 4px;font-size:22px}
+  .page-head p{margin:0;color:var(--muted);font-size:14px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px;margin-bottom:18px}
+  .card h2{margin:0 0 4px;font-size:16px}
+  .card h2+.sub{margin:0 0 16px;color:var(--muted);font-size:13px}
+  .grid{display:grid;gap:14px}
+  .grid.c2{grid-template-columns:1fr 1fr}
+  .grid.c3{grid-template-columns:repeat(3,1fr)}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+  .tag.recv{background:var(--surface-2);color:var(--muted)}
+  .tag.review{background:var(--warn-weak);color:var(--warn)}
+  .tag.approve{background:var(--ok-weak);color:var(--ok)}
+  .tag.reject{background:var(--danger-weak);color:var(--danger)}
+  .tag.brand{background:var(--brand-weak);color:var(--brand)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  tr:hover td{background:var(--surface-2)}
+  .table-wrap{overflow-x:auto}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .stat b{font-size:23px;display:block}
+  .stat span{color:var(--muted);font-size:12.5px}
+  .notice{background:var(--brand-weak);border:1px solid var(--brand);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:16px}
+  .notice.amber{background:var(--warn-weak);border-color:var(--warn)}
+  .notice.red{background:var(--danger-weak);border-color:var(--danger)}
+  .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .thumbs img{width:82px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer}
+
+  .searchbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .searchbar input{margin-top:0;flex:1;min-width:200px}
+  .search-info{color:var(--muted);font-size:13px;margin-bottom:12px}
+  mark{background:var(--warn-weak);color:inherit;border-radius:3px;padding:0 2px}
+
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+  .photo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+  .photo-card:hover{border-color:var(--brand)}
+  .photo-card .hero{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--surface-2)}
+  .photo-card .hero.none{display:grid;place-items:center;color:var(--muted);font-size:34px}
+  .photo-card .pc-body{padding:14px 16px 16px}
+  .photo-card h3{margin:0 0 6px;font-size:15.5px;line-height:1.35}
+  .photo-card .excerpt{color:var(--muted);font-size:13px;margin:0 0 10px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .photo-card .meta{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:8px}
+
+  .post-row{border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer}
+  .post-row:hover{background:var(--surface-2)}
+  .post-row .pr-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .post-row h3{margin:0;font-size:15px}
+  .post-row .excerpt{color:var(--muted);font-size:13px;margin:4px 0 0;
+    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+
+  .op-item{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:var(--surface)}
+  .op-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+  .op-body{margin-top:8px;white-space:pre-wrap}
+  .cmt-list{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px}
+  .cmt{padding:7px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
+  .cmt:last-child{border-bottom:0}
+  .cmt .cm-meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center}
+  .cmt-form{display:flex;gap:8px;margin-top:10px}
+  .cmt-form input{margin-top:0}
+
+  .cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+  .cal-head b{font-size:18px}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);
+    border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .cal .dow{background:var(--surface-2);text-align:center;font-size:12px;font-weight:600;padding:8px 0;color:var(--muted)}
+  .cal .day{background:var(--surface);min-height:98px;padding:6px 7px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+  .cal .day:hover{background:var(--surface-2)}
+  .cal .day.dim{color:var(--muted);opacity:.5}
+  .cal .day.today .dnum{background:var(--brand);color:#fff;border-radius:50%;width:22px;height:22px;display:grid;place-items:center}
+  .cal .day.sel{outline:2px solid var(--brand);outline-offset:-2px}
+  .cal .dnum{font-size:12.5px;font-weight:600}
+  .cal .sun .dnum{color:var(--danger)}
+  .cal .ev{font-size:11px;background:var(--brand-weak);color:var(--brand);border-radius:5px;
+    padding:1px 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .team{border:1px solid var(--border);border-radius:12px;padding:16px;background:var(--surface-2)}
+  .team h3{margin:0 0 2px;font-size:15px}
+  .team .lead{color:var(--brand);font-size:12.5px;font-weight:600;margin-bottom:6px}
+  .team p{margin:0;font-size:13px;color:var(--muted)}
+  .timeline{list-style:none;padding:0;margin:0}
+  .timeline li{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid var(--border)}
+  .timeline li:last-child{border-bottom:0}
+  .timeline .yr{flex:none;width:92px;font-weight:700;color:var(--brand);font-size:13.5px}
+  .timeline .tx{font-size:14px}
+
+  .modal-bg{position:fixed;inset:0;background:rgba(10,15,30,.55);display:none;place-items:center;z-index:50;padding:20px}
+  .modal-bg.open{display:grid}
+  .modal{background:var(--surface);border-radius:16px;max-width:720px;width:100%;max-height:88vh;overflow:auto;box-shadow:var(--shadow)}
+  .modal .m-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;
+    align-items:center;gap:10px;position:sticky;top:0;background:var(--surface);z-index:1}
+  .modal .m-head b{font-size:16px}
+  .modal .m-body{padding:20px}
+  .modal .m-body dt{font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:14px}
+  .modal .m-body dd{margin:2px 0 0;white-space:pre-wrap}
+  .modal .big-imgs img{width:100%;border-radius:10px;margin-bottom:10px;display:block;cursor:zoom-in}
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;place-items:center;z-index:60;padding:20px}
+  .lightbox.open{display:grid}
+  .lightbox img{max-width:95vw;max-height:92vh;border-radius:8px}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--text);
+    color:var(--bg);padding:11px 18px;border-radius:10px;font-size:13.5px;opacity:0;transition:.25s;z-index:80;
+    pointer-events:none;max-width:88vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .busy{position:fixed;top:0;left:0;right:0;height:3px;background:var(--brand);transform:scaleX(0);
+    transform-origin:left;transition:transform .3s;z-index:90}
+  .busy.on{transform:scaleX(.7)}
+
+  .auth-wrap{min-height:100vh;display:grid;place-items:center;padding:20px}
+  .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);
+    padding:30px;max-width:440px;width:100%}
+  .auth-card .logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#7aa2ff);
+    display:grid;place-items:center;color:#fff;font-size:24px;margin-bottom:14px}
+  .tabs{display:flex;gap:6px;margin:18px 0 14px;background:var(--surface-2);padding:4px;border-radius:11px}
+  .tabs button{flex:1;border:0;background:transparent;padding:8px;border-radius:8px;cursor:pointer;
+    font-size:13.5px;font-weight:600;color:var(--muted)}
+  .tabs button.on{background:var(--surface);color:var(--brand);box-shadow:var(--shadow)}
+
+  .topbar{display:none}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
+  @media (max-width:860px){
+    .app{grid-template-columns:1fr}
+    .side{position:fixed;left:0;top:0;bottom:0;width:252px;z-index:40;transform:translateX(-100%);transition:.25s}
+    .side.open{transform:translateX(0)}
+    .topbar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);
+      border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+    .scrim.open{display:block}
+    .stat-row{grid-template-columns:1fr 1fr}
+    .grid.c2,.grid.c3{grid-template-columns:1fr}
+    .cal .day{min-height:64px}
+    .cal .ev{font-size:10px}
+  }
+</style>
+</head>
+<body>
+
+<div class="busy" id="busy"></div>
+
+<!-- ================= 접속 설정 (최초 1회) ================= -->
+<div id="setupView" class="auth-wrap" style="display:none">
+  <div class="auth-card">
+    <div class="logo">🔌</div>
+    <h1 style="margin:0 0 4px;font-size:20px">Supabase 연결 설정</h1>
+    <p style="margin:0;color:var(--muted);font-size:13px">
+      Supabase 프로젝트의 주소와 <b>anon public</b> 키를 입력하세요.
+      대시보드 &gt; Project Settings &gt; API 에서 확인할 수 있습니다.</p>
+    <label class="field" style="margin-top:18px">Project URL
+      <input id="cfgUrl" placeholder="https://xxxxxxxx.supabase.co"></label>
+    <label class="field">anon public key
+      <input id="cfgKey" placeholder="eyJhbGciOi..."></label>
+    <button class="btn primary" style="width:100%" id="cfgSave">연결하기</button>
+    <p class="hint" style="margin-top:14px">
+      anon 키는 공개되어도 되는 키입니다. 실제 권한은 데이터베이스의 RLS 정책이 결정하므로,
+      이 키를 알아도 남의 영수증은 볼 수 없습니다.<br><br>
+      아직 준비 전이라면 <code>standalone.html</code> 을 열어 서버 없이 사용할 수 있습니다.</p>
+  </div>
+</div>
+
+<!-- ================= 로그인 ================= -->
+<div id="authView" class="auth-wrap" style="display:none">
+  <div class="auth-card">
+    <div class="logo">🐦</div>
+    <h1 style="margin:0 0 4px;font-size:20px">새소리단 활동 플랫폼</h1>
+    <p style="margin:0;color:var(--muted);font-size:13px">
+      소개·소식·의견함·일정은 로그인 없이 둘러볼 수 있습니다.</p>
+
+    <button class="btn" style="width:100%;margin-top:18px" id="btnAnon">익명으로 둘러보기</button>
+
+    <div class="tabs">
+      <button id="tabLogin" class="on">로그인</button>
+      <button id="tabSignup">회원가입</button>
+    </div>
+
+    <label class="field" id="fName" style="display:none">이름 <span class="req">*</span>
+      <input id="auName" placeholder="예) 홍길동"></label>
+    <label class="field">이메일 <span class="req">*</span>
+      <input id="auEmail" type="email" autocomplete="username" placeholder="you@example.com"></label>
+    <label class="field">비밀번호 <span class="req">*</span>
+      <input id="auPw" type="password" autocomplete="current-password" placeholder="6자 이상"></label>
+
+    <button class="btn primary" style="width:100%" id="btnAuth">로그인</button>
+    <p class="hint" id="authHint" style="margin-top:12px">
+      가입 직후에는 <b>일반 방문자</b> 권한입니다. 단원·담당관 권한은 운영 관리자가 부여합니다.</p>
+  </div>
+</div>
+
+<!-- ================= 앱 ================= -->
+<div id="appView" class="app" style="display:none">
+  <aside class="side" id="side">
+    <div class="brand"><div class="logo">🐦</div><div><b>새소리단</b><span>활동 플랫폼</span></div></div>
+    <div id="navArea"></div>
+    <div class="spacer"></div>
+    <div class="visits" id="visitBox" style="display:none"></div>
+    <div class="who" id="whoBox"></div>
+    <button class="btn sm" id="adminBtn" style="margin-top:8px;display:none;width:100%">🛠 관리자 콘솔 열기</button>
+    <div class="row-actions" style="margin-top:8px">
+      <button class="btn ghost sm" id="refreshBtn">새로고침</button>
+      <button class="btn ghost sm" id="logoutBtn">로그아웃</button>
+    </div>
+  </aside>
+
+  <div style="min-width:0">
+    <div class="topbar">
+      <button class="btn ghost sm" id="menuToggle">☰ 메뉴</button>
+      <b id="topTitle">홈</b>
+    </div>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<div class="modal-bg" id="modalBg"><div class="modal">
+  <div class="m-head"><b id="modalTitle"></b><button class="btn ghost sm" id="modalClose">닫기</button></div>
+  <div class="m-body" id="modalBody"></div>
+</div></div>
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt="첨부 이미지" /></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ============================================================================
+   새소리단 활동 플랫폼 — Supabase 연동판
+   · 권한(단원/담당관/관리자)은 DB의 profiles.role 에만 존재합니다.
+   · "영수증은 본인과 혁신행정담당관만" 은 RLS 정책이 강제합니다.
+     브라우저 코드를 고쳐도 남의 영수증을 가져올 수 없습니다.
+   ============================================================================ */
+
+const $  = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+/* ---------- 접속 설정 ----------
+   여기에 값을 직접 넣어두면 설정 화면 없이 바로 접속합니다. */
+const BAKED = { url:'', anonKey:'' };
+function getConfig(){
+  if(BAKED.url && BAKED.anonKey) return BAKED;
+  try{ return JSON.parse(localStorage.getItem('sb_cfg')||'null') || {url:'',anonKey:''}; }
+  catch(e){ return {url:'',anonKey:''}; }
+}
+
+let sb = null;
+
+/* ---------- 공통 유틸 ---------- */
+const pad = (n) => String(n).padStart(2,'0');
+const nowISO = () => new Date().toISOString();
+const fmt = (iso) => { if(!iso) return '-'; const d = new Date(iso);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtDay = (iso) => iso ? String(iso).slice(0,10) : '-';
+const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const won = (n) => (Number(n)||0).toLocaleString('ko-KR') + '원';
+const esc = (s) => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const excerpt = (s,n=120) => { const t=String(s||'').replace(/\s+/g,' ').trim(); return t.length>n ? t.slice(0,n)+'…' : t; };
+
+let toastT;
+function toast(msg){
+  const t = $('#toast'); if(!t) return;
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=> t.classList.remove('show'), 3000);
+}
+const busy = (on) => $('#busy').classList.toggle('on', !!on);
+
+/* Supabase 오류를 사람이 읽을 수 있는 말로 */
+function failed(where, error){
+  console.error(where, error);
+  const m = error?.message || String(error);
+  if(/row-level security|violates row-level/i.test(m)) toast(`${where}: 권한이 없습니다.`);
+  else if(/JWT|session/i.test(m)) toast(`${where}: 로그인이 만료되었습니다. 다시 로그인해 주세요.`);
+  else if(/Failed to fetch|NetworkError/i.test(m)) toast(`${where}: 서버에 연결하지 못했습니다.`);
+  else toast(`${where}: ${m}`);
+}
+
+/* ============================================================================
+   상태
+   ============================================================================ */
+const S = {
+  user:null, profile:null,
+  posts:[], opinions:[], comments:[], reports:[], expenses:[], events:[],
+  site:null, profiles:[], adminExists:true, visits:null
+};
+const SIGNED = {};                 // docs 버킷 파일의 임시 열람 URL 캐시
+const role = () => S.profile?.role || 'visitor';
+const myName = () => S.profile?.name || '방문자';
+const INNER   = ['member','officer','admin'];
+const OFFICER = ['officer','admin'];
+const isInner   = () => INNER.includes(role());
+const isOfficer = () => OFFICER.includes(role());
+const isAdmin   = () => role()==='admin';
+const ROLE_LABEL = { visitor:'일반 방문자', member:'새소리단 단원', officer:'혁신행정담당관', admin:'운영 관리자' };
+
+const DEFAULT_INTRO = {
+  mission:'새소리단은 시민의 목소리를 현장에서 듣고 행정에 전달하는 시민 참여 조직입니다.\n생활 속 불편과 개선 아이디어를 직접 발굴해 담당 부서에 전하고, 개선 과정을 끝까지 지켜봅니다.\n\n※ 예시 문구입니다. 관리자 권한으로 로그인해 실제 내용으로 수정하세요.',
+  roles:[
+    '현장 모니터링 — 생활 현장을 직접 살펴보고 개선이 필요한 지점을 기록합니다.',
+    '의견 수렴 — 주민 의견을 모아 정리하고 의견함을 통해 공유합니다.',
+    '정책 제안 — 수집한 내용을 바탕으로 개선안을 제안합니다.',
+    '이행 점검 — 제안이 실제로 반영되는지 확인하고 결과를 보고합니다.'
+  ],
+  history:[
+    { year:'2023', text:'새소리단 발족, 1기 단원 위촉 (예시)' },
+    { year:'2024', text:'분야별 6개 팀 체제로 개편 (예시)' },
+    { year:'2025', text:'온라인 활동 플랫폼 운영 시작 (예시)' },
+    { year:'2026', text:'활동 범위 확대 및 정기 보고 체계 정착 (예시)' }
+  ],
+  teams:[
+    { name:'1팀 · 생활안전', lead:'팀장 미정', desc:'보도·가로등·시설물 등 생활 안전 전반을 점검합니다. (예시)' },
+    { name:'2팀 · 환경정비', lead:'팀장 미정', desc:'하천·공원·미화 등 환경 상태를 모니터링합니다. (예시)' },
+    { name:'3팀 · 교통',     lead:'팀장 미정', desc:'보행 환경, 주정차, 대중교통 편의를 살핍니다. (예시)' },
+    { name:'4팀 · 복지',     lead:'팀장 미정', desc:'취약계층 지원과 복지 사각지대를 발굴합니다. (예시)' },
+    { name:'5팀 · 문화',     lead:'팀장 미정', desc:'문화·체육 프로그램과 시설 이용을 점검합니다. (예시)' },
+    { name:'6팀 · 홍보',     lead:'팀장 미정', desc:'활동 내용을 기록하고 대외에 알립니다. (예시)' }
+  ]
+};
+const intro = () => {
+  const i = S.site?.intro;
+  return (i && i.teams) ? i : DEFAULT_INTRO;
+};
+
+/* ---------- 게시판 정의 ---------- */
+const BOARDS = {
+  news:   { label:'새소리단 소식', icon:'📰', layout:'photo',
+            desc:'새소리단 활동 안내와 소식입니다. 누구나 볼 수 있습니다.', write:INNER },
+  notice: { label:'공지방', icon:'📢', layout:'list',
+            desc:'단원 대상 공지사항입니다.', write:OFFICER },
+  free:   { label:'자유방', icon:'💭', layout:'list',
+            desc:'단원끼리 자유롭게 이야기하는 공간입니다.', write:INNER },
+  share:  { label:'활동 공유방', icon:'📸', layout:'photo',
+            desc:'활동 사진과 현장 기록을 공유하는 공간입니다.', write:INNER },
+};
+const ALL = ['visitor', ...INNER];
+const MENUS = [
+  { id:'home',     icon:'🏠', label:'홈',           roles:ALL,   group:'홈' },
+  { id:'intro',    icon:'🐦', label:'새소리단 소개', roles:ALL,   group:'소개' },
+  { id:'news',     icon:'📰', label:'새소리단 소식', roles:ALL,   group:'소식' },
+  { id:'opinion',  icon:'💬', label:'의견함',       roles:ALL,   group:'의견함' },
+  { id:'calendar', icon:'📅', label:'일정 관리',     roles:ALL,   group:'일정' },
+  { id:'game',     icon:'🎮', label:'게임',         roles:ALL,   group:'일정' },
+
+  { id:'notice',   icon:'📢', label:'공지방',       roles:INNER, group:'새소리단 공간' },
+  { id:'free',     icon:'💭', label:'자유방',       roles:INNER, group:'새소리단 공간' },
+  { id:'share',    icon:'📸', label:'활동 공유방',   roles:INNER, group:'새소리단 공간' },
+  { id:'report',   icon:'📄', label:'결과보고서 제출', roles:INNER, group:'새소리단 공간' },
+  { id:'expense',  icon:'🧾', label:'활동비 정산',   roles:INNER, group:'새소리단 공간' },
+  { id:'mine',     icon:'📁', label:'내 제출 내역',  roles:INNER, group:'새소리단 공간' },
+
+  { id:'review-report',  icon:'✅', label:'결과보고서 검토', roles:OFFICER, group:'혁신행정담당관' },
+  { id:'review-expense', icon:'💳', label:'활동비 정산 처리', roles:OFFICER, group:'혁신행정담당관' },
+  { id:'members',        icon:'👥', label:'회원 · 권한 관리', roles:OFFICER, group:'혁신행정담당관' },
+
+  { id:'intro-edit', icon:'✏️', label:'소개 내용 편집', roles:['admin'], group:'관리' },
+  { id:'settings',   icon:'⚙️', label:'게임 등록',     roles:['admin'], group:'관리' },
+  { id:'backup',     icon:'💾', label:'데이터 내보내기', roles:['admin'], group:'관리' },
+];
+const can = (id) => { const m = MENUS.find(x=>x.id===id); return !!m && m.roles.includes(role()); };
+const canWrite = (b) => BOARDS[b].write.includes(role());
+
+/* ============================================================================
+   데이터 로드
+   ============================================================================ */
+async function refresh(){
+  busy(true);
+  try{
+    // 권한부터 다시 읽습니다. 관리자가 내 권한을 바꿨다면 여기서 바로 반영됩니다.
+    const before = role();
+    await loadProfile();
+    const roleChanged = role() !== before;
+
+    // 관리자가 아직 한 명도 없으면 홈에 "첫 관리자 등록" 안내를 띄웁니다.
+    // rpc는 예외를 던지지 않고 {error}를 돌려주므로 error를 직접 확인해야 합니다.
+    S.adminCheckError = '';
+    try{
+      const { data, error } = await sb.rpc('admin_exists');
+      if(error){
+        S.adminExists = true;
+        S.adminCheckError = /function|schema cache|does not exist/i.test(error.message||'')
+          ? 'no-function' : (error.message || 'unknown');
+      }else{
+        S.adminExists = (data === true);
+      }
+    }catch(e){ S.adminExists = true; S.adminCheckError = e?.message || 'unknown'; }
+
+    const jobs = [
+      sb.from('site').select('*').eq('id',1).maybeSingle(),
+      sb.from('posts').select('*').order('created_at',{ascending:false}),
+      sb.from('opinions').select('*').order('created_at',{ascending:false}),
+      sb.from('opinion_comments').select('*').order('created_at'),
+      sb.from('events').select('*').order('ev_date'),
+    ];
+    if(isInner()){
+      jobs.push(sb.from('reports').select('*').order('created_at',{ascending:false}));
+      jobs.push(sb.from('expenses').select('*').order('created_at',{ascending:false}));
+    }
+    if(isOfficer()) jobs.push(sb.from('profiles').select('*').order('created_at'));
+
+    const res = await Promise.all(jobs);
+    const bad = res.find(r => r.error);
+    if(bad) throw bad.error;
+
+    S.site     = res[0].data || null;
+    S.posts    = res[1].data || [];
+    S.opinions = res[2].data || [];
+    S.comments = res[3].data || [];
+    S.events   = res[4].data || [];
+    let i = 5;
+    S.reports  = isInner() ? (res[i++].data || []) : [];
+    S.expenses = isInner() ? (res[i++].data || []) : [];
+    S.profiles = isOfficer() ? (res[i++].data || []) : [];
+
+    await signDocs();
+
+    // 권한이 바뀌었으면 메뉴와 화면을 즉시 새로 그립니다 (로그아웃 불필요)
+    if(roleChanged && $('#appView').style.display !== 'none'){
+      renderNav(); paintWho();
+      // 글을 쓰던 중이면 화면을 갈아끼우지 않습니다 (입력 내용 보호)
+      const typing = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);
+      if(!typing) go(can(CURRENT) ? CURRENT : 'home');
+      toast(`권한이 "${ROLE_LABEL[role()]}"(으)로 변경되었습니다`);
+    }
+  }catch(e){ failed('데이터를 불러오지 못했습니다', e); }
+  finally{ busy(false); }
+}
+
+/* docs 버킷(영수증·보고서 첨부)은 비공개이므로 임시 열람 URL을 만들어 둡니다.
+   내려받을 권한이 없으면 Supabase가 URL 자체를 내주지 않습니다. */
+async function signDocs(){
+  const paths = [];
+  S.expenses.forEach(e => (e.receipts||[]).forEach(f => f.path && paths.push(f.path)));
+  S.reports.forEach(r => (r.files||[]).forEach(f => f.path && paths.push(f.path)));
+  const need = [...new Set(paths)].filter(p => !SIGNED[p]);
+  if(!need.length) return;
+  const { data, error } = await sb.storage.from('docs').createSignedUrls(need, 3600);
+  if(error){ console.warn('signDocs', error); return; }
+  (data||[]).forEach(d => { if(d.signedUrl) SIGNED[d.path] = d.signedUrl; });
+}
+
+const mediaUrl = (p) => sb.storage.from('media').getPublicUrl(p).data.publicUrl;
+const fileUrl  = (f) => f?.path ? (SIGNED[f.path] || '') : '';
+
+/* ============================================================================
+   인증
+   ============================================================================ */
+let AUTH_MODE = 'login';
+
+function bindAuth(){
+  $('#tabLogin').addEventListener('click', ()=> setAuthMode('login'));
+  $('#tabSignup').addEventListener('click', ()=> setAuthMode('signup'));
+  $('#btnAuth').addEventListener('click', doAuth);
+  ['#auEmail','#auPw','#auName'].forEach(s =>
+    $(s).addEventListener('keydown', e=>{ if(e.key==='Enter') doAuth(); }));
+
+  $('#btnAnon').addEventListener('click', async ()=>{
+    busy(true);
+    const { error } = await sb.auth.signInAnonymously();
+    busy(false);
+    if(error){
+      if(/disabled|not enabled/i.test(error.message))
+        toast('익명 로그인이 꺼져 있습니다. Supabase > Authentication > Sign In / Providers 에서 Anonymous sign-ins 를 켜주세요.');
+      else failed('익명 입장', error);
+      return;
+    }
+    await afterLogin();
+  });
+}
+function setAuthMode(m){
+  AUTH_MODE = m;
+  $('#tabLogin').classList.toggle('on', m==='login');
+  $('#tabSignup').classList.toggle('on', m==='signup');
+  $('#fName').style.display = m==='signup' ? 'block' : 'none';
+  $('#btnAuth').textContent = m==='signup' ? '회원가입' : '로그인';
+  $('#auPw').setAttribute('autocomplete', m==='signup' ? 'new-password' : 'current-password');
+  $('#authHint').innerHTML = m==='signup'
+    ? '가입 직후에는 <b>일반 방문자</b> 권한입니다. 단원·담당관 권한은 운영 관리자가 부여합니다.'
+    : '계정이 없다면 회원가입 탭을 이용하세요.';
+}
+async function doAuth(){
+  const email = $('#auEmail').value.trim();
+  const pw    = $('#auPw').value;
+  const name  = $('#auName').value.trim();
+  if(!email || !pw){ toast('이메일과 비밀번호를 입력하세요'); return; }
+  if(AUTH_MODE==='signup' && !name){ toast('이름을 입력하세요'); return; }
+
+  busy(true);
+  try{
+    if(AUTH_MODE==='signup'){
+      const { data, error } = await sb.auth.signUp({ email, password:pw, options:{ data:{ name } } });
+      if(error) throw error;
+      if(!data.session){
+        toast('가입 확인 메일을 보냈습니다. 메일의 링크를 눌러 인증한 뒤 로그인하세요.');
+        setAuthMode('login'); return;
+      }
+      await sb.from('profiles').update({ name }).eq('id', data.user.id);
+    }else{
+      const { error } = await sb.auth.signInWithPassword({ email, password:pw });
+      if(error) throw error;
+    }
+    await afterLogin();
+  }catch(e){
+    const m = e?.message || '';
+    if(/Invalid login credentials/i.test(m)) toast('이메일 또는 비밀번호가 올바르지 않습니다.');
+    else if(/Email not confirmed/i.test(m)) toast('메일 인증이 아직 완료되지 않았습니다.');
+    else if(/already registered/i.test(m)) toast('이미 가입된 이메일입니다. 로그인해 주세요.');
+    else failed(AUTH_MODE==='signup'?'회원가입':'로그인', e);
+  }finally{ busy(false); }
+}
+
+async function loadProfile(){
+  const { data:{ user } } = await sb.auth.getUser();
+  S.user = user;
+  if(!user) return false;
+  const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  if(error){ failed('프로필 조회', error); return false; }
+  S.profile = data || { id:user.id, name: user.is_anonymous ? '방문자' : (user.email||''), role:'visitor' };
+  if(!S.profile.name) S.profile.name = user.is_anonymous ? '방문자' : (user.email||'').split('@')[0];
+  return true;
+}
+
+async function afterLogin(){
+  if(!await loadProfile()) return;
+  await trackVisit();
+  await refresh();
+  showApp();
+}
+
+/* 방문 기록 — 페이지를 열 때 한 번만 호출합니다.
+   IP가 다르면 다른 방문자로 세고, 같은 IP가 하루에 여러 번 와도 고유 방문자는 1입니다. */
+let VISIT_DONE = false;
+async function trackVisit(){
+  if(VISIT_DONE) return;
+  VISIT_DONE = true;
+  try{
+    const { data, error } = await sb.rpc('track_visit');
+    if(!error && data) S.visits = data;
+  }catch(e){ /* 집계 실패는 이용에 영향을 주지 않습니다 */ }
+}
+
+function paintWho(){
+  $('#whoBox').innerHTML =
+    `<b>${esc(myName())}</b><span class="role">${ROLE_LABEL[role()]}</span>`;
+  // 담당관·관리자에게만 관리자 콘솔 버튼을 보여줍니다
+  $('#adminBtn').style.display = isOfficer() ? 'block' : 'none';
+
+  const v = S.visits, box = $('#visitBox');
+  if(v){
+    box.style.display = 'flex';
+    const n = x => (Number(x)||0).toLocaleString('ko-KR');
+    // 조회수는 같은 IP가 다시 들어와도 계속 올라갑니다
+    box.innerHTML = `<div><b>${n(v.today_hits ?? v.today)}</b><span>오늘 조회</span></div>
+                     <div><b>${n(v.hits ?? v.total)}</b><span>전체 조회</span></div>`;
+    box.title = `오늘 방문자 ${n(v.today)}명 · 전체 방문자 ${n(v.total)}명 (서로 다른 IP 기준)`;
+  }else{
+    box.style.display = 'none';
+  }
+}
+function showApp(){
+  $('#setupView').style.display='none';
+  $('#authView').style.display='none';
+  $('#appView').style.display='grid';
+  renderNav();
+  paintWho();
+  const start = location.hash.replace('#','') || 'home';
+  go(can(start) ? start : 'home');
+  subscribeRealtime();
+}
+function showAuth(){
+  $('#setupView').style.display='none';
+  $('#appView').style.display='none';
+  $('#authView').style.display='grid';
+  setAuthMode('login');
+}
+
+/* ============================================================================
+   실시간 반영
+   ============================================================================ */
+let channel = null, rtTimer = null;
+function subscribeRealtime(){
+  if(channel) return;
+  channel = sb.channel('saesori')
+    .on('postgres_changes', { event:'*', schema:'public', table:'posts' }, queueRefresh)
+    .on('postgres_changes', { event:'*', schema:'public', table:'opinions' }, queueRefresh)
+    .on('postgres_changes', { event:'*', schema:'public', table:'opinion_comments' }, queueRefresh)
+    .on('postgres_changes', { event:'*', schema:'public', table:'events' }, queueRefresh)
+    // 관리자가 내 권한을 바꾸면 이 자리에서 바로 알림이 옵니다
+    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'profiles' }, queueRefresh)
+    // 관리자 콘솔(admin.html)에서 소개·게임을 바꿔도 즉시 반영됩니다
+    .on('postgres_changes', { event:'*', schema:'public', table:'site' }, queueRefresh)
+    .subscribe();
+}
+function queueRefresh(){
+  clearTimeout(rtTimer);
+  rtTimer = setTimeout(async ()=>{
+    // 입력 중이거나 모달이 열려 있으면 화면을 갈아끼우지 않습니다
+    const typing = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);
+    const modal  = $('#modalBg').classList.contains('open');
+    await refresh();
+    if(!typing && !modal) go(CURRENT);
+  }, 900);
+}
+
+/* ============================================================================
+   내비게이션
+   ============================================================================ */
+function renderNav(){
+  const groups = {};
+  MENUS.filter(m => m.roles.includes(role()))
+       .forEach(m => (groups[m.group] = groups[m.group]||[]).push(m));
+  let html = '';
+  Object.entries(groups).forEach(([g, items])=>{
+    html += `<div class="nav-group">${esc(g)}</div>`;
+    items.forEach(m => html += `<button class="nav-btn" data-go="${m.id}"><span class="ic">${m.icon}</span>${esc(m.label)}</button>`);
+  });
+  $('#navArea').innerHTML = html;
+  $$('#navArea .nav-btn').forEach(b => b.addEventListener('click', ()=>{ go(b.dataset.go); closeSide(); }));
+}
+function setActive(id){
+  $$('#navArea .nav-btn').forEach(b => b.classList.toggle('active', b.dataset.go===id));
+  const m = MENUS.find(x=>x.id===id);
+  $('#topTitle').textContent = m ? m.label : '';
+}
+let CURRENT = 'home';
+function go(id){
+  if(!can(id)) id = 'home';
+  CURRENT = id;
+  try{ location.hash = id }catch(e){}
+  setActive(id);
+  $('#main').innerHTML = (VIEWS[id] || VIEWS.home)();
+  if(BIND[id]) BIND[id]();
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', ()=>{
+  if(!S.user) return;
+  const id = location.hash.replace('#','');
+  if(id && id!==CURRENT) go(id);
+});
+
+/* ============================================================================
+   화면 공통
+   ============================================================================ */
+const VIEWS = {}, BIND = {};
+const Q = {};
+
+const pageHead = (t,d,right='') =>
+  `<div class="page-head"><div><h1>${esc(t)}</h1><p>${esc(d)}</p></div><div class="row-actions">${right}</div></div>`;
+const statusTag = (s) => {
+  const map = { '접수':'recv','검토중':'review','승인':'approve','반려':'reject' };
+  return `<span class="tag ${map[s]||'recv'}">${esc(s||'접수')}</span>`;
+};
+const table = (cols) => `<div class="table-wrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+const tableEnd = `</tbody></table></div>`;
+
+function highlight(text, q){
+  const safe = esc(text);
+  if(!q) return safe;
+  const rx = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return safe.replace(rx, '<mark>$1</mark>');
+}
+function searchBar(id, ph){
+  const q = Q[id] || '';
+  return `<div class="searchbar">
+    <input id="sq_${id}" value="${esc(q)}" placeholder="${esc(ph)}">
+    <button class="btn" id="sb_${id}">검색</button>
+    ${q?`<button class="btn ghost" id="sc_${id}">초기화</button>`:''}
+  </div>`;
+}
+function bindSearch(id){
+  const inp = $('#sq_'+id);
+  const run = ()=>{ Q[id] = inp.value.trim(); go(id); };
+  $('#sb_'+id).addEventListener('click', run);
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') run(); });
+  $('#sc_'+id)?.addEventListener('click', ()=>{ Q[id]=''; go(id); });
+  if(Q[id]){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+
+/* ============================================================================
+   홈
+   ============================================================================ */
+VIEWS.home = () => {
+  const r = role();
+  const upcoming = S.events.filter(e => e.ev_date >= ymd(new Date())).slice(0,4);
+  const news = S.posts.filter(p => p.board==='news').slice(0,3);
+
+  let stats = '';
+  if(r==='member'){
+    const ex = S.expenses.filter(x => x.author_id===S.user.id);
+    stats = `<div class="stat-row">
+      <div class="stat"><b>${S.reports.filter(x=>x.author_id===S.user.id).length}</b><span>내 보고서</span></div>
+      <div class="stat"><b>${ex.length}</b><span>내 정산 신청</span></div>
+      <div class="stat"><b>${ex.filter(x=>!['승인','반려'].includes(x.status)).length}</b><span>처리 대기</span></div>
+      <div class="stat"><b>${won(ex.filter(x=>x.status==='승인').reduce((a,b)=>a+(+b.amount||0),0))}</b><span>승인 정산액</span></div>
+    </div>`;
+  } else if(isOfficer()){
+    stats = `<div class="stat-row">
+      <div class="stat"><b>${S.reports.filter(x=>!['승인','반려'].includes(x.status)).length}</b><span>검토 대기 보고서</span></div>
+      <div class="stat"><b>${S.expenses.filter(x=>!['승인','반려'].includes(x.status)).length}</b><span>처리 대기 정산</span></div>
+      <div class="stat"><b>${S.opinions.length}</b><span>접수 의견</span></div>
+      <div class="stat"><b>${won(S.expenses.filter(x=>x.status==='승인').reduce((a,b)=>a+(+b.amount||0),0))}</b><span>승인 정산 총액</span></div>
+    </div>`;
+  } else {
+    stats = `<div class="notice">방문해 주셔서 감사합니다.
+      <b>의견함</b>에 글이나 댓글을 남기면 접속 위치를 기준으로 만들어진 별칭(새소리○)이 표시됩니다.</div>`;
+  }
+
+  // 준비가 덜 된 경우를 조용히 넘기지 않고 화면에 표시합니다
+  const diag = (S.adminCheckError === 'no-function' && r === 'visitor') ? `
+    <div class="card" style="border-color:var(--warn);border-width:2px">
+      <h2>⚠️ 데이터베이스 설정이 최신이 아닙니다</h2>
+      <p class="sub">첫 관리자 등록 기능이 아직 데이터베이스에 없습니다.</p>
+      <p style="margin:0 0 14px">새소리단 폴더의 <code>supabase/schema.sql</code> 을 메모장으로 열어
+        <b>전체 선택(Ctrl+A) → 복사</b> 한 뒤, Supabase의
+        <b>SQL Editor → New query</b> 에 붙여넣고 <b>Run</b> 하세요.
+        그다음 이 화면에서 <b>새로고침</b> 을 누르면 등록 버튼이 나타납니다.</p>
+      <div class="row-actions"><button class="btn" id="diagRetry">다시 확인</button></div>
+    </div>` : '';
+
+  // 관리자가 아직 없을 때만 보이는 최초 1회용 안내
+  const claim = (!S.adminExists && !S.user?.is_anonymous) ? `
+    <div class="card" style="border-color:var(--accent);border-width:2px">
+      <h2>🔑 첫 관리자 등록</h2>
+      <p class="sub">이 사이트에는 아직 운영 관리자가 없습니다.
+        아래 버튼을 누르면 <b>${esc(myName())}</b> 님이 운영 관리자가 됩니다.</p>
+      <div class="notice amber" style="margin-bottom:14px">
+        이 버튼은 <b>관리자가 한 명도 없을 때만</b> 나타납니다.
+        한 번 등록되면 다시 나타나지 않으며, 이후 권한 부여는 <b>회원 · 권한 관리</b> 메뉴에서 합니다.
+        먼저 등록해야 할 담당자가 따로 있다면 그분이 가입한 뒤 누르게 하세요.
+      </div>
+      <div class="row-actions"><button class="btn primary" id="claimAdmin">내가 운영 관리자가 되기</button></div>
+    </div>` : '';
+
+  return pageHead(r==='visitor' ? '새소리단에 오신 것을 환영합니다' : `안녕하세요, ${myName()}님`,
+                  ROLE_LABEL[r] + ' 권한으로 이용 중입니다.')
+    + diag
+    + claim
+    + stats
+    + `<div class="grid c2">
+        <div class="card" style="margin:0"><h2>📰 최근 소식</h2><p class="sub">새소리단 활동 안내</p>
+          ${news.length ? news.map(p=>`<div class="post-row" data-open-post="${p.id}">
+              <div class="pr-top"><h3>${esc(p.title)}</h3><span class="hint">${fmtDay(p.created_at)}</span></div>
+              <p class="excerpt">${esc(excerpt(p.body,70))}</p></div>`).join('')
+            : `<div class="empty">등록된 소식이 없습니다.</div>`}
+        </div>
+        <div class="card" style="margin:0"><h2>📅 다가오는 일정</h2><p class="sub">등록된 행사 일정</p>
+          ${upcoming.length ? upcoming.map(e=>`<div class="post-row" style="cursor:default">
+              <div class="pr-top"><h3>${esc(e.title)}</h3><span class="hint">${esc(e.ev_date)}</span></div>
+              ${e.place?`<p class="excerpt">📍 ${esc(e.place)}</p>`:''}</div>`).join('')
+            : `<div class="empty">예정된 일정이 없습니다.</div>`}
+        </div>
+      </div>
+      <div class="card"><h2>바로가기</h2><p class="sub">권한에 따라 이용 가능한 메뉴입니다.</p>
+        <div class="row-actions">${MENUS.filter(m=>m.roles.includes(r) && !['home','intro-edit'].includes(m.id))
+          .map(m=>`<button class="btn" onclick="go('${m.id}')">${m.icon} ${esc(m.label)}</button>`).join('')}</div>
+      </div>`;
+};
+BIND.home = () => {
+  $$('#main [data-open-post]').forEach(el =>
+    el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
+
+  $('#diagRetry')?.addEventListener('click', async ()=>{
+    await refresh(); go('home');
+    toast(S.adminCheckError ? '아직 반영되지 않았습니다. SQL을 실행했는지 확인하세요.' : '확인되었습니다');
+  });
+
+  $('#claimAdmin')?.addEventListener('click', async ()=>{
+    if(!confirm(`${myName()} 님을 이 사이트의 운영 관리자로 등록합니다. 계속할까요?`)) return;
+    const btn = $('#claimAdmin'); btn.disabled = true; busy(true);
+    const { data, error } = await sb.rpc('claim_first_admin', { display_name: myName() });
+    busy(false); btn.disabled = false;
+    if(error){
+      if(/function .*claim_first_admin/i.test(error.message||''))
+        toast('schema.sql 을 최신 내용으로 다시 실행해 주세요.');
+      else failed('관리자 등록', error);
+      return;
+    }
+    if(data === 'ok'){ await refresh(); go('home'); toast('운영 관리자로 등록되었습니다'); }
+    else if(data === 'already-exists'){ await refresh(); go('home'); toast('이미 관리자가 있습니다. 그분에게 권한을 요청하세요.'); }
+    else if(data === 'anonymous') toast('익명 방문자는 관리자가 될 수 없습니다. 회원가입 후 이용하세요.');
+    else toast('등록하지 못했습니다. 다시 로그인 후 시도해 주세요.');
+  });
+};
+
+/* ============================================================================
+   새소리단 소개
+   ============================================================================ */
+VIEWS.intro = () => {
+  const it = intro();
+  const editBtn = isAdmin() ? `<button class="btn" onclick="go('intro-edit')">✏️ 내용 편집</button>` : '';
+  return pageHead('새소리단 소개','새소리단의 역할과 걸어온 길, 그리고 팀을 소개합니다.', editBtn)
+  + `<div class="card"><h2>우리는 이런 일을 합니다</h2><p class="sub">새소리단의 존재 이유</p>
+      <div style="white-space:pre-wrap;font-size:14.5px">${esc(it.mission)}</div></div>
+    <div class="card"><h2>주요 역할</h2><p class="sub">단원이 수행하는 활동</p>
+      ${it.roles?.length ? `<ul style="padding-left:18px;margin:0;line-height:1.9">
+        ${it.roles.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>` : `<div class="empty">등록된 역할이 없습니다.</div>`}</div>
+    <div class="card"><h2>연혁</h2><p class="sub">새소리단이 걸어온 길</p>
+      ${it.history?.length ? `<ul class="timeline">${it.history.slice()
+          .sort((a,b)=>String(b.year).localeCompare(String(a.year)))
+          .map(h=>`<li><span class="yr">${esc(h.year)}</span><span class="tx">${esc(h.text)}</span></li>`).join('')}
+      </ul>` : `<div class="empty">등록된 연혁이 없습니다.</div>`}</div>
+    <div class="card"><h2>팀 소개</h2><p class="sub">분야별 ${it.teams?.length||0}개 팀이 활동합니다.</p>
+      <div class="team-grid">${(it.teams||[]).map(t=>`<div class="team">
+        <h3>${esc(t.name)}</h3><div class="lead">${esc(t.lead||'')}</div><p>${esc(t.desc||'')}</p></div>`).join('')}</div></div>`;
+};
+
+VIEWS['intro-edit'] = () => {
+  const it = intro();
+  return pageHead('소개 내용 편집','새소리단 소개 페이지에 표시될 내용을 수정합니다.',
+                  `<button class="btn" onclick="go('intro')">미리보기</button>`)
+  + `<div class="card"><h2>소개 문구</h2>
+      <label class="field"><textarea id="ieMission" style="min-height:130px">${esc(it.mission)}</textarea></label></div>
+    <div class="card"><h2>주요 역할</h2><p class="sub">한 줄에 하나씩 입력하세요.</p>
+      <label class="field"><textarea id="ieRoles" style="min-height:120px">${esc((it.roles||[]).join('\n'))}</textarea></label></div>
+    <div class="card"><h2>연혁</h2><p class="sub">한 줄에 하나씩 <code>연도 | 내용</code> 형식으로 입력하세요.</p>
+      <label class="field"><textarea id="ieHistory" style="min-height:130px">${esc((it.history||[]).map(h=>`${h.year} | ${h.text}`).join('\n'))}</textarea></label></div>
+    <div class="card"><h2>팀 소개</h2><p class="sub">한 줄에 하나씩 <code>팀이름 | 팀장 | 설명</code> 형식으로 입력하세요.</p>
+      <label class="field"><textarea id="ieTeams" style="min-height:160px">${esc((it.teams||[]).map(t=>`${t.name} | ${t.lead} | ${t.desc}`).join('\n'))}</textarea></label></div>
+    <div class="card"><div class="row-actions">
+      <button class="btn primary" id="ieSave">저장</button>
+      <button class="btn danger" id="ieReset">예시 내용으로 되돌리기</button></div></div>`;
+};
+BIND['intro-edit'] = () => {
+  const lines = s => s.split('\n').map(x=>x.trim()).filter(Boolean);
+  const save = async (obj) => {
+    busy(true);
+    const { error } = await sb.from('site').update({ intro:obj, updated_at:nowISO() }).eq('id',1);
+    busy(false);
+    if(error) return failed('소개 저장', error);
+    await refresh(); toast('소개 내용을 저장했습니다'); go('intro');
+  };
+  $('#ieSave').addEventListener('click', ()=> save({
+    mission: $('#ieMission').value.trim(),
+    roles: lines($('#ieRoles').value),
+    history: lines($('#ieHistory').value).map(l=>{
+      const [y, ...rest] = l.split('|'); return { year:(y||'').trim(), text:rest.join('|').trim() }; }),
+    teams: lines($('#ieTeams').value).map(l=>{
+      const p = l.split('|');
+      return { name:(p[0]||'').trim(), lead:(p[1]||'').trim(), desc:(p.slice(2).join('|')||'').trim() }; })
+  }));
+  $('#ieReset').addEventListener('click', ()=>{
+    if(!confirm('처음 예시 내용으로 되돌립니다. 작성한 내용은 사라집니다.')) return;
+    save(JSON.parse(JSON.stringify(DEFAULT_INTRO)));
+  });
+};
+
+/* ============================================================================
+   게시판
+   ============================================================================ */
+function boardView(key){
+  const b = BOARDS[key];
+  const q = (Q[key]||'').toLowerCase();
+  let list = S.posts.filter(p => p.board===key);
+  if(q) list = list.filter(p => (p.title+' '+p.body+' '+p.author_name).toLowerCase().includes(q));
+  list = list.slice().sort((a,c)=> (c.pinned?1:0)-(a.pinned?1:0) || c.created_at.localeCompare(a.created_at));
+
+  const writeBtn = canWrite(key) ? `<button class="btn primary" id="bdWrite">✏️ 글쓰기</button>` : '';
+  let body;
+  if(!list.length){
+    body = `<div class="empty">${q ? `“${esc(Q[key])}” 검색 결과가 없습니다.` : '아직 등록된 글이 없습니다.'}</div>`;
+  } else if(b.layout==='photo'){
+    body = `<div class="photo-grid">${list.map(p=>{
+      const img = (p.images||[])[0];
+      return `<article class="photo-card" data-open-post="${p.id}">
+        ${img ? `<img class="hero" src="${esc(mediaUrl(img.path))}" alt="" loading="lazy">`
+              : `<div class="hero none">${b.icon}</div>`}
+        <div class="pc-body">
+          <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}</h3>
+          <p class="excerpt">${highlight(excerpt(p.body,90),Q[key])}</p>
+          <div class="meta"><span>${esc(p.author_name)}</span>
+            <span>${fmtDay(p.created_at)}${(p.images||[]).length>1?' · 📎'+p.images.length:''}</span></div>
+        </div></article>`;
+    }).join('')}</div>`;
+  } else {
+    body = `<div class="card">${list.map(p=>`
+      <div class="post-row" data-open-post="${p.id}">
+        <div class="pr-top">
+          <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}${(p.images||[]).length?' <span class="hint">📎'+p.images.length+'</span>':''}</h3>
+          <span class="hint">${fmtDay(p.created_at)}</span></div>
+        <p class="excerpt">${highlight(excerpt(p.body,110),Q[key])} <span class="hint">· ${esc(p.author_name)}</span></p>
+      </div>`).join('')}</div>`;
+  }
+  return pageHead(b.label, b.desc, writeBtn)
+    + searchBar(key, '제목·내용·작성자로 검색')
+    + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>` : '')
+    + body;
+}
+Object.keys(BOARDS).forEach(key=>{
+  VIEWS[key] = () => boardView(key);
+  BIND[key]  = () => {
+    bindSearch(key);
+    $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
+    $('#bdWrite')?.addEventListener('click', ()=> openPostForm(key));
+  };
+});
+
+function openPostForm(key){
+  const b = BOARDS[key];
+  const photo = b.layout==='photo';
+  openModal(`${b.icon} ${b.label} · 글쓰기`, `
+    <label class="field">제목 <span class="req">*</span><input id="pfTitle"></label>
+    <label class="field">내용 <span class="req">*</span><textarea id="pfBody" style="min-height:150px"></textarea></label>
+    <label class="field">사진${photo?' <span class="req">*</span>':' <span class="hint" style="display:inline">선택</span>'}
+      <input id="pfFiles" type="file" multiple accept="image/*">
+      <span class="hint">${photo?'첫 번째 사진이 목록에서 크게 표시됩니다.':''} 사진은 업로드 전에 자동 축소됩니다.</span>
+    </label>
+    <div class="thumbs" id="pfThumbs"></div>
+    ${isOfficer() ? `<label class="field" style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="pfPin" style="width:auto;margin:0"> 상단 고정(공지)</label>` : ''}
+    <div class="row-actions"><button class="btn primary" id="pfSave">등록</button></div>`);
+
+  let picked = [];
+  $('#pfFiles').addEventListener('change', async e=>{
+    picked = await prepImages(e.target.files);
+    previewLocal('#pfThumbs', picked);
+  });
+  $('#pfSave').addEventListener('click', async ()=>{
+    const title = $('#pfTitle').value.trim(), body = $('#pfBody').value.trim();
+    if(!title || !body){ toast('제목과 내용을 입력하세요'); return; }
+    if(photo && !picked.length){ toast('사진을 1장 이상 첨부하세요'); return; }
+    const btn = $('#pfSave'); btn.disabled = true; busy(true);
+    try{
+      const images = await uploadAll('media', picked, 'posts');
+      const { error } = await sb.from('posts').insert({
+        board:key, title, body, images,
+        author_id:S.user.id, author_name:myName(),
+        pinned: !!$('#pfPin')?.checked
+      });
+      if(error) throw error;
+      await refresh(); closeModal(); toast('등록되었습니다'); go(key);
+    }catch(e){ failed('글 등록', e); btn.disabled = false; }
+    finally{ busy(false); }
+  });
+}
+
+function openPost(id){
+  const p = S.posts.find(x=>x.id===id); if(!p) return;
+  const imgs = p.images || [];
+  const mine = p.author_id===S.user.id || isAdmin();
+  openModal(p.title, `
+    <div class="hint" style="margin-bottom:14px">${esc(p.author_name)} · ${fmt(p.created_at)} · ${esc(BOARDS[p.board]?.label||'')}</div>
+    ${imgs.length ? `<div class="big-imgs">${imgs.map(a=>{
+      const u = mediaUrl(a.path);
+      return `<img src="${esc(u)}" alt="${esc(a.name||'')}" data-zoom="${esc(u)}">`; }).join('')}</div>` : ''}
+    <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
+    ${mine ? `<div class="row-actions" style="margin-top:18px"><button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
+  bindZoom();
+  $('#ppDel')?.addEventListener('click', async ()=>{
+    if(!confirm('이 글을 삭제할까요? 되돌릴 수 없습니다.')) return;
+    busy(true);
+    const { error } = await sb.from('posts').delete().eq('id', id);
+    if(!error && (p.images||[]).length)
+      await sb.storage.from('media').remove(p.images.map(i=>i.path));
+    busy(false);
+    if(error) return failed('글 삭제', error);
+    await refresh(); closeModal(); toast('삭제되었습니다'); go(CURRENT);
+  });
+}
+
+/* ============================================================================
+   의견함
+   ============================================================================ */
+VIEWS.opinion = () => {
+  const q = (Q.opinion||'').toLowerCase();
+  const cmtsOf = (id) => S.comments.filter(c => c.opinion_id===id);
+  let list = S.opinions.slice();
+  if(q) list = list.filter(o =>
+    (o.body+' '+o.cat+' '+o.alias+' '+cmtsOf(o.id).map(c=>c.body).join(' ')).toLowerCase().includes(q));
+
+  return pageHead('의견함','누구나 익명으로 의견을 남기고 댓글을 달 수 있습니다. 작성한 글은 방문자 모두에게 공개됩니다.')
+  + `<div class="notice">별칭은 접속 위치를 기준으로 <b>새소리1, 새소리2 …</b> 순서대로 자동 부여됩니다.
+      이름·소속·연락처는 물론 IP 원본도 저장하지 않습니다.</div>
+    <div class="card"><h2>새 의견 남기기</h2>
+      <p class="sub">답변이 필요하면 본문에 연락 방법을 직접 적어주세요.</p>
+      <label class="field">분류<select id="opCat">
+        <option>일반 의견</option><option>활동 제안</option><option>불편·신고</option><option>칭찬</option><option>기타</option>
+      </select></label>
+      <label class="field">내용 <span class="req">*</span><textarea id="opBody" placeholder="자유롭게 작성해주세요"></textarea></label>
+      <div class="row-actions"><button class="btn primary" id="opSubmit">익명으로 제출</button></div>
+    </div>`
+  + searchBar('opinion','의견 내용·별칭·댓글로 검색')
+  + (q ? `<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>` : '')
+  + `<div style="margin-top:4px"><h2 style="margin:0 0 12px;font-size:16px">접수된 의견 (${list.length})</h2>
+      ${list.length ? list.map(o=>{
+        const mine = o.author_id===S.user.id;
+        const cs = cmtsOf(o.id);
+        return `<div class="op-item">
+          <div class="op-head">
+            <div><span class="tag brand">${esc(o.cat)}</span>
+              <b style="margin-left:8px;font-size:13.5px">${esc(o.alias||'익명')}</b>
+              ${mine?'<span class="tag approve" style="margin-left:6px">내 글</span>':''}</div>
+            <span class="hint">${fmt(o.created_at)}</span></div>
+          <div class="op-body">${highlight(o.body, Q.opinion)}</div>
+          ${(mine||isAdmin()) ? `<div class="row-actions">
+            <button class="btn sm danger" data-opdel="${o.id}">${mine?'내 글 삭제':'관리자 삭제'}</button></div>` : ''}
+          <div class="cmt-list">
+            ${cs.length ? cs.map(c=>{
+              const cm = c.author_id===S.user.id;
+              return `<div class="cmt"><div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.created_at)}</span>
+                ${(cm||isAdmin())?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px" data-cdel="${c.id}">삭제</button>`:''}
+                </div><div>${highlight(c.body, Q.opinion)}</div></div>`;
+            }).join('') : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
+            <div class="cmt-form">
+              <input data-cinput="${o.id}" placeholder="익명으로 댓글 남기기">
+              <button class="btn sm" data-cadd="${o.id}">등록</button></div>
+          </div></div>`;
+      }).join('') : `<div class="empty">${q?'검색 결과가 없습니다.':'아직 접수된 의견이 없습니다.'}</div>`}
+    </div>`;
+};
+BIND.opinion = () => {
+  bindSearch('opinion');
+
+  $('#opSubmit').addEventListener('click', async ()=>{
+    const body = $('#opBody').value.trim();
+    if(!body){ toast('내용을 입력하세요'); return; }
+    const btn = $('#opSubmit'); btn.disabled = true; busy(true);
+    const { error } = await sb.from('opinions').insert({ cat:$('#opCat').value, body, author_id:S.user.id });
+    busy(false); btn.disabled = false;
+    if(error) return failed('의견 제출', error);
+    await refresh(); toast('익명으로 제출되었습니다'); go('opinion');
+  });
+
+  $$('#main [data-opdel]').forEach(b => b.addEventListener('click', async ()=>{
+    if(!confirm('이 의견을 삭제할까요? 댓글도 함께 삭제됩니다.')) return;
+    busy(true);
+    const { error } = await sb.from('opinions').delete().eq('id', b.dataset.opdel);
+    busy(false);
+    if(error) return failed('의견 삭제', error);
+    await refresh(); toast('삭제되었습니다'); go('opinion');
+  }));
+
+  const addComment = async (opId) => {
+    const inp = $(`[data-cinput="${opId}"]`);
+    const text = inp.value.trim();
+    if(!text){ toast('댓글 내용을 입력하세요'); return; }
+    busy(true);
+    const { error } = await sb.from('opinion_comments')
+      .insert({ opinion_id:opId, body:text, author_id:S.user.id });
+    busy(false);
+    if(error) return failed('댓글 등록', error);
+    await refresh(); toast('댓글을 등록했습니다'); go('opinion');
+  };
+  $$('#main [data-cadd]').forEach(b => b.addEventListener('click', ()=> addComment(b.dataset.cadd)));
+  $$('#main [data-cinput]').forEach(i => i.addEventListener('keydown', e=>{
+    if(e.key==='Enter') addComment(i.dataset.cinput); }));
+
+  $$('#main [data-cdel]').forEach(b => b.addEventListener('click', async ()=>{
+    if(!confirm('이 댓글을 삭제할까요?')) return;
+    busy(true);
+    const { error } = await sb.from('opinion_comments').delete().eq('id', b.dataset.cdel);
+    busy(false);
+    if(error) return failed('댓글 삭제', error);
+    await refresh(); toast('댓글을 삭제했습니다'); go('opinion');
+  }));
+};
+
+/* ============================================================================
+   일정 (캘린더)
+   ============================================================================ */
+const CAL = { y:new Date().getFullYear(), m:new Date().getMonth(), sel:ymd(new Date()) };
+
+VIEWS.calendar = () => {
+  const startDow = new Date(CAL.y, CAL.m, 1).getDay();
+  const daysInMonth = new Date(CAL.y, CAL.m+1, 0).getDate();
+  const prevDays = new Date(CAL.y, CAL.m, 0).getDate();
+  const today = ymd(new Date());
+
+  const cells = [];
+  for(let i=startDow-1;i>=0;i--) cells.push({ d:prevDays-i, dim:true, key:null });
+  for(let d=1;d<=daysInMonth;d++) cells.push({ d, dim:false, key:`${CAL.y}-${pad(CAL.m+1)}-${pad(d)}` });
+  let tail = 1; while(cells.length % 7 !== 0) cells.push({ d:tail++, dim:true, key:null });
+
+  const grid = `<div class="cal">
+    ${['일','월','화','수','목','금','토'].map(w=>`<div class="dow">${w}</div>`).join('')}
+    ${cells.map((c,i)=>{
+      const evs = c.key ? S.events.filter(e=>e.ev_date===c.key) : [];
+      const cls = ['day', c.dim?'dim':'', c.key===today?'today':'', c.key===CAL.sel?'sel':'', i%7===0?'sun':''].filter(Boolean).join(' ');
+      return `<div class="${cls}" ${c.key?`data-day="${c.key}"`:''}>
+        <span class="dnum">${c.d}</span>
+        ${evs.slice(0,3).map(e=>`<span class="ev" title="${esc(e.title)}">${esc(e.title)}</span>`).join('')}
+        ${evs.length>3?`<span class="hint" style="margin:0">+${evs.length-3}건</span>`:''}</div>`;
+    }).join('')}</div>`;
+
+  const selEvs = S.events.filter(e=>e.ev_date===CAL.sel)
+                         .sort((a,b)=>(a.ev_time||'').localeCompare(b.ev_time||''));
+  const addBtn = isInner() ? `<button class="btn primary" id="calAdd">＋ 일정 등록</button>` : '';
+
+  return pageHead('일정 관리','새소리단 행사 일정입니다. 날짜를 눌러 그날 일정을 확인하세요.', addBtn)
+  + `<div class="card">
+      <div class="cal-head">
+        <button class="btn sm" id="calPrev">‹ 이전달</button>
+        <b>${CAL.y}년 ${CAL.m+1}월</b>
+        <div class="row-actions" style="margin:0">
+          <button class="btn sm ghost" id="calToday">오늘</button>
+          <button class="btn sm" id="calNext">다음달 ›</button></div>
+      </div>${grid}</div>
+    <div class="card"><h2>${esc(CAL.sel)} 일정 (${selEvs.length})</h2>
+      <p class="sub">${isInner()?'단원 이상 권한으로 일정을 등록·삭제할 수 있습니다.':'일정 등록은 새소리단 단원만 가능합니다.'}</p>
+      ${selEvs.length ? selEvs.map(e=>`<div class="post-row" style="cursor:default">
+        <div class="pr-top"><h3>${e.ev_time?`<span class="tag brand">${esc(e.ev_time)}</span> `:''}${esc(e.title)}</h3>
+          <span class="hint">${esc(e.author_name)}</span></div>
+        ${e.place?`<p class="excerpt" style="-webkit-line-clamp:2">📍 ${esc(e.place)}</p>`:''}
+        ${e.descr?`<p class="excerpt" style="-webkit-line-clamp:3">${esc(e.descr)}</p>`:''}
+        ${(e.author_id===S.user.id || isAdmin())
+          ? `<div class="row-actions"><button class="btn sm danger" data-evdel="${e.id}">삭제</button></div>`:''}
+      </div>`).join('') : `<div class="empty">이 날짜에 등록된 일정이 없습니다.</div>`}
+    </div>`;
+};
+BIND.calendar = () => {
+  $('#calPrev').addEventListener('click', ()=>{ CAL.m--; if(CAL.m<0){CAL.m=11;CAL.y--;} go('calendar'); });
+  $('#calNext').addEventListener('click', ()=>{ CAL.m++; if(CAL.m>11){CAL.m=0;CAL.y++;} go('calendar'); });
+  $('#calToday').addEventListener('click', ()=>{
+    const t=new Date(); CAL.y=t.getFullYear(); CAL.m=t.getMonth(); CAL.sel=ymd(t); go('calendar'); });
+  $$('#main [data-day]').forEach(d => d.addEventListener('click', ()=>{ CAL.sel=d.dataset.day; go('calendar'); }));
+  $('#calAdd')?.addEventListener('click', ()=> openEventForm(CAL.sel));
+  $$('#main [data-evdel]').forEach(b => b.addEventListener('click', async ()=>{
+    if(!confirm('이 일정을 삭제할까요?')) return;
+    busy(true);
+    const { error } = await sb.from('events').delete().eq('id', b.dataset.evdel);
+    busy(false);
+    if(error) return failed('일정 삭제', error);
+    await refresh(); toast('삭제되었습니다'); go('calendar');
+  }));
+};
+function openEventForm(date){
+  openModal('일정 등록', `
+    <div class="grid c2">
+      <label class="field">날짜 <span class="req">*</span><input id="evDate" type="date" value="${esc(date)}"></label>
+      <label class="field">시간 <span class="hint" style="display:inline">선택</span><input id="evTime" type="time"></label>
+    </div>
+    <label class="field">행사명 <span class="req">*</span><input id="evTitle" placeholder="예) 3분기 정기 활동일"></label>
+    <label class="field">장소<input id="evPlace" placeholder="예) 구청 3층 회의실"></label>
+    <label class="field">상세 내용<textarea id="evDesc"></textarea></label>
+    <div class="row-actions"><button class="btn primary" id="evSave">등록</button></div>`);
+  $('#evSave').addEventListener('click', async ()=>{
+    const d = $('#evDate').value, t = $('#evTitle').value.trim();
+    if(!d || !t){ toast('날짜와 행사명은 필수입니다'); return; }
+    const btn = $('#evSave'); btn.disabled = true; busy(true);
+    const { error } = await sb.from('events').insert({
+      ev_date:d, ev_time:$('#evTime').value, title:t,
+      place:$('#evPlace').value.trim(), descr:$('#evDesc').value.trim(),
+      author_id:S.user.id, author_name:myName() });
+    busy(false); btn.disabled = false;
+    if(error) return failed('일정 등록', error);
+    CAL.sel = d; const dt = new Date(d); CAL.y = dt.getFullYear(); CAL.m = dt.getMonth();
+    await refresh(); closeModal(); toast('일정을 등록했습니다'); go('calendar');
+  });
+}
+
+/* ============================================================================
+   게임
+   ============================================================================ */
+VIEWS.game = () => {
+  const url = S.site?.game_url, html = S.site?.game_html;
+  let frame;
+  if(url) frame = `<iframe src="${esc(url)}" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px" allow="fullscreen"></iframe>`;
+  else if(html) frame = `<iframe id="gameFrame" sandbox="allow-scripts" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px"></iframe>`;
+  else frame = `<div class="empty">게임 소스가 아직 등록되지 않았습니다.<br>${isAdmin()?'게임 등록 메뉴에서 등록하세요.':'관리자에게 문의하세요.'}</div>`;
+  return pageHead('게임','새소리단 활동용 게임입니다.')
+    + `<div class="card"><h2>게임 실행</h2><p class="sub">별도 제공되는 게임 소스가 이 영역에 삽입됩니다.</p>${frame}</div>`;
+};
+BIND.game = () => {
+  const html = S.site?.game_html;
+  if(html && !S.site?.game_url){ const f = $('#gameFrame'); if(f) f.srcdoc = html; }
+};
+
+VIEWS.settings = () => `${pageHead('게임 등록','별도 제공된 게임 소스를 등록합니다.')}
+  <div class="card"><h2>게임 소스</h2>
+    <p class="sub"><b>① 외부 URL</b> 또는 <b>② HTML 소스 붙여넣기</b> 중 하나로 등록하세요. URL이 있으면 URL이 우선됩니다.</p>
+    <label class="field">① 게임 URL (iframe 임베드)
+      <input id="setGameURL" value="${esc(S.site?.game_url||'')}" placeholder="https://example.com/game/index.html"></label>
+    <label class="field">② 게임 HTML 소스 붙여넣기
+      <textarea id="setGameHTML" style="min-height:170px;font-family:monospace;font-size:12px">${esc(S.site?.game_html||'')}</textarea>
+      <span class="hint">단일 HTML 파일(JS·CSS 포함) 내용을 그대로 붙여넣으면 샌드박스 iframe에서 실행됩니다.</span></label>
+    <div class="row-actions">
+      <button class="btn primary" id="setSaveGame">저장</button>
+      <button class="btn danger" id="setClearGame">게임 제거</button>
+      <button class="btn" onclick="go('game')">미리보기</button></div>
+  </div>`;
+BIND.settings = () => {
+  const save = async (u,h) => {
+    busy(true);
+    const { error } = await sb.from('site').update({ game_url:u, game_html:h, updated_at:nowISO() }).eq('id',1);
+    busy(false);
+    if(error) return failed('게임 저장', error);
+    await refresh(); toast('저장했습니다'); go('settings');
+  };
+  $('#setSaveGame').addEventListener('click', ()=> save($('#setGameURL').value.trim(), $('#setGameHTML').value));
+  $('#setClearGame').addEventListener('click', ()=>{
+    if(!confirm('등록된 게임 소스를 제거할까요?')) return; save('','');
+  });
+};
+
+/* ============================================================================
+   결과보고서 제출
+   ============================================================================ */
+VIEWS.report = () => pageHead('결과보고서 제출','활동 종료 후 결과보고서를 제출합니다. 제출본은 혁신행정담당관이 검토합니다.')
+  + `<div class="card"><h2>보고서 작성</h2>
+    <div class="grid c2">
+      <label class="field">보고서 제목 <span class="req">*</span><input id="rpTitle" placeholder="예) 8월 정기 모니터링 결과보고"></label>
+      <label class="field">활동 일자 <span class="req">*</span><input id="rpDate" type="date"></label>
+      <label class="field">작성자<input id="rpAuthor" value="${esc(myName())}"></label>
+      <label class="field">소속 팀<select id="rpTeam"><option value="">선택 안 함</option>
+        ${(intro().teams||[]).map(t=>`<option>${esc(t.name)}</option>`).join('')}</select></label>
+    </div>
+    <label class="field">활동 개요 <span class="req">*</span><textarea id="rpOverview" placeholder="언제 / 어디서 / 누가 / 무엇을"></textarea></label>
+    <label class="field">주요 활동 내용<textarea id="rpContent"></textarea></label>
+    <label class="field">성과 및 결과<textarea id="rpResult"></textarea></label>
+    <label class="field">개선점 / 건의사항<textarea id="rpImprove"></textarea></label>
+    <label class="field">첨부 사진 <span class="hint" style="display:inline">선택</span>
+      <input id="rpFiles" type="file" multiple accept="image/*">
+      <span class="hint">첨부한 파일은 본인과 혁신행정담당관만 볼 수 있습니다.</span></label>
+    <div class="thumbs" id="rpThumbs"></div>
+    <div class="row-actions"><button class="btn primary" id="rpSubmit">보고서 제출</button></div>
+  </div>`;
+BIND.report = () => {
+  let picked = [];
+  $('#rpFiles').addEventListener('change', async e=>{
+    picked = await prepImages(e.target.files); previewLocal('#rpThumbs', picked); });
+  $('#rpSubmit').addEventListener('click', async ()=>{
+    const t=$('#rpTitle').value.trim(), d=$('#rpDate').value, ov=$('#rpOverview').value.trim();
+    if(!t||!d||!ov){ toast('제목·활동일자·활동개요는 필수입니다'); return; }
+    const btn = $('#rpSubmit'); btn.disabled = true; busy(true);
+    try{
+      const files = await uploadAll('docs', picked, 'reports');
+      const { error } = await sb.from('reports').insert({
+        title:t, act_date:d, team:$('#rpTeam').value, overview:ov,
+        content:$('#rpContent').value.trim(), result:$('#rpResult').value.trim(),
+        improve:$('#rpImprove').value.trim(), files,
+        author_id:S.user.id, author_name:$('#rpAuthor').value.trim()||myName() });
+      if(error) throw error;
+      await refresh(); toast('보고서가 제출되었습니다'); go('mine');
+    }catch(e){ failed('보고서 제출', e); btn.disabled = false; }
+    finally{ busy(false); }
+  });
+};
+
+/* ============================================================================
+   활동비 정산
+   ============================================================================ */
+VIEWS.expense = () => pageHead('활동비 정산 신청','활동비 사용 내역과 영수증 사진을 첨부하면 혁신행정담당관이 확인 후 처리합니다.')
+  + `<div class="notice">첨부한 영수증은 <b>본인과 혁신행정담당관·운영 관리자</b>만 열람할 수 있습니다.
+      이 제한은 데이터베이스 정책으로 강제되므로 다른 단원은 파일 주소를 알아도 열 수 없습니다.</div>
+  <div class="card"><h2>정산 신청서</h2>
+    <div class="grid c2">
+      <label class="field">신청자 <span class="req">*</span><input id="exName" value="${esc(myName())}"></label>
+      <label class="field">연락처 <span class="hint" style="display:inline">선택</span><input id="exContact"></label>
+      <label class="field">활동일자 <span class="req">*</span><input id="exDate" type="date"></label>
+      <label class="field">활동명 <span class="req">*</span><input id="exActivity" placeholder="예) 하천 조류 조사"></label>
+      <label class="field">사용처 / 항목 <span class="req">*</span><input id="exItem" placeholder="예) 간식비, 교통비, 소모품"></label>
+      <label class="field">금액(원) <span class="req">*</span><input id="exAmount" type="number" min="0" placeholder="숫자만"></label>
+      <label class="field">결제수단<select id="exPay">
+        <option>개인카드</option><option>현금</option><option>계좌이체</option><option>기타</option></select></label>
+      <label class="field">입금 계좌 <span class="hint" style="display:inline">승인 시 지급</span>
+        <input id="exBank" placeholder="은행 / 계좌번호 / 예금주"></label>
+    </div>
+    <label class="field">상세 내역 / 비고<textarea id="exNote" placeholder="사용 목적, 참여 인원 등"></textarea></label>
+    <label class="field">영수증 사진 <span class="req">*</span>
+      <input id="exFiles" type="file" multiple accept="image/*" capture="environment">
+      <span class="hint">여러 장 첨부 가능. 휴대폰에서는 카메라로 바로 촬영할 수 있습니다.</span></label>
+    <div class="thumbs" id="exThumbs"></div>
+    <div class="row-actions"><button class="btn primary" id="exSubmit">정산 신청</button></div>
+  </div>`;
+BIND.expense = () => {
+  let picked = [];
+  $('#exFiles').addEventListener('change', async e=>{
+    picked = await prepImages(e.target.files); previewLocal('#exThumbs', picked); });
+  $('#exSubmit').addEventListener('click', async ()=>{
+    const name=$('#exName').value.trim(), date=$('#exDate').value, act=$('#exActivity').value.trim();
+    const item=$('#exItem').value.trim(), amount=$('#exAmount').value;
+    if(!name||!date||!act||!item||!amount){ toast('필수 항목을 모두 입력하세요'); return; }
+    if(!picked.length){ toast('영수증 사진을 1장 이상 첨부하세요'); return; }
+    const btn = $('#exSubmit'); btn.disabled = true; busy(true);
+    try{
+      const receipts = await uploadAll('docs', picked, 'receipts');
+      const { error } = await sb.from('expenses').insert({
+        act_date:date, activity:act, item, amount:Number(amount),
+        pay_method:$('#exPay').value, bank:$('#exBank').value.trim(),
+        contact:$('#exContact').value.trim(), note:$('#exNote').value.trim(),
+        receipts, author_id:S.user.id, author_name:name });
+      if(error) throw error;
+      await refresh(); toast('정산 신청이 접수되었습니다'); go('mine');
+    }catch(e){ failed('정산 신청', e); btn.disabled = false; }
+    finally{ busy(false); }
+  });
+};
+
+/* ============================================================================
+   내 제출 내역
+   ============================================================================ */
+VIEWS.mine = () => {
+  const rp = S.reports.filter(x=>x.author_id===S.user.id);
+  const ex = S.expenses.filter(x=>x.author_id===S.user.id);
+  return pageHead('내 제출 내역','내가 낸 보고서와 정산 신청의 처리 상태입니다.')
+  + `<div class="card"><h2>결과보고서 (${rp.length})</h2>
+      ${rp.length ? table(['제목','활동일','상태','제출일시','']) + rp.map(r=>`<tr>
+        <td>${esc(r.title)}</td><td>${esc(r.act_date)}</td><td>${statusTag(r.status)}</td>
+        <td class="hint">${fmt(r.created_at)}</td>
+        <td><button class="btn sm" data-view-report="${r.id}">보기</button></td></tr>`).join('') + tableEnd
+        : `<div class="empty">제출한 보고서가 없습니다.</div>`}</div>
+    <div class="card"><h2>활동비 정산 (${ex.length})</h2>
+      ${ex.length ? table(['활동명','항목','금액','상태','']) + ex.map(r=>`<tr>
+        <td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td><td>${statusTag(r.status)}</td>
+        <td><button class="btn sm" data-view-expense="${r.id}">보기</button></td></tr>`).join('') + tableEnd
+        : `<div class="empty">정산 신청 내역이 없습니다.</div>`}</div>`;
+};
+BIND.mine = () => {
+  $$('#main [data-view-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.viewReport,false)));
+  $$('#main [data-view-expense]').forEach(b => b.addEventListener('click', ()=> showExpense(b.dataset.viewExpense,false)));
+};
+
+/* ============================================================================
+   혁신행정담당관 — 검토 / 처리 / 회원 관리
+   ============================================================================ */
+VIEWS['review-report'] = () => pageHead('결과보고서 검토','제출된 모든 결과보고서입니다. 승인/반려 및 코멘트를 남길 수 있습니다.')
+  + `<div class="card"><h2>전체 보고서 (${S.reports.length})</h2>
+    ${S.reports.length ? table(['제목','작성자','팀','활동일','상태','']) + S.reports.map(r=>`<tr>
+      <td>${esc(r.title)}</td><td>${esc(r.author_name)}</td><td>${esc(r.team||'-')}</td>
+      <td>${esc(r.act_date)}</td><td>${statusTag(r.status)}</td>
+      <td><button class="btn sm primary" data-review-report="${r.id}">열람·처리</button></td></tr>`).join('') + tableEnd
+      : `<div class="empty">제출된 보고서가 없습니다.</div>`}</div>`;
+BIND['review-report'] = () => $$('#main [data-review-report]').forEach(b =>
+  b.addEventListener('click', ()=> showReport(b.dataset.reviewReport, true)));
+
+VIEWS['review-expense'] = () => {
+  const ex = S.expenses;
+  const sum = st => won(ex.filter(x=>x.status===st).reduce((a,b)=>a+(+b.amount||0),0));
+  return pageHead('활동비 정산 처리','단원이 첨부한 영수증과 정산 내역입니다. 확인 후 처리하세요.')
+  + `<div class="stat-row">
+      <div class="stat"><b>${ex.filter(x=>['접수','검토중'].includes(x.status)).length}</b><span>처리 대기</span></div>
+      <div class="stat"><b>${sum('접수')}</b><span>접수 금액</span></div>
+      <div class="stat"><b>${sum('승인')}</b><span>승인 금액</span></div>
+      <div class="stat"><b>${sum('반려')}</b><span>반려 금액</span></div></div>
+    <div class="card"><h2>전체 정산 신청 (${ex.length})</h2>
+    ${ex.length ? table(['신청자','활동명','항목','금액','영수증','상태','']) + ex.map(r=>`<tr>
+      <td>${esc(r.author_name)}</td><td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td>
+      <td>${(r.receipts||[]).length ? '📎 '+r.receipts.length+'장' : '<span class="hint">없음</span>'}</td>
+      <td>${statusTag(r.status)}</td>
+      <td><button class="btn sm primary" data-review-expense="${r.id}">열람·처리</button></td></tr>`).join('') + tableEnd
+      : `<div class="empty">정산 신청이 없습니다.</div>`}</div>`;
+};
+BIND['review-expense'] = () => $$('#main [data-review-expense]').forEach(b =>
+  b.addEventListener('click', ()=> showExpense(b.dataset.reviewExpense, true)));
+
+VIEWS.members = () => {
+  const ps = S.profiles;
+  const cnt = r => ps.filter(p=>p.role===r).length;
+  return pageHead('회원 · 권한 관리','가입한 사람에게 단원·담당관 권한을 부여합니다.'
+    + (isAdmin() ? '' : ' (변경은 운영 관리자만 가능합니다)'))
+  + `<div class="stat-row">
+      <div class="stat"><b>${cnt('visitor')}</b><span>일반 방문자</span></div>
+      <div class="stat"><b>${cnt('member')}</b><span>새소리단 단원</span></div>
+      <div class="stat"><b>${cnt('officer')}</b><span>혁신행정담당관</span></div>
+      <div class="stat"><b>${cnt('admin')}</b><span>운영 관리자</span></div></div>
+    <div class="card"><h2>회원 목록 (${ps.length})</h2>
+      <p class="sub">가입 직후에는 모두 일반 방문자입니다. 확인 후 권한을 올려주세요.</p>
+      ${ps.length ? table(['이름','팀','권한','가입일', isAdmin()?'권한 변경':'']) + ps.map(p=>`<tr>
+        <td>${esc(p.name||'(이름 없음)')}${p.id===S.user.id?' <span class="tag brand">나</span>':''}</td>
+        <td>${esc(p.team||'-')}</td>
+        <td>${esc(ROLE_LABEL[p.role])}</td>
+        <td class="hint">${fmtDay(p.created_at)}</td>
+        <td>${isAdmin() && p.id!==S.user.id ? `<select data-role-for="${p.id}">
+            ${['visitor','member','officer','admin'].map(r=>`<option value="${r}" ${r===p.role?'selected':''}>${ROLE_LABEL[r]}</option>`).join('')}
+          </select>` : ''}</td></tr>`).join('') + tableEnd
+        : `<div class="empty">회원이 없습니다.</div>`}</div>`;
+};
+BIND.members = () => {
+  $$('#main [data-role-for]').forEach(sel => sel.addEventListener('change', async ()=>{
+    const id = sel.dataset.roleFor, newRole = sel.value;
+    if(!confirm(`이 회원의 권한을 "${ROLE_LABEL[newRole]}"(으)로 변경할까요?`)){ go('members'); return; }
+    busy(true);
+    const { error } = await sb.from('profiles').update({ role:newRole }).eq('id', id);
+    busy(false);
+    if(error) return failed('권한 변경', error);
+    await refresh(); toast('권한을 변경했습니다'); go('members');
+  }));
+};
+
+/* ---------- 상세 모달 ---------- */
+function processBlock(cur, comment){
+  return `<hr style="border:0;border-top:1px solid var(--border);margin:18px 0">
+    <label class="field">처리 상태<select id="mdStatus">
+      ${['접수','검토중','승인','반려'].map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('')}</select></label>
+    <label class="field">코멘트 (반려 사유 등)<textarea id="mdComment">${esc(comment||'')}</textarea></label>
+    <button class="btn primary" id="mdSave">저장</button>`;
+}
+function showReport(id, canProcess){
+  const r = S.reports.find(x=>x.id===id); if(!r) return;
+  openModal(r.title, `<dl>
+    <dt>제목</dt><dd>${esc(r.title)}</dd>
+    <dt>작성자 / 팀</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}</dd>
+    <dt>활동일자</dt><dd>${esc(r.act_date)}</dd>
+    <dt>활동 개요</dt><dd>${esc(r.overview)}</dd>
+    <dt>주요 활동 내용</dt><dd>${esc(r.content)||'-'}</dd>
+    <dt>성과 및 결과</dt><dd>${esc(r.result)||'-'}</dd>
+    <dt>개선점 / 건의</dt><dd>${esc(r.improve)||'-'}</dd>
+    <dt>상태</dt><dd>${statusTag(r.status)}</dd>
+    ${r.officer_comment?`<dt>담당관 코멘트</dt><dd>${esc(r.officer_comment)}</dd>`:''}
+    <dt>첨부</dt><dd>${attHTML(r.files)}</dd>
+    <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd>
+  </dl>` + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
+  bindZoom();
+  $('#mdSave')?.addEventListener('click', async ()=>{
+    busy(true);
+    const { error } = await sb.from('reports')
+      .update({ status:$('#mdStatus').value, officer_comment:$('#mdComment').value.trim() }).eq('id', id);
+    busy(false);
+    if(error) return failed('보고서 처리', error);
+    await refresh(); closeModal(); toast('저장되었습니다'); go(CURRENT);
+  });
+}
+function showExpense(id, canProcess){
+  const r = S.expenses.find(x=>x.id===id); if(!r) return;
+  openModal('정산 신청 · ' + r.activity, `<dl>
+    <dt>신청자</dt><dd>${esc(r.author_name)}${r.contact?' · '+esc(r.contact):''}</dd>
+    <dt>활동일자 / 활동명</dt><dd>${esc(r.act_date)} · ${esc(r.activity)}</dd>
+    <dt>사용처 / 항목</dt><dd>${esc(r.item)}</dd>
+    <dt>금액</dt><dd>${won(r.amount)} (${esc(r.pay_method)})</dd>
+    ${r.bank?`<dt>입금 계좌</dt><dd>${esc(r.bank)}</dd>`:''}
+    <dt>상세 / 비고</dt><dd>${esc(r.note)||'-'}</dd>
+    <dt>상태</dt><dd>${statusTag(r.status)}</dd>
+    ${r.officer_comment?`<dt>담당관 코멘트</dt><dd>${esc(r.officer_comment)}</dd>`:''}
+    <dt>영수증 (${(r.receipts||[]).length}장)</dt><dd>${attHTML(r.receipts)}</dd>
+    <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd>
+  </dl>` + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
+  bindZoom();
+  $('#mdSave')?.addEventListener('click', async ()=>{
+    busy(true);
+    const { error } = await sb.from('expenses')
+      .update({ status:$('#mdStatus').value, officer_comment:$('#mdComment').value.trim() }).eq('id', id);
+    busy(false);
+    if(error) return failed('정산 처리', error);
+    await refresh(); closeModal(); toast('저장되었습니다'); go(CURRENT);
+  });
+}
+function attHTML(files){
+  if(!files || !files.length) return '<span class="hint">첨부 없음</span>';
+  return '<div class="thumbs">' + files.map(f=>{
+    const u = fileUrl(f);
+    if(!u) return `<span class="tag recv">🔒 ${esc(f.name||'파일')}</span>`;
+    return `<img src="${esc(u)}" alt="${esc(f.name||'')}" data-zoom="${esc(u)}">`;
+  }).join('') + '</div>';
+}
+function bindZoom(){ $$('#modalBody [data-zoom]').forEach(im =>
+  im.addEventListener('click', ()=> lightbox(im.dataset.zoom))); }
+
+/* ============================================================================
+   데이터 내보내기 (백업)
+   ============================================================================ */
+VIEWS.backup = () => pageHead('데이터 내보내기','현재 계정이 볼 수 있는 데이터를 JSON 파일로 저장합니다.')
+  + `<div class="notice">데이터는 Supabase에 저장되므로 별도 복원 기능은 두지 않았습니다.
+      실제 백업은 Supabase 대시보드 &gt; Database &gt; Backups 를 이용하세요.
+      아래 내보내기는 보고용 사본을 만들 때 사용합니다.</div>
+    <div class="card"><h2>내보내기</h2>
+      <p class="sub">게시글·의견·보고서·정산·일정·소개 내용을 하나의 파일로 저장합니다. (첨부 이미지는 제외)</p>
+      <div class="row-actions"><button class="btn primary" id="bkExport">JSON으로 내보내기</button></div></div>`;
+BIND.backup = () => {
+  $('#bkExport').addEventListener('click', ()=>{
+    const data = { posts:S.posts, opinions:S.opinions, comments:S.comments,
+                   reports:S.reports, expenses:S.expenses, events:S.events,
+                   intro:intro(), exportedAt:nowISO() };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+    a.download = '새소리단_내보내기_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+  });
+};
+
+/* ============================================================================
+   파일 처리 — 이미지 축소 후 Storage 업로드
+   ============================================================================ */
+async function prepImages(fileList){
+  const out = [];
+  for(const f of fileList){
+    if(!f.type.startsWith('image/')){ toast(`${f.name}: 이미지 파일만 첨부할 수 있습니다`); continue; }
+    try{
+      const blob = await resizeToBlob(f);
+      out.push({ blob, name:f.name.replace(/\.[^.]+$/,'') + '.jpg', preview:URL.createObjectURL(blob) });
+    }catch(e){ toast(`${f.name} 처리에 실패했습니다`); }
+  }
+  return out;
+}
+function resizeToBlob(file, max=1600, quality=0.75){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if(w>max || h>max){ const s = max/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+        const c = document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        c.toBlob(b => b ? res(b) : rej(new Error('canvas')), 'image/jpeg', quality);
+      };
+      img.onerror = rej; img.src = r.result;
+    };
+    r.onerror = rej; r.readAsDataURL(file);
+  });
+}
+async function uploadAll(bucket, picked, folder){
+  const out = [];
+  for(const p of picked){
+    const path = `${folder}/${S.user.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+    const { error } = await sb.storage.from(bucket).upload(path, p.blob, { contentType:'image/jpeg' });
+    if(error) throw error;
+    out.push({ path, name:p.name });
+  }
+  return out;
+}
+function previewLocal(sel, picked){
+  const el = $(sel); if(!el) return;
+  el.innerHTML = picked.map(p=>`<img src="${p.preview}" alt="${esc(p.name)}" data-zoom="${p.preview}">`).join('');
+  el.querySelectorAll('[data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
+}
+
+/* ============================================================================
+   오버레이 / 공통 UI
+   ============================================================================ */
+function openModal(title, html){
+  $('#modalTitle').textContent = title;
+  $('#modalBody').innerHTML = html;
+  $('#modalBg').classList.add('open');
+}
+function closeModal(){ $('#modalBg').classList.remove('open'); }
+function lightbox(src){ $('#lightboxImg').src = src; $('#lightbox').classList.add('open'); }
+$('#modalClose').addEventListener('click', closeModal);
+$('#modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
+$('#lightbox').addEventListener('click', ()=> $('#lightbox').classList.remove('open'));
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Escape') return;
+  if($('#lightbox').classList.contains('open')) $('#lightbox').classList.remove('open');
+  else closeModal();
+});
+function closeSide(){ $('#side').classList.remove('open'); $('#scrim').classList.remove('open'); }
+$('#menuToggle').addEventListener('click', ()=>{
+  $('#side').classList.toggle('open'); $('#scrim').classList.toggle('open'); });
+$('#scrim').addEventListener('click', closeSide);
+$('#refreshBtn').addEventListener('click', async ()=>{ await refresh(); go(CURRENT); toast('최신 내용을 불러왔습니다'); });
+$('#adminBtn').addEventListener('click', ()=> window.open('admin.html','_blank'));
+$('#logoutBtn').addEventListener('click', async ()=>{
+  if(channel){ sb.removeChannel(channel); channel = null; }
+  await sb.auth.signOut();
+  S.user = null; S.profile = null;
+  try{ location.hash = '' }catch(e){}
+  showAuth();
+});
+
+/* ============================================================================
+   시작
+   ============================================================================ */
+async function boot(){
+  const cfg = getConfig();
+  if(!cfg.url || !cfg.anonKey){
+    $('#setupView').style.display = 'grid';
+    $('#cfgSave').addEventListener('click', ()=>{
+      const url = $('#cfgUrl').value.trim().replace(/\/+$/,'');
+      const key = $('#cfgKey').value.trim();
+      if(!/^https:\/\/.+\.supabase\.co$/.test(url)){ toast('Project URL 형식이 올바르지 않습니다'); return; }
+      if(key.length < 40){ toast('anon key 를 다시 확인해 주세요'); return; }
+      localStorage.setItem('sb_cfg', JSON.stringify({ url, anonKey:key }));
+      location.reload();
+    });
+    return;
+  }
+
+  if(!window.supabase?.createClient){
+    $('#setupView').style.display = 'grid';
+    $('#setupView .auth-card').innerHTML =
+      `<h1 style="margin:0 0 8px;font-size:19px">라이브러리를 불러오지 못했습니다</h1>
+       <p style="color:var(--muted);font-size:13.5px">인터넷 연결을 확인해 주세요.
+       supabase-js 를 CDN에서 내려받지 못했습니다.<br><br>
+       오프라인으로 써야 한다면 <code>standalone.html</code> 을 사용하세요.</p>`;
+    return;
+  }
+
+  sb = window.supabase.createClient(cfg.url, cfg.anonKey, {
+    auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+  });
+  bindAuth();
+
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session) await afterLogin();
+  else showAuth();
+
+  sb.auth.onAuthStateChange((event)=>{
+    if(event === 'SIGNED_OUT'){ S.user = null; S.profile = null; showAuth(); }
+  });
+}
+boot();
+</script>
+</body>
+</html>

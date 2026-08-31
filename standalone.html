@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>새소리단 · 활동 플랫폼</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --surface:#ffffff; --surface-2:#f0f3fa; --border:#e2e7f0;
+    --text:#1c2434; --muted:#63708a; --brand:#2f6bff; --brand-weak:#e7eeff;
+    --ok:#1f9d55; --ok-weak:#e4f6ec; --warn:#c67a00; --warn-weak:#fbf0dd;
+    --danger:#d33; --danger-weak:#fde7e7;
+    --shadow:0 1px 2px rgba(20,30,60,.06),0 8px 24px rgba(20,30,60,.08);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0f1420; --surface:#161d2c; --surface-2:#1d263a; --border:#2a3549;
+      --text:#e8ecf5; --muted:#9aa7bf; --brand:#5b8bff; --brand-weak:#1b2540;
+      --ok:#3fbe73; --ok-weak:#16311f; --warn:#e0a33a; --warn-weak:#33260f;
+      --danger:#ef5a5a; --danger-weak:#3a1a1a;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--brand)}
+  button{font-family:inherit}
+  .app{display:grid; grid-template-columns:252px 1fr; min-height:100vh}
+
+  /* ---------- Sidebar ---------- */
+  .side{background:var(--surface); border-right:1px solid var(--border); padding:18px 14px;
+    display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh; overflow-y:auto}
+  .brand{display:flex; align-items:center; gap:10px; padding:6px 8px 14px}
+  .brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#7aa2ff);
+    display:grid;place-items:center;color:#fff;font-size:18px;flex:none}
+  .brand b{font-size:16px}
+  .brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:500}
+  .nav-group{font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:14px 8px 4px}
+  .nav-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;
+    color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:14px}
+  .nav-btn:hover{background:var(--surface-2)}
+  .nav-btn.active{background:var(--brand-weak);color:var(--brand);font-weight:600}
+  .nav-btn .ic{width:18px;text-align:center;flex:none}
+  .side .spacer{flex:1;min-height:14px}
+  .who{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px}
+  .who b{display:block}
+  .who .role{color:var(--muted);font-size:12px}
+
+  /* ---------- Buttons / forms ---------- */
+  .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 14px;border-radius:10px;
+    cursor:pointer;font-size:14px;font-weight:600}
+  .btn:hover{border-color:var(--brand)}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:6px 10px;font-size:12.5px}
+  .btn.danger{color:var(--danger);border-color:var(--danger-weak)}
+  label.field{display:block;margin-bottom:12px;font-size:13px;font-weight:600}
+  label.field .req{color:var(--danger)}
+  input,select,textarea{width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--border);border-radius:9px;
+    background:var(--surface-2);color:var(--text);font-size:14px;font-family:inherit}
+  textarea{min-height:90px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--brand-weak);border-color:var(--brand)}
+  .hint{font-weight:400;color:var(--muted);font-size:12px;margin-top:3px}
+  .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+  /* ---------- Main / cards ---------- */
+  .main{padding:26px clamp(16px,4vw,44px);max-width:1120px;width:100%}
+  .page-head{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+  .page-head h1{margin:0 0 4px;font-size:22px}
+  .page-head p{margin:0;color:var(--muted);font-size:14px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px;margin-bottom:18px}
+  .card h2{margin:0 0 4px;font-size:16px}
+  .card h2+.sub{margin:0 0 16px;color:var(--muted);font-size:13px}
+  .grid{display:grid;gap:14px}
+  .grid.c2{grid-template-columns:1fr 1fr}
+  .grid.c3{grid-template-columns:repeat(3,1fr)}
+  .tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600}
+  .tag.recv{background:var(--surface-2);color:var(--muted)}
+  .tag.review{background:var(--warn-weak);color:var(--warn)}
+  .tag.approve{background:var(--ok-weak);color:var(--ok)}
+  .tag.reject{background:var(--danger-weak);color:var(--danger)}
+  .tag.brand{background:var(--brand-weak);color:var(--brand)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  tr:hover td{background:var(--surface-2)}
+  .table-wrap{overflow-x:auto}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+  .stat b{font-size:23px;display:block}
+  .stat span{color:var(--muted);font-size:12.5px}
+  .notice{background:var(--brand-weak);border:1px solid var(--brand);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:16px}
+  .notice.amber{background:var(--warn-weak);border-color:var(--warn)}
+  .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .thumbs img{width:82px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer}
+
+  /* ---------- Search ---------- */
+  .searchbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .searchbar input{margin-top:0;flex:1;min-width:200px}
+  .search-info{color:var(--muted);font-size:13px;margin-bottom:12px}
+  mark{background:var(--warn-weak);color:inherit;border-radius:3px;padding:0 2px}
+
+  /* ---------- Photo board ---------- */
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+  .photo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+  .photo-card:hover{border-color:var(--brand)}
+  .photo-card .hero{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--surface-2)}
+  .photo-card .hero.none{display:grid;place-items:center;color:var(--muted);font-size:34px}
+  .photo-card .pc-body{padding:14px 16px 16px}
+  .photo-card h3{margin:0 0 6px;font-size:15.5px;line-height:1.35}
+  .photo-card .excerpt{color:var(--muted);font-size:13px;margin:0 0 10px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .photo-card .meta{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:8px}
+
+  /* ---------- List board ---------- */
+  .post-row{border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer}
+  .post-row:hover{background:var(--surface-2)}
+  .post-row .pr-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .post-row h3{margin:0;font-size:15px}
+  .post-row .excerpt{color:var(--muted);font-size:13px;margin:4px 0 0;
+    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* ---------- Opinion / comments ---------- */
+  .op-item{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:var(--surface)}
+  .op-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+  .op-body{margin-top:8px;white-space:pre-wrap}
+  .cmt-list{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px}
+  .cmt{padding:7px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
+  .cmt:last-child{border-bottom:0}
+  .cmt .cm-meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center}
+  .cmt-form{display:flex;gap:8px;margin-top:10px}
+  .cmt-form input{margin-top:0}
+
+  /* ---------- Calendar ---------- */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+  .cal-head b{font-size:18px}
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);
+    border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .cal .dow{background:var(--surface-2);text-align:center;font-size:12px;font-weight:600;padding:8px 0;color:var(--muted)}
+  .cal .day{background:var(--surface);min-height:98px;padding:6px 7px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+  .cal .day:hover{background:var(--surface-2)}
+  .cal .day.dim{color:var(--muted);opacity:.5}
+  .cal .day.today .dnum{background:var(--brand);color:#fff;border-radius:50%;width:22px;height:22px;display:grid;place-items:center}
+  .cal .day.sel{outline:2px solid var(--brand);outline-offset:-2px}
+  .cal .dnum{font-size:12.5px;font-weight:600}
+  .cal .sun .dnum{color:var(--danger)}
+  .cal .ev{font-size:11px;background:var(--brand-weak);color:var(--brand);border-radius:5px;
+    padding:1px 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+
+  /* ---------- Intro ---------- */
+  .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .team{border:1px solid var(--border);border-radius:12px;padding:16px;background:var(--surface-2)}
+  .team h3{margin:0 0 2px;font-size:15px}
+  .team .lead{color:var(--brand);font-size:12.5px;font-weight:600;margin-bottom:6px}
+  .team p{margin:0;font-size:13px;color:var(--muted)}
+  .timeline{list-style:none;padding:0;margin:0}
+  .timeline li{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid var(--border)}
+  .timeline li:last-child{border-bottom:0}
+  .timeline .yr{flex:none;width:92px;font-weight:700;color:var(--brand);font-size:13.5px}
+  .timeline .tx{font-size:14px}
+
+  /* ---------- Overlays ---------- */
+  .modal-bg{position:fixed;inset:0;background:rgba(10,15,30,.55);display:none;place-items:center;z-index:50;padding:20px}
+  .modal-bg.open{display:grid}
+  .modal{background:var(--surface);border-radius:16px;max-width:720px;width:100%;max-height:88vh;overflow:auto;box-shadow:var(--shadow)}
+  .modal .m-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;
+    align-items:center;gap:10px;position:sticky;top:0;background:var(--surface);z-index:1}
+  .modal .m-head b{font-size:16px}
+  .modal .m-body{padding:20px}
+  .modal .m-body dt{font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:14px}
+  .modal .m-body dd{margin:2px 0 0;white-space:pre-wrap}
+  .modal .big-imgs img{width:100%;border-radius:10px;margin-bottom:10px;display:block;cursor:zoom-in}
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;place-items:center;z-index:60;padding:20px}
+  .lightbox.open{display:grid}
+  .lightbox img{max-width:95vw;max-height:92vh;border-radius:8px}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--text);
+    color:var(--bg);padding:11px 18px;border-radius:10px;font-size:13.5px;opacity:0;transition:.25s;z-index:80;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ---------- Login ---------- */
+  .login-wrap{min-height:100vh;display:grid;place-items:center;padding:20px}
+  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);
+    padding:30px;max-width:430px;width:100%}
+  .login-card .logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--brand),#7aa2ff);
+    display:grid;place-items:center;color:#fff;font-size:24px;margin-bottom:14px}
+  .role-opts{display:grid;gap:8px;margin:14px 0}
+  .role-opt{border:1px solid var(--border);border-radius:11px;padding:11px 13px;cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+  .role-opt:hover{border-color:var(--brand)}
+  .role-opt.sel{border-color:var(--brand);background:var(--brand-weak)}
+  .role-opt input{width:auto;margin:3px 0 0}
+  .role-opt b{font-size:14px}
+  .role-opt span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+
+  .topbar{display:none}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
+  @media (max-width:860px){
+    .app{grid-template-columns:1fr}
+    .side{position:fixed;left:0;top:0;bottom:0;width:252px;z-index:40;transform:translateX(-100%);transition:.25s}
+    .side.open{transform:translateX(0)}
+    .topbar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);
+      border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+    .scrim.open{display:block}
+    .stat-row{grid-template-columns:1fr 1fr}
+    .grid.c2,.grid.c3{grid-template-columns:1fr}
+    .cal .day{min-height:64px}
+    .cal .ev{font-size:10px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginView" class="login-wrap">
+  <div class="login-card">
+    <div class="logo">🐦</div>
+    <h1 style="margin:0 0 4px;font-size:20px">새소리단 활동 플랫폼</h1>
+    <p style="margin:0;color:var(--muted);font-size:13px">권한을 선택해 입장하세요. 소개·소식·의견함·일정은 로그인 없이 볼 수 있습니다.</p>
+
+    <div class="role-opts" id="roleOpts">
+      <label class="role-opt" data-role="anon">
+        <input type="radio" name="role" value="anon" checked />
+        <div><b>일반 방문자 (익명)</b><span>소개·소식·일정 열람, 의견함 익명 작성·댓글</span></div>
+      </label>
+      <label class="role-opt" data-role="member">
+        <input type="radio" name="role" value="member" />
+        <div><b>새소리단 단원</b><span>새소리단 공간(공지·자유·활동공유), 보고서 제출, 활동비 정산</span></div>
+      </label>
+      <label class="role-opt" data-role="officer">
+        <input type="radio" name="role" value="officer" />
+        <div><b>혁신행정담당관</b><span>보고서·정산·영수증 전체 열람 및 승인 처리</span></div>
+      </label>
+      <label class="role-opt" data-role="admin">
+        <input type="radio" name="role" value="admin" />
+        <div><b>운영 관리자</b><span>전체 권한 · 소개 편집 · 게임 등록 · 백업/복원</span></div>
+      </label>
+    </div>
+
+    <label class="field" id="nameField" style="display:none">표시 이름 <span class="hint" style="display:inline">단원·담당관은 실명 권장</span>
+      <input id="loginName" placeholder="예) 홍길동 / 3팀 홍길동" />
+    </label>
+    <label class="field" id="codeField" style="display:none">접근 코드
+      <input id="loginCode" type="password" placeholder="담당자에게 받은 코드" />
+      <span class="hint">기본값 — 단원 <code>bird</code> · 담당관 <code>innov</code> · 관리자 <code>admin</code></span>
+    </label>
+
+    <button class="btn primary" style="width:100%;margin-top:6px" id="loginBtn">입장하기</button>
+    <p class="hint" style="text-align:center;margin-top:12px">데이터는 이 브라우저에 저장됩니다. 여러 명이 공유하려면 관리자 &gt; 배포 안내를 참고하세요.</p>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="appView" class="app" style="display:none">
+  <aside class="side" id="side">
+    <div class="brand"><div class="logo">🐦</div><div><b>새소리단</b><span>활동 플랫폼</span></div></div>
+    <div id="navArea"></div>
+    <div class="spacer"></div>
+    <div class="who" id="whoBox"></div>
+    <button class="btn ghost sm" style="margin-top:8px" id="logoutBtn">로그아웃</button>
+  </aside>
+
+  <div style="min-width:0">
+    <div class="topbar">
+      <button class="btn ghost sm" id="menuToggle">☰ 메뉴</button>
+      <b id="topTitle">홈</b>
+    </div>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<div class="modal-bg" id="modalBg"><div class="modal">
+  <div class="m-head"><b id="modalTitle"></b><button class="btn ghost sm" id="modalClose">닫기</button></div>
+  <div class="m-body" id="modalBody"></div>
+</div></div>
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt="첨부 이미지" /></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   새소리단 활동 플랫폼 — 단일 파일 프로토타입
+   저장소: localStorage (브라우저별). 백엔드 없음.
+   ============================================================ */
+
+/* ---------- storage (localStorage가 막힌 환경에서는 메모리 대체) ---------- */
+const MEM = {};
+let STORE_OK = true;
+try{ localStorage.setItem('sm_probe','1'); localStorage.removeItem('sm_probe'); }catch(e){ STORE_OK = false; }
+const LS = {
+  get(k, def){
+    try{
+      const raw = STORE_OK ? localStorage.getItem(k) : (MEM[k] ?? null);
+      return raw==null ? def : (JSON.parse(raw) ?? def);
+    }catch(e){ return def }
+  },
+  set(k, v){
+    const raw = JSON.stringify(v);
+    if(!STORE_OK){ MEM[k] = raw; return true; }
+    try{ localStorage.setItem(k, raw); return true; }
+    catch(e){
+      toast('저장 공간이 가득 찼습니다. 사진을 줄이거나 백업 후 오래된 글을 정리하세요.');
+      return false;
+    }
+  },
+  del(k){ if(STORE_OK){ try{ localStorage.removeItem(k) }catch(e){} } delete MEM[k]; }
+};
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const nowISO = () => new Date().toISOString();
+const pad = (n) => String(n).padStart(2,'0');
+const fmt = (iso) => { if(!iso) return '-'; const d=new Date(iso);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtDay = (iso) => iso ? new Date(iso).toISOString().slice(0,10) : '-';
+const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const won = (n) => (Number(n)||0).toLocaleString('ko-KR') + '원';
+const esc = (s) => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const excerpt = (s,n=120) => { const t=String(s||'').replace(/\s+/g,' ').trim(); return t.length>n ? t.slice(0,n)+'…' : t; };
+const firstImg = (atts) => (atts||[]).find(a=>a.data && a.type?.startsWith('image/'));
+
+/* ---------- data ---------- */
+const DEFAULT_INTRO = {
+  mission:'새소리단은 시민의 목소리를 현장에서 듣고 행정에 전달하는 시민 참여 조직입니다.\n생활 속 불편과 개선 아이디어를 직접 발굴해 담당 부서에 전하고, 개선 과정을 끝까지 지켜봅니다.\n\n※ 예시 문구입니다. 관리자 권한으로 로그인해 실제 내용으로 수정하세요.',
+  roles:[
+    '현장 모니터링 — 생활 현장을 직접 살펴보고 개선이 필요한 지점을 기록합니다.',
+    '의견 수렴 — 주민 의견을 모아 정리하고 의견함을 통해 공유합니다.',
+    '정책 제안 — 수집한 내용을 바탕으로 개선안을 제안합니다.',
+    '이행 점검 — 제안이 실제로 반영되는지 확인하고 결과를 보고합니다.'
+  ],
+  history:[
+    { year:'2023', text:'새소리단 발족, 1기 단원 위촉 (예시)' },
+    { year:'2024', text:'분야별 6개 팀 체제로 개편 (예시)' },
+    { year:'2025', text:'온라인 활동 플랫폼 운영 시작 (예시)' },
+    { year:'2026', text:'활동 범위 확대 및 정기 보고 체계 정착 (예시)' }
+  ],
+  teams:[
+    { name:'1팀 · 생활안전', lead:'팀장 미정', desc:'보도·가로등·시설물 등 생활 안전 전반을 점검합니다. (예시)' },
+    { name:'2팀 · 환경정비', lead:'팀장 미정', desc:'하천·공원·미화 등 환경 상태를 모니터링합니다. (예시)' },
+    { name:'3팀 · 교통', lead:'팀장 미정', desc:'보행 환경, 주정차, 대중교통 편의를 살핍니다. (예시)' },
+    { name:'4팀 · 복지', lead:'팀장 미정', desc:'취약계층 지원과 복지 사각지대를 발굴합니다. (예시)' },
+    { name:'5팀 · 문화', lead:'팀장 미정', desc:'문화·체육 프로그램과 시설 이용을 점검합니다. (예시)' },
+    { name:'6팀 · 홍보', lead:'팀장 미정', desc:'활동 내용을 기록하고 대외에 알립니다. (예시)' }
+  ]
+};
+
+const DB = {
+  posts(){ return LS.get('sm_posts', []) },
+  opinions(){ return LS.get('sm_opinions', []) },
+  reports(){ return LS.get('sm_reports', []) },
+  expenses(){ return LS.get('sm_expenses', []) },
+  events(){ return LS.get('sm_events', []) },
+  intro(){ return LS.get('sm_intro', DEFAULT_INTRO) },
+  settings(){ return LS.get('sm_settings', { codeMember:'bird', codeOfficer:'innov', codeAdmin:'admin', gameHTML:'', gameURL:'' }) },
+  savePosts(v){ return LS.set('sm_posts', v) },
+  saveOpinions(v){ return LS.set('sm_opinions', v) },
+  saveReports(v){ return LS.set('sm_reports', v) },
+  saveExpenses(v){ return LS.set('sm_expenses', v) },
+  saveEvents(v){ return LS.set('sm_events', v) },
+  saveIntro(v){ return LS.set('sm_intro', v) },
+  saveSettings(v){ return LS.set('sm_settings', v) },
+};
+
+/* ---------- session ---------- */
+let SESSION = LS.get('sm_session', null);
+const ROLE_LABEL = { anon:'일반 방문자', member:'새소리단 단원', officer:'혁신행정담당관', admin:'운영 관리자' };
+const INNER = ['member','officer','admin'];   // 새소리단 내부
+const ALL   = ['anon', ...INNER];
+
+/* ---------- 익명 별칭 ----------
+   브라우저에서는 방문자 IP를 알 수 없으므로, 이 기기에 심은 고유 키로
+   '새소리1, 새소리2 …' 를 순서대로 부여합니다. 같은 기기면 항상 같은 별칭입니다.
+   서버를 붙이면 이 키를 IP 해시로 바꾸기만 하면 동일하게 동작합니다. */
+function myAlias(){
+  let key = LS.get('sm_visitor', null);
+  if(!key){ key = uid(); LS.set('sm_visitor', key); }
+  const map = LS.get('sm_aliasmap', {});
+  if(!map[key]){ map[key] = Object.keys(map).length + 1; LS.set('sm_aliasmap', map); }
+  return '새소리' + map[key];
+}
+const myKey = () => LS.get('sm_visitor', null);
+
+/* ---------- 게시판 정의 ---------- */
+const BOARDS = {
+  news:   { label:'새소리단 소식', icon:'📰', layout:'photo',
+            desc:'새소리단 활동 안내와 소식입니다. 누구나 볼 수 있습니다.',
+            read:ALL,   write:INNER },
+  notice: { label:'공지방', icon:'📢', layout:'list',
+            desc:'단원 대상 공지사항입니다.',
+            read:INNER, write:['officer','admin'] },
+  free:   { label:'자유방', icon:'💭', layout:'list',
+            desc:'단원끼리 자유롭게 이야기하는 공간입니다.',
+            read:INNER, write:INNER },
+  share:  { label:'활동 공유방', icon:'📸', layout:'photo',
+            desc:'활동 사진과 현장 기록을 공유하는 공간입니다.',
+            read:INNER, write:INNER },
+};
+
+/* ---------- 메뉴 (권한별) ---------- */
+const MENUS = [
+  { id:'home',     icon:'🏠', label:'홈',            roles:ALL,   group:'홈' },
+  { id:'intro',    icon:'🐦', label:'새소리단 소개',  roles:ALL,   group:'소개' },
+  { id:'news',     icon:'📰', label:'새소리단 소식',  roles:ALL,   group:'소식' },
+  { id:'opinion',  icon:'💬', label:'의견함',        roles:ALL,   group:'의견함' },
+  { id:'calendar', icon:'📅', label:'일정 관리',      roles:ALL,   group:'일정' },
+  { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
+
+  { id:'notice',   icon:'📢', label:'공지방',        roles:INNER, group:'새소리단 공간' },
+  { id:'free',     icon:'💭', label:'자유방',        roles:INNER, group:'새소리단 공간' },
+  { id:'share',    icon:'📸', label:'활동 공유방',    roles:INNER, group:'새소리단 공간' },
+  { id:'report',   icon:'📄', label:'결과보고서 제출', roles:INNER, group:'새소리단 공간' },
+  { id:'expense',  icon:'🧾', label:'활동비 정산',    roles:INNER, group:'새소리단 공간' },
+  { id:'mine',     icon:'📁', label:'내 제출 내역',   roles:INNER, group:'새소리단 공간' },
+
+  { id:'review-report',  icon:'✅', label:'결과보고서 검토', roles:['officer','admin'], group:'혁신행정담당관' },
+  { id:'review-expense', icon:'💳', label:'활동비 정산 처리', roles:['officer','admin'], group:'혁신행정담당관' },
+
+  { id:'intro-edit', icon:'✏️', label:'소개 내용 편집', roles:['admin'], group:'관리' },
+  { id:'settings',   icon:'⚙️', label:'설정 · 게임 등록', roles:['admin'], group:'관리' },
+  { id:'backup',     icon:'💾', label:'데이터 백업/복원', roles:['admin'], group:'관리' },
+  { id:'deploy',     icon:'🚀', label:'배포 안내',       roles:['admin'], group:'관리' },
+];
+const can = (id) => { const m = MENUS.find(x=>x.id===id); return !!m && m.roles.includes(SESSION?.role); };
+const canWrite = (boardKey) => BOARDS[boardKey].write.includes(SESSION?.role);
+
+/* ============================================================
+   LOGIN
+   ============================================================ */
+const $  = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+
+function bindLogin(){
+  const opts = $$('#roleOpts .role-opt');
+  function sync(){
+    const role = $('input[name=role]:checked').value;
+    opts.forEach(o=>o.classList.toggle('sel', o.dataset.role===role));
+    const show = role==='anon' ? 'none' : 'block';
+    $('#codeField').style.display = show;
+    $('#nameField').style.display = show;
+  }
+  opts.forEach(o=> o.addEventListener('click', ()=>{ o.querySelector('input').checked = true; sync(); }));
+  $$('input[name=role]').forEach(r=> r.addEventListener('change', sync));
+  sync();
+
+  ['#loginName','#loginCode'].forEach(sel =>
+    $(sel).addEventListener('keydown', e=>{ if(e.key==='Enter') $('#loginBtn').click(); }));
+
+  $('#loginBtn').addEventListener('click', ()=>{
+    const role = $('input[name=role]:checked').value;
+    const name = $('#loginName').value.trim();
+    const code = $('#loginCode').value;
+    const s = DB.settings();
+    if(role!=='anon' && !name){ toast('표시 이름을 입력하세요'); return; }
+    if(role==='member'  && code!==s.codeMember){  toast('단원 접근 코드가 올바르지 않습니다'); return; }
+    if(role==='officer' && code!==s.codeOfficer){ toast('담당관 접근 코드가 올바르지 않습니다'); return; }
+    if(role==='admin'   && code!==s.codeAdmin){   toast('관리자 접근 코드가 올바르지 않습니다'); return; }
+    SESSION = { role, name: role==='anon' ? myAlias() : name };
+    LS.set('sm_session', SESSION);
+    enterApp();
+  });
+}
+
+function enterApp(){
+  $('#loginView').style.display='none';
+  $('#appView').style.display='grid';
+  renderNav();
+  $('#whoBox').innerHTML = `<b>${esc(SESSION.name)}</b><span class="role">${ROLE_LABEL[SESSION.role]}</span>`;
+  const start = location.hash.replace('#','') || 'home';
+  go(can(start) ? start : 'home');
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+function renderNav(){
+  const groups = {};
+  MENUS.filter(m => m.roles.includes(SESSION.role))
+       .forEach(m => (groups[m.group] = groups[m.group]||[]).push(m));
+  let html = '';
+  Object.entries(groups).forEach(([g, items])=>{
+    html += `<div class="nav-group">${esc(g)}</div>`;
+    items.forEach(m => html += `<button class="nav-btn" data-go="${m.id}"><span class="ic">${m.icon}</span>${esc(m.label)}</button>`);
+  });
+  $('#navArea').innerHTML = html;
+  $$('#navArea .nav-btn').forEach(b => b.addEventListener('click', ()=>{ go(b.dataset.go); closeSide(); }));
+}
+function setActive(id){
+  $$('#navArea .nav-btn').forEach(b => b.classList.toggle('active', b.dataset.go===id));
+  const m = MENUS.find(x=>x.id===id);
+  $('#topTitle').textContent = m ? m.label : '';
+}
+let CURRENT = 'home';
+function go(id){
+  if(!can(id)) id = 'home';
+  CURRENT = id;
+  try{ location.hash = id }catch(e){}
+  setActive(id);
+  $('#main').innerHTML = (VIEWS[id] || VIEWS.home)();
+  if(BIND[id]) BIND[id]();
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange', ()=>{
+  if(!SESSION) return;
+  const id = location.hash.replace('#','');
+  if(id && id!==CURRENT) go(id);
+});
+
+/* ============================================================
+   SHARED VIEW HELPERS
+   ============================================================ */
+const VIEWS = {}, BIND = {};
+const Q = {};   // 게시판별 검색어
+
+const pageHead = (t, d, right='') =>
+  `<div class="page-head"><div><h1>${esc(t)}</h1><p>${esc(d)}</p></div><div class="row-actions">${right}</div></div>`;
+const statusTag = (s) => {
+  const map = { '접수':'recv','검토중':'review','승인':'approve','반려':'reject' };
+  return `<span class="tag ${map[s]||'recv'}">${esc(s||'접수')}</span>`;
+};
+const table = (cols) => `<div class="table-wrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+const tableEnd = `</tbody></table></div>`;
+
+function highlight(text, q){
+  const safe = esc(text);
+  if(!q) return safe;
+  const rx = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return safe.replace(rx, '<mark>$1</mark>');
+}
+function searchBar(viewId, placeholder){
+  const q = Q[viewId] || '';
+  return `<div class="searchbar">
+    <input id="sq_${viewId}" value="${esc(q)}" placeholder="${esc(placeholder)}">
+    <button class="btn" id="sb_${viewId}">검색</button>
+    ${q?`<button class="btn ghost" id="sc_${viewId}">초기화</button>`:''}
+  </div>`;
+}
+function bindSearch(viewId){
+  const inp = $('#sq_'+viewId);
+  const run = ()=>{ Q[viewId] = inp.value.trim(); go(viewId); };
+  $('#sb_'+viewId).addEventListener('click', run);
+  inp.addEventListener('keydown', e=>{ if(e.key==='Enter') run(); });
+  $('#sc_'+viewId)?.addEventListener('click', ()=>{ Q[viewId]=''; go(viewId); });
+  if(Q[viewId]){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+
+/* ============================================================
+   1) 홈
+   ============================================================ */
+VIEWS.home = () => {
+  const r = SESSION.role;
+  const posts = DB.posts(), ops = DB.opinions(), evs = DB.events();
+  const upcoming = evs.filter(e => e.date >= ymd(new Date())).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
+  const news = posts.filter(p=>p.board==='news').sort((a,b)=>b.at.localeCompare(a.at)).slice(0,3);
+
+  let stats = '';
+  if(r==='member'){
+    const ex = DB.expenses().filter(x=>x.submittedBy===SESSION.name);
+    stats = `<div class="stat-row">
+      <div class="stat"><b>${DB.reports().filter(x=>x.realAuthor===SESSION.name).length}</b><span>내 보고서</span></div>
+      <div class="stat"><b>${ex.length}</b><span>내 정산 신청</span></div>
+      <div class="stat"><b>${ex.filter(x=>x.status!=='승인'&&x.status!=='반려').length}</b><span>처리 대기</span></div>
+      <div class="stat"><b>${won(ex.filter(x=>x.status==='승인').reduce((a,b)=>a+(+b.amount||0),0))}</b><span>승인 정산액</span></div>
+    </div>`;
+  } else if(r==='officer' || r==='admin'){
+    const ex = DB.expenses();
+    stats = `<div class="stat-row">
+      <div class="stat"><b>${DB.reports().filter(x=>x.status!=='승인'&&x.status!=='반려').length}</b><span>검토 대기 보고서</span></div>
+      <div class="stat"><b>${ex.filter(x=>x.status!=='승인'&&x.status!=='반려').length}</b><span>처리 대기 정산</span></div>
+      <div class="stat"><b>${ops.length}</b><span>접수 의견</span></div>
+      <div class="stat"><b>${won(ex.filter(x=>x.status==='승인').reduce((a,b)=>a+(+b.amount||0),0))}</b><span>승인 정산 총액</span></div>
+    </div>`;
+  } else {
+    stats = `<div class="notice">방문해 주셔서 감사합니다. 현재 별칭은 <b>${esc(SESSION.name)}</b> 입니다.
+      <b>의견함</b>에 남기는 글과 댓글에 이 별칭이 표시됩니다.</div>`;
+  }
+
+  return pageHead(r==='anon' ? '새소리단에 오신 것을 환영합니다' : `안녕하세요, ${SESSION.name}님`,
+                  ROLE_LABEL[r] + ' 권한으로 이용 중입니다.')
+    + stats
+    + `<div class="grid c2">
+        <div class="card" style="margin:0">
+          <h2>📰 최근 소식</h2><p class="sub">새소리단 활동 안내</p>
+          ${news.length ? news.map(p=>`<div class="post-row" data-open-post="${p.id}">
+              <div class="pr-top"><h3>${esc(p.title)}</h3><span class="hint">${fmtDay(p.at)}</span></div>
+              <p class="excerpt">${esc(excerpt(p.body,70))}</p></div>`).join('')
+            : `<div class="empty">등록된 소식이 없습니다.</div>`}
+        </div>
+        <div class="card" style="margin:0">
+          <h2>📅 다가오는 일정</h2><p class="sub">등록된 행사 일정</p>
+          ${upcoming.length ? upcoming.map(e=>`<div class="post-row" style="cursor:default">
+              <div class="pr-top"><h3>${esc(e.title)}</h3><span class="hint">${esc(e.date)}</span></div>
+              ${e.place?`<p class="excerpt">📍 ${esc(e.place)}</p>`:''}</div>`).join('')
+            : `<div class="empty">예정된 일정이 없습니다.</div>`}
+        </div>
+      </div>
+      <div class="card"><h2>바로가기</h2><p class="sub">권한에 따라 이용 가능한 메뉴입니다.</p>
+        <div class="row-actions">
+          ${MENUS.filter(m=>m.roles.includes(r) && !['home','intro-edit'].includes(m.id))
+                 .map(m=>`<button class="btn" onclick="go('${m.id}')">${m.icon} ${esc(m.label)}</button>`).join('')}
+        </div>
+      </div>`;
+};
+BIND.home = () => {
+  $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
+};
+
+/* ============================================================
+   2) 새소리단 소개
+   ============================================================ */
+VIEWS.intro = () => {
+  const it = DB.intro();
+  const editBtn = SESSION.role==='admin' ? `<button class="btn" onclick="go('intro-edit')">✏️ 내용 편집</button>` : '';
+  return pageHead('새소리단 소개','새소리단의 역할과 걸어온 길, 그리고 6개 팀을 소개합니다.', editBtn)
+  + `<div class="card"><h2>우리는 이런 일을 합니다</h2>
+      <p class="sub">새소리단의 존재 이유</p>
+      <div style="white-space:pre-wrap;font-size:14.5px">${esc(it.mission)}</div>
+    </div>
+    <div class="card"><h2>주요 역할</h2><p class="sub">단원이 수행하는 활동</p>
+      ${it.roles.length ? `<ul style="padding-left:18px;margin:0;line-height:1.9">
+        ${it.roles.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>` : `<div class="empty">등록된 역할이 없습니다.</div>`}
+    </div>
+    <div class="card"><h2>연혁</h2><p class="sub">새소리단이 걸어온 길</p>
+      ${it.history.length ? `<ul class="timeline">
+        ${it.history.slice().sort((a,b)=>String(b.year).localeCompare(String(a.year)))
+            .map(h=>`<li><span class="yr">${esc(h.year)}</span><span class="tx">${esc(h.text)}</span></li>`).join('')}
+      </ul>` : `<div class="empty">등록된 연혁이 없습니다.</div>`}
+    </div>
+    <div class="card"><h2>팀 소개</h2><p class="sub">분야별 ${it.teams.length}개 팀이 활동합니다.</p>
+      <div class="team-grid">
+        ${it.teams.map(t=>`<div class="team">
+          <h3>${esc(t.name)}</h3>
+          <div class="lead">${esc(t.lead||'')}</div>
+          <p>${esc(t.desc||'')}</p></div>`).join('')}
+      </div>
+    </div>`;
+};
+
+/* ---------- 소개 편집 (관리자) ---------- */
+VIEWS['intro-edit'] = () => {
+  const it = DB.intro();
+  return pageHead('소개 내용 편집','새소리단 소개 페이지에 표시될 내용을 직접 수정합니다.',
+                  `<button class="btn" onclick="go('intro')">미리보기</button>`)
+  + `<div class="card"><h2>소개 문구</h2>
+      <label class="field">본문<textarea id="ieMission" style="min-height:130px">${esc(it.mission)}</textarea></label>
+    </div>
+    <div class="card"><h2>주요 역할</h2><p class="sub">한 줄에 하나씩 입력하세요.</p>
+      <label class="field"><textarea id="ieRoles" style="min-height:120px">${esc(it.roles.join('\n'))}</textarea></label>
+    </div>
+    <div class="card"><h2>연혁</h2><p class="sub">한 줄에 하나씩 <code>연도 | 내용</code> 형식으로 입력하세요.</p>
+      <label class="field"><textarea id="ieHistory" style="min-height:130px">${esc(it.history.map(h=>`${h.year} | ${h.text}`).join('\n'))}</textarea></label>
+    </div>
+    <div class="card"><h2>팀 소개</h2><p class="sub">한 줄에 하나씩 <code>팀이름 | 팀장 | 설명</code> 형식으로 입력하세요.</p>
+      <label class="field"><textarea id="ieTeams" style="min-height:160px">${esc(it.teams.map(t=>`${t.name} | ${t.lead} | ${t.desc}`).join('\n'))}</textarea></label>
+    </div>
+    <div class="card">
+      <div class="row-actions">
+        <button class="btn primary" id="ieSave">저장</button>
+        <button class="btn danger" id="ieReset">예시 내용으로 되돌리기</button>
+      </div>
+    </div>`;
+};
+BIND['intro-edit'] = () => {
+  const lines = (s) => s.split('\n').map(x=>x.trim()).filter(Boolean);
+  $('#ieSave').addEventListener('click', ()=>{
+    DB.saveIntro({
+      mission: $('#ieMission').value.trim(),
+      roles: lines($('#ieRoles').value),
+      history: lines($('#ieHistory').value).map(l=>{
+        const [year, ...rest] = l.split('|');
+        return { year:(year||'').trim(), text:rest.join('|').trim() };
+      }),
+      teams: lines($('#ieTeams').value).map(l=>{
+        const p = l.split('|');
+        return { name:(p[0]||'').trim(), lead:(p[1]||'').trim(), desc:(p.slice(2).join('|')||'').trim() };
+      })
+    });
+    toast('소개 내용을 저장했습니다'); go('intro');
+  });
+  $('#ieReset').addEventListener('click', ()=>{
+    if(!confirm('처음 예시 내용으로 되돌립니다. 작성한 내용은 사라집니다.')) return;
+    DB.saveIntro(JSON.parse(JSON.stringify(DEFAULT_INTRO)));
+    toast('되돌렸습니다'); go('intro-edit');
+  });
+};
+
+/* ============================================================
+   3) 게시판 (소식 / 공지방 / 자유방 / 활동 공유방)
+   ============================================================ */
+function boardView(key){
+  const b = BOARDS[key];
+  const q = (Q[key]||'').toLowerCase();
+  let list = DB.posts().filter(p => p.board===key);
+  if(q) list = list.filter(p => (p.title+' '+p.body+' '+p.author).toLowerCase().includes(q));
+  list.sort((a,b2)=> (b2.pinned?1:0)-(a.pinned?1:0) || b2.at.localeCompare(a.at));
+
+  const writeBtn = canWrite(key) ? `<button class="btn primary" id="bdWrite">✏️ 글쓰기</button>` : '';
+  let body = '';
+
+  if(!list.length){
+    body = `<div class="empty">${q ? `“${esc(Q[key])}” 검색 결과가 없습니다.` : '아직 등록된 글이 없습니다.'}</div>`;
+  } else if(b.layout==='photo'){
+    body = `<div class="photo-grid">${list.map(p=>{
+      const img = firstImg(p.atts);
+      return `<article class="photo-card" data-open-post="${p.id}">
+        ${img ? `<img class="hero" src="${img.data}" alt="">`
+              : `<div class="hero none">${b.icon}</div>`}
+        <div class="pc-body">
+          <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}</h3>
+          <p class="excerpt">${highlight(excerpt(p.body,90),Q[key])}</p>
+          <div class="meta"><span>${esc(p.author)}</span><span>${fmtDay(p.at)}${(p.atts||[]).length?' · 📎'+p.atts.length:''}</span></div>
+        </div></article>`;
+    }).join('')}</div>`;
+  } else {
+    body = `<div class="card">${list.map(p=>`
+      <div class="post-row" data-open-post="${p.id}">
+        <div class="pr-top">
+          <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}${(p.atts||[]).length?' <span class="hint">📎'+p.atts.length+'</span>':''}</h3>
+          <span class="hint">${fmtDay(p.at)}</span>
+        </div>
+        <p class="excerpt">${highlight(excerpt(p.body,110),Q[key])} <span class="hint">· ${esc(p.author)}</span></p>
+      </div>`).join('')}</div>`;
+  }
+
+  return pageHead(b.label, b.desc, writeBtn)
+    + searchBar(key, '제목·내용·작성자로 검색')
+    + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>` : '')
+    + body;
+}
+function bindBoard(key){
+  bindSearch(key);
+  $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
+  $('#bdWrite')?.addEventListener('click', ()=> openPostForm(key));
+}
+Object.keys(BOARDS).forEach(key=>{
+  VIEWS[key] = () => boardView(key);
+  BIND[key]  = () => bindBoard(key);
+});
+
+/* ---------- 글쓰기 ---------- */
+function openPostForm(key){
+  const b = BOARDS[key];
+  const photo = b.layout==='photo';
+  openModal(`${b.icon} ${b.label} · 글쓰기`, `
+    <label class="field">제목 <span class="req">*</span><input id="pfTitle" placeholder="제목을 입력하세요"></label>
+    <label class="field">내용 <span class="req">*</span><textarea id="pfBody" style="min-height:150px"></textarea></label>
+    <label class="field">사진 / 첨부${photo?' <span class="req">*</span>':' <span class="hint" style="display:inline">선택</span>'}
+      <input id="pfFiles" type="file" multiple accept="${photo?'image/*':'image/*,.pdf,.doc,.docx,.hwp,.xlsx'}">
+      <span class="hint">${photo?'첫 번째 사진이 목록에서 크게 표시됩니다. 사진은 자동 축소 저장됩니다.':'이미지는 자동 축소, 5MB 초과 문서는 파일명만 기록됩니다.'}</span>
+    </label>
+    <div class="thumbs" id="pfThumbs"></div>
+    ${['officer','admin'].includes(SESSION.role)
+      ? `<label class="field" style="display:flex;align-items:center;gap:8px">
+           <input type="checkbox" id="pfPin" style="width:auto;margin:0"> 상단 고정(공지)</label>` : ''}
+    <div class="row-actions"><button class="btn primary" id="pfSave">등록</button></div>`);
+
+  let atts = [];
+  $('#pfFiles').addEventListener('change', async e=>{
+    atts = await collectFiles(e.target.files);
+    renderThumbs('#pfThumbs', atts);
+  });
+  $('#pfSave').addEventListener('click', ()=>{
+    const title = $('#pfTitle').value.trim(), body = $('#pfBody').value.trim();
+    if(!title || !body){ toast('제목과 내용을 입력하세요'); return; }
+    if(photo && !atts.some(a=>a.type?.startsWith('image/'))){ toast('사진을 1장 이상 첨부하세요'); return; }
+    const arr = DB.posts();
+    arr.push({ id:uid(), board:key, title, body, atts,
+               author:SESSION.name, authorRole:SESSION.role,
+               pinned: !!$('#pfPin')?.checked, at:nowISO() });
+    if(DB.savePosts(arr)){ closeModal(); toast('등록되었습니다'); go(key); }
+  });
+}
+
+/* ---------- 글 상세 ---------- */
+function openPost(id){
+  const p = DB.posts().find(x=>x.id===id); if(!p) return;
+  const imgs = (p.atts||[]).filter(a=>a.data && a.type?.startsWith('image/'));
+  const docs = (p.atts||[]).filter(a=>!a.type?.startsWith('image/'));
+  const mine = p.author===SESSION.name || SESSION.role==='admin';
+  openModal(p.title, `
+    <div class="hint" style="margin-bottom:14px">
+      ${esc(p.author)} · ${fmt(p.at)} · ${esc(BOARDS[p.board]?.label||'')}
+    </div>
+    ${imgs.length ? `<div class="big-imgs">${imgs.map(a=>`<img src="${a.data}" alt="${esc(a.name)}" data-zoom="${a.data}">`).join('')}</div>` : ''}
+    <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
+    ${docs.length ? `<div class="thumbs" style="margin-top:14px">${docs.map(a=>`<span class="tag recv">📄 ${esc(a.name)}</span>`).join('')}</div>` : ''}
+    ${mine ? `<div class="row-actions" style="margin-top:18px"><button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
+  $$('#modalBody [data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
+  $('#ppDel')?.addEventListener('click', ()=>{
+    if(!confirm('이 글을 삭제할까요? 되돌릴 수 없습니다.')) return;
+    DB.savePosts(DB.posts().filter(x=>x.id!==id));
+    closeModal(); toast('삭제되었습니다'); go(CURRENT);
+  });
+}
+
+/* ============================================================
+   4) 의견함 (익명 별칭 + 댓글 + 검색)
+   ============================================================ */
+const myOps   = () => LS.get('sm_myops', []);
+const isMine  = (id) => myOps().includes(id);
+const addMyOp = (id) => { const a = myOps(); a.push(id); LS.set('sm_myops', a); };
+const dropMyOp= (id) => LS.set('sm_myops', myOps().filter(x=>x!==id));
+function hashPin(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0 } return h.toString(36); }
+
+VIEWS.opinion = () => {
+  const q = (Q.opinion||'').toLowerCase();
+  let list = DB.opinions().slice().sort((a,b)=>b.at.localeCompare(a.at));
+  if(q) list = list.filter(o =>
+    (o.body + ' ' + o.cat + ' ' + o.alias + ' ' + (o.comments||[]).map(c=>c.body).join(' ')).toLowerCase().includes(q));
+  const isAdmin = SESSION.role==='admin';
+
+  return pageHead('의견함', '누구나 익명으로 의견을 남기고 댓글을 달 수 있습니다. 작성한 글은 방문자 모두에게 공개됩니다.')
+  + `<div class="notice">현재 내 별칭은 <b>${esc(myAlias())}</b> 입니다.
+      이름·소속·연락처는 저장하지 않으며, 같은 기기에서는 항상 같은 별칭이 표시됩니다.</div>
+    <div class="card">
+      <h2>새 의견 남기기</h2>
+      <p class="sub">답변이 필요하면 본문에 연락 방법을 직접 적어주세요.</p>
+      <label class="field">분류
+        <select id="opCat"><option>일반 의견</option><option>활동 제안</option><option>불편·신고</option><option>칭찬</option><option>기타</option></select>
+      </label>
+      <label class="field">내용 <span class="req">*</span><textarea id="opBody" placeholder="자유롭게 작성해주세요"></textarea></label>
+      <label class="field">삭제 비밀번호 <span class="hint" style="display:inline">선택</span>
+        <input id="opPin" type="password" maxlength="20" placeholder="다른 기기에서도 지우려면 입력">
+        <span class="hint">이 기기에서 쓴 글은 비밀번호 없이 바로 지울 수 있습니다. 휴대폰 등 다른 기기에서 지울 일이 있으면 정해두세요.</span>
+      </label>
+      <div class="row-actions"><button class="btn primary" id="opSubmit">익명으로 제출</button></div>
+    </div>`
+  + searchBar('opinion','의견 내용·별칭·댓글로 검색')
+  + (q ? `<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>` : '')
+  + `<div class="card" style="background:transparent;border:0;box-shadow:none;padding:0">
+      <h2 style="margin-bottom:12px">접수된 의견 (${list.length})</h2>
+      ${list.length ? list.map(o=>{
+        const mine = isMine(o.id);
+        let btns = '';
+        if(mine)       btns += `<button class="btn sm danger" data-del="${o.id}">내 글 삭제</button>`;
+        else if(o.pin) btns += `<button class="btn sm danger" data-del="${o.id}">비밀번호로 삭제</button>`;
+        if(isAdmin)    btns += `<button class="btn sm danger" data-admindel="${o.id}">관리자 삭제</button>`;
+        const cmts = o.comments || [];
+        return `<div class="op-item">
+          <div class="op-head">
+            <div><span class="tag brand">${esc(o.cat)}</span>
+              <b style="margin-left:8px;font-size:13.5px">${esc(o.alias||'익명')}</b>
+              ${mine?'<span class="tag approve" style="margin-left:6px">내 글</span>':''}</div>
+            <span class="hint">${fmt(o.at)}</span>
+          </div>
+          <div class="op-body">${highlight(o.body, Q.opinion)}</div>
+          ${btns?`<div class="row-actions">${btns}</div>`:''}
+          <div class="cmt-list">
+            ${cmts.length ? cmts.map(c=>{
+              const cm = isMine(c.id);
+              return `<div class="cmt">
+                <div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.at)}</span>
+                  ${(cm||isAdmin)?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px"
+                      data-cdel="${o.id}:${c.id}">삭제</button>`:''}</div>
+                <div>${highlight(c.body, Q.opinion)}</div></div>`;
+            }).join('') : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
+            <div class="cmt-form">
+              <input data-cinput="${o.id}" placeholder="${esc(myAlias())}(으)로 댓글 남기기">
+              <button class="btn sm" data-cadd="${o.id}">등록</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('') : `<div class="empty">${q?'검색 결과가 없습니다.':'아직 접수된 의견이 없습니다.'}</div>`}
+    </div>`;
+};
+BIND.opinion = () => {
+  bindSearch('opinion');
+
+  $('#opSubmit').addEventListener('click', ()=>{
+    const body = $('#opBody').value.trim();
+    if(!body){ toast('내용을 입력하세요'); return; }
+    const pin = $('#opPin').value;
+    const id = uid();
+    const arr = DB.opinions();
+    arr.push({ id, cat:$('#opCat').value, body, alias:myAlias(), at:nowISO(),
+               pin: pin ? hashPin(pin) : '', comments:[] });
+    if(DB.saveOpinions(arr)){ addMyOp(id); toast('익명으로 제출되었습니다'); go('opinion'); }
+  });
+
+  // 의견 삭제 (본인 / 비밀번호)
+  $$('#main [data-del]').forEach(b => b.addEventListener('click', ()=>{
+    const id = b.dataset.del;
+    const o = DB.opinions().find(x=>x.id===id); if(!o) return;
+    if(!isMine(id)){
+      const pin = prompt('작성 시 정한 삭제 비밀번호를 입력하세요');
+      if(pin===null) return;
+      if(!o.pin || hashPin(pin)!==o.pin){ toast('비밀번호가 일치하지 않습니다'); return; }
+    }
+    if(!confirm('이 의견을 삭제할까요? 댓글도 함께 삭제됩니다.')) return;
+    DB.saveOpinions(DB.opinions().filter(x=>x.id!==id));
+    dropMyOp(id); toast('삭제되었습니다'); go('opinion');
+  }));
+
+  // 관리자 삭제
+  $$('#main [data-admindel]').forEach(b => b.addEventListener('click', ()=>{
+    const id = b.dataset.admindel;
+    if(!confirm('관리자 권한으로 이 의견을 삭제합니다. 계속할까요?')) return;
+    DB.saveOpinions(DB.opinions().filter(x=>x.id!==id));
+    dropMyOp(id); toast('삭제되었습니다'); go('opinion');
+  }));
+
+  // 댓글 등록
+  const addComment = (opId) => {
+    const inp = $(`[data-cinput="${opId}"]`);
+    const text = inp.value.trim();
+    if(!text){ toast('댓글 내용을 입력하세요'); return; }
+    const arr = DB.opinions();
+    const o = arr.find(x=>x.id===opId); if(!o) return;
+    const cid = uid();
+    (o.comments = o.comments || []).push({ id:cid, body:text, alias:myAlias(), at:nowISO() });
+    if(DB.saveOpinions(arr)){ addMyOp(cid); toast('댓글을 등록했습니다'); go('opinion'); }
+  };
+  $$('#main [data-cadd]').forEach(b => b.addEventListener('click', ()=> addComment(b.dataset.cadd)));
+  $$('#main [data-cinput]').forEach(i => i.addEventListener('keydown', e=>{
+    if(e.key==='Enter') addComment(i.dataset.cinput);
+  }));
+
+  // 댓글 삭제
+  $$('#main [data-cdel]').forEach(b => b.addEventListener('click', ()=>{
+    const [opId, cId] = b.dataset.cdel.split(':');
+    if(!confirm('이 댓글을 삭제할까요?')) return;
+    const arr = DB.opinions();
+    const o = arr.find(x=>x.id===opId); if(!o) return;
+    o.comments = (o.comments||[]).filter(c=>c.id!==cId);
+    if(DB.saveOpinions(arr)){ dropMyOp(cId); toast('댓글을 삭제했습니다'); go('opinion'); }
+  }));
+};
+
+/* ============================================================
+   5) 일정 관리 (캘린더)
+   ============================================================ */
+const CAL = { y:new Date().getFullYear(), m:new Date().getMonth(), sel:ymd(new Date()) };
+const canEvent = () => INNER.includes(SESSION.role);
+
+VIEWS.calendar = () => {
+  const evs = DB.events();
+  const first = new Date(CAL.y, CAL.m, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(CAL.y, CAL.m+1, 0).getDate();
+  const prevDays = new Date(CAL.y, CAL.m, 0).getDate();
+  const today = ymd(new Date());
+
+  const cells = [];
+  for(let i=startDow-1; i>=0; i--) cells.push({ d:prevDays-i, dim:true, key:null });
+  for(let d=1; d<=daysInMonth; d++) cells.push({ d, dim:false, key:`${CAL.y}-${pad(CAL.m+1)}-${pad(d)}` });
+  while(cells.length % 7 !== 0) cells.push({ d:cells.length-startDow-daysInMonth+1, dim:true, key:null });
+
+  const dows = ['일','월','화','수','목','금','토'];
+  const grid = `<div class="cal">
+    ${dows.map(w=>`<div class="dow">${w}</div>`).join('')}
+    ${cells.map((c,i)=>{
+      const dayEvs = c.key ? evs.filter(e=>e.date===c.key) : [];
+      const cls = ['day', c.dim?'dim':'', c.key===today?'today':'', c.key===CAL.sel?'sel':'', i%7===0?'sun':''].filter(Boolean).join(' ');
+      return `<div class="${cls}" ${c.key?`data-day="${c.key}"`:''}>
+        <span class="dnum">${c.d}</span>
+        ${dayEvs.slice(0,3).map(e=>`<span class="ev" title="${esc(e.title)}">${esc(e.title)}</span>`).join('')}
+        ${dayEvs.length>3?`<span class="hint" style="margin:0">+${dayEvs.length-3}건</span>`:''}
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  const selEvs = evs.filter(e=>e.date===CAL.sel).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const addBtn = canEvent() ? `<button class="btn primary" id="calAdd">＋ 일정 등록</button>` : '';
+
+  return pageHead('일정 관리','새소리단 행사 일정입니다. 날짜를 눌러 그날 일정을 확인하세요.', addBtn)
+  + `<div class="card">
+      <div class="cal-head">
+        <button class="btn sm" id="calPrev">‹ 이전달</button>
+        <b>${CAL.y}년 ${CAL.m+1}월</b>
+        <div class="row-actions" style="margin:0">
+          <button class="btn sm ghost" id="calToday">오늘</button>
+          <button class="btn sm" id="calNext">다음달 ›</button>
+        </div>
+      </div>
+      ${grid}
+    </div>
+    <div class="card">
+      <h2>${esc(CAL.sel)} 일정 (${selEvs.length})</h2>
+      <p class="sub">${canEvent()?'단원 이상 권한으로 일정을 등록·삭제할 수 있습니다.':'일정 등록은 새소리단 단원만 가능합니다.'}</p>
+      ${selEvs.length ? selEvs.map(e=>`
+        <div class="post-row" style="cursor:default">
+          <div class="pr-top">
+            <h3>${e.time?`<span class="tag brand">${esc(e.time)}</span> `:''}${esc(e.title)}</h3>
+            <span class="hint">${esc(e.author)}</span>
+          </div>
+          ${e.place?`<p class="excerpt" style="-webkit-line-clamp:2">📍 ${esc(e.place)}</p>`:''}
+          ${e.desc?`<p class="excerpt" style="-webkit-line-clamp:3">${esc(e.desc)}</p>`:''}
+          ${(canEvent() && (e.author===SESSION.name || SESSION.role==='admin'))
+            ? `<div class="row-actions"><button class="btn sm danger" data-evdel="${e.id}">삭제</button></div>` : ''}
+        </div>`).join('')
+        : `<div class="empty">이 날짜에 등록된 일정이 없습니다.</div>`}
+    </div>`;
+};
+BIND.calendar = () => {
+  $('#calPrev').addEventListener('click', ()=>{ CAL.m--; if(CAL.m<0){ CAL.m=11; CAL.y--; } go('calendar'); });
+  $('#calNext').addEventListener('click', ()=>{ CAL.m++; if(CAL.m>11){ CAL.m=0; CAL.y++; } go('calendar'); });
+  $('#calToday').addEventListener('click', ()=>{
+    const t = new Date(); CAL.y=t.getFullYear(); CAL.m=t.getMonth(); CAL.sel=ymd(t); go('calendar');
+  });
+  $$('#main [data-day]').forEach(d => d.addEventListener('click', ()=>{ CAL.sel = d.dataset.day; go('calendar'); }));
+  $('#calAdd')?.addEventListener('click', ()=> openEventForm(CAL.sel));
+  $$('#main [data-evdel]').forEach(b => b.addEventListener('click', ()=>{
+    if(!confirm('이 일정을 삭제할까요?')) return;
+    DB.saveEvents(DB.events().filter(x=>x.id!==b.dataset.evdel));
+    toast('삭제되었습니다'); go('calendar');
+  }));
+};
+function openEventForm(date){
+  openModal('일정 등록', `
+    <div class="grid c2">
+      <label class="field">날짜 <span class="req">*</span><input id="evDate" type="date" value="${esc(date)}"></label>
+      <label class="field">시간 <span class="hint" style="display:inline">선택</span><input id="evTime" type="time"></label>
+    </div>
+    <label class="field">행사명 <span class="req">*</span><input id="evTitle" placeholder="예) 3분기 정기 활동일"></label>
+    <label class="field">장소<input id="evPlace" placeholder="예) 구청 3층 회의실"></label>
+    <label class="field">상세 내용<textarea id="evDesc"></textarea></label>
+    <div class="row-actions"><button class="btn primary" id="evSave">등록</button></div>`);
+  $('#evSave').addEventListener('click', ()=>{
+    const d = $('#evDate').value, t = $('#evTitle').value.trim();
+    if(!d || !t){ toast('날짜와 행사명은 필수입니다'); return; }
+    const arr = DB.events();
+    arr.push({ id:uid(), date:d, time:$('#evTime').value, title:t,
+               place:$('#evPlace').value.trim(), desc:$('#evDesc').value.trim(),
+               author:SESSION.name, at:nowISO() });
+    if(DB.saveEvents(arr)){
+      CAL.sel = d;
+      const dt = new Date(d); CAL.y = dt.getFullYear(); CAL.m = dt.getMonth();
+      closeModal(); toast('일정을 등록했습니다'); go('calendar');
+    }
+  });
+}
+
+/* ============================================================
+   6) 게임
+   ============================================================ */
+VIEWS.game = () => {
+  const s = DB.settings();
+  let frame;
+  if(s.gameURL){
+    frame = `<iframe src="${esc(s.gameURL)}" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px" allow="fullscreen"></iframe>`;
+  } else if(s.gameHTML){
+    frame = `<iframe id="gameFrame" sandbox="allow-scripts allow-same-origin" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px"></iframe>`;
+  } else {
+    frame = `<div class="empty">게임 소스가 아직 등록되지 않았습니다.<br>${SESSION.role==='admin'?'설정 · 게임 등록 메뉴에서 등록하세요.':'관리자에게 문의하세요.'}</div>`;
+  }
+  return pageHead('게임','새소리단 활동용 게임입니다.')
+    + `<div class="card"><h2>게임 실행</h2><p class="sub">별도 제공되는 게임 소스가 이 영역에 삽입됩니다.</p>${frame}</div>`;
+};
+BIND.game = () => {
+  const s = DB.settings();
+  if(s.gameHTML && !s.gameURL){ const f = $('#gameFrame'); if(f) f.srcdoc = s.gameHTML; }
+};
+
+/* ============================================================
+   7) 결과보고서 제출
+   ============================================================ */
+VIEWS.report = () => pageHead('결과보고서 제출','활동 종료 후 결과보고서를 제출합니다. 제출본은 혁신행정담당관이 검토합니다.')
+  + `<div class="card">
+    <h2>보고서 작성</h2>
+    <div class="grid c2">
+      <label class="field">보고서 제목 <span class="req">*</span><input id="rpTitle" placeholder="예) 8월 정기 모니터링 결과보고"></label>
+      <label class="field">활동 일자 <span class="req">*</span><input id="rpDate" type="date"></label>
+      <label class="field">작성자<input id="rpAuthor" value="${esc(SESSION.name)}"></label>
+      <label class="field">소속 팀
+        <select id="rpTeam"><option value="">선택 안 함</option>${DB.intro().teams.map(t=>`<option>${esc(t.name)}</option>`).join('')}</select>
+      </label>
+    </div>
+    <label class="field">활동 개요 <span class="req">*</span><textarea id="rpOverview" placeholder="언제 / 어디서 / 누가 / 무엇을"></textarea></label>
+    <label class="field">주요 활동 내용<textarea id="rpContent"></textarea></label>
+    <label class="field">성과 및 결과<textarea id="rpResult"></textarea></label>
+    <label class="field">개선점 / 건의사항<textarea id="rpImprove"></textarea></label>
+    <label class="field">첨부파일 <span class="hint" style="display:inline">선택</span>
+      <input id="rpFiles" type="file" multiple accept="image/*,.pdf,.doc,.docx,.hwp,.xlsx">
+      <span class="hint">이미지는 자동 축소 저장됩니다. 5MB 초과 문서는 파일명만 기록됩니다.</span>
+    </label>
+    <div class="thumbs" id="rpThumbs"></div>
+    <div class="row-actions"><button class="btn primary" id="rpSubmit">보고서 제출</button></div>
+  </div>`;
+BIND.report = () => {
+  let atts = [];
+  $('#rpFiles').addEventListener('change', async e=>{ atts = await collectFiles(e.target.files); renderThumbs('#rpThumbs', atts); });
+  $('#rpSubmit').addEventListener('click', ()=>{
+    const t=$('#rpTitle').value.trim(), d=$('#rpDate').value, ov=$('#rpOverview').value.trim();
+    if(!t||!d||!ov){ toast('제목·활동일자·활동개요는 필수입니다'); return; }
+    const arr = DB.reports();
+    arr.push({ id:uid(), title:t, date:d, team:$('#rpTeam').value,
+      author:$('#rpAuthor').value.trim()||SESSION.name, realAuthor:SESSION.name,
+      overview:ov, content:$('#rpContent').value.trim(), result:$('#rpResult').value.trim(),
+      improve:$('#rpImprove').value.trim(), atts, status:'접수', comment:'', at:nowISO() });
+    if(DB.saveReports(arr)){ toast('보고서가 제출되었습니다'); go('mine'); }
+  });
+};
+
+/* ============================================================
+   8) 활동비 정산
+   ============================================================ */
+VIEWS.expense = () => pageHead('활동비 정산 신청','활동비 사용 내역과 영수증 사진을 첨부하면 혁신행정담당관이 확인 후 처리합니다.')
+  + `<div class="notice">첨부한 영수증 사진은 <b>본인과 혁신행정담당관·운영 관리자</b>만 열람할 수 있습니다. 다른 단원에게는 보이지 않습니다.</div>
+  <div class="card">
+    <h2>정산 신청서</h2>
+    <div class="grid c2">
+      <label class="field">신청자 <span class="req">*</span><input id="exName" value="${esc(SESSION.name)}"></label>
+      <label class="field">연락처 <span class="hint" style="display:inline">선택</span><input id="exContact"></label>
+      <label class="field">활동일자 <span class="req">*</span><input id="exDate" type="date"></label>
+      <label class="field">활동명 <span class="req">*</span><input id="exActivity" placeholder="예) 하천 조류 조사"></label>
+      <label class="field">사용처 / 항목 <span class="req">*</span><input id="exItem" placeholder="예) 간식비, 교통비, 소모품"></label>
+      <label class="field">금액(원) <span class="req">*</span><input id="exAmount" type="number" min="0" placeholder="숫자만"></label>
+      <label class="field">결제수단
+        <select id="exPay"><option>개인카드</option><option>현금</option><option>계좌이체</option><option>기타</option></select>
+      </label>
+      <label class="field">입금 계좌 <span class="hint" style="display:inline">승인 시 지급</span><input id="exBank" placeholder="은행 / 계좌번호 / 예금주"></label>
+    </div>
+    <label class="field">상세 내역 / 비고<textarea id="exNote" placeholder="사용 목적, 참여 인원 등"></textarea></label>
+    <label class="field">영수증 사진 <span class="req">*</span>
+      <input id="exFiles" type="file" multiple accept="image/*" capture="environment">
+      <span class="hint">여러 장 첨부 가능. 휴대폰에서는 카메라로 바로 촬영할 수 있습니다.</span>
+    </label>
+    <div class="thumbs" id="exThumbs"></div>
+    <div class="row-actions"><button class="btn primary" id="exSubmit">정산 신청</button></div>
+  </div>`;
+BIND.expense = () => {
+  let receipts = [];
+  $('#exFiles').addEventListener('change', async e=>{ receipts = await collectFiles(e.target.files, true); renderThumbs('#exThumbs', receipts); });
+  $('#exSubmit').addEventListener('click', ()=>{
+    const name=$('#exName').value.trim(), date=$('#exDate').value, act=$('#exActivity').value.trim();
+    const item=$('#exItem').value.trim(), amount=$('#exAmount').value;
+    if(!name||!date||!act||!item||!amount){ toast('필수 항목을 모두 입력하세요'); return; }
+    if(!receipts.length){ toast('영수증 사진을 1장 이상 첨부하세요'); return; }
+    const arr = DB.expenses();
+    arr.push({ id:uid(), submitter:name, contact:$('#exContact').value.trim(), date, activity:act,
+      item, amount:Number(amount), pay:$('#exPay').value, bank:$('#exBank').value.trim(),
+      note:$('#exNote').value.trim(), receipts, status:'접수', comment:'', at:nowISO(), submittedBy:SESSION.name });
+    if(DB.saveExpenses(arr)){ toast('정산 신청이 접수되었습니다'); go('mine'); }
+  });
+};
+
+/* ============================================================
+   9) 내 제출 내역
+   ============================================================ */
+VIEWS.mine = () => {
+  const rp = DB.reports().filter(x=>x.realAuthor===SESSION.name).sort((a,b)=>b.at.localeCompare(a.at));
+  const ex = DB.expenses().filter(x=>x.submittedBy===SESSION.name).sort((a,b)=>b.at.localeCompare(a.at));
+  return pageHead('내 제출 내역','내가 낸 보고서와 정산 신청의 처리 상태입니다.')
+  + `<div class="card"><h2>결과보고서 (${rp.length})</h2>
+      ${rp.length ? table(['제목','활동일','상태','제출일시','']) + rp.map(r=>`<tr>
+        <td>${esc(r.title)}</td><td>${esc(r.date)}</td><td>${statusTag(r.status)}</td>
+        <td class="hint">${fmt(r.at)}</td><td><button class="btn sm" data-view-report="${r.id}">보기</button></td>
+      </tr>`).join('') + tableEnd : `<div class="empty">제출한 보고서가 없습니다.</div>`}
+    </div>
+    <div class="card"><h2>활동비 정산 (${ex.length})</h2>
+      ${ex.length ? table(['활동명','항목','금액','상태','']) + ex.map(r=>`<tr>
+        <td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td><td>${statusTag(r.status)}</td>
+        <td><button class="btn sm" data-view-expense="${r.id}">보기</button></td>
+      </tr>`).join('') + tableEnd : `<div class="empty">정산 신청 내역이 없습니다.</div>`}
+    </div>`;
+};
+BIND.mine = () => {
+  $$('#main [data-view-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.viewReport, false)));
+  $$('#main [data-view-expense]').forEach(b => b.addEventListener('click', ()=> showExpense(b.dataset.viewExpense, false)));
+};
+
+/* ============================================================
+   10) 혁신행정담당관 — 검토/처리
+   ============================================================ */
+VIEWS['review-report'] = () => {
+  const rp = DB.reports().sort((a,b)=>b.at.localeCompare(a.at));
+  return pageHead('결과보고서 검토','제출된 모든 결과보고서입니다. 승인/반려 및 코멘트를 남길 수 있습니다.')
+  + `<div class="card"><h2>전체 보고서 (${rp.length})</h2>
+    ${rp.length ? table(['제목','작성자','팀','활동일','상태','']) + rp.map(r=>`<tr>
+      <td>${esc(r.title)}</td><td>${esc(r.author)}</td><td>${esc(r.team||'-')}</td><td>${esc(r.date)}</td>
+      <td>${statusTag(r.status)}</td><td><button class="btn sm primary" data-review-report="${r.id}">열람·처리</button></td>
+    </tr>`).join('') + tableEnd : `<div class="empty">제출된 보고서가 없습니다.</div>`}
+  </div>`;
+};
+BIND['review-report'] = () => {
+  $$('#main [data-review-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.reviewReport, true)));
+};
+
+VIEWS['review-expense'] = () => {
+  const ex = DB.expenses().sort((a,b)=>b.at.localeCompare(a.at));
+  const sum = (st) => won(ex.filter(x=>x.status===st).reduce((a,b)=>a+(+b.amount||0),0));
+  return pageHead('활동비 정산 처리','단원이 첨부한 영수증과 정산 내역입니다. 확인 후 처리하세요.')
+  + `<div class="stat-row">
+      <div class="stat"><b>${ex.filter(x=>x.status==='접수'||x.status==='검토중').length}</b><span>처리 대기</span></div>
+      <div class="stat"><b>${sum('접수')}</b><span>접수 금액</span></div>
+      <div class="stat"><b>${sum('승인')}</b><span>승인 금액</span></div>
+      <div class="stat"><b>${sum('반려')}</b><span>반려 금액</span></div>
+    </div>
+    <div class="card"><h2>전체 정산 신청 (${ex.length})</h2>
+    ${ex.length ? table(['신청자','활동명','항목','금액','영수증','상태','']) + ex.map(r=>`<tr>
+      <td>${esc(r.submitter)}</td><td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td>
+      <td>${r.receipts?.length ? '📎 '+r.receipts.length+'장' : '<span class="hint">없음</span>'}</td>
+      <td>${statusTag(r.status)}</td>
+      <td><button class="btn sm primary" data-review-expense="${r.id}">열람·처리</button></td>
+    </tr>`).join('') + tableEnd : `<div class="empty">정산 신청이 없습니다.</div>`}
+  </div>`;
+};
+BIND['review-expense'] = () => {
+  $$('#main [data-review-expense]').forEach(b => b.addEventListener('click', ()=> showExpense(b.dataset.reviewExpense, true)));
+};
+
+/* ---------- 상세 모달 ---------- */
+function processBlock(cur, comment){
+  return `<hr style="border:0;border-top:1px solid var(--border);margin:18px 0">
+    <label class="field">처리 상태
+      <select id="mdStatus">${['접수','검토중','승인','반려'].map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('')}</select>
+    </label>
+    <label class="field">코멘트 (반려 사유 등)<textarea id="mdComment">${esc(comment)}</textarea></label>
+    <button class="btn primary" id="mdSave">저장</button>`;
+}
+function showReport(id, canProcess){
+  const r = DB.reports().find(x=>x.id===id); if(!r) return;
+  let body = `<dl>
+    <dt>제목</dt><dd>${esc(r.title)}</dd>
+    <dt>작성자 / 팀</dt><dd>${esc(r.author)}${r.team?' · '+esc(r.team):''}</dd>
+    <dt>활동일자</dt><dd>${esc(r.date)}</dd>
+    <dt>활동 개요</dt><dd>${esc(r.overview)}</dd>
+    <dt>주요 활동 내용</dt><dd>${esc(r.content)||'-'}</dd>
+    <dt>성과 및 결과</dt><dd>${esc(r.result)||'-'}</dd>
+    <dt>개선점 / 건의</dt><dd>${esc(r.improve)||'-'}</dd>
+    <dt>상태</dt><dd>${statusTag(r.status)}</dd>
+    ${r.comment?`<dt>담당관 코멘트</dt><dd>${esc(r.comment)}</dd>`:''}
+    <dt>첨부</dt><dd>${attHTML(r.atts)}</dd>
+    <dt>제출일시</dt><dd>${fmt(r.at)}</dd>
+  </dl>` + (canProcess ? processBlock(r.status, r.comment) : '');
+  openModal(r.title, body);
+  bindZoom();
+  $('#mdSave')?.addEventListener('click', ()=>{
+    const arr = DB.reports(), t = arr.find(x=>x.id===id);
+    t.status = $('#mdStatus').value; t.comment = $('#mdComment').value.trim();
+    if(DB.saveReports(arr)){ closeModal(); toast('저장되었습니다'); go(CURRENT); }
+  });
+}
+function showExpense(id, canProcess){
+  const r = DB.expenses().find(x=>x.id===id); if(!r) return;
+  const canSee = ['officer','admin'].includes(SESSION.role) || r.submittedBy===SESSION.name;
+  let body = `<dl>
+    <dt>신청자</dt><dd>${esc(r.submitter)}${r.contact?' · '+esc(r.contact):''}</dd>
+    <dt>활동일자 / 활동명</dt><dd>${esc(r.date)} · ${esc(r.activity)}</dd>
+    <dt>사용처 / 항목</dt><dd>${esc(r.item)}</dd>
+    <dt>금액</dt><dd>${won(r.amount)} (${esc(r.pay)})</dd>
+    ${r.bank?`<dt>입금 계좌</dt><dd>${esc(r.bank)}</dd>`:''}
+    <dt>상세 / 비고</dt><dd>${esc(r.note)||'-'}</dd>
+    <dt>상태</dt><dd>${statusTag(r.status)}</dd>
+    ${r.comment?`<dt>담당관 코멘트</dt><dd>${esc(r.comment)}</dd>`:''}
+    <dt>영수증 (${r.receipts?.length||0}장)</dt>
+    <dd>${canSee ? attHTML(r.receipts) : '<span class="hint">열람 권한이 없습니다 (혁신행정담당관 전용)</span>'}</dd>
+    <dt>제출일시</dt><dd>${fmt(r.at)}</dd>
+  </dl>` + (canProcess ? processBlock(r.status, r.comment) : '');
+  openModal('정산 신청 · ' + r.activity, body);
+  bindZoom();
+  $('#mdSave')?.addEventListener('click', ()=>{
+    const arr = DB.expenses(), t = arr.find(x=>x.id===id);
+    t.status = $('#mdStatus').value; t.comment = $('#mdComment').value.trim();
+    if(DB.saveExpenses(arr)){ closeModal(); toast('저장되었습니다'); go(CURRENT); }
+  });
+}
+function attHTML(atts){
+  if(!atts || !atts.length) return '<span class="hint">첨부 없음</span>';
+  return '<div class="thumbs">' + atts.map(a =>
+    (a.data && a.type?.startsWith('image/'))
+      ? `<img src="${a.data}" alt="${esc(a.name)}" data-zoom="${a.data}">`
+      : `<span class="tag recv">📄 ${esc(a.name)}</span>`
+  ).join('') + '</div>';
+}
+function bindZoom(){ $$('#modalBody [data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom))); }
+
+/* ============================================================
+   11) 관리 — 설정 / 백업 / 배포
+   ============================================================ */
+VIEWS.settings = () => {
+  const s = DB.settings();
+  return pageHead('설정 · 게임 등록','접근 코드와 게임 소스를 관리합니다.')
+  + `<div class="card"><h2>접근 코드</h2><p class="sub">각 권한으로 입장할 때 요구되는 코드입니다.</p>
+    <div class="grid c3">
+      <label class="field">단원 코드<input id="setM" value="${esc(s.codeMember)}"></label>
+      <label class="field">담당관 코드<input id="setO" value="${esc(s.codeOfficer)}"></label>
+      <label class="field">관리자 코드<input id="setA" value="${esc(s.codeAdmin)}"></label>
+    </div>
+    <div class="row-actions"><button class="btn primary" id="setSaveCodes">코드 저장</button></div>
+  </div>
+  <div class="card"><h2>게임 소스 등록</h2>
+    <p class="sub">별도 제공된 게임을 <b>① 외부 URL</b> 또는 <b>② HTML 소스 붙여넣기</b> 중 하나로 등록하세요. URL이 있으면 URL이 우선됩니다.</p>
+    <label class="field">① 게임 URL (iframe 임베드)<input id="setGameURL" value="${esc(s.gameURL)}" placeholder="https://example.com/game/index.html"></label>
+    <label class="field">② 게임 HTML 소스 붙여넣기
+      <textarea id="setGameHTML" style="min-height:170px;font-family:monospace;font-size:12px" placeholder="&lt;!DOCTYPE html&gt; ... 전체 HTML">${esc(s.gameHTML)}</textarea>
+      <span class="hint">단일 HTML 파일(JS·CSS 포함) 내용을 그대로 붙여넣으면 샌드박스 iframe에서 실행됩니다.</span>
+    </label>
+    <div class="row-actions">
+      <button class="btn primary" id="setSaveGame">게임 저장</button>
+      <button class="btn danger" id="setClearGame">게임 제거</button>
+      <button class="btn" onclick="go('game')">미리보기</button>
+    </div>
+  </div>`;
+};
+BIND.settings = () => {
+  $('#setSaveCodes').addEventListener('click', ()=>{
+    const s = DB.settings();
+    s.codeMember  = $('#setM').value.trim() || 'bird';
+    s.codeOfficer = $('#setO').value.trim() || 'innov';
+    s.codeAdmin   = $('#setA').value.trim() || 'admin';
+    DB.saveSettings(s); toast('접근 코드를 저장했습니다');
+  });
+  $('#setSaveGame').addEventListener('click', ()=>{
+    const s = DB.settings();
+    s.gameURL = $('#setGameURL').value.trim();
+    s.gameHTML = $('#setGameHTML').value;
+    if(DB.saveSettings(s)){ toast('게임 소스를 저장했습니다'); go('settings'); }
+  });
+  $('#setClearGame').addEventListener('click', ()=>{
+    if(!confirm('등록된 게임 소스를 제거할까요?')) return;
+    const s = DB.settings(); s.gameURL=''; s.gameHTML='';
+    DB.saveSettings(s); toast('게임을 제거했습니다'); go('settings');
+  });
+};
+
+VIEWS.backup = () => {
+  let used = 0;
+  if(STORE_OK){ try{ for(const k in localStorage) if(k.startsWith('sm_')) used += (localStorage[k]||'').length; }catch(e){} }
+  const mb = (used/1048576).toFixed(2);
+  return pageHead('데이터 백업 / 복원','전체 데이터를 JSON 파일로 내보내거나 다른 기기에서 가져옵니다.')
+  + `<div class="notice amber">이 앱은 브라우저(localStorage)에만 저장되며 한도는 보통 5MB 안팎입니다.
+      현재 사용량 <b>약 ${mb}MB</b>. 사진이 쌓이면 금방 차오르니 정기적으로 백업하세요.</div>
+  <div class="card"><h2>내보내기</h2><p class="sub">게시글·의견·보고서·정산·일정·소개·설정을 하나의 파일로 저장합니다.</p>
+    <div class="row-actions"><button class="btn primary" id="bkExport">JSON으로 내보내기</button></div>
+  </div>
+  <div class="card"><h2>가져오기</h2><p class="sub">가져오면 현재 데이터를 <b>덮어씁니다</b>.</p>
+    <label class="field"><input id="bkFile" type="file" accept="application/json,.json"></label>
+    <div class="row-actions"><button class="btn danger" id="bkImport">파일에서 복원</button></div>
+  </div>
+  <div class="card"><h2>초기화</h2><p class="sub">되돌릴 수 없습니다. 먼저 내보내기로 백업하세요.</p>
+    <div class="row-actions"><button class="btn danger" id="bkReset">모든 데이터 삭제</button></div>
+  </div>`;
+};
+BIND.backup = () => {
+  $('#bkExport').addEventListener('click', ()=>{
+    const data = { posts:DB.posts(), opinions:DB.opinions(), reports:DB.reports(), expenses:DB.expenses(),
+                   events:DB.events(), intro:DB.intro(), settings:DB.settings(), exportedAt:nowISO() };
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'}));
+    a.download = '새소리단_백업_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+  });
+  $('#bkImport').addEventListener('click', ()=>{
+    const f = $('#bkFile').files[0];
+    if(!f){ toast('파일을 선택하세요'); return; }
+    if(!confirm('현재 데이터를 덮어씁니다. 계속할까요?')) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try{
+        const d = JSON.parse(rd.result);
+        if(d.posts)    DB.savePosts(d.posts);
+        if(d.opinions) DB.saveOpinions(d.opinions);
+        if(d.reports)  DB.saveReports(d.reports);
+        if(d.expenses) DB.saveExpenses(d.expenses);
+        if(d.events)   DB.saveEvents(d.events);
+        if(d.intro)    DB.saveIntro(d.intro);
+        if(d.settings) DB.saveSettings(d.settings);
+        toast('복원되었습니다'); go('home');
+      }catch(e){ toast('올바른 백업 파일이 아닙니다'); }
+    };
+    rd.readAsText(f);
+  });
+  $('#bkReset').addEventListener('click', ()=>{
+    if(!confirm('모든 게시글·의견·보고서·정산·일정 데이터를 삭제합니다. 되돌릴 수 없습니다.')) return;
+    ['sm_posts','sm_opinions','sm_reports','sm_expenses','sm_events','sm_myops'].forEach(k=>LS.del(k));
+    toast('초기화되었습니다'); go('home');
+  });
+};
+
+VIEWS.deploy = () => pageHead('배포 안내','여러 명이 함께 쓰려면 데이터를 공유할 방법이 필요합니다.')
+  + `<div class="card"><h2>지금 구조의 한계</h2>
+    <p class="sub">이 파일은 서버 없이 도는 단일 HTML입니다. 데이터가 각자의 브라우저에만 저장되므로
+    <b>단원이 올린 영수증을 다른 기기의 담당관이 볼 수 없고, 의견함 글도 서로에게 보이지 않습니다.</b>
+    또한 익명 별칭(새소리1…)은 실제 IP가 아니라 기기 기준으로 부여됩니다.</p>
+  </div>
+  <div class="card"><h2>공유하려면 (택1)</h2>
+    <ol style="padding-left:18px;line-height:1.9">
+      <li><b>Supabase</b> — 권장. Postgres + 파일 저장 + 인증. Row Level Security로 “영수증은 담당관만 열람”을 DB 차원에서 강제할 수 있고, 서버에서 IP를 받아 별칭도 원래 요청대로 만들 수 있습니다.</li>
+      <li><b>Firebase (Firestore + Storage)</b> — 실시간 동기화와 이미지 업로드가 쉽습니다.</li>
+      <li><b>Google Apps Script + 스프레드시트</b> — 무료·간단. 사진은 Drive에 저장. 트래픽이 적을 때 적합합니다.</li>
+      <li><b>기관 내부 서버</b> — 보안 요구가 높을 때. REST API + DB를 직접 구축합니다.</li>
+    </ol>
+  </div>
+  <div class="card"><h2>연동 전까지</h2>
+    <p class="sub">공용 PC 한 대에서 이 파일을 열어 운영하고, <b>데이터 백업/복원</b> 메뉴로 정기 백업하세요.</p>
+  </div>`;
+
+/* ============================================================
+   FILE HANDLING (이미지 자동 축소 → dataURL)
+   ============================================================ */
+async function collectFiles(fileList, imageOnly){
+  const out = [];
+  for(const f of fileList){
+    if(f.type.startsWith('image/')){
+      try{ out.push({ name:f.name, type:'image/jpeg', data: await resizeImage(f) }); }
+      catch(e){ toast(f.name + ' 처리에 실패했습니다'); }
+    } else if(!imageOnly){
+      if(f.size <= 5*1024*1024) out.push({ name:f.name, type:f.type, data: await fileToDataURL(f) });
+      else out.push({ name:f.name + ' (용량초과·파일명만 기록)', type:f.type, data:null });
+    }
+  }
+  return out;
+}
+function fileToDataURL(f){
+  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
+}
+function resizeImage(file, max=1280, quality=0.7){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if(w>max || h>max){ const s = max/Math.max(w,h); w=Math.round(w*s); h=Math.round(h*s); }
+        const c = document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        res(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = rej; img.src = r.result;
+    };
+    r.onerror = rej; r.readAsDataURL(file);
+  });
+}
+function renderThumbs(sel, atts){
+  const el = $(sel); if(!el) return;
+  el.innerHTML = atts.map(a =>
+    (a.data && a.type?.startsWith('image/'))
+      ? `<img src="${a.data}" alt="${esc(a.name)}" data-zoom="${a.data}">`
+      : `<span class="tag recv">📄 ${esc(a.name)}</span>`).join('');
+  el.querySelectorAll('[data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
+}
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
+let toastT;
+function toast(msg){
+  const t = $('#toast'); if(!t) return;
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+function openModal(title, html){
+  $('#modalTitle').textContent = title;
+  $('#modalBody').innerHTML = html;
+  $('#modalBg').classList.add('open');
+}
+function closeModal(){ $('#modalBg').classList.remove('open'); }
+function lightbox(src){ $('#lightboxImg').src = src; $('#lightbox').classList.add('open'); }
+
+$('#modalClose').addEventListener('click', closeModal);
+$('#modalBg').addEventListener('click', e=>{ if(e.target.id==='modalBg') closeModal(); });
+$('#lightbox').addEventListener('click', ()=> $('#lightbox').classList.remove('open'));
+document.addEventListener('keydown', e=>{
+  if(e.key!=='Escape') return;
+  if($('#lightbox').classList.contains('open')) $('#lightbox').classList.remove('open');
+  else closeModal();
+});
+
+function closeSide(){ $('#side').classList.remove('open'); $('#scrim').classList.remove('open'); }
+$('#menuToggle').addEventListener('click', ()=>{ $('#side').classList.toggle('open'); $('#scrim').classList.toggle('open'); });
+$('#scrim').addEventListener('click', closeSide);
+$('#logoutBtn').addEventListener('click', ()=>{
+  LS.del('sm_session'); SESSION = null;
+  try{ location.hash = '' }catch(e){}
+  $('#appView').style.display='none';
+  $('#loginView').style.display='grid';
+});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+bindLogin();
+if(SESSION) enterApp();
+if(!STORE_OK) setTimeout(()=> toast('이 환경에서는 저장이 제한됩니다. 새로고침하면 데이터가 사라집니다.'), 600);
+</script>
+</body>
+</html>

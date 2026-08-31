@@ -1,0 +1,9 @@
+# 작업 중 캡처한 화면 — Supabase 대시보드 캡처에는 키가 찍혀 있을 수 있어 올리지 않습니다
+스크린샷*.png
+screenshot*.png
+*.tmp
+
+# 운영체제가 만드는 파일
+Thumbs.db
+desktop.ini
+.DS_Store
