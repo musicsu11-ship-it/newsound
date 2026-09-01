@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"C:/Users/music/OneDrive/바탕 화면/새소리단\" && sed -i \\\\ *)"
+    ]
+  }
+}
