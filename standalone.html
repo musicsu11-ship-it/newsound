@@ -37,26 +37,48 @@
   }
   a{color:var(--brand); font-weight:700}
   button{font-family:inherit}
-  .app{display:grid; grid-template-columns:252px 1fr; min-height:100vh}
+  /* ── 상단 내비게이션 (디자인 시안) ─────────────────────────── */
+  .topnav{display:flex;align-items:center;gap:22px;padding:14px clamp(16px,4vw,48px);
+    background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(22,34,92,.08);position:sticky;top:0;z-index:30}
+  @media (prefers-color-scheme:dark){ .topnav{background:rgba(23,29,71,.92);border-bottom-color:rgba(255,255,255,.08)} }
+  .brandbtn{display:flex;align-items:center;gap:11px;border:0;background:transparent;cursor:pointer;padding:0;flex:none}
+  .brandbtn img{display:block;height:32px;width:auto}
+  .brandbtn .wordmark{font-size:17px;font-weight:900;color:var(--text);letter-spacing:-.03em}
+  .mainnav{display:flex;gap:2px;align-items:center;flex:1;flex-wrap:wrap}
+  .nav-btn{border:0;background:transparent;font-family:inherit;font-size:14.5px;font-weight:700;
+    color:#3a4478;padding:8px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  @media (prefers-color-scheme:dark){ .nav-btn{color:var(--muted)} }
+  .nav-btn:hover{color:var(--accent);background:var(--brand-weak)}
+  .nav-btn.active{color:var(--brand);background:var(--brand-weak);font-weight:900}
+  .nav-right{display:flex;align-items:center;gap:10px;flex:none}
+  .whoami{font-size:13px;font-weight:800;color:var(--brand);white-space:nowrap}
+  .whoami em{font-style:normal;color:var(--muted);font-weight:600;margin-left:5px}
+  .navtoggle{display:none;border:1px solid var(--border);background:var(--surface);color:var(--text);
+    font-size:17px;padding:6px 12px;border-radius:12px;cursor:pointer}
 
-  /* ---------- Sidebar ---------- */
-  .side{background:var(--surface); border-right:1px solid var(--border); padding:18px 14px;
-    display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh; overflow-y:auto}
-  .brand{display:flex; align-items:center; gap:10px; padding:6px 8px 14px}
-  .brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(150deg,var(--accent),var(--brand));
-    display:grid;place-items:center;color:#fff;font-size:18px;flex:none}
-  .brand b{font-size:16px}
-  .brand span{display:block;font-size:11.5px;color:var(--muted);font-weight:500}
-  .nav-group{font-size:11px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:14px 8px 4px}
-  .nav-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;
-    color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer;font-size:14px}
-  .nav-btn:hover{background:var(--surface-2)}
-  .nav-btn.active{background:var(--brand-weak);color:var(--brand);font-weight:900}
-  .nav-btn .ic{width:18px;text-align:center;flex:none}
-  .side .spacer{flex:1;min-height:14px}
-  .who{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px}
-  .who b{display:block}
-  .who .role{color:var(--muted);font-size:12px}
+  /* 단원 메뉴 드롭다운 */
+  .navdrop{position:relative}
+  .navdrop-panel{position:absolute;right:0;top:calc(100% + 8px);min-width:210px;background:var(--surface);
+    border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:8px;display:none;z-index:40}
+  .navdrop.open .navdrop-panel{display:block}
+  .navdrop-panel .nav-btn{display:block;width:100%;text-align:left;font-size:14px;border-radius:12px}
+  .navdrop-panel .grp{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);padding:9px 14px 4px;font-weight:800}
+
+  /* 푸터 */
+  .sitefoot{border-top:1px solid var(--border);background:var(--surface);margin-top:60px}
+  .foot-in{max-width:1180px;margin:0 auto;padding:22px clamp(16px,4vw,48px);
+    display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .foot-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}
+  .foot-brand img{height:26px;width:auto}
+  .foot-brand b{display:block;font-size:14px;font-weight:900}
+  .foot-brand span{font-size:12px;color:var(--muted)}
+  .visits{display:flex;gap:18px;padding:8px 14px;border:1px solid var(--border);
+    border-radius:14px;background:var(--surface-2)}
+  .visits div{text-align:center}
+  .visits b{display:block;font-size:16px;font-variant-numeric:tabular-nums;line-height:1.25;font-weight:900}
+  .visits span{font-size:11px;color:var(--muted)}
 
   /* ---------- Buttons / forms ---------- */
   .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 14px;border-radius:999px;
@@ -77,7 +99,7 @@
   .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 
   /* ---------- Main / cards ---------- */
-  .main{padding:26px clamp(16px,4vw,44px);max-width:1120px;width:100%}
+  .main{padding:30px clamp(16px,4vw,48px) 20px;max-width:1180px;width:100%;margin:0 auto;min-height:60vh}
   .page-head{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
   .page-head h1{margin:0 0 5px;font-size:clamp(24px,3.2vw,32px);font-weight:900}
   .page-head p{margin:0;color:var(--muted);font-size:14px}
@@ -266,13 +288,20 @@
 
   .topbar{display:none}
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
-  @media (max-width:860px){
-    .app{grid-template-columns:1fr}
-    .side{position:fixed;left:0;top:0;bottom:0;width:252px;z-index:40;transform:translateX(-100%);transition:.25s}
-    .side.open{transform:translateX(0)}
-    .topbar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface);
-      border-bottom:1px solid var(--border);position:sticky;top:0;z-index:20}
+  @media (max-width:960px){
+    .navtoggle{display:block}
+    .brandbtn .wordmark{display:none}
+    .mainnav{position:fixed;left:0;right:0;top:0;bottom:0;background:var(--surface);z-index:40;
+      flex-direction:column;align-items:stretch;gap:4px;padding:72px 18px 24px;overflow-y:auto;
+      transform:translateX(100%);transition:transform .25s;flex-wrap:nowrap}
+    .mainnav.open{transform:translateX(0)}
+    .mainnav .nav-btn{text-align:left;font-size:16px;padding:13px 16px}
+    .navdrop{position:static}
+    .navdrop-panel{position:static;display:block;border:0;box-shadow:none;padding:0;background:transparent;min-width:0}
+    .navdrop>.nav-btn{display:none}
     .scrim.open{display:block}
+  }
+  @media (max-width:860px){
     .stat-row{grid-template-columns:1fr 1fr}
     .grid.c2,.grid.c3{grid-template-columns:1fr}
     .hero{padding:34px 22px 38px;border-radius:22px}
@@ -331,22 +360,33 @@
 </div>
 
 <!-- ================= APP ================= -->
-<div id="appView" class="app" style="display:none">
-  <aside class="side" id="side">
-    <div class="brand"><div class="logo">🐦</div><div><b>새소리단</b><span>활동 플랫폼</span></div></div>
-    <div id="navArea"></div>
-    <div class="spacer"></div>
-    <div class="who" id="whoBox"></div>
-    <button class="btn ghost sm" style="margin-top:8px" id="logoutBtn">로그아웃</button>
-  </aside>
-
-  <div style="min-width:0">
-    <div class="topbar">
-      <button class="btn ghost sm" id="menuToggle">☰ 메뉴</button>
-      <b id="topTitle">홈</b>
+<div id="appView" style="display:none">
+  <header class="topnav">
+    <button class="brandbtn" id="brandBtn">
+      <img src="assets/logo-molab.jpg" alt="고용노동부">
+      <span class="wordmark">새소리단</span>
+    </button>
+    <nav class="mainnav" id="navArea"></nav>
+    <div class="nav-right">
+      <span class="whoami" id="whoBox"></span>
+      <button class="btn primary sm" id="logoutBtn">로그아웃</button>
+      <button class="navtoggle" id="menuToggle" aria-label="메뉴">☰</button>
     </div>
-    <main class="main" id="main"></main>
-  </div>
+  </header>
+
+  <main class="main" id="main"></main>
+
+  <footer class="sitefoot">
+    <div class="foot-in">
+      <div class="foot-brand">
+        <img src="assets/logo-molab.jpg" alt="">
+        <div><b>새소리단</b><span>새내기 소통 리더단</span></div>
+      </div>
+      <div class="row-actions" style="margin:0">
+        <span class="hint" style="margin:0">연습용 · 이 브라우저에만 저장됩니다</span>
+      </div>
+    </div>
+  </footer>
 </div>
 <div class="scrim" id="scrim"></div>
 
@@ -482,7 +522,7 @@ const BOARDS = {
   free:   { label:'자유방', icon:'💭', layout:'list',
             desc:'단원끼리 자유롭게 이야기하는 공간입니다.',
             read:INNER, write:INNER },
-  share:  { label:'활동 공유방', icon:'📸', layout:'photo',
+  share:  { label:'새소리단 공간', icon:'📸', layout:'photo',
             desc:'활동 사진과 현장 기록을 공유하는 공간입니다.',
             read:INNER, write:INNER },
 };
@@ -498,7 +538,7 @@ const MENUS = [
 
   { id:'notice',   icon:'📢', label:'공지방',        roles:INNER, group:'새소리단 공간' },
   { id:'free',     icon:'💭', label:'자유방',        roles:INNER, group:'새소리단 공간' },
-  { id:'share',    icon:'📸', label:'활동 공유방',    roles:INNER, group:'새소리단 공간' },
+  { id:'share',    icon:'📸', label:'새소리단 공간',  roles:INNER, group:'새소리단 공간' },
   { id:'report',   icon:'📄', label:'결과보고서 제출', roles:INNER, group:'새소리단 공간' },
   { id:'expense',  icon:'🧾', label:'활동비 정산',    roles:INNER, group:'새소리단 공간' },
   { id:'mine',     icon:'📁', label:'내 제출 내역',   roles:INNER, group:'새소리단 공간' },
@@ -553,9 +593,9 @@ function bindLogin(){
 
 function enterApp(){
   $('#loginView').style.display='none';
-  $('#appView').style.display='grid';
+  $('#appView').style.display='block';
   renderNav();
-  $('#whoBox').innerHTML = `<b>${esc(SESSION.name)}</b><span class="role">${ROLE_LABEL[SESSION.role]}</span>`;
+  $('#whoBox').innerHTML = `${esc(SESSION.name)}<em>${ROLE_LABEL[SESSION.role]}</em>`;
   const start = location.hash.replace('#','') || 'home';
   go(can(start) ? start : 'home');
 }
@@ -563,22 +603,41 @@ function enterApp(){
 /* ============================================================
    NAV
    ============================================================ */
+/* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
+const PUBLIC_NAV = ['intro','news','opinion','calendar','share','game'];
+
 function renderNav(){
-  const groups = {};
-  MENUS.filter(m => m.roles.includes(SESSION.role))
-       .forEach(m => (groups[m.group] = groups[m.group]||[]).push(m));
-  let html = '';
-  Object.entries(groups).forEach(([g, items])=>{
-    html += `<div class="nav-group">${esc(g)}</div>`;
-    items.forEach(m => html += `<button class="nav-btn" data-go="${m.id}"><span class="ic">${m.icon}</span>${esc(m.label)}</button>`);
-  });
+  const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
+  const top  = PUBLIC_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
+  const rest = mine.filter(m => !PUBLIC_NAV.includes(m.id) && m.id!=='home');
+
+  let html = top.map(m => `<button class="nav-btn" data-go="${m.id}">${esc(m.label)}</button>`).join('');
+
+  if(rest.length){
+    const groups = {};
+    rest.forEach(m => (groups[m.group] = groups[m.group]||[]).push(m));
+    html += `<div class="navdrop" id="navDrop">
+      <button class="nav-btn" id="navDropBtn">단원 메뉴 ▾</button>
+      <div class="navdrop-panel">
+        ${Object.entries(groups).map(([g,items]) =>
+          `<div class="grp">${esc(g)}</div>` +
+          items.map(m=>`<button class="nav-btn" data-go="${m.id}">${m.icon} ${esc(m.label)}</button>`).join('')
+        ).join('')}
+      </div></div>`;
+  }
+
   $('#navArea').innerHTML = html;
-  $$('#navArea .nav-btn').forEach(b => b.addEventListener('click', ()=>{ go(b.dataset.go); closeSide(); }));
+  $$('#navArea .nav-btn[data-go]').forEach(b =>
+    b.addEventListener('click', ()=>{ go(b.dataset.go); closeSide(); }));
+  $('#navDropBtn')?.addEventListener('click', e=>{
+    e.stopPropagation(); $('#navDrop').classList.toggle('open'); });
 }
+document.addEventListener('click', ()=> $('#navDrop')?.classList.remove('open'));
+
 function setActive(id){
-  $$('#navArea .nav-btn').forEach(b => b.classList.toggle('active', b.dataset.go===id));
-  const m = MENUS.find(x=>x.id===id);
-  $('#topTitle').textContent = m ? m.label : '';
+  $$('#navArea .nav-btn[data-go]').forEach(b => b.classList.toggle('active', b.dataset.go===id));
+  const inDrop = !!document.querySelector(`.navdrop-panel .nav-btn[data-go="${id}"]`);
+  $('#navDropBtn')?.classList.toggle('active', inDrop);
 }
 let CURRENT = 'home';
 function go(id){
@@ -1608,8 +1667,9 @@ document.addEventListener('keydown', e=>{
   else closeModal();
 });
 
-function closeSide(){ $('#side').classList.remove('open'); $('#scrim').classList.remove('open'); }
-$('#menuToggle').addEventListener('click', ()=>{ $('#side').classList.toggle('open'); $('#scrim').classList.toggle('open'); });
+function closeSide(){ $('#navArea').classList.remove('open'); $('#scrim').classList.remove('open'); }
+$('#menuToggle').addEventListener('click', e=>{ e.stopPropagation(); $('#navArea').classList.toggle('open'); $('#scrim').classList.toggle('open'); });
+$('#brandBtn').addEventListener('click', ()=>{ go('home'); closeSide(); });
 $('#scrim').addEventListener('click', closeSide);
 $('#logoutBtn').addEventListener('click', ()=>{
   LS.del('sm_session'); SESSION = null;
