@@ -7,3 +7,6 @@ screenshot*.png
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# 도구 로컬 설정
+.claude/

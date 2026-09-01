@@ -242,7 +242,10 @@
   .thought{background:var(--surface);color:var(--text);font-weight:800;line-height:1.5;word-break:keep-all;
     box-shadow:0 10px 26px rgba(28,38,90,.1);padding:16px 22px;font-size:16px;border-radius:24px 24px 24px 8px}
   .thought:nth-child(even){background:var(--lav);border-radius:24px 24px 8px 24px}
-  .thoughts .mid{text-align:center}
+  .thoughts .mid{text-align:center;position:relative;padding-top:96px}
+  .thoughts .mid-art{position:absolute;left:0;right:0;top:-14px;margin:0 auto;
+    width:clamp(180px,22vw,260px);opacity:.28;pointer-events:none;z-index:0}
+  .thoughts .mid h2,.thoughts .mid p,.thoughts .mid .btn{position:relative;z-index:1}
   .thoughts .mid h2{font-size:clamp(24px,3.4vw,34px);font-weight:900;letter-spacing:-.03em;margin:0 0 10px}
   .thoughts .mid p{margin:0 0 20px;color:var(--muted);font-size:15px;font-weight:600}
 
@@ -913,7 +916,8 @@ VIEWS.home = () => {
           </div>
         </div>
         <div class="hero-art">
-          <img src="mascot-bird.jpg" alt="새소리단 마스코트 새초롱이">
+          <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이"
+               onerror="this.dataset.failed=1;this.alt='이미지를 불러오지 못했습니다 (assets/mascots.png)'">
           <span class="bubble l">이런 것도 의견이 될까?</span>
           <span class="bubble r">당연하죠! 작은 의견도 소중해요!</span>
         </div>
@@ -927,6 +931,7 @@ VIEWS.home = () => {
         ${THOUGHTS.map(t=>`<div class="thought">${esc(t)}</div>`).join('')}
       </div>
       <div class="mid">
+        <img class="mid-art" src="assets/dragon-thinking.png" alt="">
         <h2>이런 생각, 한 번쯤 해보셨죠?</h2>
         <p>익명이니까 더 편하게, 여러분의 생각을 들려주세요.</p>
         <button class="btn primary" data-go-to="opinion">익명으로 의견 보내기</button>
