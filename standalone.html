@@ -10,7 +10,7 @@
 <style>
   /* ── 디자인 시안 팔레트 (네이비 + 마젠타) ───────────────────── */
   :root{
-    --bg:#f3f2fd; --surface:#ffffff; --surface-2:#f7f6fe; --border:#e4e2f5;
+    --bg:#ffffff; --surface:#ffffff; --surface-2:#f7f6fe; --border:#e4e2f5;
     --text:#16225c; --muted:#5b6591; --brand:#d61e5c; --brand-weak:#ffe1ec;
     --accent:#f5326b; --lav:#e9e5ff;
     --ok:#0e8a6a; --ok-weak:#d9f5ef; --warn:#a86a00; --warn-weak:#fff2d8;
@@ -66,19 +66,25 @@
   .navdrop-panel .grp{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
     color:var(--muted);padding:9px 14px 4px;font-weight:800}
 
-  /* 푸터 */
-  .sitefoot{border-top:1px solid var(--border);background:var(--surface);margin-top:60px}
-  .foot-in{max-width:1180px;margin:0 auto;padding:22px clamp(16px,4vw,48px);
-    display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-  .foot-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}
-  .foot-brand img{height:26px;width:auto}
-  .foot-brand b{display:block;font-size:14px;font-weight:900}
-  .foot-brand span{font-size:12px;color:var(--muted)}
-  .visits{display:flex;gap:18px;padding:8px 14px;border:1px solid var(--border);
-    border-radius:14px;background:var(--surface-2)}
-  .visits div{text-align:center}
-  .visits b{display:block;font-size:16px;font-variant-numeric:tabular-nums;line-height:1.25;font-weight:900}
-  .visits span{font-size:11px;color:var(--muted)}
+  /* 푸터 (시안: 네이비 띠) */
+  .sitefoot{background:#16225c;color:#fff;margin-top:0}
+  .foot-in{max-width:1180px;margin:0 auto;padding:56px clamp(16px,4vw,48px) 34px}
+  .foot-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+    padding-bottom:26px}
+  .foot-top h2{font-size:clamp(21px,2.6vw,28px);font-weight:900;letter-spacing:-.03em;margin:0;line-height:1.35}
+  .foot-top h2 em{font-style:normal;color:var(--accent)}
+  .foot-links{display:flex;gap:22px;flex-wrap:wrap}
+  .foot-links button{border:0;background:transparent;color:#fff;font-family:inherit;font-size:14px;
+    font-weight:800;cursor:pointer;padding:0}
+  .foot-links button:hover{color:var(--accent)}
+  .foot-meta{border-top:1px solid rgba(255,255,255,.14);padding-top:20px;display:flex;
+    align-items:center;gap:18px;flex-wrap:wrap;font-size:12.5px;color:rgba(255,255,255,.62)}
+  .foot-meta b{font-weight:800;color:rgba(255,255,255,.86)}
+  .visits{display:flex;gap:16px;margin-left:auto}
+  .visits div{text-align:right}
+  .visits b{display:block;font-size:15px;font-variant-numeric:tabular-nums;line-height:1.25;
+    font-weight:900;color:#fff}
+  .visits span{font-size:11px;color:rgba(255,255,255,.55)}
 
   /* ---------- Buttons / forms ---------- */
   .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 14px;border-radius:999px;
@@ -229,62 +235,131 @@
   .role-opt b{font-size:14px}
   .role-opt span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 
-  /* ── 홈 히어로 (디자인 시안) ───────────────────────────────── */
-  .hero{position:relative;overflow:hidden;background:var(--surface);border-radius:28px;
-    padding:52px 44px 56px;margin-bottom:22px}
-  .hero .blob{position:absolute;pointer-events:none}
-  .hero .blob.a{left:-170px;bottom:-190px;width:460px;height:420px;background:var(--bg);
+  /* ════════════ 홈 (디자인 시안 그대로) ════════════ */
+  .home{margin:-30px calc(-1 * clamp(16px,4vw,48px)) -20px}
+  .home section{position:relative}
+  .wrap-1180{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
+
+  /* 1. 히어로 */
+  .hero{background:var(--surface);padding:56px 0 66px;overflow:hidden}
+  .hero .blob{position:absolute;pointer-events:none;z-index:0}
+  .hero .blob.a{left:-160px;bottom:-180px;width:460px;height:420px;background:#f3f2fd;
     border-radius:48% 52% 56% 44%/52% 44% 56% 48%}
-  .hero .blob.b{right:-260px;top:-150px;width:620px;height:520px;background:var(--brand-weak);
+  .hero .blob.b{right:-320px;top:-132px;width:820px;height:640px;background:#ffe1ec;
     border-radius:52% 48% 44% 56%/56% 46% 54% 44%}
-  .hero-in{position:relative;z-index:2;display:grid;grid-template-columns:1.05fr .95fr;gap:36px;align-items:center}
+  .hero-in{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center}
   .hero .eyebrow{font-size:15px;font-weight:800;color:var(--brand);margin-bottom:14px}
-  .hero h1{font-size:clamp(30px,3.6vw,46px);font-weight:900;line-height:1.22;letter-spacing:-.045em;
+  .hero h1{font-size:clamp(30px,3.8vw,48px);font-weight:900;line-height:1.22;letter-spacing:-.045em;
     margin:0 0 20px;word-break:keep-all}
   .hero h1 em{font-style:normal;color:var(--accent)}
-  .hero .lede{margin:0 0 28px;font-size:17px;line-height:1.85;color:var(--muted);word-break:keep-all;max-width:36em}
+  .hero .lede{margin:0 0 30px;font-size:clamp(15px,1.5vw,20px);line-height:1.85;color:var(--muted);
+    word-break:keep-all;max-width:600px}
   .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
-  .hero .cta .btn{padding:14px 26px;font-size:15.5px}
-  .hero .btn.outline{border:1.5px solid var(--text);background:var(--surface);color:var(--text);box-shadow:none}
-  .hero-art{position:relative;display:flex;align-items:center;justify-content:center;min-height:300px}
-  .hero-art img{display:block;width:min(100%,340px);
+  .hero .cta .btn{padding:15px 27px;font-size:15.5px;min-height:52px}
+  .btn.outline{border:1.5px solid var(--text);background:var(--surface);color:var(--text);box-shadow:none}
+  .hero-art{position:relative;display:flex;align-items:center;justify-content:center;min-height:440px}
+  .hero-art img{display:block;width:min(124%,660px);margin-right:-8%;
     filter:drop-shadow(0 22px 34px rgba(28,38,90,.16));animation:bob 6.4s ease-in-out infinite}
   .bubble{position:absolute;padding:11px 16px;font-weight:800;font-size:13.5px;white-space:nowrap;
-    box-shadow:0 14px 40px rgba(28,38,90,.14)}
-  .bubble.l{left:-4px;top:14px;background:var(--surface);color:var(--text);border-radius:18px 18px 18px 4px}
-  .bubble.r{right:-4px;bottom:34px;background:var(--text);color:var(--surface);border-radius:18px 18px 4px 18px}
+    box-shadow:0 14px 40px rgba(28,38,90,.14);z-index:3}
+  .bubble.l{left:-6px;top:26px;background:var(--surface);color:var(--text);border-radius:18px 18px 18px 4px}
+  .bubble.r{right:-10px;bottom:96px;background:var(--text);color:#fff;border-radius:18px 18px 4px 18px}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
   @keyframes floaty{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-12px) rotate(1deg)}}
 
-  /* ── 생각 말풍선 섹션 ─────────────────────────────────────── */
-  .thoughts{border-radius:28px;background:var(--brand-weak);padding:40px 36px 44px;margin-bottom:22px}
-  .thought-wrap{display:flex;flex-wrap:wrap;gap:14px 18px;justify-content:center;margin-bottom:30px}
-  .thought{background:var(--surface);color:var(--text);font-weight:800;line-height:1.5;word-break:keep-all;
-    box-shadow:0 10px 26px rgba(28,38,90,.1);padding:16px 22px;font-size:16px;border-radius:24px 24px 24px 8px}
-  .thought:nth-child(even){background:var(--lav);border-radius:24px 24px 8px 24px}
-  .thoughts .mid{text-align:center;position:relative;padding-top:96px}
-  .thoughts .mid-art{position:absolute;left:0;right:0;top:-14px;margin:0 auto;width:clamp(180px,22vw,260px);opacity:.28;pointer-events:none;z-index:0}
-  .thoughts .mid h2,.thoughts .mid p,.thoughts .mid .btn{position:relative;z-index:1}
-  .thoughts .mid h2{font-size:clamp(24px,3.4vw,34px);font-weight:900;letter-spacing:-.03em;margin:0 0 10px}
-  .thoughts .mid p{margin:0 0 20px;color:var(--muted);font-size:15px;font-weight:600}
+  /* 2. 이런 생각 */
+  .thoughts{border-radius:32px;background:#ffeef5;padding:44px 40px 52px;overflow:hidden}
+  .thought-wrap{display:flex;flex-wrap:wrap;gap:18px 22px;justify-content:center;align-items:flex-start;margin-bottom:34px}
+  .thought{background:#fff;color:#16225c;font-weight:800;line-height:1.5;word-break:keep-all;
+    box-shadow:0 10px 26px rgba(28,38,90,.1)}
+  .thoughts .mid{position:relative;text-align:center;padding:120px 0 10px}
+  .thoughts .mid-art{position:absolute;left:0;right:0;top:0;margin:0 auto;
+    width:clamp(220px,26vw,340px);opacity:.24;pointer-events:none;z-index:0}
+  .thoughts .mid h2{position:relative;z-index:1;font-size:clamp(26px,3.6vw,38px);font-weight:900;
+    letter-spacing:-.03em;color:#12b39a;margin:0 0 22px}
+  .thoughts .mid p{position:relative;z-index:1;margin:0 0 22px;font-size:16px;line-height:1.8;color:#5b6591}
+  .thoughts .mid .btn{position:relative;z-index:1;background:#16225c;color:#fff;border:0;border-radius:12px;
+    padding:15px 30px;font-size:15.5px;box-shadow:none}
+  .thoughts .mid .btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
 
-  /* ── 활동 영역 카드 ───────────────────────────────────────── */
-  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
-    margin:0 0 18px;flex-wrap:wrap}
-  .pill-label{display:inline-flex;color:var(--brand);background:var(--brand-weak);font-size:13px;
-    font-weight:800;padding:6px 13px;border-radius:999px;margin-bottom:10px}
-  .sec-head h2{font-size:clamp(22px,3vw,30px);font-weight:900;letter-spacing:-.03em;margin:0}
-  .work-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:22px}
-  .work{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:24px;
-    box-shadow:var(--shadow)}
-  .work .n{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;
-    font-size:19px;font-weight:900;margin-bottom:14px}
-  .work h3{margin:0 0 8px;font-size:22px;font-weight:900;letter-spacing:-.03em;word-break:keep-all}
-  .work p{margin:0;font-size:15px;line-height:1.7;color:var(--muted);word-break:keep-all}
+  /* 3. 한마디 */
+  .voices{background:linear-gradient(180deg,#fff6f9 0%,#f3f2fd 100%);padding:64px 0 70px;text-align:center}
+  .voices .eyebrow{font-size:24px;font-weight:900;color:var(--brand);margin-bottom:16px}
+  .voices h2{font-size:clamp(26px,4vw,46px);font-weight:900;letter-spacing:-.04em;line-height:1.25;margin:0 0 34px}
+  .voices h2 em{font-style:normal;color:#7b2ff2}
+  .voice-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:26px;align-items:center;max-width:1400px;margin:0 auto}
+  .voice-col{display:flex;flex-direction:column;gap:16px}
+  .voice-col.l{align-items:flex-end}
+  .voice-col.r{align-items:flex-start}
+  .voice{background:#fff;border:2px solid #cfe9de;border-radius:34px;padding:20px 30px;text-align:left;
+    font-size:clamp(15px,1.6vw,21px);font-weight:700;line-height:1.55;color:#16225c;word-break:keep-all;max-width:560px}
+  .voice-col.r .voice{border-color:#f6cdd9}
+  .voice-mid img{display:block;width:clamp(150px,22vw,300px);
+    filter:drop-shadow(0 20px 30px rgba(28,38,90,.2));animation:floaty 5.6s ease-in-out infinite}
 
-  @media (prefers-reduced-motion:reduce){
-    .hero-art img{animation:none}
-  }
+  /* 4. 우리가 하는 일 */
+  .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin:0 0 26px;flex-wrap:wrap}
+  .pill-label{display:inline-flex;color:var(--brand);background:var(--brand-weak);font-size:13.5px;
+    font-weight:800;padding:6px 12px;border-radius:999px;margin-bottom:12px}
+  .sec-head h2{font-size:clamp(24px,3.2vw,34px);font-weight:900;letter-spacing:-.03em;margin:0}
+  .btn.softpink{background:var(--brand-weak);color:var(--brand);border:0;border-radius:14px;padding:12px 18px;box-shadow:none}
+  .work-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .work{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:22px;padding:26px;
+    box-shadow:0 14px 40px rgba(28,38,90,.11)}
+  .work .n{width:60px;height:60px;border-radius:18px;display:grid;place-items:center;
+    font-size:21px;font-weight:900;margin-bottom:16px}
+  .work h3{margin:0 0 10px;font-size:clamp(20px,2.2vw,27px);font-weight:900;letter-spacing:-.03em;word-break:keep-all}
+  .work p{margin:0;font-size:clamp(14px,1.4vw,19px);line-height:1.7;color:var(--muted);word-break:keep-all}
+
+  /* 5. 연혁 */
+  .histcard{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:28px;
+    box-shadow:var(--shadow);padding:34px 40px;display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center}
+  .histcard>img{width:clamp(120px,16vw,210px);filter:drop-shadow(0 16px 26px rgba(28,38,90,.16))}
+  .histcard h2{font-size:clamp(24px,3vw,32px);font-weight:900;letter-spacing:-.03em;margin:0 0 8px}
+  .histcard .sub{margin:0 0 22px;color:var(--muted);font-size:14.5px}
+  .hist-row{margin-bottom:16px}
+  .hist-row .cap{font-size:13.5px;font-weight:800;color:var(--text);margin-bottom:9px;display:flex;
+    align-items:center;gap:8px;flex-wrap:wrap}
+  .hist-row .cap .tag{background:var(--accent);color:#fff}
+  .yrs{display:flex;gap:9px;flex-wrap:wrap}
+  .yr{font-size:15px;font-weight:800;padding:9px 17px;border-radius:12px;background:#f0eeff;color:#4a3ec8}
+  .yr.pink{background:var(--brand-weak);color:var(--brand)}
+  .yr.now{background:var(--brand);color:#fff}
+
+  /* 6. 소식 카드 */
+  .news-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .news-card{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:22px;overflow:hidden;
+    box-shadow:var(--shadow);cursor:pointer;display:flex;flex-direction:column}
+  .news-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+  .news-card .ph{aspect-ratio:16/10;background:linear-gradient(150deg,#f3f2fd,#fff9ec);display:grid;
+    place-items:center;color:#a2a9c6;font-size:28px}
+  .news-card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .news-card .bd{padding:18px 22px 22px}
+  .news-card h3{margin:10px 0 8px;font-size:clamp(17px,1.8vw,23px);font-weight:900;letter-spacing:-.03em;
+    line-height:1.35;word-break:keep-all}
+  .news-card p{margin:0 0 12px;font-size:14px;color:var(--muted);line-height:1.6;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .news-card .dt{font-size:12.5px;color:var(--muted)}
+
+  /* 7. 일정 */
+  .schedcard{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:28px;
+    box-shadow:var(--shadow);padding:30px 34px}
+  .schedcard h2{font-size:clamp(20px,2.4vw,26px);font-weight:900;letter-spacing:-.03em;margin:0 0 18px}
+  .sched-row{display:flex;align-items:center;gap:16px;padding:13px 0;border-bottom:1px solid var(--border)}
+  .sched-row:last-of-type{border-bottom:0}
+  .sched-row .d{flex:none;background:#f0eeff;color:#4a3ec8;font-weight:900;font-size:14px;
+    padding:9px 12px;border-radius:12px;font-variant-numeric:tabular-nums}
+  .sched-row b{display:block;font-size:15px;font-weight:800}
+  .sched-row span{font-size:13px;color:var(--muted)}
+  .linkmore{border:0;background:transparent;color:var(--brand);font-weight:800;font-size:14px;
+    cursor:pointer;padding:14px 0 0;font-family:inherit}
+
+  /* 8. 게임 배너 */
+  .gamebanner{border-radius:26px;background:linear-gradient(160deg,#ffe1ec,#e9e5ff);padding:44px 40px 48px}
+  .gamebanner h2{font-size:clamp(26px,3.6vw,42px);font-weight:900;letter-spacing:-.04em;
+    line-height:1.28;margin:0 0 26px;color:var(--text)}
+
+  @media (prefers-reduced-motion:reduce){ .hero-art img,.voice-mid img{animation:none} }
 
   .topbar{display:none}
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
@@ -304,15 +379,26 @@
   @media (max-width:860px){
     .stat-row{grid-template-columns:1fr 1fr}
     .grid.c2,.grid.c3{grid-template-columns:1fr}
-    .hero{padding:34px 22px 38px;border-radius:22px}
-    .hero-in{grid-template-columns:1fr;gap:24px}
-    .hero-art{min-height:220px;order:-1}
-    .hero-art img{width:min(70%,240px)}
+    .hero{padding:32px 0 38px}
+    .hero-in{grid-template-columns:1fr;gap:22px}
+    .hero-art{min-height:240px;order:-1}
+    .hero-art img{width:min(92%,330px);margin-right:0}
     .bubble{font-size:12px;padding:9px 13px}
-    .thoughts{padding:28px 18px 32px;border-radius:22px}
-    .thought{font-size:14.5px;padding:13px 17px}
-    .work-grid{grid-template-columns:1fr}
-    .cal .day{min-height:64px}
+    .bubble.r{bottom:20px;right:0}
+    .thoughts{padding:26px 18px 32px;border-radius:22px}
+    .thought{font-size:15px !important;padding:14px 18px !important}
+    .thoughts .mid{padding-top:90px}
+    .work-grid,.news-grid{grid-template-columns:1fr}
+    .voice-grid{grid-template-columns:1fr;gap:16px}
+    .voice-col.l,.voice-col.r{align-items:stretch}
+    .voice-mid{order:-1;display:flex;justify-content:center}
+    .voice{font-size:15px;padding:16px 20px;max-width:none}
+    .histcard{grid-template-columns:1fr;padding:26px 22px;text-align:center}
+    .histcard>img{margin:0 auto;width:150px}
+    .yrs,.hist-row .cap{justify-content:center}
+    .gamebanner{grid-template-columns:1fr;padding:32px 24px;text-align:center}
+    .gamebanner img{margin:0 auto}
+    .schedcard{padding:22px 20px}
     .cal .day{min-height:64px}
     .cal .ev{font-size:10px}
   }
@@ -378,12 +464,20 @@
 
   <footer class="sitefoot">
     <div class="foot-in">
-      <div class="foot-brand">
-        <img src="assets/logo-molab.jpg" alt="">
-        <div><b>새소리단</b><span>새내기 소통 리더단</span></div>
+      <div class="foot-top">
+        <h2>작은 목소리가<br>일하는 방식을 <em>바꿉니다</em></h2>
+        <div class="foot-links">
+          <button data-foot="intro">소개</button>
+          <button data-foot="news">소식</button>
+          <button data-foot="opinion">의견함</button>
+        </div>
       </div>
-      <div class="row-actions" style="margin:0">
-        <span class="hint" style="margin:0">연습용 · 이 브라우저에만 저장됩니다</span>
+      <div class="foot-meta">
+        <b>새소리단 활동 플랫폼</b>
+        <span>대표문의 000-0000-0000 · 평일 09:00–18:00</span>
+        <span>○○시 ○○구 ○○로 000, 구청 3층 혁신행정담당관</span>
+        <span>© 2026 새소리단</span>
+        <span style="margin-left:auto">연습용 · 이 브라우저에만 저장됩니다</span>
       </div>
     </div>
   </footer>
@@ -530,10 +624,10 @@ const BOARDS = {
 /* ---------- 메뉴 (권한별) ---------- */
 const MENUS = [
   { id:'home',     icon:'🏠', label:'홈',            roles:ALL,   group:'홈' },
-  { id:'intro',    icon:'🐦', label:'새소리단 소개',  roles:ALL,   group:'소개' },
-  { id:'news',     icon:'📰', label:'새소리단 소식',  roles:ALL,   group:'소식' },
+  { id:'intro',    icon:'🐦', label:'소개',           roles:ALL,   group:'소개' },
+  { id:'news',     icon:'📰', label:'소식',           roles:ALL,   group:'소식' },
   { id:'opinion',  icon:'💬', label:'의견함',        roles:ALL,   group:'의견함' },
-  { id:'calendar', icon:'📅', label:'일정 관리',      roles:ALL,   group:'일정' },
+  { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
   { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
 
   { id:'notice',   icon:'📢', label:'공지방',        roles:INNER, group:'새소리단 공간' },
@@ -696,120 +790,175 @@ function bindSearch(viewId){
 /* ============================================================
    1) 홈
    ============================================================ */
+const THOUGHT_STYLE = [
+  { fs:22, br:'26px 26px 26px 8px', bg:'#fff',     max:400 },
+  { fs:17, br:'24px 24px 8px 24px', bg:'#e9e5ff',  max:330 },
+  { fs:26, br:'28px 28px 28px 8px', bg:'#fff',     max:430 },
+  { fs:16, br:'22px 22px 8px 22px', bg:'#e9e5ff',  max:300 },
+  { fs:20, br:'26px 26px 26px 8px', bg:'#fff',     max:340 },
+  { fs:23, br:'26px 26px 8px 26px', bg:'#fff',     max:420 },
+];
+const VOICES_L = [
+  '🌙 야근이 당연한 분위기, 이제는 좀 바꿔주세요',
+  '😮‍💨 수직적인 보고체계가 답답해요',
+  '🏖️ 휴가 쓸 때 눈치 보이지 않으면 좋겠어요',
+];
+const VOICES_R = [
+  '🙈 연가 쓰는데 어디 가는지 묻지 않았으면 합니다',
+  '🐣 신규 직원도 쉽게 적응할 수 있게 업무 노하우를 더 잘 가르쳐 주셨으면 좋겠어요',
+];
+const HISTORY_ERAS = [
+  { cap:'새내기 혁신참견단', badge:'', years:['2019','2020','2021','2022','2023'], tone:'' },
+  { cap:'새소리단 · 새내기소통리더단', badge:'8기 운영 중', years:['2024','2025','2026'], tone:'pink' },
+];
+
 VIEWS.home = () => {
   const r = SESSION.role;
-  const posts = DB.posts(), ops = DB.opinions(), evs = DB.events();
-  const upcoming = evs.filter(e => e.date >= ymd(new Date())).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4);
-  const news = posts.filter(p=>p.board==='news').sort((a,b)=>b.at.localeCompare(a.at)).slice(0,3);
+  const today = ymd(new Date());
+  const news = DB.posts().filter(p => p.board==='news').slice(0,3);
+  const upcoming = DB.events().filter(e => e.date >= today).slice(0,3);
+  const works = DB.intro().teams || [];
 
-  let stats = '';
-  if(r==='member'){
-    const ex = DB.expenses().filter(x=>x.submittedBy===SESSION.name);
-    stats = `<div class="stat-row">
-      <div class="stat"><b>${DB.reports().filter(x=>x.realAuthor===SESSION.name).length}</b><span>내 보고서</span></div>
-      <div class="stat"><b>${ex.length}</b><span>내 정산 신청</span></div>
-      <div class="stat"><b>${ex.filter(x=>x.status!=='승인'&&x.status!=='반려').length}</b><span>처리 대기</span></div>
-      <div class="stat"><b>${won(ex.filter(x=>x.status==='승인').reduce((a,b)=>a+(+b.amount||0),0))}</b><span>승인 정산액</span></div>
-    </div>`;
-  } else if(r==='officer' || r==='admin'){
-    const ex = DB.expenses();
-    stats = `<div class="stat-row">
-      <div class="stat"><b>${DB.reports().filter(x=>x.status!=='승인'&&x.status!=='반려').length}</b><span>검토 대기 보고서</span></div>
-      <div class="stat"><b>${ex.filter(x=>x.status!=='승인'&&x.status!=='반려').length}</b><span>처리 대기 정산</span></div>
-      <div class="stat"><b>${ops.length}</b><span>접수 의견</span></div>
-      <div class="stat"><b>${won(ex.filter(x=>x.status==='승인').reduce((a,b)=>a+(+b.amount||0),0))}</b><span>승인 정산 총액</span></div>
-    </div>`;
-  } else {
-    stats = `<div class="notice">방문해 주셔서 감사합니다. 현재 별칭은 <b>${esc(SESSION.name)}</b> 입니다.
-      <b>의견함</b>에 남기는 글과 댓글에 이 별칭이 표시됩니다.</div>`;
+  /* 관리자·담당관용 알림은 히어로 위에 얇게 */
+  let ops = '';
+  if(["officer","admin"].includes(SESSION.role)){
+    const nr = DB.reports().filter(x=>!['승인','반려'].includes(x.status)).length;
+    const ne = DB.expenses().filter(x=>!['승인','반려'].includes(x.status)).length;
+    if(nr || ne) ops = `<div class="wrap-1180" style="padding-top:16px">
+      <div class="notice">처리할 일이 있습니다 —
+        ${nr?`검토 대기 보고서 <b>${nr}</b>건`:''}${nr&&ne?' · ':''}${ne?`처리 대기 정산 <b>${ne}</b>건`:''}
+        <button class="btn sm" style="margin-left:10px" data-go-to="${nr?'review-report':'review-expense'}">처리하러 가기</button>
+      </div></div>`;
   }
 
-  const hero = `
-    <section class="hero">
-      <div class="blob a"></div><div class="blob b"></div>
-      <div class="hero-in">
-        <div>
-          <div class="eyebrow">안녕하세요, 새내기 소통 리더단입니다</div>
-          <h1>새로운 <em>시선</em>,<br>새로운 <em>목소리</em>,<br>새로운 <em>변화</em></h1>
-          <p class="lede">새소리단은 새내기의 시선으로 직원들의 다양한 목소리를 모아,
-            더 나은 고용노동부를 만들어갑니다.<br>
-            사소한 생각, 아이디어도 변화의 시작이 될 수 있습니다.
-            여러분의 생각과 이야기를 들려주세요!</p>
-          <div class="cta">
-            <button class="btn outline" data-go-to="intro">새소리단 소개</button>
-            <button class="btn primary" data-go-to="opinion">아이디어 제안하기 →</button>
-          </div>
-        </div>
-        <div class="hero-art">
-          <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이" onerror="this.alt='이미지를 불러오지 못했습니다 (assets/mascots.png)'">
-          <span class="bubble l">이런 것도 의견이 될까?</span>
-          <span class="bubble r">당연하죠! 작은 의견도 소중해요!</span>
+  return `<div class="home">${ops}
+
+  <!-- 1. 히어로 -->
+  <section class="hero">
+    <div class="blob a"></div><div class="blob b"></div>
+    <div class="wrap-1180 hero-in">
+      <div>
+        <div class="eyebrow">안녕하세요, 새내기 소통 리더단입니다</div>
+        <h1>새로운 <em>시선</em>,<br>새로운 <em>목소리</em>,<br>새로운 <em>변화</em></h1>
+        <p class="lede">새소리단은 새내기의 시선으로 직원들의 다양한 목소리를 모아,<br>
+          더 나은 고용노동부를 만들어갑니다.<br>
+          사소한 생각, 아이디어도 변화의 시작이 될 수 있습니다.<br><br>
+          여러분의 생각과 이야기를 들려주세요!</p>
+        <div class="cta">
+          <button class="btn outline" data-go-to="intro">새소리단 소개</button>
+          <button class="btn primary" data-go-to="opinion">아이디어 제안하기 →</button>
         </div>
       </div>
-    </section>`;
+      <div class="hero-art">
+        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
+        <span class="bubble l">이런 것도 의견이 될까?</span>
+        <span class="bubble r">당연하죠! 작은 의견도 소중해요!</span>
+      </div>
+    </div>
+  </section>
 
-  const thoughts = `
-    <section class="thoughts">
+  <!-- 2. 이런 생각 -->
+  <section class="wrap-1180" style="padding-top:64px">
+    <div class="thoughts">
       <div class="thought-wrap">
-        ${THOUGHTS.map(t=>`<div class="thought">${esc(t)}</div>`).join('')}
+        ${THOUGHTS.map((t,i)=>{ const s=THOUGHT_STYLE[i%THOUGHT_STYLE.length];
+          return `<div class="thought" style="font-size:${s.fs}px;border-radius:${s.br};
+            background:${s.bg};max-width:${s.max}px;padding:${Math.round(s.fs*0.85)}px ${Math.round(s.fs*1.2)}px">${esc(t)}</div>`;
+        }).join('')}
       </div>
       <div class="mid">
         <img class="mid-art" src="assets/dragon-thinking.png" alt="">
         <h2>이런 생각, 한 번쯤 해보셨죠?</h2>
         <p>익명이니까 더 편하게, 여러분의 생각을 들려주세요.</p>
-        <button class="btn primary" data-go-to="opinion">익명으로 의견 보내기</button>
+        <button class="btn" data-go-to="opinion">익명으로 의견 보내기</button>
       </div>
-    </section>`;
+    </div>
+  </section>
 
-  const works = DB.intro().teams || [];
-  const workSec = works.length ? `
-    <section>
-      <div class="sec-head">
-        <div>
-          <span class="pill-label">우리가 하는 일</span>
-          <h2>새소리단은 이런 일을 합니다</h2>
-        </div>
-        <button class="btn" data-go-to="intro">소개 전체 보기 →</button>
+  <!-- 3. 한마디 -->
+  <section class="voices" style="margin-top:64px">
+    <div class="wrap-1180">
+      <div class="eyebrow">오늘도 무탈하신가요?</div>
+      <h2>새소리단이<br>당신의 <em>한마디</em>를 기다립니다</h2>
+      <div class="voice-grid">
+        <div class="voice-col l">${VOICES_L.map(v=>`<div class="voice">${esc(v)}</div>`).join('')}</div>
+        <div class="voice-mid"><img src="assets/bird-large.png" alt="새초롱이"></div>
+        <div class="voice-col r">${VOICES_R.map(v=>`<div class="voice">${esc(v)}</div>`).join('')}</div>
       </div>
-      <div class="work-grid">
-        ${works.map((w,i)=>{
-          const [bgc, fgc] = WORK_TINTS[i % WORK_TINTS.length];
-          return `<article class="work">
-            <div class="n" style="background:${bgc};color:${fgc}">${String(i+1).padStart(2,'0')}</div>
-            <h3>${esc(w.name)}</h3>
-            <p>${esc(w.desc||'')}</p>
-          </article>`;
-        }).join('')}
-      </div>
-    </section>` : '';
+    </div>
+  </section>
 
-  return hero
-    + stats
-    + thoughts
-    + workSec
-    + `<div class="grid c2">
-        <div class="card" style="margin:0">
-          <h2>📰 최근 소식</h2><p class="sub">새소리단 활동 안내</p>
-          ${news.length ? news.map(p=>`<div class="post-row" data-open-post="${p.id}">
-              <div class="pr-top"><h3>${esc(p.title)}</h3><span class="hint">${fmtDay(p.at)}</span></div>
-              <p class="excerpt">${esc(excerpt(p.body,70))}</p></div>`).join('')
-            : `<div class="empty">등록된 소식이 없습니다.</div>`}
-        </div>
-        <div class="card" style="margin:0">
-          <h2>📅 다가오는 일정</h2><p class="sub">등록된 행사 일정</p>
-          ${upcoming.length ? upcoming.map(e=>`<div class="post-row" style="cursor:default">
-              <div class="pr-top"><h3>${esc(e.title)}</h3><span class="hint">${esc(e.date)}</span></div>
-              ${e.place?`<p class="excerpt">📍 ${esc(e.place)}</p>`:''}</div>`).join('')
-            : `<div class="empty">예정된 일정이 없습니다.</div>`}
-        </div>
+  <!-- 4. 우리가 하는 일 -->
+  ${works.length ? `<section class="wrap-1180" style="padding-top:64px">
+    <div class="sec-head">
+      <div><span class="pill-label">우리가 하는 일</span>
+        <h2>새소리단은 이런 일을 합니다</h2></div>
+      <button class="btn softpink" data-go-to="intro">소개 전체 보기 →</button>
+    </div>
+    <div class="work-grid">
+      ${works.map((w,i)=>{ const [bgc,fgc]=WORK_TINTS[i%WORK_TINTS.length];
+        return `<article class="work">
+          <div class="n" style="background:${bgc};color:${fgc}">${String(i+1).padStart(2,'0')}</div>
+          <h3>${esc(w.name)}</h3><p>${esc(w.desc||'')}</p></article>`; }).join('')}
+    </div></section>` : ''}
+
+  <!-- 5. 연혁 -->
+  <section class="wrap-1180" style="padding-top:64px">
+    <div class="histcard">
+      <img src="assets/bird.png" alt="">
+      <div>
+        <span class="pill-label">연혁</span>
+        <h2>2019년부터 지금까지</h2>
+        <p class="sub">새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로 이어지고 있습니다.</p>
+        ${HISTORY_ERAS.map(e=>`<div class="hist-row">
+          <div class="cap">${esc(e.cap)}${e.badge?`<span class="tag">${esc(e.badge)}</span>`:''}</div>
+          <div class="yrs">${e.years.map(y=>`<span class="yr ${e.tone}${y===String(new Date().getFullYear())?' now':''}">${y}</span>`).join('')}</div>
+        </div>`).join('')}
       </div>
-      <div class="card"><h2>바로가기</h2><p class="sub">권한에 따라 이용 가능한 메뉴입니다.</p>
-        <div class="row-actions">
-          ${MENUS.filter(m=>m.roles.includes(r) && !['home','intro-edit'].includes(m.id))
-                 .map(m=>`<button class="btn" onclick="go('${m.id}')">${m.icon} ${esc(m.label)}</button>`).join('')}
-        </div>
-      </div>`;
+    </div>
+  </section>
+
+  <!-- 6. 소식 -->
+  <section class="wrap-1180" style="padding-top:64px">
+    <div class="sec-head">
+      <div><span class="pill-label">소식</span><h2>새소리단 소식</h2></div>
+      <button class="btn softpink" data-go-to="news">소식 더 보기 →</button>
+    </div>
+    ${news.length ? `<div class="news-grid">${news.map(p=>{
+      const img=firstImg(p.atts);
+      return `<article class="news-card" data-open-post="${p.id}">
+        <div class="ph">${img?`<img src="${esc(img.data)}" alt="" loading="lazy">`:'📰'}</div>
+        <div class="bd"><span class="tag brand">활동 소식</span>
+          <h3>${esc(p.title)}</h3>
+          <p>${esc(excerpt(p.body,60))}</p>
+          <div class="dt">${fmtDay(p.at)}</div></div></article>`;
+    }).join('')}</div>` : `<div class="card"><div class="empty">아직 등록된 소식이 없습니다.</div></div>`}
+  </section>
+
+  <!-- 7. 일정 -->
+  <section class="wrap-1180" style="padding-top:64px">
+    <div class="schedcard">
+      <span class="pill-label">일정</span>
+      <h2>새소리단 활동일이 궁금하다면?</h2>
+      ${upcoming.length ? upcoming.map(e=>`<div class="sched-row">
+        <span class="d">${esc(e.date.slice(5).replace('-','.'))}</span>
+        <div><b>${esc(e.title)}</b><span>${esc(e.place||'장소 미정')}${e.time?' · '+esc(e.time):''}</span></div>
+      </div>`).join('') : `<div class="empty">예정된 일정이 없습니다.</div>`}
+      <button class="linkmore" data-go-to="calendar">일정 전체 보기 →</button>
+    </div>
+  </section>
+
+  <!-- 8. 게임 -->
+  <section class="wrap-1180" style="padding:64px 0 72px">
+    <div class="gamebanner">
+      <span class="pill-label">게임</span>
+      <h2>아..일하기 싫다.<br>심심풀이<br>게임이나 해볼까?</h2>
+      <button class="btn primary" data-go-to="game">게임 열기</button>
+    </div>
+  </section>
+  </div>`;
 };
+
 BIND.home = () => {
   $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
   $$('#main [data-go-to]').forEach(el => el.addEventListener('click', ()=> go(el.dataset.goTo)));
@@ -1670,6 +1819,8 @@ document.addEventListener('keydown', e=>{
 function closeSide(){ $('#navArea').classList.remove('open'); $('#scrim').classList.remove('open'); }
 $('#menuToggle').addEventListener('click', e=>{ e.stopPropagation(); $('#navArea').classList.toggle('open'); $('#scrim').classList.toggle('open'); });
 $('#brandBtn').addEventListener('click', ()=>{ go('home'); closeSide(); });
+$$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
+$$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
 $('#scrim').addEventListener('click', closeSide);
 $('#logoutBtn').addEventListener('click', ()=>{
   LS.del('sm_session'); SESSION = null;

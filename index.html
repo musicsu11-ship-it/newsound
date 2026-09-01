@@ -67,19 +67,25 @@
   .navdrop-panel .grp{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
     color:var(--muted);padding:9px 14px 4px;font-weight:800}
 
-  /* 푸터 */
-  .sitefoot{border-top:1px solid var(--border);background:var(--surface);margin-top:60px}
-  .foot-in{max-width:1180px;margin:0 auto;padding:22px clamp(16px,4vw,48px);
-    display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-  .foot-brand{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}
-  .foot-brand img{height:26px;width:auto}
-  .foot-brand b{display:block;font-size:14px;font-weight:900}
-  .foot-brand span{font-size:12px;color:var(--muted)}
-  .visits{display:flex;gap:18px;padding:8px 14px;border:1px solid var(--border);
-    border-radius:14px;background:var(--surface-2)}
-  .visits div{text-align:center}
-  .visits b{display:block;font-size:16px;font-variant-numeric:tabular-nums;line-height:1.25;font-weight:900}
-  .visits span{font-size:11px;color:var(--muted)}
+  /* 푸터 (시안: 네이비 띠) */
+  .sitefoot{background:#16225c;color:#fff;margin-top:0}
+  .foot-in{max-width:1180px;margin:0 auto;padding:56px clamp(16px,4vw,48px) 34px}
+  .foot-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+    padding-bottom:26px}
+  .foot-top h2{font-size:clamp(21px,2.6vw,28px);font-weight:900;letter-spacing:-.03em;margin:0;line-height:1.35}
+  .foot-top h2 em{font-style:normal;color:var(--accent)}
+  .foot-links{display:flex;gap:22px;flex-wrap:wrap}
+  .foot-links button{border:0;background:transparent;color:#fff;font-family:inherit;font-size:14px;
+    font-weight:800;cursor:pointer;padding:0}
+  .foot-links button:hover{color:var(--accent)}
+  .foot-meta{border-top:1px solid rgba(255,255,255,.14);padding-top:20px;display:flex;
+    align-items:center;gap:18px;flex-wrap:wrap;font-size:12.5px;color:rgba(255,255,255,.62)}
+  .foot-meta b{font-weight:800;color:rgba(255,255,255,.86)}
+  .visits{display:flex;gap:16px;margin-left:auto}
+  .visits div{text-align:right}
+  .visits b{display:block;font-size:15px;font-variant-numeric:tabular-nums;line-height:1.25;
+    font-weight:900;color:#fff}
+  .visits span{font-size:11px;color:rgba(255,255,255,.55)}
 
   .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:10px 18px;border-radius:999px;
     cursor:pointer;font-size:14px;font-weight:800;transition:transform .12s, box-shadow .12s, border-color .12s}
@@ -347,22 +353,11 @@
     cursor:pointer;padding:14px 0 0;font-family:inherit}
 
   /* 8. 게임 배너 */
-  .gamebanner{border-radius:32px;background:linear-gradient(160deg,#ffe1ec,#e9e5ff);padding:46px 44px;
-    display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center}
-  .gamebanner h2{font-size:clamp(26px,3.6vw,42px);font-weight:900;letter-spacing:-.04em;line-height:1.25;margin:0 0 22px}
-  .gamebanner img{width:clamp(120px,16vw,200px);animation:bob 6s ease-in-out infinite}
+  .gamebanner{border-radius:26px;background:linear-gradient(160deg,#ffe1ec,#e9e5ff);padding:44px 40px 48px}
+  .gamebanner h2{font-size:clamp(26px,3.6vw,42px);font-weight:900;letter-spacing:-.04em;
+    line-height:1.28;margin:0 0 26px;color:var(--text)}
 
-  /* 홈 푸터 띠 */
-  .home-cta{background:var(--text);color:#fff;padding:44px 0;margin-top:0}
-  .home-cta .wrap-1180{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
-  .home-cta h2{font-size:clamp(22px,2.8vw,30px);font-weight:900;letter-spacing:-.03em;margin:0;line-height:1.35}
-  .home-cta h2 em{font-style:normal;color:var(--accent)}
-  .home-cta nav{display:flex;gap:20px;flex-wrap:wrap}
-  .home-cta nav button{border:0;background:transparent;color:#fff;font-family:inherit;font-size:14px;
-    font-weight:800;cursor:pointer;opacity:.85}
-  .home-cta nav button:hover{opacity:1;color:var(--accent)}
-
-  @media (prefers-reduced-motion:reduce){ .hero-art img,.voice-mid img,.gamebanner img{animation:none} }
+  @media (prefers-reduced-motion:reduce){ .hero-art img,.voice-mid img{animation:none} }
 
   .topbar{display:none}
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
@@ -478,14 +473,22 @@
 
   <footer class="sitefoot">
     <div class="foot-in">
-      <div class="foot-brand">
-        <img src="assets/logo-molab.jpg" alt="">
-        <div><b>새소리단</b><span>새내기 소통 리더단</span></div>
+      <div class="foot-top">
+        <h2>작은 목소리가<br>일하는 방식을 <em>바꿉니다</em></h2>
+        <div class="foot-links">
+          <button data-foot="intro">소개</button>
+          <button data-foot="news">소식</button>
+          <button data-foot="opinion">의견함</button>
+          <button id="adminBtn" style="display:none">관리자 콘솔</button>
+          <button id="refreshBtn">새로고침</button>
+        </div>
       </div>
-      <div class="visits" id="visitBox" style="display:none"></div>
-      <div class="row-actions" style="margin:0">
-        <button class="btn ghost sm" id="adminBtn" style="display:none">🛠 관리자 콘솔</button>
-        <button class="btn ghost sm" id="refreshBtn">새로고침</button>
+      <div class="foot-meta">
+        <b>새소리단 활동 플랫폼</b>
+        <span>대표문의 000-0000-0000 · 평일 09:00–18:00</span>
+        <span>○○시 ○○구 ○○로 000, 구청 3층 혁신행정담당관</span>
+        <span>© 2026 새소리단</span>
+        <div class="visits" id="visitBox" style="display:none"></div>
       </div>
     </div>
   </footer>
@@ -1160,27 +1163,11 @@ VIEWS.home = () => {
   </section>
 
   <!-- 8. 게임 -->
-  <section class="wrap-1180" style="padding-top:64px;padding-bottom:64px">
+  <section class="wrap-1180" style="padding:64px 0 72px">
     <div class="gamebanner">
-      <div>
-        <span class="pill-label">게임</span>
-        <h2>아..일하기 싫다.<br>심심풀이<br>게임이나 해볼까?</h2>
-        <button class="btn primary" data-go-to="game">게임하러 가기 →</button>
-      </div>
-      <img src="assets/bird.png" alt="">
-    </div>
-  </section>
-
-  <!-- 9. 마무리 띠 -->
-  <section class="home-cta">
-    <div class="wrap-1180">
-      <h2>작은 목소리가<br>일하는 방식을 <em>바꿉니다</em></h2>
-      <nav>
-        <button data-go-to="intro">소개</button>
-        <button data-go-to="news">소식</button>
-        <button data-go-to="opinion">의견함</button>
-        <button data-go-to="calendar">일정</button>
-      </nav>
+      <span class="pill-label">게임</span>
+      <h2>아..일하기 싫다.<br>심심풀이<br>게임이나 해볼까?</h2>
+      <button class="btn primary" data-go-to="game">게임 열기</button>
     </div>
   </section>
   </div>`;
@@ -1972,6 +1959,8 @@ $('#scrim').addEventListener('click', closeSide);
 $('#brandBtn').addEventListener('click', ()=>{ go('home'); closeSide(); });
 $('#refreshBtn').addEventListener('click', async ()=>{ await refresh(); go(CURRENT); toast('최신 내용을 불러왔습니다'); });
 $('#adminBtn').addEventListener('click', ()=> window.open('admin.html','_blank'));
+$$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
+$$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
 $('#logoutBtn').addEventListener('click', async ()=>{
   if(channel){ sb.removeChannel(channel); channel = null; }
   await sb.auth.signOut();
