@@ -577,3 +577,42 @@ exception when duplicate_object then null; end $$;
 drop policy if exists opinions_update on public.opinions;
 create policy opinions_update on public.opinions for update
   using ( public.is_officer() ) with check ( public.is_officer() );
+
+-- ---------------------------------------------------------------------------
+--  조회수는 혁신행정담당관·운영 관리자만 볼 수 있습니다.
+--  집계는 계속 쌓되(track_visit), 숫자를 읽는 것은 담당관 이상으로 제한합니다.
+-- ---------------------------------------------------------------------------
+create or replace function public.visit_stats()
+returns json language sql stable security definer set search_path = public as $$
+  select case when public.is_officer() then
+    json_build_object(
+      'today',      (select count(*) from public.visit_daily
+                      where day = (now() at time zone 'Asia/Seoul')::date),
+      'today_hits', (select coalesce(sum(hits), 0) from public.visit_daily
+                      where day = (now() at time zone 'Asia/Seoul')::date),
+      'week',       (select count(distinct ip_hash) from public.visit_daily
+                      where day > (now() at time zone 'Asia/Seoul')::date - 7),
+      'week_hits',  (select coalesce(sum(hits), 0) from public.visit_daily
+                      where day > (now() at time zone 'Asia/Seoul')::date - 7),
+      'month',      (select count(distinct ip_hash) from public.visit_daily
+                      where day > (now() at time zone 'Asia/Seoul')::date - 30),
+      'total',      (select count(*) from public.ip_alias),
+      'hits',       (select coalesce(sum(visits), 0) from public.ip_alias)
+    )
+  else null end
+$$;
+
+-- 추이 그래프도 담당관 이상만
+create or replace function public.visit_series(days int default 14)
+returns table(d date, uniques bigint, hits bigint)
+language sql stable security definer set search_path = public as $$
+  select g::date, count(v.ip_hash), coalesce(sum(v.hits), 0)
+    from generate_series(
+           (now() at time zone 'Asia/Seoul')::date - (greatest(days,1) - 1),
+           (now() at time zone 'Asia/Seoul')::date,
+           interval '1 day') g
+    left join public.visit_daily v on v.day = g::date
+   where public.is_officer()
+   group by g
+   order by g
+$$;

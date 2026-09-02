@@ -576,10 +576,7 @@
         </div>
       </div>
       <div class="foot-meta">
-        <b>새소리단 활동 플랫폼</b>
-        <span>대표문의 000-0000-0000 · 평일 09:00–18:00</span>
-        <span>○○시 ○○구 ○○로 000, 구청 3층 혁신행정담당관</span>
-        <span>© 2026 새소리단</span>
+        <span>© 2026 새소리단 · 고용노동부 새내기 소통 리더단</span>
         <div class="visits" id="visitBox" style="display:none"></div>
       </div>
     </div>
@@ -882,16 +879,18 @@ function paintWho(){
   // 담당관·관리자에게만 관리자 콘솔 버튼을 보여줍니다
   $('#adminBtn').style.display = isOfficer() ? 'block' : 'none';
 
+  /* 조회수는 혁신행정담당관·운영 관리자에게만 보입니다.
+     서버(visit_stats)에서도 그 외에는 숫자를 내주지 않습니다. */
   const v = S.visits, box = $('#visitBox');
-  if(v){
+  if(v && isOfficer()){
     box.style.display = 'flex';
     const n = x => (Number(x)||0).toLocaleString('ko-KR');
-    // 조회수는 같은 IP가 다시 들어와도 계속 올라갑니다
     box.innerHTML = `<div><b>${n(v.today_hits ?? v.today)}</b><span>오늘 조회</span></div>
                      <div><b>${n(v.hits ?? v.total)}</b><span>전체 조회</span></div>`;
     box.title = `오늘 방문자 ${n(v.today)}명 · 전체 방문자 ${n(v.total)}명 (서로 다른 IP 기준)`;
   }else{
     box.style.display = 'none';
+    box.innerHTML = '';
   }
 }
 function showApp(){
