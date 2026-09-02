@@ -352,10 +352,17 @@
   .linkmore{border:0;background:transparent;color:var(--brand);font-weight:800;font-size:14px;
     cursor:pointer;padding:14px 0 0;font-family:inherit}
 
-  /* 8. 게임 배너 */
-  .gamebanner{border-radius:26px;background:linear-gradient(160deg,#ffe1ec,#e9e5ff);padding:44px 40px 48px}
-  .gamebanner h2{font-size:clamp(26px,3.6vw,42px);font-weight:900;letter-spacing:-.04em;
-    line-height:1.28;margin:0 0 26px;color:var(--text)}
+  /* 8. 게임 배너 — 일러스트로 꽉 채웁니다 */
+  .gamebanner{display:block;width:100%;padding:0;border:0;background:#f9d9e4;border-radius:26px;
+    overflow:hidden;cursor:pointer;position:relative;line-height:0;
+    box-shadow:var(--shadow);transition:transform .15s, box-shadow .15s}
+  .gamebanner:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+  /* 그림이 배너를 꽉 채우되 말풍선·캐릭터가 잘리지 않도록 위쪽을 살려 자릅니다 */
+  .gamebanner img{display:block;width:100%;height:clamp(260px,34vw,470px);
+    object-fit:cover;object-position:center 30%}
+  .gb-cta{position:absolute;right:22px;bottom:20px;background:var(--brand);color:#fff;
+    font-family:inherit;font-size:14.5px;font-weight:800;padding:11px 20px;border-radius:999px;
+    line-height:1;box-shadow:0 8px 22px rgba(214,30,92,.3)}
 
   @media (prefers-reduced-motion:reduce){ .hero-art img,.voice-mid img{animation:none} }
 
@@ -530,8 +537,8 @@
     .histcard{grid-template-columns:1fr;padding:26px 22px;text-align:center}
     .histcard>img{margin:0 auto;width:150px}
     .yrs,.hist-row .cap{justify-content:center}
-    .gamebanner{grid-template-columns:1fr;padding:32px 24px;text-align:center}
-    .gamebanner img{margin:0 auto}
+    .gamebanner{border-radius:20px}
+    .gb-cta{right:12px;bottom:12px;font-size:12.5px;padding:9px 15px}
     .schedcard{padding:22px 20px}
     .cal .day{min-height:64px}
     .cal .ev{font-size:10px}
@@ -1284,11 +1291,11 @@ VIEWS.home = () => {
 
   <!-- 8. 게임 -->
   <section class="wrap-1180" style="padding:64px 0 72px">
-    <div class="gamebanner">
-      <span class="pill-label">게임</span>
-      <h2>아..일하기 싫다.<br>심심풀이<br>게임이나 해볼까?</h2>
-      <button class="btn primary" data-go-to="game">게임 열기</button>
-    </div>
+    <button class="gamebanner" data-go-to="game" aria-label="게임 열기">
+      <img src="assets/game-banner.png"
+           alt="고드래곤과 새초롱이가 책상에서 “일하기 싫다…”, “심심풀이 게임이나 해볼까?” 하고 말하는 그림">
+      <span class="gb-cta">게임 열기 →</span>
+    </button>
   </section>
   </div>`;
 };
