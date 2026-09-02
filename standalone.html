@@ -499,7 +499,13 @@
     .thoughts{padding:26px 18px 32px;border-radius:22px}
     .thought{font-size:15px !important;padding:14px 18px !important}
     .thoughts .mid{padding-top:90px}
-    .work-grid,.news-grid{grid-template-columns:1fr}
+    /* 활동 영역은 모바일에서도 2행 3열을 유지합니다 */
+    .work-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+    .work{padding:14px 12px;border-radius:16px}
+    .work .n{width:38px;height:38px;border-radius:11px;font-size:14px;margin-bottom:9px}
+    .work h3{font-size:15px;margin:0 0 6px;letter-spacing:-.04em}
+    .work p{font-size:12px;line-height:1.55}
+    .news-grid{grid-template-columns:1fr}
     .voice-grid{grid-template-columns:1fr;gap:16px}
     .voice-col.l,.voice-col.r{align-items:stretch}
     .voice-mid{order:-1;display:flex;justify-content:center}
