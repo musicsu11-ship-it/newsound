@@ -369,6 +369,115 @@
 
   @media (prefers-reduced-motion:reduce){ .hero-art img,.voice-mid img{animation:none} }
 
+  /* ════════════ 속화면 공통 (디자인 시안) ════════════ */
+  .crumb{font-size:13px;color:#a2a9c6;margin-bottom:18px}
+  .pg-title{font-size:clamp(28px,4vw,40px);font-weight:900;letter-spacing:-.03em;margin:0 0 8px}
+  .pg-sub{margin:0 0 26px;color:var(--muted);font-size:14.5px}
+  .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+  /* 소개 — 팀 밴드 */
+  .teamband{padding:44px clamp(20px,4vw,54px);display:grid;grid-template-columns:auto 1fr;
+    gap:clamp(24px,4vw,56px);align-items:center}
+  .teamband:nth-child(even){grid-template-columns:1fr auto;text-align:right}
+  .teamband:nth-child(even) .tb-art{order:2}
+  .tb-art{width:clamp(150px,18vw,215px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.62);
+    border:2px dashed rgba(22,34,92,.16);display:grid;place-items:center;text-align:center;
+    color:rgba(22,34,92,.4);font-size:12.5px;font-weight:700;overflow:hidden}
+  .tb-art img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+  .tb-no{font-size:12.5px;font-weight:900;letter-spacing:.14em;color:var(--brand);margin-bottom:8px}
+  .teamband h3{font-size:clamp(24px,3.2vw,34px);font-weight:900;letter-spacing:-.03em;margin:0 0 12px}
+  .teamband .lead{font-size:clamp(15px,1.7vw,19px);font-weight:800;margin:0 0 8px;color:var(--text)}
+  .teamband p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.7;word-break:keep-all}
+
+
+  /* 소식 — 추천 + 목록 */
+  .news-feat{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-items:start}
+  .feat-card{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:24px;
+    overflow:hidden;box-shadow:var(--shadow);cursor:pointer}
+  .feat-card .ph{aspect-ratio:16/10;background:linear-gradient(150deg,#f3f2fd,#fff9ec);
+    display:grid;place-items:center;color:#a2a9c6;font-size:13px}
+  .feat-card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .feat-card .bd{padding:22px 26px 26px}
+  .feat-card h3{margin:10px 0 8px;font-size:clamp(19px,2.2vw,26px);font-weight:900;letter-spacing:-.03em}
+  .feat-card p{margin:0 0 12px;font-size:14px;color:var(--muted)}
+  .side-list{display:flex;flex-direction:column;gap:14px}
+  .side-item{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:20px;
+    box-shadow:var(--shadow);display:grid;grid-template-columns:auto 1fr;gap:16px;padding:14px;
+    align-items:center;cursor:pointer}
+  .side-item .ph{width:88px;height:66px;border-radius:14px;background:linear-gradient(150deg,#f3f2fd,#fff9ec);
+    display:grid;place-items:center;color:#a2a9c6;font-size:11px;overflow:hidden;flex:none}
+  .side-item .ph img{width:100%;height:100%;object-fit:cover}
+  .side-item h4{margin:6px 0 4px;font-size:15.5px;font-weight:900;letter-spacing:-.02em;line-height:1.35}
+  .side-item .dt{font-size:12px;color:var(--muted)}
+
+  /* 의견함 — 표 */
+  .filter-pills{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:20px}
+  .fpill{border:0;background:var(--surface-2);color:var(--muted);font-family:inherit;font-size:13.5px;
+    font-weight:800;padding:9px 18px;border-radius:999px;cursor:pointer}
+  .fpill.on{background:var(--brand);color:#fff}
+  .op-table{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:22px;
+    box-shadow:var(--shadow);overflow:hidden}
+  .op-table table{font-size:13.5px}
+  .op-table th{background:var(--surface-2);padding:14px 18px;font-size:12px;text-transform:none;font-weight:800}
+  .op-table td{padding:16px 18px}
+  .op-table tbody tr{cursor:pointer}
+  .op-table .no{color:var(--muted);font-weight:800;width:56px}
+  .op-table .subj b{display:block;font-size:15px;font-weight:800;margin-bottom:4px}
+  .op-table .subj span{font-size:12px;color:var(--muted)}
+  .st{display:inline-block;padding:5px 13px;border-radius:999px;font-size:12px;font-weight:800}
+  .st.접수{background:var(--surface-2);color:var(--muted)}
+  .st.확인중{background:#e9e5ff;color:#4a3ec8}
+  .st.제안완료{background:var(--brand-weak);color:var(--brand)}
+  .st.반영완료{background:var(--brand);color:#fff}
+
+  /* 일정 — 캘린더 + 사이드 */
+  .cal-layout{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start}
+  .cal-panel{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:24px;
+    box-shadow:var(--shadow);padding:24px 26px}
+  .cal-side{display:flex;flex-direction:column;gap:16px}
+  .attend{background:linear-gradient(160deg,#ffe1ec,#e9e5ff);border-radius:24px;padding:26px;text-align:center}
+  .attend b{display:block;font-size:44px;font-weight:900;letter-spacing:-.04em;margin:8px 0}
+  .attend p{margin:0 0 14px;font-size:13px;color:var(--muted);line-height:1.6}
+  .attend img{width:clamp(110px,14vw,150px);animation:floaty 5.6s ease-in-out infinite}
+
+  /* 공간 — 사진 카드 */
+  .space-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .space-card{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:22px;
+    overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;cursor:pointer}
+  .space-card .ph{aspect-ratio:4/3;display:grid;place-items:center;color:#a2a9c6;font-size:12.5px}
+  .space-card .ph img{width:100%;height:100%;object-fit:cover}
+  .space-card .bd{padding:16px 20px 18px;flex:1;display:flex;flex-direction:column}
+  .space-card p{margin:0 0 12px;font-size:14.5px;font-weight:800;line-height:1.55;word-break:keep-all;flex:1}
+  .space-card .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .loginbar{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:20px;
+    box-shadow:var(--shadow);padding:18px 22px;display:flex;align-items:center;gap:16px;
+    flex-wrap:wrap;margin-bottom:22px;font-size:14px;font-weight:700}
+
+  /* 게임 */
+  .game-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
+  .quizcard{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:24px;
+    box-shadow:var(--shadow);padding:26px 28px}
+  .quizcard h3{margin:12px 0 20px;font-size:clamp(16px,1.9vw,20px);font-weight:900;line-height:1.5;word-break:keep-all}
+  .choice{display:block;width:100%;text-align:left;border:1px solid var(--border);background:var(--surface);
+    color:var(--text);font-family:inherit;font-size:14.5px;font-weight:700;padding:14px 18px;
+    border-radius:14px;cursor:pointer;margin-bottom:10px}
+  .choice:hover{border-color:var(--brand);background:var(--brand-weak)}
+  .choice.ok{border-color:var(--ok);background:var(--ok-weak);color:var(--ok)}
+  .choice.no{border-color:var(--danger);background:var(--danger-weak);color:var(--danger)}
+  .quiz-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px}
+  .gamepanel{background:linear-gradient(160deg,#ffe1ec,#e9e5ff);border-radius:24px;padding:26px;text-align:center}
+  .gamepanel .bars{display:flex;gap:8px;justify-content:center;margin:14px 0 18px}
+  .gamepanel .bars i{width:44px;height:7px;border-radius:999px;background:rgba(255,255,255,.6)}
+  .gamepanel .bars i.on{background:var(--brand)}
+  .gamepanel img{width:clamp(130px,18vw,210px)}
+
+  @media (max-width:860px){
+    .teamband,.teamband:nth-child(even){grid-template-columns:1fr;text-align:left;gap:20px;padding:30px 22px}
+    .teamband:nth-child(even) .tb-art{order:0}
+    .news-feat,.cal-layout,.game-layout{grid-template-columns:1fr}
+    .space-grid{grid-template-columns:1fr}
+  }
+
   .topbar{display:none}
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
   @media (max-width:960px){
@@ -956,33 +1065,64 @@ BIND.home = () => {
 /* ============================================================
    2) 새소리단 소개
    ============================================================ */
+const TEAM_BANDS = [
+  { bg:'#ffe1ec', lead:'일하기 좋은 공간을 함께 만듭니다',   img:'assets/team-01.jpg' },
+  { bg:'#e9e5ff', lead:'굳어진 관행부터 하나씩 걷어냅니다', img:'assets/team-02.jpg' },
+  { bg:'#d9f5ef', lead:'서로의 말이 통하는 조직을 만듭니다', img:'assets/team-03.jpg' },
+  { bg:'#fff2d9', lead:'쉼과 일이 함께 가는 방식을 찾습니다', img:'assets/team-04.png' },
+  { bg:'#dfeaff', lead:'일을 줄이는 기술을 먼저 써봅니다',   img:'assets/team-05.png' },
+  { bg:'#ffe6ec', lead:'잘한 일은 널리 알립니다',           img:'assets/team-06.png' },
+];
+
 VIEWS.intro = () => {
   const it = DB.intro();
-  const editBtn = SESSION.role==='admin' ? `<button class="btn" onclick="go('intro-edit')">✏️ 내용 편집</button>` : '';
-  return pageHead('새소리단 소개','새소리단의 역할과 걸어온 길, 그리고 6개 팀을 소개합니다.', editBtn)
-  + `<div class="card"><h2>우리는 이런 일을 합니다</h2>
-      <p class="sub">새소리단의 존재 이유</p>
-      <div style="white-space:pre-wrap;font-size:14.5px">${esc(it.mission)}</div>
-    </div>
-    <div class="card"><h2>주요 역할</h2><p class="sub">단원이 수행하는 활동</p>
-      ${it.roles.length ? `<ul style="padding-left:18px;margin:0;line-height:1.9">
-        ${it.roles.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>` : `<div class="empty">등록된 역할이 없습니다.</div>`}
-    </div>
-    <div class="card"><h2>연혁</h2><p class="sub">새소리단이 걸어온 길</p>
-      ${it.history.length ? `<ul class="timeline">
-        ${it.history.slice().sort((a,b)=>String(b.year).localeCompare(String(a.year)))
-            .map(h=>`<li><span class="yr">${esc(h.year)}</span><span class="tx">${esc(h.text)}</span></li>`).join('')}
-      </ul>` : `<div class="empty">등록된 연혁이 없습니다.</div>`}
-    </div>
-    <div class="card"><h2>팀 소개</h2><p class="sub">분야별 ${it.teams.length}개 팀이 활동합니다.</p>
-      <div class="team-grid">
-        ${it.teams.map(t=>`<div class="team">
+  const teams = it.teams || [];
+  const editBtn = SESSION.role==="admin" ? `<button class="btn softpink" data-go-to="intro-edit">✏️ 내용 편집</button>` : '';
+
+  return `<div class="crumb">홈 · 소개</div>
+  <div class="pg-head">
+    <div>
+      <h1 class="pg-title">새소리단 소개</h1>
+      <p class="pg-sub">새내기 혁신참견단에서 시작해 새소리단(새내기소통리더단)으로 이어지는 활동입니다.</p>
+    </div>${editBtn}
+  </div>
+
+  <!-- 팀 밴드 -->
+  <div style="border-radius:28px;overflow:hidden;margin-bottom:34px">
+    ${teams.map((t,i)=>{ const b = TEAM_BANDS[i % TEAM_BANDS.length];
+      return `<section class="teamband" style="background:${b.bg}">
+        <div class="tb-art">${b.img
+          ? `<img src="${b.img}" alt="${esc(t.name)} 팀 일러스트" loading="lazy">`
+          : esc(t.name)+' 이미지'}</div>
+        <div>
+          <div class="tb-no">TEAM ${String(i+1).padStart(2,'0')}</div>
           <h3>${esc(t.name)}</h3>
-          <div class="lead">${esc(t.lead||'')}</div>
-          <p>${esc(t.desc||'')}</p></div>`).join('')}
+          <p class="lead">${esc(t.lead || b.lead)}</p>
+          <p>${esc(t.desc||'')}</p>
+        </div>
+      </section>`; }).join('')}
+  </div>
+
+  <!-- 연혁 -->
+  <section style="padding-top:34px">
+    <div class="histcard">
+      <img src="assets/bird.png" alt="">
+      <div>
+        <span class="pill-label">연혁</span>
+        <h2>2019년부터 지금까지</h2>
+        <p class="sub">새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로 이어지고 있습니다.</p>
+        ${HISTORY_ERAS.map(e=>`<div class="hist-row">
+          <div class="cap">${esc(e.cap)}${e.badge?`<span class="tag">${esc(e.badge)}</span>`:''}</div>
+          <div class="yrs">${e.years.map(y=>`<span class="yr ${e.tone}${y===String(new Date().getFullYear())?' now':''}">${y}</span>`).join('')}</div>
+        </div>`).join('')}
       </div>
-    </div>`;
+    </div>
+  </section>`;
 };
+BIND.intro = () => {
+  $$('#main [data-go-to]').forEach(el => el.addEventListener('click', ()=> go(el.dataset.goTo)));
+};
+
 
 /* ---------- 소개 편집 (관리자) ---------- */
 VIEWS['intro-edit'] = () => {
