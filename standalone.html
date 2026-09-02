@@ -338,7 +338,8 @@
   .news-card .dt{font-size:12.5px;color:var(--muted)}
 
   /* 7·8. 일정 캘린더 + 게임 배너 — 같은 폭으로 위아래 배치 */
-  .home-stack{display:flex;flex-direction:column;gap:26px;max-width:900px;margin:0 auto}
+  /* 캘린더(왼쪽) + 게임 배너(오른쪽) 나란히 */
+  .home-stack{display:grid;grid-template-columns:1.15fr 1fr;gap:22px;align-items:start}
   .schedcard{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:28px;
     box-shadow:var(--shadow);padding:30px 34px}
   .schedcard h2{font-size:clamp(20px,2.4vw,26px);font-weight:900;letter-spacing:-.03em;margin:0}
@@ -510,6 +511,7 @@
     .thought{font-size:15px !important;padding:14px 18px !important}
     .thoughts .mid{padding-top:90px}
     /* 활동 영역은 모바일에서도 2행 3열을 유지합니다 */
+    .home-stack{grid-template-columns:1fr;gap:18px}
     .work-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
     .work{padding:14px 12px;border-radius:16px}
     .work .n{width:38px;height:38px;border-radius:11px;font-size:14px;margin-bottom:9px}
