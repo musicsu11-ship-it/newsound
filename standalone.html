@@ -320,9 +320,12 @@
   .history{background:transparent;padding:0;text-align:center}
   .history .lead-line{margin:12px auto 22px;max-width:44em;font-size:15.5px;
     color:var(--muted);line-height:1.8;word-break:keep-all}
-  /* 밝은 배경에서는 흰 판이 보이지 않아 그대로 얹힌 것처럼 보이고,
-     다크 모드에서는 그림이 묻히지 않도록 흰 판이 받쳐줍니다 */
-  .histfig{margin:0 auto;max-width:540px;line-height:0;background:#fff;border-radius:16px;overflow:hidden}
+  /* 배경을 지운 PNG라 그대로 얹힙니다. 다만 다크 모드에서는 그림 속
+     짙은 남색 글씨가 묻히므로 그때만 흰 판을 받칩니다. */
+  .histfig{margin:0 auto;max-width:540px;line-height:0;background:transparent}
+  @media (prefers-color-scheme:dark){
+    .histfig{background:#fff;border-radius:16px;overflow:hidden;padding:6px}
+  }
   .histfig img{display:block;width:100%;height:auto}
   .history figcaption{margin-top:16px;font-size:13px;color:var(--muted);line-height:1.6}
 
@@ -1039,7 +1042,7 @@ VIEWS.home = () => {
       <p class="lead-line">2019년 새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로
         이어지고 있습니다. 해마다 새로운 새내기들이 바통을 이어받아 조직문화를 바꿔왔습니다.</p>
       <figure class="histfig">
-        <img src="assets/history.jpg" alt="새소리단 연혁 — 2019년 새내기 혁신참견단 출범부터 2023년 새내기소통리더단(새소리단) 출범, 현재 8기 운영까지의 흐름">
+        <img src="assets/history.png" alt="새소리단 연혁 — 2019년 새내기 혁신참견단 출범부터 2023년 새내기소통리더단(새소리단) 출범, 현재 8기 운영까지의 흐름">
       </figure>
       <figcaption>※ 연혁은 지속적으로 이어지고 있습니다.</figcaption>
     </div>
@@ -1138,7 +1141,7 @@ VIEWS.intro = () => {
       <p class="lead-line">2019년 새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로
         이어지고 있습니다. 해마다 새로운 새내기들이 바통을 이어받아 조직문화를 바꿔왔습니다.</p>
       <figure class="histfig">
-        <img src="assets/history.jpg" alt="새소리단 연혁 — 2019년 새내기 혁신참견단 출범부터 2023년 새내기소통리더단(새소리단) 출범, 현재 8기 운영까지의 흐름">
+        <img src="assets/history.png" alt="새소리단 연혁 — 2019년 새내기 혁신참견단 출범부터 2023년 새내기소통리더단(새소리단) 출범, 현재 8기 운영까지의 흐름">
       </figure>
       <figcaption>※ 연혁은 지속적으로 이어지고 있습니다.</figcaption>
     </div>
