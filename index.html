@@ -358,8 +358,8 @@
     box-shadow:var(--shadow);transition:transform .15s, box-shadow .15s}
   .gamebanner:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
   /* 그림이 배너를 꽉 채우되 말풍선·캐릭터가 잘리지 않도록 위쪽을 살려 자릅니다 */
-  .gamebanner img{display:block;width:100%;height:clamp(260px,34vw,470px);
-    object-fit:cover;object-position:center 30%}
+  /* 원본을 자르지 않고 전체를 보여줍니다 */
+  .gamebanner img{display:block;width:100%;height:auto}
   .gb-cta{position:absolute;right:22px;bottom:20px;background:var(--brand);color:#fff;
     font-family:inherit;font-size:14.5px;font-weight:800;padding:11px 20px;border-radius:999px;
     line-height:1;box-shadow:0 8px 22px rgba(214,30,92,.3)}
