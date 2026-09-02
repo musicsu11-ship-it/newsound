@@ -847,7 +847,20 @@ VIEWS.home = () => {
     </div>
   </section>
 
-  <!-- 2. 이런 생각 -->
+  <!-- 2. 새소리단은 이런 일을 합니다 -->
+  ${works.length ? `<section class="wrap-1180" style="padding-top:64px">
+    <div class="sec-head">
+      <div><span class="pill-label">우리가 하는 일</span>
+        <h2>새소리단은 이런 일을 합니다</h2></div>
+      <button class="btn softpink" data-go-to="intro">소개 전체 보기 →</button>
+    </div>
+    <div class="work-grid">
+      ${works.map((w,i)=>{ const [bgc,fgc]=WORK_TINTS[i%WORK_TINTS.length];
+        return `<article class="work">
+          <div class="n" style="background:${bgc};color:${fgc}">${String(i+1).padStart(2,'0')}</div>
+          <h3>${esc(w.name)}</h3><p>${esc(w.desc||'')}</p></article>`; }).join('')}
+    </div></section>` : ''}
+  <!-- 3. 이런 생각 (익명 의견 제출) -->
   <section class="wrap-1180" style="padding-top:64px">
     <div class="thoughts">
       <div class="thought-wrap">
@@ -865,7 +878,7 @@ VIEWS.home = () => {
     </div>
   </section>
 
-  <!-- 3. 한마디 -->
+  <!-- 4. 한마디 -->
   <section class="voices" style="margin-top:64px">
     <div class="wrap-1180">
       <div class="eyebrow">오늘도 무탈하신가요?</div>
@@ -878,19 +891,6 @@ VIEWS.home = () => {
     </div>
   </section>
 
-  <!-- 4. 우리가 하는 일 -->
-  ${works.length ? `<section class="wrap-1180" style="padding-top:64px">
-    <div class="sec-head">
-      <div><span class="pill-label">우리가 하는 일</span>
-        <h2>새소리단은 이런 일을 합니다</h2></div>
-      <button class="btn softpink" data-go-to="intro">소개 전체 보기 →</button>
-    </div>
-    <div class="work-grid">
-      ${works.map((w,i)=>{ const [bgc,fgc]=WORK_TINTS[i%WORK_TINTS.length];
-        return `<article class="work">
-          <div class="n" style="background:${bgc};color:${fgc}">${String(i+1).padStart(2,'0')}</div>
-          <h3>${esc(w.name)}</h3><p>${esc(w.desc||'')}</p></article>`; }).join('')}
-    </div></section>` : ''}
 
   <!-- 5. 연혁 -->
   <section class="wrap-1180" style="padding-top:64px">
