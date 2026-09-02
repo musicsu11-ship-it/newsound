@@ -401,10 +401,6 @@
   .side-item .dt{font-size:12px;color:var(--muted)}
 
   /* 의견함 — 표 */
-  .filter-pills{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:20px}
-  .fpill{border:0;background:var(--surface-2);color:var(--muted);font-family:inherit;font-size:13.5px;
-    font-weight:800;padding:9px 18px;border-radius:999px;cursor:pointer}
-  .fpill.on{background:var(--brand);color:#fff}
   .op-table{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:22px;
     box-shadow:var(--shadow);overflow:hidden}
   .op-table table{font-size:13.5px}
@@ -1536,14 +1532,11 @@ function openPost(id){
 /* ============================================================================
    의견함
    ============================================================================ */
-const OP_STATES = ['전체','접수','확인중','제안완료','반영완료'];
 
 VIEWS.opinion = () => {
   const q = (Q.opinion||'').toLowerCase();
-  const f = Q.opState || '전체';
   const cmtsOf = id => S.comments.filter(c => c.opinion_id===id);
   let list = S.opinions.slice();
-  if(f !== '전체') list = list.filter(o => (o.status||'접수') === f);
   if(q) list = list.filter(o =>
     (o.body+' '+o.cat+' '+o.alias+' '+cmtsOf(o.id).map(c=>c.body).join(' ')).toLowerCase().includes(q));
 
@@ -1554,9 +1547,6 @@ VIEWS.opinion = () => {
     <button class="btn primary" id="opNew">의견 남기기</button>
   </div>
 
-  <div class="filter-pills">
-    ${OP_STATES.map(s=>`<button class="fpill ${s===f?'on':''}" data-opstate="${s}">${s}</button>`).join('')}
-  </div>
   ${searchBar('opinion','의견 내용·별칭·댓글로 검색')}
   ${q?`<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>`:''}
 
@@ -1573,7 +1563,7 @@ VIEWS.opinion = () => {
         <td><span class="st ${esc(st)}">${esc(st)}</span></td>
       </tr>`;
     }).join('')}${tableEnd}</div>`
-    : `<div class="card"><div class="empty">${q||f!=='전체'?'해당하는 의견이 없습니다.':'아직 접수된 의견이 없습니다.'}</div></div>`}`;
+    : `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 접수된 의견이 없습니다.'}</div></div>`}`;
 };
 
 /* 의견 상세 — 본문·댓글·삭제 */
@@ -1651,8 +1641,6 @@ function openOpinionForm(){
 BIND.opinion = () => {
   bindSearch('opinion');
   $('#opNew').addEventListener('click', openOpinionForm);
-  $$('#main [data-opstate]').forEach(b => b.addEventListener('click', ()=>{
-    Q.opState = b.dataset.opstate; go('opinion'); }));
   $$('#main [data-opopen]').forEach(tr => tr.addEventListener('click', ()=> openOpinion(tr.dataset.opopen)));
 };
 
