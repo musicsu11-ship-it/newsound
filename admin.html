@@ -832,6 +832,8 @@ BIND.exps = () => {
 };
 
 /* ---------- 의견함 ---------- */
+const OP_STATES = ['접수','확인중','제안완료','반영완료'];
+
 VIEWS.opinions = () => {
   const q=(Q.oq||'').toLowerCase();
   const cmts = id => S.comments.filter(c=>c.opinion_id===id);
@@ -841,16 +843,35 @@ VIEWS.opinions = () => {
   + `<div class="searchbar"><input id="oq" value="${esc(Q.oq||'')}" placeholder="내용·별칭 검색">
       <button class="btn" id="oqGo">검색</button>
       ${q?`<button class="btn ghost" id="oqClear">초기화</button>`:''}</div>
-    <div class="card">${list.length ? table(['분류','별칭','내용','댓글','접수','']) + list.map(o=>`<tr>
+    <div class="card">${list.length ? table(['분류','별칭','내용','댓글','접수','처리 상태','']) + list.map(o=>`<tr>
       <td><span class="tag brand">${esc(o.cat)}</span></td><td>${esc(o.alias)}</td>
-      <td style="max-width:380px">${esc(excerpt(o.body,120))}</td>
+      <td style="max-width:340px">${esc(excerpt(o.body,110))}</td>
       <td>${cmts(o.id).length}</td><td class="hint">${fmtDay(o.created_at)}</td>
+      <td><select data-opstatus="${o.id}" style="margin:0;min-width:104px">
+        ${OP_STATES.map(s=>`<option ${s===(o.status||'접수')?'selected':''}>${s}</option>`).join('')}
+      </select></td>
       <td><div class="row-actions" style="margin:0">
         <button class="btn sm" data-opview="${o.id}">보기</button>
         ${isAdmin()?`<button class="btn sm danger" data-opdel="${o.id}">삭제</button>`:''}</div></td></tr>`).join('')+tableEnd
-      : `<div class="empty">${q?'검색 결과가 없습니다.':'접수된 의견이 없습니다.'}</div>`}</div>`;
+      : `<div class="empty">${q?'검색 결과가 없습니다.':'접수된 의견이 없습니다.'}</div>`}</div>
+    <div class="notice">처리 상태를 바꾸면 홈페이지 의견함에 <b>즉시</b> 반영됩니다.
+      시민은 자기 의견이 어디까지 진행됐는지 여기서 정한 상태로 확인합니다.</div>`;
 };
 BIND.opinions = () => {
+  $$('#main [data-opstatus]').forEach(sel => sel.addEventListener('change', async ()=>{
+    busy(true);
+    const { error } = await sb.from('opinions')
+      .update({ status: sel.value }).eq('id', sel.dataset.opstatus);
+    busy(false);
+    if(error){
+      if(/column .*status/i.test(error.message||''))
+        toast('schema.sql 을 최신 내용으로 다시 실행해 주세요. (status 컬럼 없음)');
+      else failed('상태 변경', error);
+      return go('opinions');
+    }
+    await refresh(); toast(`처리 상태를 "${sel.value}"(으)로 바꿨습니다`); go('opinions');
+  }));
+
   const run=()=>{ Q.oq=$('#oq').value.trim(); go('opinions'); };
   $('#oqGo').addEventListener('click',run);
   $('#oq').addEventListener('keydown',e=>{ if(e.key==='Enter') run(); });
@@ -880,6 +901,7 @@ BIND.opinions = () => {
 /* ---------- 회원 ---------- */
 VIEWS.members = () => {
   const ps = S.profiles;
+  const teams = intro().teams || [];
   const cnt = r => ps.filter(p=>p.role===r).length;
   return pageHead('회원 · 권한 관리','권한을 바꾸면 그 사람 화면에 즉시 반영됩니다.'
     + (isAdmin()?'':' (변경은 운영 관리자만 가능합니다)'))
@@ -890,9 +912,13 @@ VIEWS.members = () => {
       <div class="stat"><b>${cnt('admin')}</b><span>운영 관리자</span></div></div>
     <div class="card"><h2>회원 목록 (${ps.length})</h2>
       <p class="sub">가입 직후에는 모두 일반 방문자입니다. 확인 후 권한을 올려주세요.</p>
-      ${ps.length ? table(['이름','팀','현재 권한','가입일', isAdmin()?'권한 변경':''])+ps.map(p=>`<tr>
+      ${ps.length ? table(['이름','소속 팀','현재 권한','가입일', isAdmin()?'권한 변경':''])+ps.map(p=>`<tr>
         <td>${esc(p.name||'(이름 없음)')}${p.id===S.user.id?' <span class="tag brand">나</span>':''}</td>
-        <td>${esc(p.team||'-')}</td><td>${esc(ROLE_LABEL[p.role])}</td>
+        <td>${isAdmin() ? `<select data-team-for="${p.id}" style="margin:0;min-width:130px">
+              <option value="">미지정</option>
+              ${teams.map(t=>`<option ${t.name===p.team?'selected':''}>${esc(t.name)}</option>`).join('')}
+            </select>` : esc(p.team||'-')}</td>
+        <td>${esc(ROLE_LABEL[p.role])}</td>
         <td class="hint">${fmtDay(p.created_at)}</td>
         <td>${isAdmin()&&p.id!==S.user.id ? `<select data-role-for="${p.id}">
           ${['visitor','member','officer','admin'].map(r=>
@@ -901,6 +927,13 @@ VIEWS.members = () => {
         : `<div class="empty">회원이 없습니다.</div>`}</div>`;
 };
 BIND.members = () => {
+  $$('#main [data-team-for]').forEach(sel => sel.addEventListener('change', async ()=>{
+    busy(true);
+    const { error } = await sb.from('profiles').update({ team: sel.value }).eq('id', sel.dataset.teamFor);
+    busy(false);
+    if(error) return failed('소속 팀 변경', error);
+    await refresh(); toast('소속 팀을 변경했습니다'); go('members');
+  }));
   $$('#main [data-role-for]').forEach(sel=>sel.addEventListener('change', async ()=>{
     const id=sel.dataset.roleFor, r=sel.value;
     const who = S.profiles.find(p=>p.id===id)?.name || '이 회원';

@@ -359,6 +359,142 @@
 
   @media (prefers-reduced-motion:reduce){ .hero-art img,.voice-mid img{animation:none} }
 
+  /* ════════════ 속화면 공통 (디자인 시안) ════════════ */
+  .crumb{font-size:13px;color:#a2a9c6;margin-bottom:18px}
+  .pg-title{font-size:clamp(28px,4vw,40px);font-weight:900;letter-spacing:-.03em;margin:0 0 8px}
+  .pg-sub{margin:0 0 26px;color:var(--muted);font-size:14.5px}
+  .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+  /* 소개 — 팀 밴드 */
+  .teamband{padding:44px clamp(20px,4vw,54px);display:grid;grid-template-columns:auto 1fr;
+    gap:clamp(24px,4vw,56px);align-items:center}
+  .teamband:nth-child(even){grid-template-columns:1fr auto;text-align:right}
+  .teamband:nth-child(even) .tb-art{order:2}
+  .tb-art{width:clamp(150px,18vw,215px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.62);
+    border:2px dashed rgba(22,34,92,.16);display:grid;place-items:center;text-align:center;
+    color:rgba(22,34,92,.4);font-size:12.5px;font-weight:700;overflow:hidden}
+  .tb-art img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+  .tb-no{font-size:12.5px;font-weight:900;letter-spacing:.14em;color:var(--brand);margin-bottom:8px}
+  .teamband h3{font-size:clamp(24px,3.2vw,34px);font-weight:900;letter-spacing:-.03em;margin:0 0 12px}
+  .teamband .lead{font-size:clamp(15px,1.7vw,19px);font-weight:800;margin:0 0 8px;color:var(--text)}
+  .teamband p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.7;word-break:keep-all}
+
+  /* 소개 — 마스코트 */
+  .mascot-wrap{background:linear-gradient(150deg,#fffaf2,#fdf3f7);border-radius:32px;padding:32px}
+  .mascot-top{display:grid;grid-template-columns:1fr 1.1fr .9fr;gap:22px;align-items:center;
+    background:var(--surface);border-radius:24px;padding:26px 30px;box-shadow:var(--shadow)}
+  .mascot-top h3{font-size:clamp(28px,3.4vw,38px);font-weight:900;color:var(--brand);margin:0;letter-spacing:-.03em}
+  .mascot-top .en{font-size:13px;font-weight:800;color:var(--muted);margin-bottom:16px}
+  .mascot-top .tagline{font-weight:900;color:var(--accent);margin:0 0 10px;font-size:15px}
+  .mascot-top .desc{margin:0;font-size:13.5px;color:var(--muted);line-height:1.75}
+  .mascot-photo{border-radius:20px;background:linear-gradient(160deg,#ffe1ec,#e9e5ff);
+    display:grid;place-items:center;padding:14px;min-height:190px}
+  .mascot-photo img{width:min(100%,190px);filter:drop-shadow(0 14px 22px rgba(28,38,90,.18))}
+  .profile{background:var(--surface-2);border-radius:18px;padding:18px 20px}
+  .profile dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:9px 16px;font-size:13px}
+  .profile dt{color:var(--muted);font-weight:700}
+  .profile dd{margin:0;font-weight:800}
+  .mascot-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+  .mascot-cards .card{margin:0;border-radius:20px;padding:20px 22px}
+  .mascot-cards h4{margin:0 0 4px;font-size:14.5px;font-weight:900}
+  .mascot-cards p{margin:0 0 14px;font-size:13px;color:var(--muted);line-height:1.65}
+  .mascot-cards li{list-style:none;font-size:13.5px;font-weight:700;margin-bottom:9px;
+    display:flex;gap:8px}
+  .mascot-cards li::before{content:'—';color:var(--brand);flex:none}
+  .mascot-quote{margin-top:16px;background:var(--surface);border-radius:18px;padding:18px 24px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:var(--shadow)}
+  .mascot-quote q{font-size:15px;font-weight:800;quotes:'“' '”'}
+
+  /* 소식 — 추천 + 목록 */
+  .news-feat{display:grid;grid-template-columns:1.25fr 1fr;gap:20px;align-items:start}
+  .feat-card{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:24px;
+    overflow:hidden;box-shadow:var(--shadow);cursor:pointer}
+  .feat-card .ph{aspect-ratio:16/10;background:linear-gradient(150deg,#f3f2fd,#fff9ec);
+    display:grid;place-items:center;color:#a2a9c6;font-size:13px}
+  .feat-card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .feat-card .bd{padding:22px 26px 26px}
+  .feat-card h3{margin:10px 0 8px;font-size:clamp(19px,2.2vw,26px);font-weight:900;letter-spacing:-.03em}
+  .feat-card p{margin:0 0 12px;font-size:14px;color:var(--muted)}
+  .side-list{display:flex;flex-direction:column;gap:14px}
+  .side-item{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:20px;
+    box-shadow:var(--shadow);display:grid;grid-template-columns:auto 1fr;gap:16px;padding:14px;
+    align-items:center;cursor:pointer}
+  .side-item .ph{width:88px;height:66px;border-radius:14px;background:linear-gradient(150deg,#f3f2fd,#fff9ec);
+    display:grid;place-items:center;color:#a2a9c6;font-size:11px;overflow:hidden;flex:none}
+  .side-item .ph img{width:100%;height:100%;object-fit:cover}
+  .side-item h4{margin:6px 0 4px;font-size:15.5px;font-weight:900;letter-spacing:-.02em;line-height:1.35}
+  .side-item .dt{font-size:12px;color:var(--muted)}
+
+  /* 의견함 — 표 */
+  .filter-pills{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:20px}
+  .fpill{border:0;background:var(--surface-2);color:var(--muted);font-family:inherit;font-size:13.5px;
+    font-weight:800;padding:9px 18px;border-radius:999px;cursor:pointer}
+  .fpill.on{background:var(--brand);color:#fff}
+  .op-table{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:22px;
+    box-shadow:var(--shadow);overflow:hidden}
+  .op-table table{font-size:13.5px}
+  .op-table th{background:var(--surface-2);padding:14px 18px;font-size:12px;text-transform:none;font-weight:800}
+  .op-table td{padding:16px 18px}
+  .op-table tbody tr{cursor:pointer}
+  .op-table .no{color:var(--muted);font-weight:800;width:56px}
+  .op-table .subj b{display:block;font-size:15px;font-weight:800;margin-bottom:4px}
+  .op-table .subj span{font-size:12px;color:var(--muted)}
+  .st{display:inline-block;padding:5px 13px;border-radius:999px;font-size:12px;font-weight:800}
+  .st.접수{background:var(--surface-2);color:var(--muted)}
+  .st.확인중{background:#e9e5ff;color:#4a3ec8}
+  .st.제안완료{background:var(--brand-weak);color:var(--brand)}
+  .st.반영완료{background:var(--brand);color:#fff}
+
+  /* 일정 — 캘린더 + 사이드 */
+  .cal-layout{display:grid;grid-template-columns:1.55fr 1fr;gap:20px;align-items:start}
+  .cal-panel{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:24px;
+    box-shadow:var(--shadow);padding:24px 26px}
+  .cal-side{display:flex;flex-direction:column;gap:16px}
+  .attend{background:linear-gradient(160deg,#ffe1ec,#e9e5ff);border-radius:24px;padding:26px;text-align:center}
+  .attend b{display:block;font-size:44px;font-weight:900;letter-spacing:-.04em;margin:8px 0}
+  .attend p{margin:0 0 14px;font-size:13px;color:var(--muted);line-height:1.6}
+  .attend img{width:clamp(110px,14vw,150px);animation:floaty 5.6s ease-in-out infinite}
+
+  /* 공간 — 사진 카드 */
+  .space-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .space-card{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:22px;
+    overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;cursor:pointer}
+  .space-card .ph{aspect-ratio:4/3;display:grid;place-items:center;color:#a2a9c6;font-size:12.5px}
+  .space-card .ph img{width:100%;height:100%;object-fit:cover}
+  .space-card .bd{padding:16px 20px 18px;flex:1;display:flex;flex-direction:column}
+  .space-card p{margin:0 0 12px;font-size:14.5px;font-weight:800;line-height:1.55;word-break:keep-all;flex:1}
+  .space-card .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .loginbar{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:20px;
+    box-shadow:var(--shadow);padding:18px 22px;display:flex;align-items:center;gap:16px;
+    flex-wrap:wrap;margin-bottom:22px;font-size:14px;font-weight:700}
+
+  /* 게임 */
+  .game-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
+  .quizcard{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:24px;
+    box-shadow:var(--shadow);padding:26px 28px}
+  .quizcard h3{margin:12px 0 20px;font-size:clamp(16px,1.9vw,20px);font-weight:900;line-height:1.5;word-break:keep-all}
+  .choice{display:block;width:100%;text-align:left;border:1px solid var(--border);background:var(--surface);
+    color:var(--text);font-family:inherit;font-size:14.5px;font-weight:700;padding:14px 18px;
+    border-radius:14px;cursor:pointer;margin-bottom:10px}
+  .choice:hover{border-color:var(--brand);background:var(--brand-weak)}
+  .choice.ok{border-color:var(--ok);background:var(--ok-weak);color:var(--ok)}
+  .choice.no{border-color:var(--danger);background:var(--danger-weak);color:var(--danger)}
+  .quiz-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:18px}
+  .gamepanel{background:linear-gradient(160deg,#ffe1ec,#e9e5ff);border-radius:24px;padding:26px;text-align:center}
+  .gamepanel .bars{display:flex;gap:8px;justify-content:center;margin:14px 0 18px}
+  .gamepanel .bars i{width:44px;height:7px;border-radius:999px;background:rgba(255,255,255,.6)}
+  .gamepanel .bars i.on{background:var(--brand)}
+  .gamepanel img{width:clamp(130px,18vw,210px)}
+
+  @media (max-width:860px){
+    .teamband,.teamband:nth-child(even){grid-template-columns:1fr;text-align:left;gap:20px;padding:30px 22px}
+    .teamband:nth-child(even) .tb-art{order:0}
+    .mascot-top{grid-template-columns:1fr;text-align:center}
+    .mascot-cards{grid-template-columns:1fr}
+    .news-feat,.cal-layout,.game-layout{grid-template-columns:1fr}
+    .space-grid{grid-template-columns:1fr}
+  }
+
   .topbar{display:none}
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:35;display:none}
   @media (max-width:960px){
@@ -985,8 +1121,9 @@ function searchBar(id, ph){
 }
 function bindSearch(id){
   const inp = $('#sq_'+id);
+  if(!inp) return;
   const run = ()=>{ Q[id] = inp.value.trim(); go(id); };
-  $('#sb_'+id).addEventListener('click', run);
+  $('#sb_'+id)?.addEventListener('click', run);
   inp.addEventListener('keydown', e=>{ if(e.key==='Enter') run(); });
   $('#sc_'+id)?.addEventListener('click', ()=>{ Q[id]=''; go(id); });
   if(Q[id]){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
@@ -1205,23 +1342,110 @@ BIND.home = () => {
 /* ============================================================================
    새소리단 소개
    ============================================================================ */
+/* 시안의 팀 밴드 — 배경색과 한 줄 소개 */
+const TEAM_BANDS = [
+  { bg:'#ffe1ec', lead:'일하기 좋은 공간을 함께 만듭니다' },
+  { bg:'#e9e5ff', lead:'굳어진 관행부터 하나씩 걷어냅니다' },
+  { bg:'#d9f5ef', lead:'서로의 말이 통하는 조직을 만듭니다' },
+  { bg:'#fff2d9', lead:'쉼과 일이 함께 가는 방식을 찾습니다' },
+  { bg:'#dfeaff', lead:'일을 줄이는 기술을 먼저 써봅니다' },
+  { bg:'#ffe6ec', lead:'잘한 일은 널리 알립니다' },
+];
+const MASCOT = {
+  name:'새초롱이', en:'Saechorong',
+  tagline:'작은 소리도 놓치지 않는 새, 새초롱이',
+  desc:'헤드셋을 끼고 주민의 이야기를 가장 먼저 듣습니다.\n눈 귀를 열어두고, 좋은 이야기를 잊지 않아요.',
+  profile:[['이름','새초롱이'],['종족','참새'],['역할','의견함 지킴이'],
+           ['첫 등장','2024년 새소리단 출범'],['짝꿍','고드래곤']],
+  traits:[
+    ['잘 들어요','작게 말한 불편도 끝까지 듣고 기억합니다.'],
+    ['부지런해요','접수된 의견을 그날 안에 담당 팀에 전합니다.'],
+    ['비밀을 지켜요','이름도 연락처도 묻지 않고, 남기지 않습니다.'],
+  ],
+  looks:['민트색 깃털과 동그란 몸','헤드셋과 마이크 · 언제나 듣는 중','머리의 하얀 꽃 · 첫 제안이 반영된 날의 기념','작은 주황색 부리와 발'],
+  likes:[
+    ['동네 산책','골목을 돌며 달라진 곳을 살펴봅니다.'],
+    ['한 줄 의견','짧아도 괜찮은 이야기를 가장 반가워합니다.'],
+    ['반영완료 도장','개선이 확인된 순간을 제일 좋아합니다.'],
+  ],
+  quote:'작은 목소리도 너무 소중해요. 사소한 의견도 좋아요.',
+};
+
 VIEWS.intro = () => {
   const it = intro();
-  const editBtn = isAdmin() ? `<button class="btn" onclick="go('intro-edit')">✏️ 내용 편집</button>` : '';
-  return pageHead('새소리단 소개','새소리단의 역할과 걸어온 길, 그리고 팀을 소개합니다.', editBtn)
-  + `<div class="card"><h2>우리는 이런 일을 합니다</h2><p class="sub">새소리단의 존재 이유</p>
-      <div style="white-space:pre-wrap;font-size:14.5px">${esc(it.mission)}</div></div>
-    <div class="card"><h2>주요 역할</h2><p class="sub">단원이 수행하는 활동</p>
-      ${it.roles?.length ? `<ul style="padding-left:18px;margin:0;line-height:1.9">
-        ${it.roles.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>` : `<div class="empty">등록된 역할이 없습니다.</div>`}</div>
-    <div class="card"><h2>연혁</h2><p class="sub">새소리단이 걸어온 길</p>
-      ${it.history?.length ? `<ul class="timeline">${it.history.slice()
-          .sort((a,b)=>String(b.year).localeCompare(String(a.year)))
-          .map(h=>`<li><span class="yr">${esc(h.year)}</span><span class="tx">${esc(h.text)}</span></li>`).join('')}
-      </ul>` : `<div class="empty">등록된 연혁이 없습니다.</div>`}</div>
-    <div class="card"><h2>팀 소개</h2><p class="sub">분야별 ${it.teams?.length||0}개 팀이 활동합니다.</p>
-      <div class="team-grid">${(it.teams||[]).map(t=>`<div class="team">
-        <h3>${esc(t.name)}</h3><div class="lead">${esc(t.lead||'')}</div><p>${esc(t.desc||'')}</p></div>`).join('')}</div></div>`;
+  const teams = it.teams || [];
+  const editBtn = isAdmin() ? `<button class="btn softpink" data-go-to="intro-edit">✏️ 내용 편집</button>` : '';
+
+  return `<div class="crumb">홈 · 소개</div>
+  <div class="pg-head">
+    <div>
+      <h1 class="pg-title">새소리단 소개</h1>
+      <p class="pg-sub">새내기 혁신참견단에서 시작해 새소리단(새내기소통리더단)으로 이어지는 활동입니다.</p>
+    </div>${editBtn}
+  </div>
+
+  <!-- 팀 밴드 -->
+  <div style="border-radius:28px;overflow:hidden;margin-bottom:34px">
+    ${teams.map((t,i)=>{ const b = TEAM_BANDS[i % TEAM_BANDS.length];
+      return `<section class="teamband" style="background:${b.bg}">
+        <div class="tb-art">${esc(t.name)} 이미지</div>
+        <div>
+          <div class="tb-no">TEAM ${String(i+1).padStart(2,'0')}</div>
+          <h3>${esc(t.name)}</h3>
+          <p class="lead">${esc(t.lead || b.lead)}</p>
+          <p>${esc(t.desc||'')}</p>
+        </div>
+      </section>`; }).join('')}
+  </div>
+
+  <!-- 마스코트 -->
+  <h2 style="font-size:20px;font-weight:900;margin:0 0 14px">마스코트</h2>
+  <div class="mascot-wrap">
+    <div class="mascot-top">
+      <div>
+        <h3>${esc(MASCOT.name)}</h3>
+        <div class="en">${esc(MASCOT.en)}</div>
+        <p class="tagline">${esc(MASCOT.tagline)}</p>
+        <p class="desc">${esc(MASCOT.desc)}</p>
+      </div>
+      <div class="mascot-photo"><img src="assets/bird-large.png" alt="새초롱이"></div>
+      <div class="profile">
+        <span class="pill-label" style="margin-bottom:12px">프로필</span>
+        <dl>${MASCOT.profile.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+      </div>
+    </div>
+    <div class="mascot-cards">
+      <div class="card"><span class="pill-label">성격</span>
+        ${MASCOT.traits.map(([h,d])=>`<h4>${esc(h)}</h4><p>${esc(d)}</p>`).join('')}</div>
+      <div class="card"><span class="pill-label">모습의 특징</span>
+        <ul style="margin:0;padding:0">${MASCOT.looks.map(l=>`<li>${esc(l)}</li>`).join('')}</ul></div>
+      <div class="card"><span class="pill-label">좋아하는 것</span>
+        ${MASCOT.likes.map(([h,d])=>`<h4>${esc(h)}</h4><p>${esc(d)}</p>`).join('')}</div>
+    </div>
+    <div class="mascot-quote">
+      <span class="tag brand">새초롱이가 전하는 말</span>
+      <q>${esc(MASCOT.quote)}</q>
+    </div>
+  </div>
+
+  <!-- 연혁 -->
+  <section style="padding-top:34px">
+    <div class="histcard">
+      <img src="assets/bird.png" alt="">
+      <div>
+        <span class="pill-label">연혁</span>
+        <h2>2019년부터 지금까지</h2>
+        <p class="sub">새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로 이어지고 있습니다.</p>
+        ${HISTORY_ERAS.map(e=>`<div class="hist-row">
+          <div class="cap">${esc(e.cap)}${e.badge?`<span class="tag">${esc(e.badge)}</span>`:''}</div>
+          <div class="yrs">${e.years.map(y=>`<span class="yr ${e.tone}${y===String(new Date().getFullYear())?' now':''}">${y}</span>`).join('')}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </section>`;
+};
+BIND.intro = () => {
+  $$('#main [data-go-to]').forEach(el => el.addEventListener('click', ()=> go(el.dataset.goTo)));
 };
 
 VIEWS['intro-edit'] = () => {
@@ -1267,47 +1491,99 @@ BIND['intro-edit'] = () => {
 /* ============================================================================
    게시판
    ============================================================================ */
+const CRUMB = { news:'소식', notice:'공지방', free:'자유방', share:'새소리단 공간' };
+
 function boardView(key){
   const b = BOARDS[key];
   const q = (Q[key]||'').toLowerCase();
   let list = S.posts.filter(p => p.board===key);
   if(q) list = list.filter(p => (p.title+' '+p.body+' '+p.author_name).toLowerCase().includes(q));
   list = list.slice().sort((a,c)=> (c.pinned?1:0)-(a.pinned?1:0) || c.created_at.localeCompare(a.created_at));
+  const writeBtn = canWrite(key)
+    ? `<button class="btn primary" id="bdWrite">${key==='news'?'단원 전용 · 소식 작성':'글쓰기'}</button>` : '';
 
-  const writeBtn = canWrite(key) ? `<button class="btn primary" id="bdWrite">✏️ 글쓰기</button>` : '';
-  let body;
-  if(!list.length){
-    body = `<div class="empty">${q ? `“${esc(Q[key])}” 검색 결과가 없습니다.` : '아직 등록된 글이 없습니다.'}</div>`;
-  } else if(b.layout==='photo'){
-    body = `<div class="photo-grid">${list.map(p=>{
-      const img = (p.images||[])[0];
-      return `<article class="photo-card" data-open-post="${p.id}">
-        ${img ? `<img class="hero" src="${esc(mediaUrl(img.path))}" alt="" loading="lazy">`
-              : `<div class="hero none">${b.icon}</div>`}
-        <div class="pc-body">
-          <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}</h3>
-          <p class="excerpt">${highlight(excerpt(p.body,90),Q[key])}</p>
-          <div class="meta"><span>${esc(p.author_name)}</span>
-            <span>${fmtDay(p.created_at)}${(p.images||[]).length>1?' · 📎'+p.images.length:''}</span></div>
-        </div></article>`;
-    }).join('')}</div>`;
-  } else {
-    body = `<div class="card">${list.map(p=>`
-      <div class="post-row" data-open-post="${p.id}">
-        <div class="pr-top">
-          <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}${(p.images||[]).length?' <span class="hint">📎'+p.images.length+'</span>':''}</h3>
-          <span class="hint">${fmtDay(p.created_at)}</span></div>
-        <p class="excerpt">${highlight(excerpt(p.body,110),Q[key])} <span class="hint">· ${esc(p.author_name)}</span></p>
-      </div>`).join('')}</div>`;
+  /* ── 소식: 추천(큰 카드) + 사이드 목록 ── */
+  if(key === 'news'){
+    const [feat, ...rest] = list;
+    return `<div class="crumb">홈 · 새소리단 소식</div>
+    <div class="pg-head">
+      <div><h1 class="pg-title">새소리단 소식</h1>
+        <p class="pg-sub">총 ${list.length}건 · 단원이 작성한 활동 기록입니다</p></div>
+      <div class="searchbar" style="margin:0;flex:0 1 420px">
+        <input id="sq_${key}" value="${esc(Q[key]||'')}" placeholder="제목·내용 검색">
+        ${writeBtn || `<button class="btn" id="sb_${key}">검색</button>`}
+      </div>
+    </div>
+    ${q?`<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>`:''}
+    ${!list.length ? `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 등록된 소식이 없습니다.'}</div></div>` : `
+      <h2 style="font-size:15px;font-weight:900;margin:0 0 14px">추천 소식</h2>
+      <div class="news-feat">
+        <article class="feat-card" data-open-post="${feat.id}">
+          <div class="ph">${photoOf(feat) ? `<img src="${esc(photoOf(feat))}" alt="">` : '현장 사진'}</div>
+          <div class="bd"><span class="tag brand">활동 소식</span>
+            <h3>${esc(feat.title)}</h3>
+            <p>${esc(excerpt(feat.body,90))}</p>
+            <div class="dt" style="font-size:12.5px;color:var(--muted)">${fmtDay(feat.created_at)}</div></div>
+        </article>
+        <div class="side-list">
+          ${rest.slice(0,3).map(p=>`<article class="side-item" data-open-post="${p.id}">
+            <div class="ph">${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="">`:'안내물 사진'}</div>
+            <div><span class="tag brand">활동 소식</span>
+              <h4>${esc(p.title)}</h4>
+              <div class="dt">${fmtDay(p.created_at)}</div></div>
+          </article>`).join('') || '<div class="empty">다른 소식이 없습니다.</div>'}
+        </div>
+      </div>`}`;
   }
-  return pageHead(b.label, b.desc, writeBtn)
-    + searchBar(key, '제목·내용·작성자로 검색')
-    + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>` : '')
-    + body;
+
+  /* ── 새소리단 공간: 사진 카드 격자 ── */
+  if(key === 'share'){
+    const tints = ['linear-gradient(150deg,#ffe1ec,#fff9ec)','linear-gradient(150deg,#e9e5ff,#f3f2fd)',
+                   'linear-gradient(150deg,#ffe9f1,#e9e5ff)'];
+    return `<div class="crumb">홈 · 새소리단 공간</div>
+    <div class="pg-head">
+      <div><h1 class="pg-title">새소리단 공간</h1>
+        <p class="pg-sub">단원들이 활동 사진과 짧은 기록을 자유롭게 나누는 공유방입니다.</p></div>
+      <span class="tag brand" style="padding:8px 16px">기록 ${list.length}개</span>
+    </div>
+    ${canWrite(key)
+      ? `<div class="loginbar">공간에 새 기록을 올려보세요.<button class="btn primary sm" id="bdWrite" style="margin-left:auto">기록 올리기</button></div>`
+      : `<div class="loginbar">공간에 글을 올리려면 단원 로그인이 필요합니다.
+           <button class="btn primary sm" style="margin-left:auto" id="needLogin">단원 로그인</button></div>`}
+    ${searchBar(key,'내용·작성자 검색')}
+    ${list.length ? `<div class="space-grid">${list.map((p,i)=>`
+      <article class="space-card" data-open-post="${p.id}">
+        <div class="ph" style="background:${tints[i%3]}">
+          ${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="">`:'현장 사진'}</div>
+        <div class="bd"><p>${highlight(excerpt(p.body,70),Q[key])}</p>
+          <div class="meta"><span>${esc(p.author_name)}</span><span>${fmtDay(p.created_at)}</span></div></div>
+      </article>`).join('')}</div>`
+      : `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 올라온 기록이 없습니다.'}</div></div>`}`;
+  }
+
+  /* ── 공지방 / 자유방: 목록형 ── */
+  return `<div class="crumb">홈 · ${esc(CRUMB[key]||b.label)}</div>
+  <div class="pg-head">
+    <div><h1 class="pg-title">${esc(b.label)}</h1><p class="pg-sub">${esc(b.desc)}</p></div>
+    ${writeBtn}
+  </div>
+  ${searchBar(key,'제목·내용·작성자로 검색')}
+  ${q?`<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>`:''}
+  ${list.length ? `<div class="card">${list.map(p=>`
+    <div class="post-row" data-open-post="${p.id}">
+      <div class="pr-top">
+        <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}${(p.images||[]).length?' <span class="hint">📎'+p.images.length+'</span>':''}</h3>
+        <span class="hint">${fmtDay(p.created_at)}</span></div>
+      <p class="excerpt">${highlight(excerpt(p.body,110),Q[key])} <span class="hint">· ${esc(p.author_name)}</span></p>
+    </div>`).join('')}</div>`
+    : `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 등록된 글이 없습니다.'}</div></div>`}`;
 }
+const photoOf = (p) => { const im=(p.images||[])[0]; return im ? mediaUrl(im.path) : ''; };
+
 Object.keys(BOARDS).forEach(key=>{
   VIEWS[key] = () => boardView(key);
   BIND[key]  = () => {
+    $('#needLogin')?.addEventListener('click', ()=> toast('단원 권한이 필요합니다. 관리자에게 요청하세요.'));
     bindSearch(key);
     $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
     $('#bdWrite')?.addEventListener('click', ()=> openPostForm(key));
@@ -1380,99 +1656,126 @@ function openPost(id){
 /* ============================================================================
    의견함
    ============================================================================ */
+const OP_STATES = ['전체','접수','확인중','제안완료','반영완료'];
+
 VIEWS.opinion = () => {
   const q = (Q.opinion||'').toLowerCase();
-  const cmtsOf = (id) => S.comments.filter(c => c.opinion_id===id);
+  const f = Q.opState || '전체';
+  const cmtsOf = id => S.comments.filter(c => c.opinion_id===id);
   let list = S.opinions.slice();
+  if(f !== '전체') list = list.filter(o => (o.status||'접수') === f);
   if(q) list = list.filter(o =>
     (o.body+' '+o.cat+' '+o.alias+' '+cmtsOf(o.id).map(c=>c.body).join(' ')).toLowerCase().includes(q));
 
-  return pageHead('의견함','누구나 익명으로 의견을 남기고 댓글을 달 수 있습니다. 작성한 글은 방문자 모두에게 공개됩니다.')
-  + `<div class="notice">별칭은 접속 위치를 기준으로 <b>새소리1, 새소리2 …</b> 순서대로 자동 부여됩니다.
-      이름·소속·연락처는 물론 IP 원본도 저장하지 않습니다.</div>
-    <div class="card"><h2>새 의견 남기기</h2>
-      <p class="sub">답변이 필요하면 본문에 연락 방법을 직접 적어주세요.</p>
-      <label class="field">분류<select id="opCat">
-        <option>일반 의견</option><option>활동 제안</option><option>불편·신고</option><option>칭찬</option><option>기타</option>
-      </select></label>
-      <label class="field">내용 <span class="req">*</span><textarea id="opBody" placeholder="자유롭게 작성해주세요"></textarea></label>
-      <div class="row-actions"><button class="btn primary" id="opSubmit">익명으로 제출</button></div>
-    </div>`
-  + searchBar('opinion','의견 내용·별칭·댓글로 검색')
-  + (q ? `<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>` : '')
-  + `<div style="margin-top:4px"><h2 style="margin:0 0 12px;font-size:16px">접수된 의견 (${list.length})</h2>
-      ${list.length ? list.map(o=>{
-        const mine = o.author_id===S.user.id;
-        const cs = cmtsOf(o.id);
-        return `<div class="op-item">
-          <div class="op-head">
-            <div><span class="tag brand">${esc(o.cat)}</span>
-              <b style="margin-left:8px;font-size:13.5px">${esc(o.alias||'익명')}</b>
-              ${mine?'<span class="tag approve" style="margin-left:6px">내 글</span>':''}</div>
-            <span class="hint">${fmt(o.created_at)}</span></div>
-          <div class="op-body">${highlight(o.body, Q.opinion)}</div>
-          ${(mine||isAdmin()) ? `<div class="row-actions">
-            <button class="btn sm danger" data-opdel="${o.id}">${mine?'내 글 삭제':'관리자 삭제'}</button></div>` : ''}
-          <div class="cmt-list">
-            ${cs.length ? cs.map(c=>{
-              const cm = c.author_id===S.user.id;
-              return `<div class="cmt"><div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.created_at)}</span>
-                ${(cm||isAdmin())?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px" data-cdel="${c.id}">삭제</button>`:''}
-                </div><div>${highlight(c.body, Q.opinion)}</div></div>`;
-            }).join('') : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
-            <div class="cmt-form">
-              <input data-cinput="${o.id}" placeholder="익명으로 댓글 남기기">
-              <button class="btn sm" data-cadd="${o.id}">등록</button></div>
-          </div></div>`;
-      }).join('') : `<div class="empty">${q?'검색 결과가 없습니다.':'아직 접수된 의견이 없습니다.'}</div>`}
-    </div>`;
+  return `<div class="crumb">홈 · 의견함</div>
+  <div class="pg-head">
+    <div><h1 class="pg-title">의견함</h1>
+      <p class="pg-sub">이름을 밝히지 않아도 괜찮습니다 · 별칭은 자동 부여됩니다</p></div>
+    <button class="btn primary" id="opNew">의견 남기기</button>
+  </div>
+
+  <div class="filter-pills">
+    ${OP_STATES.map(s=>`<button class="fpill ${s===f?'on':''}" data-opstate="${s}">${s}</button>`).join('')}
+  </div>
+  ${searchBar('opinion','의견 내용·별칭·댓글로 검색')}
+  ${q?`<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>`:''}
+
+  ${list.length ? `<div class="op-table">${table(['번호','내용','분류','작성자','처리 상태'])}
+    ${list.map((o,i)=>{
+      const st = o.status || '접수';
+      const mine = o.author_id===S.user.id;
+      return `<tr data-opopen="${o.id}">
+        <td class="no">${list.length - i}</td>
+        <td class="subj"><b>${highlight(excerpt(o.body,44), Q.opinion)}</b>
+          <span>${fmtDay(o.created_at)} 접수${cmtsOf(o.id).length?` · 댓글 ${cmtsOf(o.id).length}`:''}${mine?' · 내 글':''}</span></td>
+        <td>${esc(o.cat)}</td>
+        <td>${esc(o.alias||'익명')}</td>
+        <td><span class="st ${esc(st)}">${esc(st)}</span></td>
+      </tr>`;
+    }).join('')}${tableEnd}</div>`
+    : `<div class="card"><div class="empty">${q||f!=='전체'?'해당하는 의견이 없습니다.':'아직 접수된 의견이 없습니다.'}</div></div>`}`;
 };
-BIND.opinion = () => {
-  bindSearch('opinion');
 
-  $('#opSubmit').addEventListener('click', async ()=>{
-    const body = $('#opBody').value.trim();
-    if(!body){ toast('내용을 입력하세요'); return; }
-    const btn = $('#opSubmit'); btn.disabled = true; busy(true);
-    const { error } = await sb.from('opinions').insert({ cat:$('#opCat').value, body, author_id:S.user.id });
-    busy(false); btn.disabled = false;
-    if(error) return failed('의견 제출', error);
-    await refresh(); toast('익명으로 제출되었습니다'); go('opinion');
-  });
+/* 의견 상세 — 본문·댓글·삭제 */
+function openOpinion(id){
+  const o = S.opinions.find(x=>x.id===id); if(!o) return;
+  const cs = S.comments.filter(c=>c.opinion_id===o.id);
+  const mine = o.author_id===S.user.id;
+  openModal(`${o.cat} · ${o.alias||'익명'}`, `
+    <div class="hint" style="margin-bottom:12px">${fmt(o.created_at)} 접수 ·
+      <span class="st ${esc(o.status||'접수')}">${esc(o.status||'접수')}</span></div>
+    <div style="white-space:pre-wrap;font-size:15px;font-weight:600">${esc(o.body)}</div>
+    ${(mine||isAdmin()) ? `<div class="row-actions" style="margin-top:16px">
+      <button class="btn sm danger" id="opDel">${mine?'내 글 삭제':'관리자 삭제'}</button></div>`:''}
+    <div class="cmt-list" style="margin-top:18px">
+      ${cs.length ? cs.map(c=>{
+        const cm = c.author_id===S.user.id;
+        return `<div class="cmt"><div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.created_at)}</span>
+          ${(cm||isAdmin())?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px" data-cdel="${c.id}">삭제</button>`:''}
+          </div><div>${esc(c.body)}</div></div>`; }).join('')
+        : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
+      <div class="cmt-form"><input id="opCmt" placeholder="익명으로 댓글 남기기">
+        <button class="btn sm" id="opCmtAdd">등록</button></div>
+    </div>`);
 
-  $$('#main [data-opdel]').forEach(b => b.addEventListener('click', async ()=>{
+  $('#opDel')?.addEventListener('click', async ()=>{
     if(!confirm('이 의견을 삭제할까요? 댓글도 함께 삭제됩니다.')) return;
     busy(true);
-    const { error } = await sb.from('opinions').delete().eq('id', b.dataset.opdel);
+    const { error } = await sb.from('opinions').delete().eq('id', id);
     busy(false);
     if(error) return failed('의견 삭제', error);
-    await refresh(); toast('삭제되었습니다'); go('opinion');
-  }));
-
-  const addComment = async (opId) => {
-    const inp = $(`[data-cinput="${opId}"]`);
-    const text = inp.value.trim();
-    if(!text){ toast('댓글 내용을 입력하세요'); return; }
+    await refresh(); closeModal(); toast('삭제되었습니다'); go('opinion');
+  });
+  const add = async ()=>{
+    const t = $('#opCmt').value.trim();
+    if(!t){ toast('댓글 내용을 입력하세요'); return; }
     busy(true);
-    const { error } = await sb.from('opinion_comments')
-      .insert({ opinion_id:opId, body:text, author_id:S.user.id });
+    const { error } = await sb.from('opinion_comments').insert({ opinion_id:id, body:t, author_id:S.user.id });
     busy(false);
     if(error) return failed('댓글 등록', error);
-    await refresh(); toast('댓글을 등록했습니다'); go('opinion');
+    await refresh(); closeModal(); toast('댓글을 등록했습니다'); go('opinion');
   };
-  $$('#main [data-cadd]').forEach(b => b.addEventListener('click', ()=> addComment(b.dataset.cadd)));
-  $$('#main [data-cinput]').forEach(i => i.addEventListener('keydown', e=>{
-    if(e.key==='Enter') addComment(i.dataset.cinput); }));
-
-  $$('#main [data-cdel]').forEach(b => b.addEventListener('click', async ()=>{
+  $('#opCmtAdd').addEventListener('click', add);
+  $('#opCmt').addEventListener('keydown', e=>{ if(e.key==='Enter') add(); });
+  $$('#modalBody [data-cdel]').forEach(b=> b.addEventListener('click', async ()=>{
     if(!confirm('이 댓글을 삭제할까요?')) return;
     busy(true);
     const { error } = await sb.from('opinion_comments').delete().eq('id', b.dataset.cdel);
     busy(false);
     if(error) return failed('댓글 삭제', error);
-    await refresh(); toast('댓글을 삭제했습니다'); go('opinion');
+    await refresh(); closeModal(); toast('댓글을 삭제했습니다'); go('opinion');
   }));
+}
+
+/* 의견 작성 */
+function openOpinionForm(){
+  openModal('의견 남기기', `
+    <div class="notice">별칭은 접속 위치를 기준으로 자동 부여됩니다. 이름·소속·연락처는 저장하지 않습니다.</div>
+    <label class="field">분류<select id="opCat">
+      <option>업무효율</option><option>조직문화</option><option>AI 활용</option>
+      <option>복지</option><option>일하는 방식</option><option>기타</option></select></label>
+    <label class="field">내용 <span class="req">*</span>
+      <textarea id="opBody" style="min-height:130px" placeholder="자유롭게 작성해주세요"></textarea></label>
+    <div class="row-actions"><button class="btn primary" id="opSubmit">익명으로 제출</button></div>`);
+  $('#opSubmit').addEventListener('click', async ()=>{
+    const body = $('#opBody').value.trim();
+    if(!body){ toast('내용을 입력하세요'); return; }
+    const btn=$('#opSubmit'); btn.disabled=true; busy(true);
+    const { error } = await sb.from('opinions').insert({ cat:$('#opCat').value, body, author_id:S.user.id });
+    busy(false); btn.disabled=false;
+    if(error) return failed('의견 제출', error);
+    await refresh(); closeModal(); toast('익명으로 제출되었습니다'); go('opinion');
+  });
+}
+
+BIND.opinion = () => {
+  bindSearch('opinion');
+  $('#opNew').addEventListener('click', openOpinionForm);
+  $$('#main [data-opstate]').forEach(b => b.addEventListener('click', ()=>{
+    Q.opState = b.dataset.opstate; go('opinion'); }));
+  $$('#main [data-opopen]').forEach(tr => tr.addEventListener('click', ()=> openOpinion(tr.dataset.opopen)));
 };
+
 
 /* ============================================================================
    일정 (캘린더)
@@ -1497,35 +1800,57 @@ VIEWS.calendar = () => {
       const cls = ['day', c.dim?'dim':'', c.key===today?'today':'', c.key===CAL.sel?'sel':'', i%7===0?'sun':''].filter(Boolean).join(' ');
       return `<div class="${cls}" ${c.key?`data-day="${c.key}"`:''}>
         <span class="dnum">${c.d}</span>
-        ${evs.slice(0,3).map(e=>`<span class="ev" title="${esc(e.title)}">${esc(e.title)}</span>`).join('')}
-        ${evs.length>3?`<span class="hint" style="margin:0">+${evs.length-3}건</span>`:''}</div>`;
+        ${evs.slice(0,2).map(e=>`<span class="ev" title="${esc(e.title)}">${esc(e.title)}</span>`).join('')}
+        ${evs.length>2?`<span class="hint" style="margin:0">+${evs.length-2}</span>`:''}</div>`;
     }).join('')}</div>`;
 
   const selEvs = S.events.filter(e=>e.ev_date===CAL.sel)
                          .sort((a,b)=>(a.ev_time||'').localeCompare(b.ev_time||''));
+  const selD = new Date(CAL.sel);
   const addBtn = isInner() ? `<button class="btn primary" id="calAdd">＋ 일정 등록</button>` : '';
 
-  return pageHead('일정 관리','새소리단 행사 일정입니다. 날짜를 눌러 그날 일정을 확인하세요.', addBtn)
-  + `<div class="card">
+  return `<div class="crumb">홈 · 일정</div>
+  <div class="pg-head">
+    <div><h1 class="pg-title">활동 일정</h1>
+      <p class="pg-sub">${isInner()?'날짜를 눌러 그날 일정을 확인하고 등록할 수 있습니다.':'참석 여부는 단원 로그인 후 표시할 수 있습니다.'}</p></div>
+    ${addBtn}
+  </div>
+
+  <div class="cal-layout">
+    <div class="cal-panel">
       <div class="cal-head">
-        <button class="btn sm" id="calPrev">‹ 이전달</button>
+        <button class="btn sm" id="calPrev">‹</button>
         <b>${CAL.y}년 ${CAL.m+1}월</b>
         <div class="row-actions" style="margin:0">
           <button class="btn sm ghost" id="calToday">오늘</button>
-          <button class="btn sm" id="calNext">다음달 ›</button></div>
-      </div>${grid}</div>
-    <div class="card"><h2>${esc(CAL.sel)} 일정 (${selEvs.length})</h2>
-      <p class="sub">${isInner()?'단원 이상 권한으로 일정을 등록·삭제할 수 있습니다.':'일정 등록은 새소리단 단원만 가능합니다.'}</p>
-      ${selEvs.length ? selEvs.map(e=>`<div class="post-row" style="cursor:default">
-        <div class="pr-top"><h3>${e.ev_time?`<span class="tag brand">${esc(e.ev_time)}</span> `:''}${esc(e.title)}</h3>
-          <span class="hint">${esc(e.author_name)}</span></div>
-        ${e.place?`<p class="excerpt" style="-webkit-line-clamp:2">📍 ${esc(e.place)}</p>`:''}
-        ${e.descr?`<p class="excerpt" style="-webkit-line-clamp:3">${esc(e.descr)}</p>`:''}
-        ${(e.author_id===S.user.id || isAdmin())
-          ? `<div class="row-actions"><button class="btn sm danger" data-evdel="${e.id}">삭제</button></div>`:''}
-      </div>`).join('') : `<div class="empty">이 날짜에 등록된 일정이 없습니다.</div>`}
-    </div>`;
+          <button class="btn sm" id="calNext">›</button></div>
+      </div>${grid}
+    </div>
+
+    <div class="cal-side">
+      <div class="cal-panel">
+        <b style="font-size:16px;font-weight:900">${selD.getFullYear()}년 ${selD.getMonth()+1}월 ${selD.getDate()}일</b>
+        <p class="hint" style="margin:2px 0 16px">일정 ${selEvs.length}건</p>
+        ${selEvs.length ? selEvs.map(e=>`<div style="margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+            <span class="tag brand">정기 활동</span>
+            <b style="font-size:15.5px;font-weight:900">${esc(e.title)}</b></div>
+          <div class="hint" style="margin:0 0 10px">${esc(e.place||'장소 미정')}${e.ev_time?' · '+esc(e.ev_time):''}</div>
+          ${(e.author_id===S.user.id || isAdmin())
+            ? `<button class="btn sm danger" data-evdel="${e.id}">삭제</button>` : ''}
+        </div>`).join('') : `<div class="empty" style="padding:22px 0">이 날짜에 등록된 일정이 없습니다.</div>`}
+      </div>
+
+      <div class="attend">
+        <span class="tag brand">다가오는 일정</span>
+        <b>${S.events.filter(e=>e.ev_date>=today).length}건</b>
+        <p>오늘 이후로 등록된 활동 일정입니다.<br>날짜를 눌러 자세히 볼 수 있습니다.</p>
+        <img src="assets/bird.png" alt="">
+      </div>
+    </div>
+  </div>`;
 };
+
 BIND.calendar = () => {
   $('#calPrev').addEventListener('click', ()=>{ CAL.m--; if(CAL.m<0){CAL.m=11;CAL.y--;} go('calendar'); });
   $('#calNext').addEventListener('click', ()=>{ CAL.m++; if(CAL.m>11){CAL.m=0;CAL.y++;} go('calendar'); });
@@ -1570,18 +1895,86 @@ function openEventForm(date){
 /* ============================================================================
    게임
    ============================================================================ */
+/* 동네 한 바퀴 미션 게임 — 시안의 3문항 퀴즈 */
+const QUIZ = [
+  { q:'주민이 "보도블록이 깨졌어요"라는 의견을 남겼습니다. 가장 먼저 할 일은?',
+    a:['현장에 나가 사진과 위치를 기록한다','바로 개선 공문을 보낸다','의견을 종결 처리한다'], ok:0 },
+  { q:'같은 불편이 세 건 넘게 접수됐습니다. 어떻게 하는 게 좋을까요?',
+    a:['각각 따로 답변한다','묶어서 하나의 개선 과제로 제안한다','가장 최근 것만 처리한다'], ok:1 },
+  { q:'개선이 완료됐습니다. 마지막으로 할 일은?',
+    a:['바로 다음 의견으로 넘어간다','내부에만 공유한다','의견함에 반영완료를 남겨 알린다'], ok:2 },
+];
+const GAME = { step:0, score:0, picked:null };
+
 VIEWS.game = () => {
   const url = S.site?.game_url, html = S.site?.game_html;
-  let frame;
-  if(url) frame = `<iframe src="${esc(url)}" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px" allow="fullscreen"></iframe>`;
-  else if(html) frame = `<iframe id="gameFrame" sandbox="allow-scripts" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px"></iframe>`;
-  else frame = `<div class="empty">게임 소스가 아직 등록되지 않았습니다.<br>${isAdmin()?'게임 등록 메뉴에서 등록하세요.':'관리자에게 문의하세요.'}</div>`;
-  return pageHead('게임','새소리단 활동용 게임입니다.')
-    + `<div class="card"><h2>게임 실행</h2><p class="sub">별도 제공되는 게임 소스가 이 영역에 삽입됩니다.</p>${frame}</div>`;
+
+  /* 관리자가 별도 게임을 등록했으면 그것을 우선 표시 */
+  if(url || html){
+    return `<div class="crumb">홈 · 게임</div>
+    <h1 class="pg-title">새소리단 게임</h1>
+    <p class="pg-sub">별도 제공되는 게임입니다.</p>
+    <div class="card">${url
+      ? `<iframe src="${esc(url)}" style="width:100%;height:70vh;border:0;border-radius:16px" allow="fullscreen"></iframe>`
+      : `<iframe id="gameFrame" sandbox="allow-scripts" style="width:100%;height:70vh;border:0;border-radius:16px"></iframe>`}
+    </div>`;
+  }
+
+  const done = GAME.step >= QUIZ.length;
+  const cur = QUIZ[Math.min(GAME.step, QUIZ.length-1)];
+
+  return `<div class="crumb">홈 · 게임</div>
+  <h1 class="pg-title">동네 한 바퀴 미션 게임</h1>
+  <p class="pg-sub">현장 점검 순서를 순서대로 골라보세요. 단원 교육용 퀴즈입니다.</p>
+
+  <div class="game-layout">
+    <div class="quizcard">
+      ${done ? `
+        <span class="pill-label">완료</span>
+        <h3>수고하셨습니다! ${QUIZ.length}문항 중 ${GAME.score}문항을 맞히셨어요.</h3>
+        <p style="margin:0 0 20px;color:var(--muted);font-size:14.5px">
+          ${GAME.score===QUIZ.length ? '완벽합니다. 현장 점검 순서를 정확히 알고 계시네요!'
+            : '다시 한 번 풀어보면서 순서를 익혀보세요.'}</p>
+        <button class="btn primary" id="qRestart">다시 하기</button>
+      ` : `
+        <span class="pill-label">문제 ${GAME.step+1} / ${QUIZ.length}</span>
+        <h3>${esc(cur.q)}</h3>
+        ${cur.a.map((c,i)=>{
+          let cls = '';
+          if(GAME.picked !== null) cls = (i===cur.ok) ? ' ok' : (i===GAME.picked ? ' no' : '');
+          return `<button class="choice${cls}" data-choice="${i}" ${GAME.picked!==null?'disabled':''}>${esc(c)}</button>`;
+        }).join('')}
+        ${GAME.picked !== null ? `<div class="notice" style="margin:16px 0 0">
+          ${GAME.picked===cur.ok ? '정답입니다!' : `아쉬워요. 정답은 “${esc(cur.a[cur.ok])}” 입니다.`}
+          <button class="btn sm primary" style="margin-left:10px" id="qNext">
+            ${GAME.step===QUIZ.length-1?'결과 보기':'다음 문제'}</button></div>` : ''}
+        <div class="quiz-foot">
+          <button class="btn sm ghost" id="qRestart">다시 하기</button>
+          <span class="hint" style="margin:0">점수 ${GAME.score} / ${QUIZ.length}</span>
+        </div>`}
+    </div>
+
+    <div class="gamepanel">
+      <span class="tag brand">진행 상황</span>
+      <div class="bars">${QUIZ.map((_,i)=>`<i class="${i<GAME.step?'on':''}"></i>`).join('')}</div>
+      <img src="assets/sheet-dragon.png" alt="고드래곤"
+           onerror="this.src='assets/dragon-thinking.png'">
+    </div>
+  </div>`;
 };
+
 BIND.game = () => {
   const html = S.site?.game_html;
-  if(html && !S.site?.game_url){ const f = $('#gameFrame'); if(f) f.srcdoc = html; }
+  if(html && !S.site?.game_url){ const f = $('#gameFrame'); if(f) f.srcdoc = html; return; }
+
+  $$('#main [data-choice]').forEach(b => b.addEventListener('click', ()=>{
+    if(GAME.picked !== null) return;
+    GAME.picked = +b.dataset.choice;
+    if(GAME.picked === QUIZ[GAME.step].ok) GAME.score++;
+    go('game');
+  }));
+  $('#qNext')?.addEventListener('click', ()=>{ GAME.step++; GAME.picked=null; go('game'); });
+  $('#qRestart')?.addEventListener('click', ()=>{ GAME.step=0; GAME.score=0; GAME.picked=null; go('game'); });
 };
 
 VIEWS.settings = () => `${pageHead('게임 등록','별도 제공된 게임 소스를 등록합니다.')}
