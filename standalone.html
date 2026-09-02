@@ -313,20 +313,11 @@
   .work h3{margin:0 0 10px;font-size:clamp(20px,2.2vw,27px);font-weight:900;letter-spacing:-.03em;word-break:keep-all}
   .work p{margin:0;font-size:clamp(14px,1.4vw,19px);line-height:1.7;color:var(--muted);word-break:keep-all}
 
-  /* 5. 연혁 */
-  .histcard{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:28px;
-    box-shadow:var(--shadow);padding:34px 40px;display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center}
-  .histcard>img{width:clamp(120px,16vw,210px);filter:drop-shadow(0 16px 26px rgba(28,38,90,.16))}
-  .histcard h2{font-size:clamp(24px,3vw,32px);font-weight:900;letter-spacing:-.03em;margin:0 0 8px}
-  .histcard .sub{margin:0 0 22px;color:var(--muted);font-size:14.5px}
-  .hist-row{margin-bottom:16px}
-  .hist-row .cap{font-size:13.5px;font-weight:800;color:var(--text);margin-bottom:9px;display:flex;
-    align-items:center;gap:8px;flex-wrap:wrap}
-  .hist-row .cap .tag{background:var(--accent);color:#fff}
-  .yrs{display:flex;gap:9px;flex-wrap:wrap}
-  .yr{font-size:15px;font-weight:800;padding:9px 17px;border-radius:12px;background:#f0eeff;color:#4a3ec8}
-  .yr.pink{background:var(--brand-weak);color:var(--brand)}
-  .yr.now{background:var(--brand);color:#fff}
+  /* 5. 연혁 — 일러스트 한 장 */
+  .histfig{margin:0;border-radius:26px;overflow:hidden;background:var(--surface);
+    border:1px solid rgba(22,34,92,.06);box-shadow:var(--shadow);
+    max-width:540px;margin-inline:auto;line-height:0}
+  .histfig img{display:block;width:100%;height:auto}
 
   /* 6. 소식 카드 */
   .news-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
@@ -513,9 +504,6 @@
     .voice-col.l,.voice-col.r{align-items:stretch}
     .voice-mid{order:-1;display:flex;justify-content:center}
     .voice{font-size:15px;padding:16px 20px;max-width:none}
-    .histcard{grid-template-columns:1fr;padding:26px 22px;text-align:center}
-    .histcard>img{margin:0 auto;width:150px}
-    .yrs,.hist-row .cap{justify-content:center}
     .gamebanner{border-radius:20px}
     .gb-cta{right:12px;bottom:12px;font-size:12.5px;padding:9px 15px}
     .schedcard{padding:22px 20px}
@@ -909,10 +897,6 @@ const VOICES_R = [
   '🙈 연가 쓰는데 어디 가는지 묻지 않았으면 합니다',
   '🐣 신규 직원도 쉽게 적응할 수 있게 업무 노하우를 더 잘 가르쳐 주셨으면 좋겠어요',
 ];
-const HISTORY_ERAS = [
-  { cap:'새내기 혁신참견단', badge:'', years:['2019','2020','2021','2022','2023'], tone:'' },
-  { cap:'새소리단 · 새내기소통리더단', badge:'8기 운영 중', years:['2024','2025','2026'], tone:'pink' },
-];
 
 VIEWS.home = () => {
   const r = SESSION.role;
@@ -1006,18 +990,9 @@ VIEWS.home = () => {
 
   <!-- 5. 연혁 -->
   <section class="wrap-1180" style="padding-top:64px">
-    <div class="histcard">
-      <img src="assets/bird.png" alt="">
-      <div>
-        <span class="pill-label">연혁</span>
-        <h2>2019년부터 지금까지</h2>
-        <p class="sub">새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로 이어지고 있습니다.</p>
-        ${HISTORY_ERAS.map(e=>`<div class="hist-row">
-          <div class="cap">${esc(e.cap)}${e.badge?`<span class="tag">${esc(e.badge)}</span>`:''}</div>
-          <div class="yrs">${e.years.map(y=>`<span class="yr ${e.tone}${y===String(new Date().getFullYear())?' now':''}">${y}</span>`).join('')}</div>
-        </div>`).join('')}
-      </div>
-    </div>
+    <figure class="histfig">
+      <img src="assets/history.jpg" alt="새소리단 연혁 — 2019년 새내기 혁신참견단 출범부터 2023년 새내기소통리더단(새소리단) 출범, 현재 8기 운영까지의 흐름">
+    </figure>
   </section>
 
   <!-- 6. 소식 -->
@@ -1108,18 +1083,9 @@ VIEWS.intro = () => {
 
   <!-- 연혁 -->
   <section style="padding-top:34px">
-    <div class="histcard">
-      <img src="assets/bird.png" alt="">
-      <div>
-        <span class="pill-label">연혁</span>
-        <h2>2019년부터 지금까지</h2>
-        <p class="sub">새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로 이어지고 있습니다.</p>
-        ${HISTORY_ERAS.map(e=>`<div class="hist-row">
-          <div class="cap">${esc(e.cap)}${e.badge?`<span class="tag">${esc(e.badge)}</span>`:''}</div>
-          <div class="yrs">${e.years.map(y=>`<span class="yr ${e.tone}${y===String(new Date().getFullYear())?' now':''}">${y}</span>`).join('')}</div>
-        </div>`).join('')}
-      </div>
-    </div>
+    <figure class="histfig">
+      <img src="assets/history.jpg" alt="새소리단 연혁 — 2019년 새내기 혁신참견단 출범부터 2023년 새내기소통리더단(새소리단) 출범, 현재 8기 운영까지의 흐름">
+    </figure>
   </section>`;
 };
 BIND.intro = () => {
