@@ -563,32 +563,6 @@
 </div>
 
 <!-- ================= 로그인 ================= -->
-<div id="authView" class="auth-wrap" style="display:none">
-  <div class="auth-card">
-    <div class="logo">🐦</div>
-    <h1 style="margin:0 0 4px;font-size:20px">새소리단 활동 플랫폼</h1>
-    <p style="margin:0;color:var(--muted);font-size:13px">
-      소개·소식·의견함·일정은 로그인 없이 둘러볼 수 있습니다.</p>
-
-    <button class="btn" style="width:100%;margin-top:18px" id="btnAnon">익명으로 둘러보기</button>
-
-    <div class="tabs">
-      <button id="tabLogin" class="on">로그인</button>
-      <button id="tabSignup">회원가입</button>
-    </div>
-
-    <label class="field" id="fName" style="display:none">이름 <span class="req">*</span>
-      <input id="auName" placeholder="예) 홍길동"></label>
-    <label class="field">이메일 <span class="req">*</span>
-      <input id="auEmail" type="email" autocomplete="username" placeholder="you@example.com"></label>
-    <label class="field">비밀번호 <span class="req">*</span>
-      <input id="auPw" type="password" autocomplete="current-password" placeholder="6자 이상"></label>
-
-    <button class="btn primary" style="width:100%" id="btnAuth">로그인</button>
-    <p class="hint" id="authHint" style="margin-top:12px">
-      가입 직후에는 <b>일반 방문자</b> 권한입니다. 단원·담당관 권한은 운영 관리자가 부여합니다.</p>
-  </div>
-</div>
 
 <!-- ================= 앱 ================= -->
 <div id="appView" style="display:none">
@@ -875,80 +849,22 @@ const fileUrl  = (f) => f?.path ? (SIGNED[f.path] || '') : '';
 /* ============================================================================
    인증
    ============================================================================ */
-let AUTH_MODE = 'login';
-
-function bindAuth(){
-  $('#tabLogin').addEventListener('click', ()=> setAuthMode('login'));
-  $('#tabSignup').addEventListener('click', ()=> setAuthMode('signup'));
-  $('#btnAuth').addEventListener('click', doAuth);
-  ['#auEmail','#auPw','#auName'].forEach(s =>
-    $(s).addEventListener('keydown', e=>{ if(e.key==='Enter') doAuth(); }));
-
-  $('#btnAnon').addEventListener('click', async ()=>{
-    busy(true);
-    const { error } = await sb.auth.signInAnonymously();
-    busy(false);
-    if(error){
-      if(/disabled|not enabled/i.test(error.message))
-        toast('익명 로그인이 꺼져 있습니다. Supabase > Authentication > Sign In / Providers 에서 Anonymous sign-ins 를 켜주세요.');
-      else failed('익명 입장', error);
-      return;
-    }
-    await afterLogin();
-  });
-}
-function setAuthMode(m){
-  AUTH_MODE = m;
-  $('#tabLogin').classList.toggle('on', m==='login');
-  $('#tabSignup').classList.toggle('on', m==='signup');
-  $('#fName').style.display = m==='signup' ? 'block' : 'none';
-  $('#btnAuth').textContent = m==='signup' ? '회원가입' : '로그인';
-  $('#auPw').setAttribute('autocomplete', m==='signup' ? 'new-password' : 'current-password');
-  $('#authHint').innerHTML = m==='signup'
-    ? '가입 직후에는 <b>일반 방문자</b> 권한입니다. 단원·담당관 권한은 운영 관리자가 부여합니다.'
-    : '계정이 없다면 회원가입 탭을 이용하세요.';
-}
-async function doAuth(){
-  const email = $('#auEmail').value.trim();
-  const pw    = $('#auPw').value;
-  const name  = $('#auName').value.trim();
-  if(!email || !pw){ toast('이메일과 비밀번호를 입력하세요'); return; }
-  if(AUTH_MODE==='signup' && !name){ toast('이름을 입력하세요'); return; }
-
-  busy(true);
-  try{
-    if(AUTH_MODE==='signup'){
-      const { data, error } = await sb.auth.signUp({ email, password:pw, options:{ data:{ name } } });
-      if(error) throw error;
-      if(!data.session){
-        toast('가입 확인 메일을 보냈습니다. 메일의 링크를 눌러 인증한 뒤 로그인하세요.');
-        setAuthMode('login'); return;
-      }
-      await sb.from('profiles').update({ name }).eq('id', data.user.id);
-    }else{
-      const { error } = await sb.auth.signInWithPassword({ email, password:pw });
-      if(error) throw error;
-    }
-    await afterLogin();
-  }catch(e){
-    const m = e?.message || '';
-    if(/Invalid login credentials/i.test(m)) toast('이메일 또는 비밀번호가 올바르지 않습니다.');
-    else if(/Email not confirmed/i.test(m)) toast('메일 인증이 아직 완료되지 않았습니다.');
-    else if(/already registered/i.test(m)) toast('이미 가입된 이메일입니다. 로그인해 주세요.');
-    else failed(AUTH_MODE==='signup'?'회원가입':'로그인', e);
-  }finally{ busy(false); }
-}
-
 async function loadProfile(){
   const { data:{ user } } = await sb.auth.getUser();
-  S.user = user;
-  if(!user) return false;
+  S.user = user || null;
+  /* 로그인이 아예 없어도 공개 콘텐츠는 볼 수 있게 방문자로 계속 진행합니다 */
+  if(!user){
+    S.profile = { id:null, name:'방문자', role:'visitor' };
+    return true;
+  }
   const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
   if(error){ failed('프로필 조회', error); return false; }
   S.profile = data || { id:user.id, name: user.is_anonymous ? '방문자' : (user.email||''), role:'visitor' };
   if(!S.profile.name) S.profile.name = user.is_anonymous ? '방문자' : (user.email||'').split('@')[0];
   return true;
 }
+/* 로그인한 실제 계정인가 (익명·미로그인 제외) */
+const isSignedIn = () => !!S.user && !S.user.is_anonymous;
 
 async function afterLogin(){
   if(!await loadProfile()) return;
@@ -970,8 +886,17 @@ async function trackVisit(){
 }
 
 function paintWho(){
-  $('#whoBox').innerHTML =
-    `${esc(myName())}<em>${ROLE_LABEL[role()]}</em>`;
+  /* 시안대로: 로그인 전에는 "단원 로그인" 버튼만, 로그인 후에는 이름·권한·로그아웃 */
+  if(isSignedIn()){
+    $('#whoBox').innerHTML = `${esc(myName())}<em>${ROLE_LABEL[role()]}</em>`;
+    $('#whoBox').style.display = '';
+    $('#logoutBtn').textContent = '로그아웃';
+    $('#logoutBtn').className = 'btn sm';
+  }else{
+    $('#whoBox').style.display = 'none';
+    $('#logoutBtn').textContent = '단원 로그인';
+    $('#logoutBtn').className = 'btn primary sm';
+  }
   // 담당관·관리자에게만 관리자 콘솔 버튼을 보여줍니다
   $('#adminBtn').style.display = isOfficer() ? 'block' : 'none';
 
@@ -989,7 +914,6 @@ function paintWho(){
 }
 function showApp(){
   $('#setupView').style.display='none';
-  $('#authView').style.display='none';
   $('#appView').style.display='block';
   renderNav();
   paintWho();
@@ -997,11 +921,70 @@ function showApp(){
   go(can(start) ? start : 'home');
   subscribeRealtime();
 }
-function showAuth(){
-  $('#setupView').style.display='none';
-  $('#appView').style.display='none';
-  $('#authView').style.display='grid';
-  setAuthMode('login');
+/* 로그인/회원가입은 전체 화면이 아니라 모달로 띄웁니다 (시안 구조) */
+let LOGIN_MODE = 'login';
+function openLogin(mode){
+  LOGIN_MODE = mode || 'login';
+  const render = () => {
+    openModal('단원 로그인', `
+      <div class="tabs" style="margin-top:0">
+        <button id="lgTabIn" class="${LOGIN_MODE==='login'?'on':''}">로그인</button>
+        <button id="lgTabUp" class="${LOGIN_MODE==='signup'?'on':''}">회원가입</button>
+      </div>
+      ${LOGIN_MODE==='signup'
+        ? `<label class="field">이름 <span class="req">*</span><input id="lgName" placeholder="예) 홍길동"></label>` : ''}
+      <label class="field">이메일 <span class="req">*</span>
+        <input id="lgEmail" type="email" autocomplete="username" placeholder="you@example.com"></label>
+      <label class="field">비밀번호 <span class="req">*</span>
+        <input id="lgPw" type="password" autocomplete="${LOGIN_MODE==='signup'?'new-password':'current-password'}"
+               placeholder="6자 이상"></label>
+      <div class="row-actions"><button class="btn primary" id="lgGo" style="width:100%">
+        ${LOGIN_MODE==='signup'?'회원가입':'로그인'}</button></div>
+      <p class="hint" style="margin-top:12px">${LOGIN_MODE==='signup'
+        ? '가입 직후에는 <b>일반 방문자</b> 권한입니다. 단원·담당관 권한은 운영 관리자가 부여합니다.'
+        : '계정이 없다면 회원가입 탭을 이용하세요. 로그인하지 않아도 소개·소식·의견함·일정은 볼 수 있습니다.'}</p>`);
+
+    $('#lgTabIn').addEventListener('click', ()=>{ LOGIN_MODE='login';  render(); });
+    $('#lgTabUp').addEventListener('click', ()=>{ LOGIN_MODE='signup'; render(); });
+    $('#lgGo').addEventListener('click', submit);
+    ['#lgEmail','#lgPw','#lgName'].forEach(s =>
+      $(s)?.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); }));
+  };
+
+  const submit = async () => {
+    const email = $('#lgEmail').value.trim();
+    const pw    = $('#lgPw').value;
+    const name  = $('#lgName')?.value.trim() || '';
+    if(!email || !pw){ toast('이메일과 비밀번호를 입력하세요'); return; }
+    if(LOGIN_MODE==='signup' && !name){ toast('이름을 입력하세요'); return; }
+    const btn = $('#lgGo'); btn.disabled = true; busy(true);
+    try{
+      if(LOGIN_MODE==='signup'){
+        const { data, error } = await sb.auth.signUp({ email, password:pw, options:{ data:{ name } } });
+        if(error) throw error;
+        if(!data.session){
+          toast('가입 확인 메일을 보냈습니다. 메일의 링크를 눌러 인증한 뒤 로그인하세요.');
+          LOGIN_MODE='login'; render(); return;
+        }
+        await sb.from('profiles').update({ name }).eq('id', data.user.id);
+      }else{
+        const { error } = await sb.auth.signInWithPassword({ email, password:pw });
+        if(error) throw error;
+      }
+      closeModal();
+      await afterLogin();
+      toast(`${myName()}님, 환영합니다`);
+    }catch(e){
+      const m = e?.message || '';
+      if(/Invalid login credentials/i.test(m)) toast('이메일 또는 비밀번호가 올바르지 않습니다.');
+      else if(/Email not confirmed/i.test(m)) toast('메일 인증이 아직 완료되지 않았습니다.');
+      else if(/already registered/i.test(m)) toast('이미 가입된 이메일입니다. 로그인해 주세요.');
+      else failed(LOGIN_MODE==='signup'?'회원가입':'로그인', e);
+      btn.disabled = false;
+    }finally{ busy(false); }
+  };
+
+  render();
 }
 
 /* ============================================================================
@@ -1619,7 +1602,7 @@ function openPostForm(key){
       const images = await uploadAll('media', picked, 'posts');
       const { error } = await sb.from('posts').insert({
         board:key, title, body, images,
-        author_id:S.user.id, author_name:myName(),
+        author_id:S.user?.id, author_name:myName(),
         pinned: !!$('#pfPin')?.checked
       });
       if(error) throw error;
@@ -1632,7 +1615,7 @@ function openPostForm(key){
 function openPost(id){
   const p = S.posts.find(x=>x.id===id); if(!p) return;
   const imgs = p.images || [];
-  const mine = p.author_id===S.user.id || isAdmin();
+  const mine = p.author_id===S.user?.id || isAdmin();
   openModal(p.title, `
     <div class="hint" style="margin-bottom:14px">${esc(p.author_name)} · ${fmt(p.created_at)} · ${esc(BOARDS[p.board]?.label||'')}</div>
     ${imgs.length ? `<div class="big-imgs">${imgs.map(a=>{
@@ -1683,7 +1666,7 @@ VIEWS.opinion = () => {
   ${list.length ? `<div class="op-table">${table(['번호','내용','분류','작성자','처리 상태'])}
     ${list.map((o,i)=>{
       const st = o.status || '접수';
-      const mine = o.author_id===S.user.id;
+      const mine = o.author_id===S.user?.id;
       return `<tr data-opopen="${o.id}">
         <td class="no">${list.length - i}</td>
         <td class="subj"><b>${highlight(excerpt(o.body,44), Q.opinion)}</b>
@@ -1700,7 +1683,7 @@ VIEWS.opinion = () => {
 function openOpinion(id){
   const o = S.opinions.find(x=>x.id===id); if(!o) return;
   const cs = S.comments.filter(c=>c.opinion_id===o.id);
-  const mine = o.author_id===S.user.id;
+  const mine = o.author_id===S.user?.id;
   openModal(`${o.cat} · ${o.alias||'익명'}`, `
     <div class="hint" style="margin-bottom:12px">${fmt(o.created_at)} 접수 ·
       <span class="st ${esc(o.status||'접수')}">${esc(o.status||'접수')}</span></div>
@@ -1709,7 +1692,7 @@ function openOpinion(id){
       <button class="btn sm danger" id="opDel">${mine?'내 글 삭제':'관리자 삭제'}</button></div>`:''}
     <div class="cmt-list" style="margin-top:18px">
       ${cs.length ? cs.map(c=>{
-        const cm = c.author_id===S.user.id;
+        const cm = c.author_id===S.user?.id;
         return `<div class="cmt"><div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.created_at)}</span>
           ${(cm||isAdmin())?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px" data-cdel="${c.id}">삭제</button>`:''}
           </div><div>${esc(c.body)}</div></div>`; }).join('')
@@ -1730,7 +1713,7 @@ function openOpinion(id){
     const t = $('#opCmt').value.trim();
     if(!t){ toast('댓글 내용을 입력하세요'); return; }
     busy(true);
-    const { error } = await sb.from('opinion_comments').insert({ opinion_id:id, body:t, author_id:S.user.id });
+    const { error } = await sb.from('opinion_comments').insert({ opinion_id:id, body:t, author_id:S.user?.id });
     busy(false);
     if(error) return failed('댓글 등록', error);
     await refresh(); closeModal(); toast('댓글을 등록했습니다'); go('opinion');
@@ -1761,7 +1744,7 @@ function openOpinionForm(){
     const body = $('#opBody').value.trim();
     if(!body){ toast('내용을 입력하세요'); return; }
     const btn=$('#opSubmit'); btn.disabled=true; busy(true);
-    const { error } = await sb.from('opinions').insert({ cat:$('#opCat').value, body, author_id:S.user.id });
+    const { error } = await sb.from('opinions').insert({ cat:$('#opCat').value, body, author_id:S.user?.id });
     busy(false); btn.disabled=false;
     if(error) return failed('의견 제출', error);
     await refresh(); closeModal(); toast('익명으로 제출되었습니다'); go('opinion');
@@ -1836,7 +1819,7 @@ VIEWS.calendar = () => {
             <span class="tag brand">정기 활동</span>
             <b style="font-size:15.5px;font-weight:900">${esc(e.title)}</b></div>
           <div class="hint" style="margin:0 0 10px">${esc(e.place||'장소 미정')}${e.ev_time?' · '+esc(e.ev_time):''}</div>
-          ${(e.author_id===S.user.id || isAdmin())
+          ${(e.author_id===S.user?.id || isAdmin())
             ? `<button class="btn sm danger" data-evdel="${e.id}">삭제</button>` : ''}
         </div>`).join('') : `<div class="empty" style="padding:22px 0">이 날짜에 등록된 일정이 없습니다.</div>`}
       </div>
@@ -1884,7 +1867,7 @@ function openEventForm(date){
     const { error } = await sb.from('events').insert({
       ev_date:d, ev_time:$('#evTime').value, title:t,
       place:$('#evPlace').value.trim(), descr:$('#evDesc').value.trim(),
-      author_id:S.user.id, author_name:myName() });
+      author_id:S.user?.id, author_name:myName() });
     busy(false); btn.disabled = false;
     if(error) return failed('일정 등록', error);
     CAL.sel = d; const dt = new Date(d); CAL.y = dt.getFullYear(); CAL.m = dt.getMonth();
@@ -2040,7 +2023,7 @@ BIND.report = () => {
         title:t, act_date:d, team:$('#rpTeam').value, overview:ov,
         content:$('#rpContent').value.trim(), result:$('#rpResult').value.trim(),
         improve:$('#rpImprove').value.trim(), files,
-        author_id:S.user.id, author_name:$('#rpAuthor').value.trim()||myName() });
+        author_id:S.user?.id, author_name:$('#rpAuthor').value.trim()||myName() });
       if(error) throw error;
       await refresh(); toast('보고서가 제출되었습니다'); go('mine');
     }catch(e){ failed('보고서 제출', e); btn.disabled = false; }
@@ -2090,7 +2073,7 @@ BIND.expense = () => {
         act_date:date, activity:act, item, amount:Number(amount),
         pay_method:$('#exPay').value, bank:$('#exBank').value.trim(),
         contact:$('#exContact').value.trim(), note:$('#exNote').value.trim(),
-        receipts, author_id:S.user.id, author_name:name });
+        receipts, author_id:S.user?.id, author_name:name });
       if(error) throw error;
       await refresh(); toast('정산 신청이 접수되었습니다'); go('mine');
     }catch(e){ failed('정산 신청', e); btn.disabled = false; }
@@ -2102,8 +2085,8 @@ BIND.expense = () => {
    내 제출 내역
    ============================================================================ */
 VIEWS.mine = () => {
-  const rp = S.reports.filter(x=>x.author_id===S.user.id);
-  const ex = S.expenses.filter(x=>x.author_id===S.user.id);
+  const rp = S.reports.filter(x=>x.author_id===S.user?.id);
+  const ex = S.expenses.filter(x=>x.author_id===S.user?.id);
   return pageHead('내 제출 내역','내가 낸 보고서와 정산 신청의 처리 상태입니다.')
   + `<div class="card"><h2>결과보고서 (${rp.length})</h2>
       ${rp.length ? table(['제목','활동일','상태','제출일시','']) + rp.map(r=>`<tr>
@@ -2168,11 +2151,11 @@ VIEWS.members = () => {
     <div class="card"><h2>회원 목록 (${ps.length})</h2>
       <p class="sub">가입 직후에는 모두 일반 방문자입니다. 확인 후 권한을 올려주세요.</p>
       ${ps.length ? table(['이름','팀','권한','가입일', isAdmin()?'권한 변경':'']) + ps.map(p=>`<tr>
-        <td>${esc(p.name||'(이름 없음)')}${p.id===S.user.id?' <span class="tag brand">나</span>':''}</td>
+        <td>${esc(p.name||'(이름 없음)')}${p.id===S.user?.id?' <span class="tag brand">나</span>':''}</td>
         <td>${esc(p.team||'-')}</td>
         <td>${esc(ROLE_LABEL[p.role])}</td>
         <td class="hint">${fmtDay(p.created_at)}</td>
-        <td>${isAdmin() && p.id!==S.user.id ? `<select data-role-for="${p.id}">
+        <td>${isAdmin() && p.id!==S.user?.id ? `<select data-role-for="${p.id}">
             ${['visitor','member','officer','admin'].map(r=>`<option value="${r}" ${r===p.role?'selected':''}>${ROLE_LABEL[r]}</option>`).join('')}
           </select>` : ''}</td></tr>`).join('') + tableEnd
         : `<div class="empty">회원이 없습니다.</div>`}</div>`;
@@ -2313,7 +2296,7 @@ function resizeToBlob(file, max=1600, quality=0.75){
 async function uploadAll(bucket, picked, folder){
   const out = [];
   for(const p of picked){
-    const path = `${folder}/${S.user.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+    const path = `${folder}/${S.user?.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
     const { error } = await sb.storage.from(bucket).upload(path, p.blob, { contentType:'image/jpeg' });
     if(error) throw error;
     out.push({ path, name:p.name });
@@ -2353,14 +2336,30 @@ $('#brandBtn').addEventListener('click', ()=>{ go('home'); closeSide(); });
 $('#refreshBtn').addEventListener('click', async ()=>{ await refresh(); go(CURRENT); toast('최신 내용을 불러왔습니다'); });
 $('#adminBtn').addEventListener('click', ()=> window.open('admin.html','_blank'));
 $$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
-$$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
+/* 로그인 전에는 "단원 로그인", 로그인 뒤에는 "로그아웃" 으로 동작합니다 */
 $('#logoutBtn').addEventListener('click', async ()=>{
+  if(!isSignedIn()){ openLogin('login'); return; }
   if(channel){ sb.removeChannel(channel); channel = null; }
   await sb.auth.signOut();
-  S.user = null; S.profile = null;
   try{ location.hash = '' }catch(e){}
-  showAuth();
+  await ensureSession();
+  await afterLogin();
+  toast('로그아웃했습니다');
 });
+
+/* 세션 확보 — 없으면 익명으로 입장. 익명 로그인이 꺼져 있어도 멈추지 않습니다. */
+let ANON_BLOCKED = false;
+async function ensureSession(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session) return true;
+  const { error } = await sb.auth.signInAnonymously();
+  if(error){
+    ANON_BLOCKED = true;
+    console.warn('익명 로그인 불가:', error.message);
+    return false;
+  }
+  return true;
+}
 
 /* ============================================================================
    시작
@@ -2393,14 +2392,15 @@ async function boot(){
   sb = window.supabase.createClient(cfg.url, cfg.anonKey, {
     auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
   });
-  bindAuth();
 
-  const { data:{ session } } = await sb.auth.getSession();
-  if(session) await afterLogin();
-  else showAuth();
+  /* 로그인 화면을 거치지 않고 바로 홈페이지를 보여줍니다.
+     세션이 없으면 익명으로 조용히 입장시키고, 그마저 막혀 있으면
+     로그인 없이 공개 콘텐츠만 읽는 상태로 계속 진행합니다. */
+  await ensureSession();
+  await afterLogin();
 
   sb.auth.onAuthStateChange((event)=>{
-    if(event === 'SIGNED_OUT'){ S.user = null; S.profile = null; showAuth(); }
+    if(event === 'SIGNED_OUT'){ paintWho(); }
   });
 }
 boot();

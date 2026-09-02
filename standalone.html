@@ -407,43 +407,6 @@
 <body>
 
 <!-- ================= LOGIN ================= -->
-<div id="loginView" class="login-wrap">
-  <div class="login-card">
-    <div class="logo">🐦</div>
-    <h1 style="margin:0 0 4px;font-size:20px">새소리단 활동 플랫폼</h1>
-    <p style="margin:0;color:var(--muted);font-size:13px">권한을 선택해 입장하세요. 소개·소식·의견함·일정은 로그인 없이 볼 수 있습니다.</p>
-
-    <div class="role-opts" id="roleOpts">
-      <label class="role-opt" data-role="anon">
-        <input type="radio" name="role" value="anon" checked />
-        <div><b>일반 방문자 (익명)</b><span>소개·소식·일정 열람, 의견함 익명 작성·댓글</span></div>
-      </label>
-      <label class="role-opt" data-role="member">
-        <input type="radio" name="role" value="member" />
-        <div><b>새소리단 단원</b><span>새소리단 공간(공지·자유·활동공유), 보고서 제출, 활동비 정산</span></div>
-      </label>
-      <label class="role-opt" data-role="officer">
-        <input type="radio" name="role" value="officer" />
-        <div><b>혁신행정담당관</b><span>보고서·정산·영수증 전체 열람 및 승인 처리</span></div>
-      </label>
-      <label class="role-opt" data-role="admin">
-        <input type="radio" name="role" value="admin" />
-        <div><b>운영 관리자</b><span>전체 권한 · 소개 편집 · 게임 등록 · 백업/복원</span></div>
-      </label>
-    </div>
-
-    <label class="field" id="nameField" style="display:none">표시 이름 <span class="hint" style="display:inline">단원·담당관은 실명 권장</span>
-      <input id="loginName" placeholder="예) 홍길동 / 3팀 홍길동" />
-    </label>
-    <label class="field" id="codeField" style="display:none">접근 코드
-      <input id="loginCode" type="password" placeholder="담당자에게 받은 코드" />
-      <span class="hint">기본값 — 단원 <code>bird</code> · 담당관 <code>innov</code> · 관리자 <code>admin</code></span>
-    </label>
-
-    <button class="btn primary" style="width:100%;margin-top:6px" id="loginBtn">입장하기</button>
-    <p class="hint" style="text-align:center;margin-top:12px">데이터는 이 브라우저에 저장됩니다. 여러 명이 공유하려면 관리자 &gt; 배포 안내를 참고하세요.</p>
-  </div>
-</div>
 
 <!-- ================= APP ================= -->
 <div id="appView" style="display:none">
@@ -654,44 +617,63 @@ const canWrite = (boardKey) => BOARDS[boardKey].write.includes(SESSION?.role);
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-function bindLogin(){
-  const opts = $$('#roleOpts .role-opt');
-  function sync(){
-    const role = $('input[name=role]:checked').value;
-    opts.forEach(o=>o.classList.toggle('sel', o.dataset.role===role));
-    const show = role==='anon' ? 'none' : 'block';
-    $('#codeField').style.display = show;
-    $('#nameField').style.display = show;
+
+const isSignedIn = () => SESSION && SESSION.role !== 'anon';
+
+function paintWho(){
+  /* 시안대로: 로그인 전에는 "단원 로그인" 버튼만 */
+  if(isSignedIn()){
+    $('#whoBox').innerHTML = `${esc(SESSION.name)}<em>${ROLE_LABEL[SESSION.role]}</em>`;
+    $('#whoBox').style.display = '';
+    $('#logoutBtn').textContent = '로그아웃';
+    $('#logoutBtn').className = 'btn sm';
+  }else{
+    $('#whoBox').style.display = 'none';
+    $('#logoutBtn').textContent = '단원 로그인';
+    $('#logoutBtn').className = 'btn primary sm';
   }
-  opts.forEach(o=> o.addEventListener('click', ()=>{ o.querySelector('input').checked = true; sync(); }));
-  $$('input[name=role]').forEach(r=> r.addEventListener('change', sync));
-  sync();
-
-  ['#loginName','#loginCode'].forEach(sel =>
-    $(sel).addEventListener('keydown', e=>{ if(e.key==='Enter') $('#loginBtn').click(); }));
-
-  $('#loginBtn').addEventListener('click', ()=>{
-    const role = $('input[name=role]:checked').value;
-    const name = $('#loginName').value.trim();
-    const code = $('#loginCode').value;
-    const s = DB.settings();
-    if(role!=='anon' && !name){ toast('표시 이름을 입력하세요'); return; }
-    if(role==='member'  && code!==s.codeMember){  toast('단원 접근 코드가 올바르지 않습니다'); return; }
-    if(role==='officer' && code!==s.codeOfficer){ toast('담당관 접근 코드가 올바르지 않습니다'); return; }
-    if(role==='admin'   && code!==s.codeAdmin){   toast('관리자 접근 코드가 올바르지 않습니다'); return; }
-    SESSION = { role, name: role==='anon' ? myAlias() : name };
-    LS.set('sm_session', SESSION);
-    enterApp();
-  });
 }
 
 function enterApp(){
-  $('#loginView').style.display='none';
+
   $('#appView').style.display='block';
   renderNav();
-  $('#whoBox').innerHTML = `${esc(SESSION.name)}<em>${ROLE_LABEL[SESSION.role]}</em>`;
+  paintWho();
   const start = location.hash.replace('#','') || 'home';
   go(can(start) ? start : 'home');
+}
+
+/* 로그인은 전체 화면이 아니라 모달로 (시안 구조) */
+function openLogin(){
+  const s = DB.settings();
+  openModal('단원 로그인', `
+    <p class="hint" style="margin:0 0 16px">연습용 사본입니다. 접근 코드로 권한을 골라 들어갑니다.</p>
+    <label class="field">권한
+      <select id="lgRole">
+        <option value="member">새소리단 단원</option>
+        <option value="officer">혁신행정담당관</option>
+        <option value="admin">운영 관리자</option>
+      </select></label>
+    <label class="field">표시 이름 <span class="req">*</span><input id="lgName" placeholder="예) 홍길동"></label>
+    <label class="field">접근 코드 <span class="req">*</span>
+      <input id="lgCode" type="password" placeholder="담당자에게 받은 코드">
+      <span class="hint">기본값 — 단원 <code>${esc(s.codeMember)}</code> ·
+        담당관 <code>${esc(s.codeOfficer)}</code> · 관리자 <code>${esc(s.codeAdmin)}</code></span></label>
+    <div class="row-actions"><button class="btn primary" id="lgGo" style="width:100%">로그인</button></div>`);
+
+  const submit = ()=>{
+    const role = $('#lgRole').value, name = $('#lgName').value.trim(), code = $('#lgCode').value;
+    if(!name){ toast('표시 이름을 입력하세요'); return; }
+    const st = DB.settings();
+    const want = role==='member' ? st.codeMember : role==='officer' ? st.codeOfficer : st.codeAdmin;
+    if(code !== want){ toast('접근 코드가 올바르지 않습니다'); return; }
+    SESSION = { role, name };
+    LS.set('sm_session', SESSION);
+    closeModal(); renderNav(); paintWho(); go('home');
+    toast(`${name}님, 환영합니다`);
+  };
+  $('#lgGo').addEventListener('click', submit);
+  ['#lgName','#lgCode'].forEach(x=> $(x).addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); }));
 }
 
 /* ============================================================
@@ -1823,17 +1805,21 @@ $$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b
 $$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
 $('#scrim').addEventListener('click', closeSide);
 $('#logoutBtn').addEventListener('click', ()=>{
-  LS.del('sm_session'); SESSION = null;
+  if(!isSignedIn()){ openLogin(); return; }
+  SESSION = { role:'anon', name: myAlias() };
+  LS.set('sm_session', SESSION);
   try{ location.hash = '' }catch(e){}
-  $('#appView').style.display='none';
-  $('#loginView').style.display='grid';
+  renderNav(); paintWho(); go('home');
+  toast('로그아웃했습니다');
 });
 
 /* ============================================================
    BOOT
    ============================================================ */
-bindLogin();
-if(SESSION) enterApp();
+/* 로그인 화면 없이 바로 홈페이지를 보여줍니다 */
+if(!SESSION) SESSION = { role:'anon', name: myAlias() };
+LS.set('sm_session', SESSION);
+enterApp();
 if(!STORE_OK) setTimeout(()=> toast('이 환경에서는 저장이 제한됩니다. 새로고침하면 데이터가 사라집니다.'), 600);
 </script>
 </body>
