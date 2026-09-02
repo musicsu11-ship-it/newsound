@@ -1422,7 +1422,6 @@ function boardView(key){
 
   /* ── 소식: 추천(큰 카드) + 사이드 목록 ── */
   if(key === 'news'){
-    const [feat, ...rest] = list;
     return `<div class="crumb">홈 · 새소리단 소식</div>
     <div class="pg-head">
       <div><h1 class="pg-title">새소리단 소식</h1>
@@ -1433,38 +1432,17 @@ function boardView(key){
       </div>
     </div>
     ${q?`<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>`:''}
-    ${!list.length ? `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 등록된 소식이 없습니다.'}</div></div>` : `
-      <h2 style="font-size:15px;font-weight:900;margin:0 0 14px">추천 소식</h2>
-      <div class="news-feat">
-        <article class="feat-card" data-open-post="${feat.id}">
-          <div class="ph">${photoOf(feat) ? `<img src="${esc(photoOf(feat))}" alt="">` : '현장 사진'}</div>
-          <div class="bd"><span class="tag brand">활동 소식</span>
-            <h3>${esc(feat.title)}</h3>
-            <p>${esc(excerpt(feat.body,90))}</p>
-            <div class="dt" style="font-size:12.5px;color:var(--muted)">${fmtDay(feat.created_at)}</div></div>
-        </article>
-        <div class="side-list">
-          ${rest.slice(0,3).map(p=>`<article class="side-item" data-open-post="${p.id}">
-            <div class="ph">${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="">`:'안내물 사진'}</div>
-            <div><span class="tag brand">활동 소식</span>
-              <h4>${esc(p.title)}</h4>
-              <div class="dt">${fmtDay(p.created_at)}</div></div>
-          </article>`).join('') || '<div class="empty">다른 소식이 없습니다.</div>'}
-        </div>
-      </div>
-      ${rest.length > 3 ? `
-        <h2 style="font-size:15px;font-weight:900;margin:36px 0 14px">
-          지난 소식 <span style="color:var(--muted);font-weight:700">${rest.length - 3}건</span></h2>
-        <div class="news-grid">
-          ${rest.slice(3).map(p=>`<article class="news-card" data-open-post="${p.id}">
+    ${!list.length
+      ? `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 등록된 소식이 없습니다.'}</div></div>`
+      : `<div class="news-grid">
+          ${list.map(p=>`<article class="news-card" data-open-post="${p.id}">
             <div class="ph">${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="" loading="lazy">`:'📰'}</div>
             <div class="bd"><span class="tag brand">활동 소식</span>
               <h3>${esc(p.title)}</h3>
-              <p>${esc(excerpt(p.body,60))}</p>
+              <p>${esc(excerpt(p.body,70))}</p>
               <div class="dt">${fmtDay(p.created_at)}</div></div>
           </article>`).join('')}
-        </div>` : ''}
-      `}`;
+        </div>`}`;
   }
 
   /* ── 새소리단 공간: 사진 카드 격자 ── */
