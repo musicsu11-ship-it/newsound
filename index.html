@@ -1533,6 +1533,9 @@ function openPost(id){
    의견함
    ============================================================================ */
 
+/* 의견 분류 — 여기만 고치면 작성 폼에 그대로 반영됩니다 */
+const OP_CATS = ['일하는 방식','조직문화','업무효율','디지털·AI','복지·근무환경','제도개선','기타'];
+
 VIEWS.opinion = () => {
   const q = (Q.opinion||'').toLowerCase();
   const cmtsOf = id => S.comments.filter(c => c.opinion_id===id);
@@ -1622,8 +1625,7 @@ function openOpinionForm(){
   openModal('의견 남기기', `
     <div class="notice">별칭은 접속 위치를 기준으로 자동 부여됩니다. 이름·소속·연락처는 저장하지 않습니다.</div>
     <label class="field">분류<select id="opCat">
-      <option>업무효율</option><option>조직문화</option><option>AI 활용</option>
-      <option>복지</option><option>일하는 방식</option><option>기타</option></select></label>
+      ${OP_CATS.map(c=>`<option>${esc(c)}</option>`).join('')}</select></label>
     <label class="field">내용 <span class="req">*</span>
       <textarea id="opBody" style="min-height:130px" placeholder="자유롭게 작성해주세요"></textarea></label>
     <div class="row-actions"><button class="btn primary" id="opSubmit">익명으로 제출</button></div>`);

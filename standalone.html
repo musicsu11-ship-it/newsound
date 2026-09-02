@@ -1265,6 +1265,9 @@ const addMyOp = (id) => { const a = myOps(); a.push(id); LS.set('sm_myops', a); 
 const dropMyOp= (id) => LS.set('sm_myops', myOps().filter(x=>x!==id));
 function hashPin(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0 } return h.toString(36); }
 
+/* 의견 분류 — 여기만 고치면 작성 폼에 그대로 반영됩니다 */
+const OP_CATS = ['일하는 방식','조직문화','업무효율','디지털·AI','복지·근무환경','제도개선','기타'];
+
 VIEWS.opinion = () => {
   const q = (Q.opinion||'').toLowerCase();
   let list = DB.opinions().slice().sort((a,b)=>b.at.localeCompare(a.at));
@@ -1279,7 +1282,7 @@ VIEWS.opinion = () => {
       <h2>새 의견 남기기</h2>
       <p class="sub">답변이 필요하면 본문에 연락 방법을 직접 적어주세요.</p>
       <label class="field">분류
-        <select id="opCat"><option>일반 의견</option><option>활동 제안</option><option>불편·신고</option><option>칭찬</option><option>기타</option></select>
+        <select id="opCat">${OP_CATS.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
       </label>
       <label class="field">내용 <span class="req">*</span><textarea id="opBody" placeholder="자유롭게 작성해주세요"></textarea></label>
       <label class="field">삭제 비밀번호 <span class="hint" style="display:inline">선택</span>
