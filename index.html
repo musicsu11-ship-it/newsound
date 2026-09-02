@@ -333,10 +333,17 @@
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .news-card .dt{font-size:12.5px;color:var(--muted)}
 
-  /* 7. 일정 */
+  /* 7·8. 일정 캘린더 + 게임 배너 — 같은 폭으로 위아래 배치 */
+  .home-stack{display:flex;flex-direction:column;gap:26px;max-width:900px;margin:0 auto}
   .schedcard{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:28px;
     box-shadow:var(--shadow);padding:30px 34px}
-  .schedcard h2{font-size:clamp(20px,2.4vw,26px);font-weight:900;letter-spacing:-.03em;margin:0 0 18px}
+  .schedcard h2{font-size:clamp(20px,2.4vw,26px);font-weight:900;letter-spacing:-.03em;margin:0}
+  .sched-head{display:flex;align-items:flex-end;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .cal-month{font-size:17px;font-weight:900;color:var(--brand)}
+  .home-cal .day{min-height:74px;cursor:default}
+  .home-cal .day:hover{background:var(--surface)}
+  .home-cal .day.dim:hover{background:var(--surface)}
   .sched-row{display:flex;align-items:center;gap:16px;padding:13px 0;border-bottom:1px solid var(--border)}
   .sched-row:last-of-type{border-bottom:0}
   .sched-row .d{flex:none;background:#f0eeff;color:#4a3ec8;font-weight:900;font-size:14px;
@@ -347,7 +354,7 @@
     cursor:pointer;padding:14px 0 0;font-family:inherit}
 
   /* 8. 게임 배너 — 일러스트로 꽉 채웁니다 */
-  .gamebanner{display:block;width:100%;max-width:900px;margin:0 auto;padding:0;border:0;background:#f9d9e4;border-radius:26px;
+  .gamebanner{display:block;width:100%;padding:0;border:0;background:#f9d9e4;border-radius:26px;
     overflow:hidden;cursor:pointer;position:relative;line-height:0;
     box-shadow:var(--shadow);transition:transform .15s, box-shadow .15s}
   .gamebanner:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
@@ -1106,11 +1113,35 @@ const VOICES_R = [
   '🐣 신규 직원도 쉽게 적응할 수 있게 업무 노하우를 더 잘 가르쳐 주셨으면 좋겠어요',
 ];
 
+/* 홈 캘린더 — 이번 달을 읽기 전용으로 보여줍니다 */
+const HM = { y:new Date().getFullYear(), m:new Date().getMonth() };
+function homeCalendar(){
+  const startDow = new Date(HM.y, HM.m, 1).getDay();
+  const daysInMonth = new Date(HM.y, HM.m+1, 0).getDate();
+  const prevDays = new Date(HM.y, HM.m, 0).getDate();
+  const today = ymd(new Date());
+
+  const cells = [];
+  for(let i=startDow-1;i>=0;i--) cells.push({ d:prevDays-i, dim:true, key:null });
+  for(let d=1;d<=daysInMonth;d++) cells.push({ d, dim:false, key:`${HM.y}-${pad(HM.m+1)}-${pad(d)}` });
+  let tail = 1; while(cells.length % 7 !== 0) cells.push({ d:tail++, dim:true, key:null });
+
+  return `<div class="cal home-cal">
+    ${['일','월','화','수','목','금','토'].map(w=>`<div class="dow">${w}</div>`).join('')}
+    ${cells.map((c,i)=>{
+      const evs = c.key ? S.events.filter(e=>e.ev_date===c.key) : [];
+      const cls = ['day', c.dim?'dim':'', c.key===today?'today':'', i%7===0?'sun':''].filter(Boolean).join(' ');
+      return `<div class="${cls}">
+        <span class="dnum">${c.d}</span>
+        ${evs.slice(0,2).map(e=>`<span class="ev" title="${esc(e.title)}${e.place?' · '+esc(e.place):''}">${esc(e.title)}</span>`).join('')}
+        ${evs.length>2?`<span class="hint" style="margin:0">+${evs.length-2}</span>`:''}</div>`;
+    }).join('')}</div>`;
+}
+
 VIEWS.home = () => {
   const r = role();
   const today = ymd(new Date());
   const news = S.posts.filter(p => p.board==='news').slice(0,3);
-  const upcoming = S.events.filter(e => e.ev_date >= today).slice(0,3);
   const works = intro().teams || [];
 
   /* 관리자·담당관용 알림은 히어로 위에 얇게 */
@@ -1228,26 +1259,25 @@ VIEWS.home = () => {
     }).join('')}</div>` : `<div class="card"><div class="empty">아직 등록된 소식이 없습니다.</div></div>`}
   </section>
 
-  <!-- 7. 일정 -->
-  <section class="wrap-1180" style="padding-top:64px">
-    <div class="schedcard">
-      <span class="pill-label">일정</span>
-      <h2>새소리단 활동일이 궁금하다면?</h2>
-      ${upcoming.length ? upcoming.map(e=>`<div class="sched-row">
-        <span class="d">${esc(e.ev_date.slice(5).replace('-','.'))}</span>
-        <div><b>${esc(e.title)}</b><span>${esc(e.place||'장소 미정')}${e.ev_time?' · '+esc(e.ev_time):''}</span></div>
-      </div>`).join('') : `<div class="empty">예정된 일정이 없습니다.</div>`}
-      <button class="linkmore" data-go-to="calendar">일정 전체 보기 →</button>
-    </div>
-  </section>
-
-  <!-- 8. 게임 -->
+  <!-- 7. 일정 (캘린더) + 8. 게임 — 같은 폭으로 위아래 배치 -->
   <section class="wrap-1180" style="padding:64px 0 72px">
-    <button class="gamebanner" data-go-to="game" aria-label="게임 열기">
-      <img src="assets/game-banner.png"
-           alt="고드래곤과 새초롱이가 책상에서 “일하기 싫다…”, “심심풀이 게임이나 해볼까?” 하고 말하는 그림">
-      <span class="gb-cta">게임 열기 →</span>
-    </button>
+    <div class="home-stack">
+      <div class="schedcard">
+        <div class="sched-head">
+          <div><span class="pill-label">일정</span>
+            <h2>새소리단 활동일이 궁금하다면?</h2></div>
+          <b class="cal-month">${HM.y}년 ${HM.m+1}월</b>
+        </div>
+        ${homeCalendar()}
+        <button class="linkmore" data-go-to="calendar">일정 전체 보기 →</button>
+      </div>
+
+      <button class="gamebanner" data-go-to="game" aria-label="게임 열기">
+        <img src="assets/game-banner.png"
+             alt="고드래곤과 새초롱이가 책상에서 “일하기 싫다…”, “심심풀이 게임이나 해볼까?” 하고 말하는 그림">
+        <span class="gb-cta">게임 열기 →</span>
+      </button>
+    </div>
   </section>
   </div>`;
 };
