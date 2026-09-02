@@ -75,7 +75,10 @@
     padding-bottom:26px}
   .foot-top h2{font-size:clamp(21px,2.6vw,28px);font-weight:900;letter-spacing:-.03em;margin:0;line-height:1.35}
   .foot-top h2 em{font-style:normal;color:var(--accent)}
-  .foot-links{display:flex;gap:22px;flex-wrap:wrap}
+  .foot-links{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  /* 로고 원본이 흰 배경이라 흰 판 위에 올려 네이비 푸터에서도 또렷하게 보이게 합니다 */
+  .foot-logo{height:46px;width:auto;display:block;background:#fff;
+    padding:8px 14px;border-radius:12px}
   .foot-links button{border:0;background:transparent;color:#fff;font-family:inherit;font-size:14px;
     font-weight:800;cursor:pointer;padding:0}
   .foot-links button:hover{color:var(--accent)}
@@ -544,9 +547,7 @@
       <div class="foot-top">
         <h2>작은 목소리가<br>일하는 방식을 <em>바꿉니다</em></h2>
         <div class="foot-links">
-          <button data-foot="intro">소개</button>
-          <button data-foot="news">소식</button>
-          <button data-foot="opinion">의견함</button>
+          <img class="foot-logo" src="assets/logo-molab.jpg" alt="고용노동부">
         </div>
       </div>
       <div class="foot-meta">
@@ -1926,8 +1927,6 @@ document.addEventListener('keydown', e=>{
 function closeSide(){ $('#navArea').classList.remove('open'); $('#scrim').classList.remove('open'); }
 $('#menuToggle').addEventListener('click', e=>{ e.stopPropagation(); $('#navArea').classList.toggle('open'); $('#scrim').classList.toggle('open'); });
 $('#brandBtn').addEventListener('click', ()=>{ go('home'); closeSide(); });
-$$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
-$$('.foot-links [data-foot]').forEach(b => b.addEventListener('click', ()=> go(b.dataset.foot)));
 $('#scrim').addEventListener('click', closeSide);
 $('#logoutBtn').addEventListener('click', ()=>{
   if(!isSignedIn()){ openLogin(); return; }
