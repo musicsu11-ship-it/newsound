@@ -373,18 +373,20 @@
   .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
 
   /* 소개 — 팀 밴드 */
-  .teamband{padding:44px clamp(20px,4vw,54px);display:grid;grid-template-columns:auto 1fr;
-    gap:clamp(24px,4vw,56px);align-items:center}
+  .teamband{padding:30px clamp(18px,3vw,40px);display:grid;grid-template-columns:auto 1fr;
+    gap:clamp(20px,3vw,42px);align-items:center}
   .teamband:nth-child(even){grid-template-columns:1fr auto;text-align:right}
   .teamband:nth-child(even) .tb-art{order:2}
-  .tb-art{width:clamp(150px,18vw,215px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.62);
-    border:2px dashed rgba(22,34,92,.16);display:grid;place-items:center;text-align:center;
-    color:rgba(22,34,92,.4);font-size:12.5px;font-weight:700;overflow:hidden}
-  .tb-art img{width:100%;height:100%;object-fit:cover;border-radius:50%}
-  .tb-no{font-size:12.5px;font-weight:900;letter-spacing:.14em;color:var(--brand);margin-bottom:8px}
-  .teamband h3{font-size:clamp(24px,3.2vw,34px);font-weight:900;letter-spacing:-.03em;margin:0 0 12px}
-  .teamband .lead{font-size:clamp(15px,1.7vw,19px);font-weight:800;margin:0 0 8px;color:var(--text)}
-  .teamband p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.7;word-break:keep-all}
+  /* 네모 틀 — 사진을 자르지 않고 원본 그대로 보여줍니다 */
+  .tb-art{width:clamp(190px,27vw,340px);border-radius:20px;overflow:hidden;line-height:0}
+  .tb-art img{width:100%;height:auto;display:block}
+  .tb-art.ph{aspect-ratio:1;background:rgba(255,255,255,.62);border:2px dashed rgba(22,34,92,.16);
+    display:grid;place-items:center;text-align:center;color:rgba(22,34,92,.4);
+    font-size:13px;font-weight:700;line-height:1.5}
+  .tb-no{font-size:13.5px;font-weight:900;letter-spacing:.14em;color:var(--brand);margin-bottom:10px}
+  .teamband h3{font-size:clamp(28px,3.9vw,44px);font-weight:900;letter-spacing:-.03em;margin:0 0 14px}
+  .teamband .lead{font-size:clamp(17px,2.1vw,24px);font-weight:800;margin:0 0 10px;color:var(--text)}
+  .teamband p{margin:0;font-size:clamp(15px,1.7vw,19px);color:var(--muted);line-height:1.7;word-break:keep-all}
 
 
   /* 소식 — 추천 + 목록 */
@@ -1332,7 +1334,7 @@ VIEWS.intro = () => {
   <div style="border-radius:28px;overflow:hidden;margin-bottom:34px">
     ${teams.map((t,i)=>{ const b = TEAM_BANDS[i % TEAM_BANDS.length];
       return `<section class="teamband" style="background:${b.bg}">
-        <div class="tb-art">${b.img
+        <div class="tb-art${b.img?'':' ph'}">${b.img
           ? `<img src="${b.img}" alt="${esc(t.name)} 팀 일러스트" loading="lazy">`
           : esc(t.name)+' 이미지'}</div>
         <div>
