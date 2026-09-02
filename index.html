@@ -313,19 +313,13 @@
   .work p{margin:0;font-size:clamp(14px,1.4vw,19px);line-height:1.7;color:var(--muted);word-break:keep-all}
 
   /* 5. 연혁 — 일러스트 한 장 */
-  /* 연혁 — 라벤더 블록 안에 카드로 넣어 다른 섹션과 결이 맞게 */
-  .history{border-radius:32px;background:linear-gradient(160deg,#f3f2fd,#fff6f9);
-    padding:44px 36px 48px;text-align:center;position:relative;overflow:hidden}
-  .history::before{content:"";position:absolute;left:-90px;top:-70px;width:260px;height:240px;
-    background:rgba(255,255,255,.55);border-radius:48% 52% 56% 44%/52% 44% 56% 48%;pointer-events:none}
-  .history::after{content:"";position:absolute;right:-110px;bottom:-90px;width:300px;height:270px;
-    background:var(--brand-weak);opacity:.5;border-radius:52% 48% 44% 56%/56% 46% 54% 44%;pointer-events:none}
-  .history > *{position:relative;z-index:1}
-  .history .lead-line{margin:12px auto 26px;max-width:44em;font-size:15.5px;
+  /* 연혁 — 배경 없이 페이지에 그대로 얹습니다 */
+  .history{background:transparent;padding:0;text-align:center}
+  .history .lead-line{margin:12px auto 22px;max-width:44em;font-size:15.5px;
     color:var(--muted);line-height:1.8;word-break:keep-all}
-  .histfig{margin:0;border-radius:26px;overflow:hidden;background:var(--surface);
-    border:1px solid rgba(22,34,92,.06);box-shadow:var(--shadow-lg);
-    max-width:540px;margin-inline:auto;line-height:0}
+  /* 밝은 배경에서는 흰 판이 보이지 않아 그대로 얹힌 것처럼 보이고,
+     다크 모드에서는 그림이 묻히지 않도록 흰 판이 받쳐줍니다 */
+  .histfig{margin:0 auto;max-width:540px;line-height:0;background:#fff;border-radius:16px;overflow:hidden}
   .histfig img{display:block;width:100%;height:auto}
   .history figcaption{margin-top:16px;font-size:13px;color:var(--muted);line-height:1.6}
 
