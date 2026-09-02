@@ -1451,7 +1451,20 @@ function boardView(key){
               <div class="dt">${fmtDay(p.created_at)}</div></div>
           </article>`).join('') || '<div class="empty">다른 소식이 없습니다.</div>'}
         </div>
-      </div>`}`;
+      </div>
+      ${rest.length > 3 ? `
+        <h2 style="font-size:15px;font-weight:900;margin:36px 0 14px">
+          지난 소식 <span style="color:var(--muted);font-weight:700">${rest.length - 3}건</span></h2>
+        <div class="news-grid">
+          ${rest.slice(3).map(p=>`<article class="news-card" data-open-post="${p.id}">
+            <div class="ph">${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="" loading="lazy">`:'📰'}</div>
+            <div class="bd"><span class="tag brand">활동 소식</span>
+              <h3>${esc(p.title)}</h3>
+              <p>${esc(excerpt(p.body,60))}</p>
+              <div class="dt">${fmtDay(p.created_at)}</div></div>
+          </article>`).join('')}
+        </div>` : ''}
+      `}`;
   }
 
   /* ── 새소리단 공간: 사진 카드 격자 ── */
