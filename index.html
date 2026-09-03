@@ -67,27 +67,28 @@
   .navdrop-panel .grp{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
     color:var(--muted);padding:9px 14px 4px;font-weight:800}
 
-  /* 푸터 (시안: 네이비 띠) */
-  .sitefoot{background:#16225c;color:#fff;margin-top:0}
+  /* 푸터 (밝은 띠 — 고용노동부 원본 로고가 제 색으로 보이도록) */
+  .sitefoot{background:var(--surface-2);color:var(--text);margin-top:0;
+    border-top:1px solid var(--border)}
   .foot-in{max-width:1180px;margin:0 auto;padding:56px clamp(16px,4vw,48px) 34px}
   .foot-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
     padding-bottom:26px}
   .foot-top h2{font-size:clamp(21px,2.6vw,28px);font-weight:900;letter-spacing:-.03em;margin:0;line-height:1.35}
   .foot-top h2 em{font-style:normal;color:var(--accent)}
   .foot-links{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-  /* 네이비 푸터용 흰색(반전) 로고 — 배경판 없이 그대로 올립니다 */
-  .foot-logo{height:40px;width:auto;display:block}
-  .foot-links button{border:0;background:transparent;color:#fff;font-family:inherit;font-size:14px;
+  /* 배경 투명 원본 로고 — 밝은 푸터라 판을 깔지 않습니다 */
+  .foot-logo{height:44px;width:auto;display:block}
+  .foot-links button{border:0;background:transparent;color:var(--text);font-family:inherit;font-size:14px;
     font-weight:800;cursor:pointer;padding:0}
-  .foot-links button:hover{color:var(--accent)}
-  .foot-meta{border-top:1px solid rgba(255,255,255,.14);padding-top:20px;display:flex;
-    align-items:center;gap:18px;flex-wrap:wrap;font-size:12.5px;color:rgba(255,255,255,.62)}
-  .foot-meta b{font-weight:800;color:rgba(255,255,255,.86)}
+  .foot-links button:hover{color:var(--brand)}
+  .foot-meta{border-top:1px solid var(--border);padding-top:20px;display:flex;
+    align-items:center;gap:18px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .foot-meta b{font-weight:800;color:var(--text)}
   .visits{display:flex;gap:16px;margin-left:auto}
   .visits div{text-align:right}
   .visits b{display:block;font-size:15px;font-variant-numeric:tabular-nums;line-height:1.25;
-    font-weight:900;color:#fff}
-  .visits span{font-size:11px;color:rgba(255,255,255,.55)}
+    font-weight:900;color:var(--text)}
+  .visits span{font-size:11px;color:var(--muted)}
 
   .btn{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:10px 18px;border-radius:999px;
     cursor:pointer;font-size:14px;font-weight:800;transition:transform .12s, box-shadow .12s, border-color .12s}
