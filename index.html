@@ -1225,7 +1225,8 @@ function homeCalendar(){
 VIEWS.home = () => {
   const r = role();
   const today = ymd(new Date());
-  const news = S.posts.filter(p => p.board==='news').slice(0,3);
+  /* S.posts 는 전체적으로 최신순(내림차순)이라, 홈은 오래된 순으로 보이도록 뒤집어서 앞 3개를 뽑습니다 */
+  const news = S.posts.filter(p => p.board==='news').slice().reverse().slice(0,3);
   const works = intro().teams || [];
 
   /* 관리자·담당관용 알림은 히어로 위에 얇게 */
