@@ -832,8 +832,6 @@ BIND.exps = () => {
 };
 
 /* ---------- 의견함 ---------- */
-const OP_STATES = ['접수','확인중','제안완료','반영완료'];
-
 VIEWS.opinions = () => {
   const q=(Q.oq||'').toLowerCase();
   const cmts = id => S.comments.filter(c=>c.opinion_id===id);
@@ -843,35 +841,18 @@ VIEWS.opinions = () => {
   + `<div class="searchbar"><input id="oq" value="${esc(Q.oq||'')}" placeholder="내용·별칭 검색">
       <button class="btn" id="oqGo">검색</button>
       ${q?`<button class="btn ghost" id="oqClear">초기화</button>`:''}</div>
-    <div class="card">${list.length ? table(['분류','별칭','내용','댓글','접수','처리 상태','']) + list.map(o=>`<tr>
+    <div class="card">${list.length ? table(['분류','별칭','내용','댓글','접수','']) + list.map(o=>`<tr>
       <td><span class="tag brand">${esc(o.cat)}</span></td><td>${esc(o.alias)}</td>
       <td style="max-width:340px">${esc(excerpt(o.body,110))}</td>
       <td>${cmts(o.id).length}</td><td class="hint">${fmtDay(o.created_at)}</td>
-      <td><select data-opstatus="${o.id}" style="margin:0;min-width:104px">
-        ${OP_STATES.map(s=>`<option ${s===(o.status||'접수')?'selected':''}>${s}</option>`).join('')}
-      </select></td>
       <td><div class="row-actions" style="margin:0">
         <button class="btn sm" data-opview="${o.id}">보기</button>
         ${isAdmin()?`<button class="btn sm danger" data-opdel="${o.id}">삭제</button>`:''}</div></td></tr>`).join('')+tableEnd
       : `<div class="empty">${q?'검색 결과가 없습니다.':'접수된 의견이 없습니다.'}</div>`}</div>
-    <div class="notice">처리 상태를 바꾸면 홈페이지 의견함에 <b>즉시</b> 반영됩니다.
-      시민은 자기 의견이 어디까지 진행됐는지 여기서 정한 상태로 확인합니다.</div>`;
+    <div class="notice">의견함은 의견을 받기만 하는 공간입니다. 처리 상태는 두지 않습니다.
+      개인정보가 담겼거나 부적절한 글은 <b>삭제</b>로 내릴 수 있습니다.</div>`;
 };
 BIND.opinions = () => {
-  $$('#main [data-opstatus]').forEach(sel => sel.addEventListener('change', async ()=>{
-    busy(true);
-    const { error } = await sb.from('opinions')
-      .update({ status: sel.value }).eq('id', sel.dataset.opstatus);
-    busy(false);
-    if(error){
-      if(/column .*status/i.test(error.message||''))
-        toast('schema.sql 을 최신 내용으로 다시 실행해 주세요. (status 컬럼 없음)');
-      else failed('상태 변경', error);
-      return go('opinions');
-    }
-    await refresh(); toast(`처리 상태를 "${sel.value}"(으)로 바꿨습니다`); go('opinions');
-  }));
-
   const run=()=>{ Q.oq=$('#oq').value.trim(); go('opinions'); };
   $('#oqGo').addEventListener('click',run);
   $('#oq').addEventListener('keydown',e=>{ if(e.key==='Enter') run(); });

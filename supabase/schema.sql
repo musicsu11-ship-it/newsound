@@ -565,18 +565,11 @@ exception when duplicate_object then null; end $$;
 --   where id = (select id from auth.users where email = 'you@example.com');
 
 -- ---------------------------------------------------------------------------
---  의견 처리 상태 (접수 → 확인중 → 제안완료 → 반영완료)
+--  의견함은 의견을 받기만 하는 공간입니다. 처리 상태는 두지 않습니다.
+--  따라서 수정(update) 정책도 만들지 않습니다 — 남기기·읽기·삭제만 가능합니다.
+--  (예전 버전에서 만들어진 것이 있다면 정리합니다)
 -- ---------------------------------------------------------------------------
-alter table public.opinions add column if not exists status text not null default '접수';
-do $$ begin
-  alter table public.opinions add constraint opinions_status_chk
-    check (status in ('접수','확인중','제안완료','반영완료'));
-exception when duplicate_object then null; end $$;
-
--- 담당관만 처리 상태를 바꿀 수 있습니다
 drop policy if exists opinions_update on public.opinions;
-create policy opinions_update on public.opinions for update
-  using ( public.is_officer() ) with check ( public.is_officer() );
 
 -- ---------------------------------------------------------------------------
 --  조회수는 혁신행정담당관·운영 관리자만 볼 수 있습니다.

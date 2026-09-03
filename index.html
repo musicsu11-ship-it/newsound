@@ -436,11 +436,8 @@
   .op-table .no{color:var(--muted);font-weight:800;width:56px}
   .op-table .subj b{display:block;font-size:15px;font-weight:800;margin-bottom:4px}
   .op-table .subj span{font-size:12px;color:var(--muted)}
-  .st{display:inline-block;padding:5px 13px;border-radius:999px;font-size:12px;font-weight:800}
-  .st.접수{background:var(--surface-2);color:var(--muted)}
-  .st.확인중{background:#e9e5ff;color:#4a3ec8}
-  .st.제안완료{background:var(--brand-weak);color:var(--brand)}
-  .st.반영완료{background:var(--brand);color:#fff}
+  /* 분류·작성자는 넓은 화면에서만 별도 열로, 좁은 화면에서는 내용 아래 한 줄로 합칩니다 */
+  .op-table .m-only{display:none}
 
   /* 일정 — 캘린더 + 사이드 */
   .cal-layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px;align-items:start}
@@ -555,6 +552,16 @@
      날짜를 누르면 아래 패널에 제목이 나옵니다(제목은 title 속성으로도 남아 있습니다).
      - 휴대폰 전 기종(600px 이하)
      - 홈의 2단 배치에서 달력이 좁아지는 구간(1200px 이하) */
+  /* 의견함 표 — 좁은 화면에서 분류·작성자 열을 접어 글자가 세로로 쪼개지지 않게 합니다 */
+  @media (max-width:700px){
+    .op-table th:nth-child(3),.op-table td:nth-child(3),
+    .op-table th:nth-child(4),.op-table td:nth-child(4){display:none}
+    .op-table .m-only{display:inline;font-style:normal;font-weight:700;color:var(--brand)}
+    .op-table th,.op-table td{padding:14px 14px}
+    .op-table th{white-space:nowrap}
+    .op-table .no{width:52px}
+  }
+
   @media (max-width:1200px){
     .cal .ev{width:6px;height:6px;padding:0;border-radius:50%;background:var(--brand);
       font-size:0;line-height:0;overflow:hidden;margin:1px 0 0 1px;flex:0 0 auto}
@@ -1661,17 +1668,15 @@ VIEWS.opinion = () => {
   ${searchBar('opinion','의견 내용·별칭·댓글로 검색')}
   ${q?`<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>`:''}
 
-  ${list.length ? `<div class="op-table">${table(['번호','내용','분류','작성자','처리 상태'])}
+  ${list.length ? `<div class="op-table">${table(['번호','내용','분류','작성자'])}
     ${list.map((o,i)=>{
-      const st = o.status || '접수';
       const mine = o.author_id===S.user?.id;
       return `<tr data-opopen="${o.id}">
         <td class="no">${list.length - i}</td>
         <td class="subj"><b>${highlight(excerpt(o.body,44), Q.opinion)}</b>
-          <span>${fmtDay(o.created_at)} 접수${cmtsOf(o.id).length?` · 댓글 ${cmtsOf(o.id).length}`:''}${mine?' · 내 글':''}</span></td>
-        <td>${esc(o.cat)}</td>
-        <td>${esc(o.alias||'익명')}</td>
-        <td><span class="st ${esc(st)}">${esc(st)}</span></td>
+          <span><i class="m-only">${esc(o.cat)} · ${esc(o.alias||'익명')} · </i>${fmtDay(o.created_at)} 접수${cmtsOf(o.id).length?` · 댓글 ${cmtsOf(o.id).length}`:''}${mine?' · 내 글':''}</span></td>
+        <td class="c-cat">${esc(o.cat)}</td>
+        <td class="c-alias">${esc(o.alias||'익명')}</td>
       </tr>`;
     }).join('')}${tableEnd}</div>`
     : `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 접수된 의견이 없습니다.'}</div></div>`}`;
@@ -1683,8 +1688,7 @@ function openOpinion(id){
   const cs = S.comments.filter(c=>c.opinion_id===o.id);
   const mine = o.author_id===S.user?.id;
   openModal(`${o.cat} · ${o.alias||'익명'}`, `
-    <div class="hint" style="margin-bottom:12px">${fmt(o.created_at)} 접수 ·
-      <span class="st ${esc(o.status||'접수')}">${esc(o.status||'접수')}</span></div>
+    <div class="hint" style="margin-bottom:12px">${fmt(o.created_at)} 접수</div>
     <div style="white-space:pre-wrap;font-size:15px;font-weight:600">${esc(o.body)}</div>
     ${(mine||isAdmin()) ? `<div class="row-actions" style="margin-top:16px">
       <button class="btn sm danger" id="opDel">${mine?'내 글 삭제':'관리자 삭제'}</button></div>`:''}
@@ -1880,7 +1884,7 @@ const QUIZ = [
   { q:'같은 불편이 세 건 넘게 접수됐습니다. 어떻게 하는 게 좋을까요?',
     a:['각각 따로 답변한다','묶어서 하나의 개선 과제로 제안한다','가장 최근 것만 처리한다'], ok:1 },
   { q:'개선이 완료됐습니다. 마지막으로 할 일은?',
-    a:['바로 다음 의견으로 넘어간다','내부에만 공유한다','의견함에 반영완료를 남겨 알린다'], ok:2 },
+    a:['바로 다음 의견으로 넘어간다','내부에만 공유한다','무엇이 어떻게 바뀌었는지 알린다'], ok:2 },
 ];
 const GAME = { step:0, score:0, picked:null };
 
