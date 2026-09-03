@@ -17,6 +17,8 @@
     --danger:#d61e5c; --danger-weak:#ffe9f1;
     --shadow:0 14px 40px rgba(28,38,90,.11);
     --shadow-lg:0 20px 44px rgba(28,38,90,.16);
+    /* 본문 최대 폭 — 좌우 여백을 한 곳에서 조절합니다 */
+    --wrap:1680px;
     --radius:14px;
   }
   @media (prefers-color-scheme:dark){
@@ -70,7 +72,7 @@
   /* 푸터 (밝은 띠 — 고용노동부 원본 로고가 제 색으로 보이도록) */
   .sitefoot{background:var(--surface-2);color:var(--text);margin-top:0;
     border-top:1px solid var(--border)}
-  .foot-in{max-width:1180px;margin:0 auto;padding:56px clamp(16px,4vw,48px) 34px}
+  .foot-in{max-width:var(--wrap);margin:0 auto;padding:56px clamp(16px,4vw,48px) 34px}
   .foot-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
     padding-bottom:26px}
   .foot-top h2{font-size:clamp(21px,2.6vw,28px);font-weight:900;letter-spacing:-.03em;margin:0;line-height:1.35}
@@ -110,7 +112,7 @@
   .hint{font-weight:400;color:var(--muted);font-size:12px;margin-top:3px}
   .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 
-  .main{padding:30px clamp(16px,4vw,48px) 20px;max-width:1180px;width:100%;margin:0 auto;min-height:60vh}
+  .main{padding:30px clamp(16px,4vw,48px) 20px;max-width:var(--wrap);width:100%;margin:0 auto;min-height:60vh}
   .page-head{margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
   .page-head h1{margin:0 0 5px;font-size:clamp(24px,3.2vw,32px);font-weight:900}
   .page-head p{margin:0;color:var(--muted);font-size:14px;font-weight:500}
@@ -239,7 +241,7 @@
   /* ════════════ 홈 (디자인 시안 그대로) ════════════ */
   .home{margin:-30px calc(-1 * clamp(16px,4vw,48px)) -20px}
   .home section{position:relative}
-  .wrap-1180{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,48px)}
+  .wrap-1180{max-width:var(--wrap);margin:0 auto;padding:0 clamp(16px,4vw,48px)}
 
   /* 1. 히어로 */
   .hero{background:var(--surface);padding:56px 0 66px;overflow:hidden}
@@ -259,7 +261,7 @@
   .hero .cta .btn{padding:15px 27px;font-size:15.5px;min-height:52px}
   .btn.outline{border:1.5px solid var(--text);background:var(--surface);color:var(--text);box-shadow:none}
   .hero-art{position:relative;display:flex;align-items:center;justify-content:center;min-height:440px}
-  .hero-art img{display:block;width:min(124%,660px);margin-right:-8%;
+  .hero-art img{display:block;width:min(124%,900px);margin-right:-8%;
     filter:drop-shadow(0 22px 34px rgba(28,38,90,.16));animation:bob 6.4s ease-in-out infinite}
   .bubble{position:absolute;padding:11px 16px;font-weight:800;font-size:13.5px;white-space:nowrap;
     box-shadow:0 14px 40px rgba(28,38,90,.14);z-index:3}
