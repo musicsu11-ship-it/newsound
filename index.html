@@ -323,19 +323,39 @@
   .work h3{margin:0 0 10px;font-size:clamp(20px,2.2vw,27px);font-weight:900;letter-spacing:-.03em;word-break:keep-all}
   .work p{margin:0;font-size:clamp(14px,1.4vw,19px);line-height:1.7;color:var(--muted);word-break:keep-all}
 
-  /* 5. 연혁 — 일러스트 한 장 */
-  /* 연혁 — 배경 없이 페이지에 그대로 얹습니다 */
+  /* 5. 연혁 — "새소리단의 발자취" 타임라인 */
   .history{background:transparent;padding:0;text-align:center}
-  .history .lead-line{margin:12px auto 22px;max-width:44em;font-size:15.5px;
-    color:var(--muted);line-height:1.8;word-break:keep-all}
-  /* 배경을 지운 PNG라 그대로 얹힙니다. 다만 다크 모드에서는 그림 속
-     짙은 남색 글씨가 묻히므로 그때만 흰 판을 받칩니다. */
-  .histfig{margin:0 auto;max-width:540px;line-height:0;background:transparent}
-  @media (prefers-color-scheme:dark){
-    .histfig{background:#fff;border-radius:16px;overflow:hidden;padding:6px}
-  }
-  .histfig img{display:block;width:100%;height:auto}
-  .history figcaption{margin-top:16px;font-size:13px;color:var(--muted);line-height:1.6}
+  .hist-head h2{font-size:clamp(28px,3.6vw,42px);font-weight:900;letter-spacing:-.03em;
+    margin:16px 0 10px;color:var(--text)}
+  .hist-head h2 em{font-style:normal;position:relative;z-index:0}
+  .hist-head h2 em::after{content:'';position:absolute;left:1%;right:1%;bottom:2px;height:10px;
+    background:var(--brand-weak);z-index:-1;border-radius:6px}
+  .hist-head p{margin:0 0 42px;font-size:16px;font-weight:700;color:var(--muted)}
+  .hist-head p b{color:var(--text);font-weight:800}
+  .hist-head p em{font-style:normal;color:var(--brand);font-weight:900}
+
+  .hist-track{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:24px;max-width:960px;margin:0 auto}
+  .hist-line{position:absolute;left:9%;right:9%;top:15px;height:2px;background:var(--text);z-index:0}
+  .hist-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px}
+  .hist-dot{position:relative;z-index:1;width:30px;height:30px;border-radius:50%;background:#fff;
+    border:2px solid var(--text);display:grid;place-items:center;color:var(--brand);font-size:14px}
+  .hist-year{display:inline-block;padding:7px 20px;border-radius:999px;font-weight:900;font-size:15px;color:#fff}
+  .hist-year.navy{background:var(--text)}
+  .hist-year.brand{background:var(--brand)}
+  .hist-year i{font-style:normal;font-size:11.5px;opacity:.85;margin-left:2px}
+  .hist-card{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);
+    padding:20px 18px;width:100%}
+  .hist-card h3{margin:0 0 12px;font-size:16px;font-weight:900;color:var(--text);word-break:keep-all;
+    padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .hist-card p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.7;word-break:keep-all}
+
+  .hist-mascots{position:relative;display:flex;justify-content:center;margin:46px 0 6px}
+  .hist-mascots img{width:min(64%,400px);display:block}
+  .hbub{position:absolute;font-weight:900;border-radius:999px;padding:9px 15px;font-size:14px;box-shadow:var(--shadow)}
+  .hbub.h1{left:12%;top:8%;background:var(--brand-weak);color:var(--brand)}
+  .hbub.h2{right:12%;top:2%;background:var(--lav);color:#4a3ec8;letter-spacing:2px}
+  .history figcaption{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.6}
 
   /* 6. 소식 카드 */
   .news-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
@@ -493,6 +513,11 @@
     .teamband:nth-child(even) .tb-art{order:0}
     .news-feat,.cal-layout,.game-layout{grid-template-columns:minmax(0,1fr)}
     .space-grid{grid-template-columns:minmax(0,1fr)}
+    /* 연혁 타임라인 — 가로 3열 대신 세로로 쌓고, 가로선을 중앙 세로선으로 바꿉니다 */
+    .hist-track{grid-template-columns:minmax(0,1fr);gap:32px;max-width:360px}
+    .hist-line{left:50%;right:auto;top:15px;bottom:15px;width:2px;height:auto;transform:translateX(-50%)}
+    .hbub{display:none}
+    .hist-mascots img{width:min(80%,280px)}
   }
 
   .topbar{display:none}
@@ -1324,11 +1349,42 @@ VIEWS.home = () => {
   <section class="wrap-1180" style="padding-top:64px">
     <div class="history">
       <span class="pill-label">연혁</span>
-      <p class="lead-line">2019년 새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로
-        이어지고 있습니다. 해마다 새로운 새내기들이 바통을 이어받아 조직문화를 바꿔왔습니다.</p>
-      <figure class="histfig">
-        <img src="assets/history.png" alt="새소리단 연혁 — 2019년 새내기 혁신참견단 출범부터 2023년 새내기소통리더단(새소리단) 출범, 현재 8기 운영까지의 흐름">
-      </figure>
+      <div class="hist-head">
+        <h2>새소리단의 <em>발자취</em></h2>
+        <p><b>새내기들의 목소리로,</b> <em>더 나은 조직문화를</em> <b>만들어갑니다.</b></p>
+      </div>
+      <div class="hist-track">
+        <div class="hist-line"></div>
+        <div class="hist-item">
+          <span class="hist-dot">♥</span>
+          <span class="hist-year navy">2019년</span>
+          <div class="hist-card">
+            <h3>새내기 혁신 참견단으로 출범</h3>
+            <p>새내기들의 목소리를 모아 더 나은 조직문화를 만들기 위해 첫 걸음을 내딛었습니다.</p>
+          </div>
+        </div>
+        <div class="hist-item">
+          <span class="hist-dot">♥</span>
+          <span class="hist-year brand">2023년</span>
+          <div class="hist-card">
+            <h3>새소리단(새내기 소통 리더단)으로 개명</h3>
+            <p>소통을 중심으로 활동 범위를 넓히고, 소통 리더단으로 새롭게 도약했습니다.</p>
+          </div>
+        </div>
+        <div class="hist-item">
+          <span class="hist-dot">♥</span>
+          <span class="hist-year navy">2026년 <i>(현재)</i></span>
+          <div class="hist-card">
+            <h3>8기 운영 중!</h3>
+            <p>새소리단은 앞으로도 직원들과 함께 소통하며 발전된 조직문화를 만들어 나갑니다.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hist-mascots">
+        <span class="hbub h1">♡</span>
+        <span class="hbub h2">···</span>
+        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
+      </div>
       <figcaption>※ 연혁은 지속적으로 이어지고 있습니다.</figcaption>
     </div>
   </section>
@@ -1448,11 +1504,42 @@ VIEWS.intro = () => {
   <section style="padding-top:34px">
     <div class="history">
       <span class="pill-label">연혁</span>
-      <p class="lead-line">2019년 새내기 혁신참견단으로 시작해, 지금은 새소리단(새내기소통리더단)으로
-        이어지고 있습니다. 해마다 새로운 새내기들이 바통을 이어받아 조직문화를 바꿔왔습니다.</p>
-      <figure class="histfig">
-        <img src="assets/history.png" alt="새소리단 연혁 — 2019년 새내기 혁신참견단 출범부터 2023년 새내기소통리더단(새소리단) 출범, 현재 8기 운영까지의 흐름">
-      </figure>
+      <div class="hist-head">
+        <h2>새소리단의 <em>발자취</em></h2>
+        <p><b>새내기들의 목소리로,</b> <em>더 나은 조직문화를</em> <b>만들어갑니다.</b></p>
+      </div>
+      <div class="hist-track">
+        <div class="hist-line"></div>
+        <div class="hist-item">
+          <span class="hist-dot">♥</span>
+          <span class="hist-year navy">2019년</span>
+          <div class="hist-card">
+            <h3>새내기 혁신 참견단으로 출범</h3>
+            <p>새내기들의 목소리를 모아 더 나은 조직문화를 만들기 위해 첫 걸음을 내딛었습니다.</p>
+          </div>
+        </div>
+        <div class="hist-item">
+          <span class="hist-dot">♥</span>
+          <span class="hist-year brand">2023년</span>
+          <div class="hist-card">
+            <h3>새소리단(새내기 소통 리더단)으로 개명</h3>
+            <p>소통을 중심으로 활동 범위를 넓히고, 소통 리더단으로 새롭게 도약했습니다.</p>
+          </div>
+        </div>
+        <div class="hist-item">
+          <span class="hist-dot">♥</span>
+          <span class="hist-year navy">2026년 <i>(현재)</i></span>
+          <div class="hist-card">
+            <h3>8기 운영 중!</h3>
+            <p>새소리단은 앞으로도 직원들과 함께 소통하며 발전된 조직문화를 만들어 나갑니다.</p>
+          </div>
+        </div>
+      </div>
+      <div class="hist-mascots">
+        <span class="hbub h1">♡</span>
+        <span class="hbub h2">···</span>
+        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
+      </div>
       <figcaption>※ 연혁은 지속적으로 이어지고 있습니다.</figcaption>
     </div>
   </section>`;
