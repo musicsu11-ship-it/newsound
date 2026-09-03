@@ -279,11 +279,14 @@
 
   /* 2. 이런 생각 */
   .thoughts{border-radius:32px;background:#ffeef5;padding:44px 40px 52px;overflow:hidden}
-  .thought-wrap{display:flex;flex-wrap:wrap;gap:18px 22px;justify-content:center;align-items:flex-start;margin-bottom:34px}
+  .thought-wrap{display:flex;flex-wrap:wrap;gap:26px 22px;justify-content:center;align-items:flex-start;margin-bottom:34px}
+  /* --r(기울기)·--ty(위아래 위치)를 항목마다 다르게 줘서 격자처럼 반듯하지 않고 자유롭게 흩어진 느낌을 냅니다 */
   .thought{background:#fff;color:#16225c;font-weight:800;line-height:1.5;word-break:keep-all;
     box-shadow:0 10px 26px rgba(28,38,90,.1);font-size:23px;max-width:440px;padding:20px 27px;
+    transform:rotate(var(--r,0deg)) translateY(var(--ty,0px));
     transition:transform .25s ease, box-shadow .25s ease}
-  .thought:hover{transform:translateY(-7px) scale(1.05);box-shadow:0 18px 36px rgba(28,38,90,.18)}
+  .thought:hover{transform:rotate(var(--r,0deg)) translateY(calc(var(--ty,0px) - 8px)) scale(1.06);
+    box-shadow:0 18px 36px rgba(28,38,90,.18)}
   .thoughts .mid{position:relative;text-align:center;padding:120px 0 10px}
   .thoughts .mid-art{position:absolute;left:0;right:0;top:0;margin:0 auto;
     width:clamp(220px,26vw,340px);opacity:.24;pointer-events:none;z-index:0}
@@ -960,9 +963,13 @@ function bindSearch(viewId){
    1) 홈
    ============================================================ */
 /* "이런 생각" 말풍선: 크기·글씨는 전부 동일하게 두고, 흰색 3개 · 보라색 3개로 고정합니다.
-   꼬리 방향(말풍선 모양)만 별도로 번갈아 약간의 리듬을 줍니다 */
+   꼬리 방향과 기울기·상하 위치를 항목마다 다르게 줘서 격자처럼 반듯하지 않고 자유롭게 흩어져 보이게 합니다 */
 const THOUGHT_BG = ['#fff','#fff','#fff','#e9e5ff','#e9e5ff','#e9e5ff'];
 const THOUGHT_TAIL = ['24px 24px 24px 8px','24px 24px 8px 24px'];
+const THOUGHT_TILT = [
+  { r:-3,  ty:8   }, { r:2,   ty:-14 }, { r:-1.5, ty:16 },
+  { r:2.5, ty:-6  }, { r:-2,  ty:2   }, { r:1.5,  ty:-16 },
+];
 const VOICES_L = [
   '🌙 야근이 당연한 분위기, 이제는 좀 바꿔주세요',
   '😮‍💨 수직적인 보고체계가 답답해요',
@@ -1059,9 +1066,9 @@ VIEWS.home = () => {
   <section class="wrap-1180" style="padding-top:64px">
     <div class="thoughts">
       <div class="thought-wrap">
-        ${THOUGHTS.map((t,i)=>
-          `<div class="thought" style="border-radius:${THOUGHT_TAIL[i%2]};background:${THOUGHT_BG[i]}">${esc(t)}</div>`
-        ).join('')}
+        ${THOUGHTS.map((t,i)=>{ const k=THOUGHT_TILT[i];
+          return `<div class="thought" style="border-radius:${THOUGHT_TAIL[i%2]};background:${THOUGHT_BG[i]};--r:${k.r}deg;--ty:${k.ty}px">${esc(t)}</div>`;
+        }).join('')}
       </div>
       <div class="mid">
         <img class="mid-art" src="assets/dragon-thinking.png" alt="">
