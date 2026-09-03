@@ -278,7 +278,7 @@
   .thoughts{border-radius:32px;background:#ffeef5;padding:44px 40px 52px;overflow:hidden}
   .thought-wrap{display:flex;flex-wrap:wrap;gap:18px 22px;justify-content:center;align-items:flex-start;margin-bottom:34px}
   .thought{background:#fff;color:#16225c;font-weight:800;line-height:1.5;word-break:keep-all;
-    box-shadow:0 10px 26px rgba(28,38,90,.1)}
+    box-shadow:0 10px 26px rgba(28,38,90,.1);font-size:19px;max-width:380px;padding:16px 22px}
   .thoughts .mid{position:relative;text-align:center;padding:120px 0 10px}
   .thoughts .mid-art{position:absolute;left:0;right:0;top:0;margin:0 auto;
     width:clamp(220px,26vw,340px);opacity:.24;pointer-events:none;z-index:0}
@@ -1175,13 +1175,10 @@ function bindSearch(id){
    홈 — 디자인 시안 구조 그대로
    ============================================================================ */
 /* "이런 생각" 말풍선: 시안의 크기·모서리·배경을 그대로 옮겼습니다 */
+/* 말풍선 크기·글씨는 전부 동일하게 두고, 꼬리 방향과 배경색만 번갈아 리듬을 줍니다 */
 const THOUGHT_STYLE = [
-  { fs:22, br:'26px 26px 26px 8px', bg:'#fff',     max:400 },
-  { fs:17, br:'24px 24px 8px 24px', bg:'#e9e5ff',  max:330 },
-  { fs:26, br:'28px 28px 28px 8px', bg:'#fff',     max:430 },
-  { fs:16, br:'22px 22px 8px 22px', bg:'#e9e5ff',  max:300 },
-  { fs:20, br:'26px 26px 26px 8px', bg:'#fff',     max:340 },
-  { fs:23, br:'26px 26px 8px 26px', bg:'#fff',     max:420 },
+  { br:'24px 24px 24px 8px', bg:'#fff' },
+  { br:'24px 24px 8px 24px', bg:'#e9e5ff' },
 ];
 const VOICES_L = [
   '🌙 야근이 당연한 분위기, 이제는 좀 바꿔주세요',
@@ -1289,8 +1286,7 @@ VIEWS.home = () => {
     <div class="thoughts">
       <div class="thought-wrap">
         ${THOUGHTS.map((t,i)=>{ const s=THOUGHT_STYLE[i%THOUGHT_STYLE.length];
-          return `<div class="thought" style="font-size:${s.fs}px;border-radius:${s.br};
-            background:${s.bg};max-width:${s.max}px;padding:${Math.round(s.fs*0.85)}px ${Math.round(s.fs*1.2)}px">${esc(t)}</div>`;
+          return `<div class="thought" style="border-radius:${s.br};background:${s.bg}">${esc(t)}</div>`;
         }).join('')}
       </div>
       <div class="mid">
