@@ -42,8 +42,8 @@
   code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:.92em}
   /* ── 상단 내비게이션 (디자인 시안) ─────────────────────────── */
   .topnav{display:flex;align-items:center;gap:22px;padding:14px clamp(16px,4vw,48px);
-    background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
-    border-bottom:1px solid rgba(22,34,92,.08);position:sticky;top:0;z-index:30}
+    background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border-bottom:1px solid rgba(22,34,92,.08);position:sticky;top:0;z-index:36}
   @media (prefers-color-scheme:dark){ .topnav{background:rgba(23,29,71,.92);border-bottom-color:rgba(255,255,255,.08)} }
   .brandbtn{display:flex;align-items:center;gap:11px;border:0;background:transparent;cursor:pointer;padding:0;flex:none}
   .brandbtn img{display:block;height:32px;width:auto}
@@ -57,7 +57,8 @@
   .nav-right{display:flex;align-items:center;gap:10px;flex:none}
   .whoami{font-size:13px;font-weight:800;color:var(--brand);white-space:nowrap}
   .whoami em{font-style:normal;color:var(--muted);font-weight:600;margin-left:5px}
-  .navtoggle{display:none;border:1px solid var(--border);background:var(--surface);color:var(--text);
+  /* position+z-index — 드로어(.mainnav, z-index:40)가 열렸을 때도 이 버튼이 항상 눌리도록 위에 둡니다 */
+  .navtoggle{display:none;position:relative;z-index:41;border:1px solid var(--border);background:var(--surface);color:var(--text);
     font-size:17px;padding:6px 12px;border-radius:12px;cursor:pointer}
 
   /* 단원 메뉴 드롭다운 */
@@ -2328,10 +2329,11 @@ document.addEventListener('keydown', e=>{
   if($('#lightbox').classList.contains('open')) $('#lightbox').classList.remove('open');
   else closeModal();
 });
-function closeSide(){ $('#navArea').classList.remove('open'); $('#scrim').classList.remove('open'); }
+function closeSide(){ $('#navArea').classList.remove('open'); $('#scrim').classList.remove('open'); $('#menuToggle').textContent='☰'; }
 $('#menuToggle').addEventListener('click', e=>{
   e.stopPropagation();
-  $('#navArea').classList.toggle('open'); $('#scrim').classList.toggle('open'); });
+  const open = $('#navArea').classList.toggle('open'); $('#scrim').classList.toggle('open', open);
+  $('#menuToggle').textContent = open ? '✕' : '☰'; });
 $('#scrim').addEventListener('click', closeSide);
 $('#brandBtn').addEventListener('click', ()=>{ go('home'); closeSide(); });
 $('#adminBtn').addEventListener('click', ()=> window.open('admin.html','_blank'));
