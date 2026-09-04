@@ -1455,7 +1455,7 @@ const dropMyOp= (id) => LS.set('sm_myops', myOps().filter(x=>x!==id));
 function hashPin(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0 } return h.toString(36); }
 
 /* 의견 분류 — 여기만 고치면 작성 폼에 그대로 반영됩니다 */
-const OP_CATS = ['일하는 방식','조직문화','업무효율','디지털·AI','복지·근무환경','제도개선','기타'];
+const OP_CATS = ['일하는 방식','조직문화','업무효율','디지털·AI','복지·근무환경','제도개선','새소리단 홈페이지','기타'];
 /* 분류별 태그 색 — [배경, 글자]. "우리가 하는 일" 카드 번호칩과 같은 톤을 씁니다.
    목록에 없는 분류(과거 글 등)는 마지막 "기타" 색으로 대체됩니다 */
 const OP_CAT_COLORS = {
@@ -1465,6 +1465,7 @@ const OP_CAT_COLORS = {
   '디지털·AI':     ['#dfeaff','#2b5fd9'],
   '복지·근무환경': ['#fff2d9','#b07a12'],
   '제도개선':      ['#ffe6da','#c1521f'],
+  '새소리단 홈페이지': ['#e6f5d9','#3f7d1f'],
   '기타':          ['#eceef2','#5b6591'],
 };
 const catTag = (cat) => { const [bg,fg] = OP_CAT_COLORS[cat] || OP_CAT_COLORS['기타'];
