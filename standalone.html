@@ -1698,11 +1698,15 @@ function openEventForm(date){
 /* ============================================================
    6) 게임
    ============================================================ */
+/* 기본 게임 — 설정 · 게임 등록 메뉴에서 gameURL 을 따로 등록하면 그쪽이 우선합니다 */
+const DEFAULT_GAME_URL = 'https://kimzion77.github.io/godragon-volleyball/';
+
 VIEWS.game = () => {
   const s = DB.settings();
+  const url = s.gameURL || (s.gameHTML ? '' : DEFAULT_GAME_URL);
   let frame;
-  if(s.gameURL){
-    frame = `<iframe src="${esc(s.gameURL)}" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px" allow="fullscreen"></iframe>`;
+  if(url){
+    frame = `<iframe src="${esc(url)}" title="고드래곤 배구" style="width:100%;aspect-ratio:432/304;border:0;border-radius:8px" allow="fullscreen"></iframe>`;
   } else if(s.gameHTML){
     frame = `<iframe id="gameFrame" sandbox="allow-scripts allow-same-origin" style="width:100%;height:70vh;border:1px solid var(--border);border-radius:12px"></iframe>`;
   } else {
