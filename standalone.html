@@ -1225,24 +1225,8 @@ VIEWS.intro = () => {
     </div>${editBtn}
   </div>
 
-  <!-- 팀 밴드 -->
-  <div style="border-radius:28px;overflow:hidden;margin-bottom:34px">
-    ${teams.map((t,i)=>{ const b = TEAM_BANDS[i % TEAM_BANDS.length];
-      return `<section class="teamband" style="background:${b.bg}">
-        <div class="tb-art${b.img?'':' ph'}">${b.img
-          ? `<img src="${b.img}" alt="${esc(t.name)} 팀 일러스트" loading="lazy">`
-          : esc(t.name)+' 이미지'}</div>
-        <div>
-          <div class="tb-no">TEAM ${String(i+1).padStart(2,'0')}</div>
-          <h3>${esc(t.name)}</h3>
-          <p class="lead">${esc(t.lead || b.lead)}</p>
-          <p>${esc(t.desc||'')}</p>
-        </div>
-      </section>`; }).join('')}
-  </div>
-
   <!-- 연혁 -->
-  <section style="padding-top:34px">
+  <section style="padding-bottom:34px">
     <div class="history">
       <span class="pill-label">연혁</span>
       <div class="hist-head">
@@ -1276,10 +1260,27 @@ VIEWS.intro = () => {
           </div>
         </div>
       </div>
-      <div class="hist-mascots">        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
+      <div class="hist-mascots">
+        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
       </div>
     </div>
-  </section>`;
+  </section>
+
+  <!-- 팀 밴드 -->
+  <div style="border-radius:28px;overflow:hidden;margin-bottom:34px">
+    ${teams.map((t,i)=>{ const b = TEAM_BANDS[i % TEAM_BANDS.length];
+      return `<section class="teamband" style="background:${b.bg}">
+        <div class="tb-art${b.img?'':' ph'}">${b.img
+          ? `<img src="${b.img}" alt="${esc(t.name)} 팀 일러스트" loading="lazy">`
+          : esc(t.name)+' 이미지'}</div>
+        <div>
+          <div class="tb-no">TEAM ${String(i+1).padStart(2,'0')}</div>
+          <h3>${esc(t.name)}</h3>
+          <p class="lead">${esc(t.lead || b.lead)}</p>
+          <p>${esc(t.desc||'')}</p>
+        </div>
+      </section>`; }).join('')}
+  </div>`;
 };
 BIND.intro = () => {
   $$('#main [data-go-to]').forEach(el => el.addEventListener('click', ()=> go(el.dataset.goTo)));
