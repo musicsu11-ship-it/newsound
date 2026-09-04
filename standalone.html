@@ -897,8 +897,9 @@ const PUBLIC_NAV = ['intro','news','opinion','calendar'];
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
   const top  = PUBLIC_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
-  /* 게임은 어느 메뉴에도 넣지 않습니다 — 첫 화면 배너를 눌러서만 들어갈 수 있습니다 */
-  const rest = mine.filter(m => !PUBLIC_NAV.includes(m.id) && m.id!=='home' && m.id!=='game');
+  /* game: 첫 화면 배너를 눌러서만 들어갈 수 있게 어느 메뉴에도 넣지 않습니다.
+     share: 드롭다운 이름과 겹쳐 헷갈려서 메뉴에서 뺐습니다(화면 자체는 남아있음). */
+  const rest = mine.filter(m => !PUBLIC_NAV.includes(m.id) && m.id!=='home' && m.id!=='game' && m.id!=='share');
 
   let html = top.map(m => `<button class="nav-btn" data-go="${m.id}">${esc(m.label)}</button>`).join('');
 
@@ -906,7 +907,7 @@ function renderNav(){
     const groups = {};
     rest.forEach(m => (groups[m.group] = groups[m.group]||[]).push(m));
     html += `<div class="navdrop" id="navDrop">
-      <button class="nav-btn" id="navDropBtn">새소리단 단원 전용 ▾</button>
+      <button class="nav-btn" id="navDropBtn">새소리단 단원 전용 공간 ▾</button>
       <div class="navdrop-panel">
         ${Object.entries(groups).map(([g,items]) =>
           `<div class="grp">${esc(g)}</div>` +
