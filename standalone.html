@@ -892,12 +892,13 @@ function openLogin(){
    NAV
    ============================================================ */
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
-const PUBLIC_NAV = ['intro','news','opinion','calendar','share','game'];
+const PUBLIC_NAV = ['intro','news','opinion','calendar','share'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
   const top  = PUBLIC_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
-  const rest = mine.filter(m => !PUBLIC_NAV.includes(m.id) && m.id!=='home');
+  /* 게임은 어느 메뉴에도 넣지 않습니다 — 첫 화면 배너를 눌러서만 들어갈 수 있습니다 */
+  const rest = mine.filter(m => !PUBLIC_NAV.includes(m.id) && m.id!=='home' && m.id!=='game');
 
   let html = top.map(m => `<button class="nav-btn" data-go="${m.id}">${esc(m.label)}</button>`).join('');
 
