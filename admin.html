@@ -832,6 +832,19 @@ BIND.exps = () => {
 };
 
 /* ---------- 의견함 ---------- */
+/* 분류별 태그 색 — 메인 사이트(index.html)와 같은 색을 씁니다 */
+const OP_CAT_COLORS = {
+  '일하는 방식':   ['#ffe1ec','#d61e5c'],
+  '조직문화':      ['#e9e5ff','#4a3ec8'],
+  '업무효율':      ['#d9f5ef','#12866f'],
+  '디지털·AI':     ['#dfeaff','#2b5fd9'],
+  '복지·근무환경': ['#fff2d9','#b07a12'],
+  '제도개선':      ['#ffe6da','#c1521f'],
+  '기타':          ['#eceef2','#5b6591'],
+};
+const catTag = (cat) => { const [bg,fg] = OP_CAT_COLORS[cat] || OP_CAT_COLORS['기타'];
+  return `<span class="tag" style="background:${bg};color:${fg}">${esc(cat)}</span>`; };
+
 VIEWS.opinions = () => {
   const q=(Q.oq||'').toLowerCase();
   const cmts = id => S.comments.filter(c=>c.opinion_id===id);
@@ -842,7 +855,7 @@ VIEWS.opinions = () => {
       <button class="btn" id="oqGo">검색</button>
       ${q?`<button class="btn ghost" id="oqClear">초기화</button>`:''}</div>
     <div class="card">${list.length ? table(['분류','별칭','내용','댓글','접수','']) + list.map(o=>`<tr>
-      <td><span class="tag brand">${esc(o.cat)}</span></td><td>${esc(o.alias)}</td>
+      <td>${catTag(o.cat)}</td><td>${esc(o.alias)}</td>
       <td style="max-width:340px">${esc(excerpt(o.body,110))}</td>
       <td>${cmts(o.id).length}</td><td class="hint">${fmtDay(o.created_at)}</td>
       <td><div class="row-actions" style="margin:0">
