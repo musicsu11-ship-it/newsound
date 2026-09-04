@@ -892,7 +892,7 @@ function openLogin(){
    NAV
    ============================================================ */
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
-const PUBLIC_NAV = ['intro','news','opinion','calendar','share'];
+const PUBLIC_NAV = ['intro','news','opinion','calendar'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
@@ -906,7 +906,7 @@ function renderNav(){
     const groups = {};
     rest.forEach(m => (groups[m.group] = groups[m.group]||[]).push(m));
     html += `<div class="navdrop" id="navDrop">
-      <button class="nav-btn" id="navDropBtn">단원 메뉴 ▾</button>
+      <button class="nav-btn" id="navDropBtn">새소리단 단원 전용 ▾</button>
       <div class="navdrop-panel">
         ${Object.entries(groups).map(([g,items]) =>
           `<div class="grp">${esc(g)}</div>` +
