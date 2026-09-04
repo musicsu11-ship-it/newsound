@@ -954,11 +954,7 @@ function showReport(id){
   openModal(r.title, `<dl>
     <dt>작성자 / 팀</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}</dd>
     <dt>활동일자</dt><dd>${esc(r.act_date)}</dd>
-    <dt>활동 개요</dt><dd>${esc(r.overview)}</dd>
-    <dt>주요 활동 내용</dt><dd>${esc(r.content)||'-'}</dd>
-    <dt>성과 및 결과</dt><dd>${esc(r.result)||'-'}</dd>
-    <dt>개선점 / 건의</dt><dd>${esc(r.improve)||'-'}</dd>
-    <dt>첨부</dt><dd>${attHTML(r.files)}</dd>
+    <dt>결과보고서 파일</dt><dd>${attHTML(r.files)}</dd>
     <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd></dl>` + processBlock(r.status, r.officer_comment));
   bindZoom();
   $('#mSave').addEventListener('click', async ()=>{
@@ -991,12 +987,14 @@ function showExpense(id){
     await refresh(); closeModal(); toast('저장되었습니다. 신청자 화면에 즉시 반영됩니다.'); go(CURRENT);
   });
 }
+const ATT_IMG_RE = /\.(jpe?g|png|gif|webp)$/i;
 function attHTML(files){
   if(!files||!files.length) return '<span class="hint">첨부 없음</span>';
   return '<div class="thumbs">'+files.map(f=>{
     const u=fileUrl(f);
-    return u ? `<img src="${esc(u)}" data-zoom="${esc(u)}" alt="${esc(f.name||'')}">`
-             : `<span class="tag recv">🔒 ${esc(f.name||'파일')}</span>`;
+    if(!u) return `<span class="tag recv">🔒 ${esc(f.name||'파일')}</span>`;
+    if(ATT_IMG_RE.test(f.name||'')) return `<img src="${esc(u)}" data-zoom="${esc(u)}" alt="${esc(f.name||'')}">`;
+    return `<a class="tag brand" href="${esc(u)}" target="_blank" rel="noopener">📎 ${esc(f.name||'파일')}</a>`;
   }).join('')+'</div>';
 }
 function bindZoom(){ $$('#modalBody [data-zoom]').forEach(im=>

@@ -2098,39 +2098,34 @@ BIND.settings = () => {
 /* ============================================================================
    결과보고서 제출
    ============================================================================ */
-VIEWS.report = () => pageHead('결과보고서 제출','활동 종료 후 결과보고서를 제출합니다. 제출본은 혁신행정담당관이 검토합니다.')
-  + `<div class="card"><h2>보고서 작성</h2>
+VIEWS.report = () => pageHead('결과보고서 제출','작성한 결과보고서 파일을 올리면 혁신행정담당관이 검토합니다.')
+  + `<div class="card"><h2>결과보고서 제출</h2>
     <div class="grid c2">
-      <label class="field">보고서 제목 <span class="req">*</span><input id="rpTitle" placeholder="예) 8월 정기 모니터링 결과보고"></label>
       <label class="field">활동 일자 <span class="req">*</span><input id="rpDate" type="date"></label>
       <label class="field">작성자<input id="rpAuthor" value="${esc(myName())}"></label>
       <label class="field">소속 팀<select id="rpTeam"><option value="">선택 안 함</option>
         ${(intro().teams||[]).map(t=>`<option>${esc(t.name)}</option>`).join('')}</select></label>
     </div>
-    <label class="field">활동 개요 <span class="req">*</span><textarea id="rpOverview" placeholder="언제 / 어디서 / 누가 / 무엇을"></textarea></label>
-    <label class="field">주요 활동 내용<textarea id="rpContent"></textarea></label>
-    <label class="field">성과 및 결과<textarea id="rpResult"></textarea></label>
-    <label class="field">개선점 / 건의사항<textarea id="rpImprove"></textarea></label>
-    <label class="field">첨부 사진 <span class="hint" style="display:inline">선택</span>
-      <input id="rpFiles" type="file" multiple accept="image/*">
-      <span class="hint">첨부한 파일은 본인과 혁신행정담당관만 볼 수 있습니다.</span></label>
+    <label class="field">결과보고서 파일 <span class="req">*</span>
+      <input id="rpFiles" type="file" multiple accept=".pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx">
+      <span class="hint">pdf · hwp · doc · ppt · xls 파일을 올려주세요(여러 개 첨부 가능, 개당 20MB 이하).
+        첨부한 파일은 본인과 혁신행정담당관만 볼 수 있습니다.</span></label>
     <div class="thumbs" id="rpThumbs"></div>
     <div class="row-actions"><button class="btn primary" id="rpSubmit">보고서 제출</button></div>
   </div>`;
 BIND.report = () => {
   let picked = [];
-  $('#rpFiles').addEventListener('change', async e=>{
-    picked = await prepImages(e.target.files); previewLocal('#rpThumbs', picked); });
+  $('#rpFiles').addEventListener('change', e=>{
+    picked = prepDocs(e.target.files); previewDocsLocal('#rpThumbs', picked); });
   $('#rpSubmit').addEventListener('click', async ()=>{
-    const t=$('#rpTitle').value.trim(), d=$('#rpDate').value, ov=$('#rpOverview').value.trim();
-    if(!t||!d||!ov){ toast('제목·활동일자·활동개요는 필수입니다'); return; }
+    const d=$('#rpDate').value;
+    if(!d){ toast('활동일자를 입력하세요'); return; }
+    if(!picked.length){ toast('결과보고서 파일을 첨부하세요'); return; }
     const btn = $('#rpSubmit'); btn.disabled = true; busy(true);
     try{
-      const files = await uploadAll('docs', picked, 'reports');
+      const files = await uploadDocs('docs', picked, 'reports');
       const { error } = await sb.from('reports').insert({
-        title:t, act_date:d, team:$('#rpTeam').value, overview:ov,
-        content:$('#rpContent').value.trim(), result:$('#rpResult').value.trim(),
-        improve:$('#rpImprove').value.trim(), files,
+        title:'결과보고서', act_date:d, team:$('#rpTeam').value, files,
         author_id:S.user?.id, author_name:$('#rpAuthor').value.trim()||myName() });
       if(error) throw error;
       await refresh(); toast('보고서가 제출되었습니다'); go('mine');
@@ -2291,16 +2286,11 @@ function processBlock(cur, comment){
 function showReport(id, canProcess){
   const r = S.reports.find(x=>x.id===id); if(!r) return;
   openModal(r.title, `<dl>
-    <dt>제목</dt><dd>${esc(r.title)}</dd>
     <dt>작성자 / 팀</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}</dd>
     <dt>활동일자</dt><dd>${esc(r.act_date)}</dd>
-    <dt>활동 개요</dt><dd>${esc(r.overview)}</dd>
-    <dt>주요 활동 내용</dt><dd>${esc(r.content)||'-'}</dd>
-    <dt>성과 및 결과</dt><dd>${esc(r.result)||'-'}</dd>
-    <dt>개선점 / 건의</dt><dd>${esc(r.improve)||'-'}</dd>
     <dt>상태</dt><dd>${statusTag(r.status)}</dd>
     ${r.officer_comment?`<dt>담당관 코멘트</dt><dd>${esc(r.officer_comment)}</dd>`:''}
-    <dt>첨부</dt><dd>${attHTML(r.files)}</dd>
+    <dt>결과보고서 파일</dt><dd>${attHTML(r.files)}</dd>
     <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd>
   </dl>` + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
   bindZoom();
@@ -2337,12 +2327,14 @@ function showExpense(id, canProcess){
     await refresh(); closeModal(); toast('저장되었습니다'); go(CURRENT);
   });
 }
+const ATT_IMG_RE = /\.(jpe?g|png|gif|webp)$/i;
 function attHTML(files){
   if(!files || !files.length) return '<span class="hint">첨부 없음</span>';
   return '<div class="thumbs">' + files.map(f=>{
     const u = fileUrl(f);
     if(!u) return `<span class="tag recv">🔒 ${esc(f.name||'파일')}</span>`;
-    return `<img src="${esc(u)}" alt="${esc(f.name||'')}" data-zoom="${esc(u)}">`;
+    if(ATT_IMG_RE.test(f.name||'')) return `<img src="${esc(u)}" alt="${esc(f.name||'')}" data-zoom="${esc(u)}">`;
+    return `<a class="tag brand" href="${esc(u)}" target="_blank" rel="noopener">📎 ${esc(f.name||'파일')}</a>`;
   }).join('') + '</div>';
 }
 function bindZoom(){ $$('#modalBody [data-zoom]').forEach(im =>
@@ -2415,6 +2407,32 @@ function previewLocal(sel, picked){
   const el = $(sel); if(!el) return;
   el.innerHTML = picked.map(p=>`<img src="${p.preview}" alt="${esc(p.name)}" data-zoom="${p.preview}">`).join('');
   el.querySelectorAll('[data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
+}
+/* 결과보고서 같은 문서 첨부 — 이미지처럼 리사이즈하지 않고 원본 파일 그대로 올립니다 */
+const DOC_EXT_RE = /\.(pdf|docx?|hwpx?|pptx?|xlsx?)$/i;
+function prepDocs(fileList){
+  const out = [];
+  for(const f of fileList){
+    if(!DOC_EXT_RE.test(f.name)){ toast(`${f.name}: pdf·hwp·doc·ppt·xls 파일만 첨부할 수 있습니다`); continue; }
+    if(f.size > 20*1024*1024){ toast(`${f.name}: 20MB 이하 파일만 첨부할 수 있습니다`); continue; }
+    out.push({ file:f, name:f.name });
+  }
+  return out;
+}
+async function uploadDocs(bucket, picked, folder){
+  const out = [];
+  for(const p of picked){
+    const safe = p.name.replace(/[^\w.\-가-힣]/g,'_');
+    const path = `${folder}/${S.user?.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safe}`;
+    const { error } = await sb.storage.from(bucket).upload(path, p.file, { contentType: p.file.type || 'application/octet-stream' });
+    if(error) throw error;
+    out.push({ path, name:p.name });
+  }
+  return out;
+}
+function previewDocsLocal(sel, picked){
+  const el = $(sel); if(!el) return;
+  el.innerHTML = picked.map(p=>`<span class="tag brand" style="margin:4px 6px 4px 0">📎 ${esc(p.name)}</span>`).join('');
 }
 
 /* ============================================================================
