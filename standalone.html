@@ -353,13 +353,9 @@
     padding-bottom:14px;border-bottom:1px solid var(--border)}
   .hist-card p{margin:0;font-size:15px;color:var(--muted);line-height:1.75;word-break:keep-all}
 
-  /* 마스코트는 장식이라 작게 — 카드(표)가 시선을 받도록 합니다.
-     width:fit-content 로 그림 크기에 맞춰 상자를 줄여야 말풍선(%)이 그림 옆에 붙습니다 */
-  .hist-mascots{position:relative;width:fit-content;margin:38px auto 6px}
+  /* 마스코트는 장식이라 작게 — 카드(표)가 시선을 받도록 합니다 */
+  .hist-mascots{width:fit-content;margin:38px auto 6px}
   .hist-mascots img{width:min(46vw,170px);display:block}
-  .hbub{position:absolute;font-weight:900;border-radius:999px;padding:9px 15px;font-size:14px;box-shadow:var(--shadow)}
-  .hbub.h1{left:12%;top:8%;background:var(--brand-weak);color:var(--brand)}
-  .hbub.h2{right:12%;top:2%;background:var(--lav);color:#4a3ec8;letter-spacing:2px}
   .history figcaption{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.6}
 
   /* 6. 소식 카드 */
@@ -521,7 +517,6 @@
     /* 연혁 타임라인 — 가로 3열 대신 세로로 쌓고, 가로선을 중앙 세로선으로 바꿉니다 */
     .hist-track{grid-template-columns:minmax(0,1fr);gap:32px;max-width:360px}
     .hist-line{left:50%;right:auto;top:15px;bottom:15px;width:2px;height:auto;transform:translateX(-50%)}
-    .hbub{display:none}
     .hist-mascots img{width:min(46vw,190px)}
   }
 
@@ -1156,10 +1151,7 @@ VIEWS.home = () => {
           </div>
         </div>
       </div>
-      <div class="hist-mascots">
-        <span class="hbub h1">♡</span>
-        <span class="hbub h2">···</span>
-        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
+      <div class="hist-mascots">        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
       </div>
       <figcaption>※ 연혁은 지속적으로 이어지고 있습니다.</figcaption>
     </div>
@@ -1286,10 +1278,7 @@ VIEWS.intro = () => {
           </div>
         </div>
       </div>
-      <div class="hist-mascots">
-        <span class="hbub h1">♡</span>
-        <span class="hbub h2">···</span>
-        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
+      <div class="hist-mascots">        <img src="assets/mascots.png" alt="새소리단 마스코트 고드래곤과 새초롱이">
       </div>
       <figcaption>※ 연혁은 지속적으로 이어지고 있습니다.</figcaption>
     </div>
