@@ -2005,7 +2005,6 @@ VIEWS.game = () => {
   if(url || html){
     return `<div class="crumb">홈 · 게임</div>
     <h1 class="pg-title">새소리단 게임</h1>
-    <p class="pg-sub">별도 제공되는 게임입니다.</p>
     <div class="card">${url
       ? `<iframe src="${esc(url)}" title="고드래곤 배구" style="width:100%;aspect-ratio:432/304;border:0;border-radius:8px" allow="fullscreen"></iframe>`
       : `<iframe id="gameFrame" sandbox="allow-scripts" style="width:100%;height:70vh;border:0;border-radius:16px"></iframe>`}
