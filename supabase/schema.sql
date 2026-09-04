@@ -425,13 +425,17 @@ drop policy if exists events_insert on public.events;
 create policy events_insert on public.events for insert
   with check ( author_id = auth.uid() and public.is_inner() );
 
+-- 관리자 콘솔의 "일정 관리"는 담당관·관리자 모두 접근하는 화면이라
+-- (admin.html MENUS: roles:['officer','admin']) 삭제/수정 권한도 그에 맞춥니다.
+-- is_admin() 만 허용했을 때는 담당관이 남이 등록한 일정을 지우려 하면
+-- 버튼은 보이는데 DB 정책에 막혀 조용히 실패했습니다.
 drop policy if exists events_update on public.events;
 create policy events_update on public.events for update
-  using ( author_id = auth.uid() or public.is_admin() );
+  using ( author_id = auth.uid() or public.is_officer() );
 
 drop policy if exists events_delete on public.events;
 create policy events_delete on public.events for delete
-  using ( author_id = auth.uid() or public.is_admin() );
+  using ( author_id = auth.uid() or public.is_officer() );
 
 -- ============================================================================
 --  8. 사이트 설정 / 새소리단 소개 (단일 행)

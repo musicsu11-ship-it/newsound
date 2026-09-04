@@ -1964,7 +1964,7 @@ VIEWS.calendar = () => {
             <span class="tag brand">정기 활동</span>
             <b style="font-size:15.5px;font-weight:900">${esc(e.title)}</b></div>
           <div class="hint" style="margin:0 0 10px">${esc(e.place||'장소 미정')}${e.ev_time?' · '+esc(e.ev_time):''}</div>
-          ${(e.author_id===S.user?.id || isAdmin())
+          ${(e.author_id===S.user?.id || isOfficer())
             ? `<button class="btn sm danger" data-evdel="${e.id}">삭제</button>` : ''}
         </div>`).join('') : `<div class="empty" style="padding:22px 0">이 날짜에 등록된 일정이 없습니다.</div>`}
       </div>
@@ -2198,8 +2198,8 @@ VIEWS.expense = () => pageHead('활동비 정산 신청','활동비 사용 내�
     </div>
     <label class="field">상세 내역 / 비고<textarea id="exNote" placeholder="사용 목적, 참여 인원 등"></textarea></label>
     <label class="field">영수증 사진 <span class="req">*</span>
-      <input id="exFiles" type="file" multiple accept="image/*" capture="environment">
-      <span class="hint">여러 장 첨부 가능. 휴대폰에서는 카메라로 바로 촬영할 수 있습니다.</span></label>
+      <input id="exFiles" type="file" multiple accept="image/*">
+      <span class="hint">여러 장 첨부 가능. 카메라 촬영 또는 앨범에서 사진을 선택할 수 있습니다.</span></label>
     <div class="thumbs" id="exThumbs"></div>
     <div class="row-actions"><button class="btn primary" id="exSubmit">정산 신청</button></div>
   </div>`;
