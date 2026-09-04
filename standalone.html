@@ -413,6 +413,7 @@
   .crumb{font-size:13px;color:#a2a9c6;margin-bottom:18px}
   .pg-title{font-size:clamp(28px,4vw,40px);font-weight:900;letter-spacing:-.03em;margin:0 0 8px}
   .pg-sub{margin:0 0 26px;color:var(--muted);font-size:14.5px;word-break:keep-all}
+  .game-desc{margin:0 0 22px;color:var(--text);font-size:15.5px;font-weight:600;line-height:1.7;word-break:keep-all}
   .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
 
   /* 소개 — 팀 밴드 */
@@ -1718,7 +1719,9 @@ VIEWS.game = () => {
     frame = `<div class="empty">게임 소스가 아직 등록되지 않았습니다.<br>${SESSION.role==='admin'?'설정 · 게임 등록 메뉴에서 등록하세요.':'관리자에게 문의하세요.'}</div>`;
   }
   return pageHead('게임','새소리단 활동용 게임입니다.')
-    + `<div class="card"><h2>게임 실행</h2><p class="sub">별도 제공되는 게임 소스가 이 영역에 삽입됩니다.</p>${frame}</div>`;
+    + `<p class="game-desc">잠시 쉬어가며, 다시 집중할 수 있도록 업무 중 잠깐의 휴식과 기분 전환을 위한 공간입니다.<br>
+        가볍게 즐기며 잠시 머리를 식히고, 다시 업무에 집중해보세요.</p>
+      <div class="card"><h2>게임 실행</h2>${frame}</div>`;
 };
 BIND.game = () => {
   const s = DB.settings();
