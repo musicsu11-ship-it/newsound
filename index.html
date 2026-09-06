@@ -444,7 +444,13 @@
   .pg-title{font-size:clamp(28px,4vw,40px);font-weight:900;letter-spacing:-.03em;margin:0 0 8px}
   .pg-sub{margin:0 0 26px;color:var(--muted);font-size:14.5px;word-break:keep-all}
   .game-desc{margin:0 0 22px;color:var(--text);font-size:15.5px;font-weight:600;line-height:1.7;word-break:keep-all}
-  .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  /* 아래 여백을 안내문(.pg-sub)이 아니라 이 상자가 갖게 합니다.
+     휴대폰처럼 폭이 좁으면 오른쪽 버튼이 아랫줄로 내려가는데, 그때는 버튼이
+     상자의 맨 아래가 되어 안내문의 여백이 소용없어집니다.
+     그대로 두면 버튼과 바로 밑 검색칸이 딱 붙고 버튼 그림자까지 겹칩니다. */
+  .pg-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    margin-bottom:26px}
+  .pg-head .pg-sub{margin-bottom:0}
 
   /* 소개 — 팀 밴드 */
   .teamband{padding:30px clamp(18px,3vw,40px);display:grid;grid-template-columns:auto minmax(0,1fr);
