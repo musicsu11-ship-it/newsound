@@ -10,6 +10,10 @@
 <style>
   /* ── 디자인 시안 팔레트 (네이비 + 마젠타) ───────────────────── */
   :root{
+    /* color-scheme:light — 휴대폰이 다크모드여도 이 사이트는 항상 밝은 화면으로 보여 줍니다.
+       PC 화면과 색이 달라지지 않게 하려는 것이고, 입력칸·스크롤바처럼
+       브라우저가 직접 그리는 부분까지 밝게 고정하려면 이 한 줄이 필요합니다. */
+    color-scheme:light;
     --bg:#ffffff; --surface:#ffffff; --surface-2:#f7f6fe; --border:#e4e2f5;
     --text:#16225c; --muted:#5b6591; --brand:#d61e5c; --brand-weak:#ffe1ec;
     --accent:#f5326b; --lav:#e9e5ff;
@@ -22,18 +26,6 @@
     /* 본문 최대 폭 — 좌우 여백을 한 곳에서 조절합니다 */
     --wrap:1560px;
     --radius:14px;
-  }
-  @media (prefers-color-scheme:dark){
-    :root{
-      --bg:#0e1230; --surface:#171d47; --surface-2:#1e2555; --border:#2e3670;
-      --text:#eceaff; --muted:#a2a9c6; --brand:#ff6f9c; --brand-weak:#3a1c39;
-      --accent:#ff85ab; --lav:#2a2f63;
-      --ok:#4ecfa8; --ok-weak:#0f3a31; --warn:#e8b055; --warn-weak:#3a2c10;
-      --danger:#ff7a9c; --danger-weak:#3f1a2b;
-      --hol:#ff8f83; --hol-weak:#41211d;
-      --shadow:0 14px 40px rgba(0,0,0,.42);
-      --shadow-lg:0 20px 46px rgba(0,0,0,.5);
-    }
   }
   h1,h2,h3{letter-spacing:-.03em; text-wrap:balance}
   *{box-sizing:border-box}
@@ -48,25 +40,12 @@
   .topnav{display:flex;align-items:center;gap:22px;padding:14px clamp(16px,4vw,48px);
     background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
     border-bottom:1px solid rgba(22,34,92,.08);position:sticky;top:0;z-index:36}
-  @media (prefers-color-scheme:dark){ .topnav{background:rgba(23,29,71,.92);border-bottom-color:rgba(255,255,255,.08)} }
   .brandbtn{display:flex;align-items:center;gap:11px;border:0;background:transparent;cursor:pointer;padding:0;flex:none}
   .brandbtn img{display:block;height:32px;width:auto}
-  /* 고용노동부 로고 — 밝은 배경용·어두운 배경용 두 장을 넣어 두고 CSS 로 하나만 보여 줍니다.
-     picture+source 를 쓰지 않는 이유: 브라우저가 페이지를 열 때 한 번만 고르기 때문에,
-     보고 있는 도중 휴대폰이 다크모드로 바뀌면 로고가 따라오지 않습니다.
-     display 로 바꾸면 테마가 바뀌는 즉시 같이 바뀝니다. */
-  /* 선택자를 둘씩 겹쳐 쓰는 이유: 위의 .brandbtn img{display:block} 과
-     .foot-logo{display:block} 보다 세야 숨기기가 먹습니다 */
-  .brandbtn .molab-dark,.foot-logo.molab-dark{display:none}
-  @media (prefers-color-scheme:dark){
-    .brandbtn .molab-light,.foot-logo.molab-light{display:none}
-    .brandbtn .molab-dark,.foot-logo.molab-dark{display:block}
-  }
   .brandbtn .wordmark{font-size:17px;font-weight:900;color:var(--text);letter-spacing:-.03em}
   .mainnav{display:flex;gap:2px;align-items:center;flex:1;flex-wrap:wrap}
   .nav-btn{border:0;background:transparent;font-family:inherit;font-size:14.5px;font-weight:700;
     color:#3a4478;padding:8px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
-  @media (prefers-color-scheme:dark){ .nav-btn{color:var(--muted)} }
   .nav-btn:hover{color:var(--accent);background:var(--brand-weak)}
   .nav-btn.active{color:var(--brand);background:var(--brand-weak);font-weight:900}
   .nav-right{display:flex;align-items:center;gap:10px;flex:none}
@@ -673,51 +652,6 @@
     .hero .cta{flex-direction:column;align-items:stretch}
     .hero .cta .btn{width:100%;justify-content:center}
   }
-
-  /* ══════════════════════════════════════════════════════════════════════════
-     다크모드 마무리   (index.html 과 같은 내용)
-
-     위쪽 규칙 중에 색을 직접 박아 둔 곳(#fff, #ffeef5 처럼)은 기기를 다크모드로
-     두면 그대로 밝게 남아, 흰 글씨가 밝은 판 위에 올라가 안 보이게 됩니다.
-     그런 자리를 여기 한곳에 모아 어둡게 바꿉니다.
-     라이트모드에서는 이 블록이 통째로 꺼지므로 지금 화면은 그대로입니다.
-     ══════════════════════════════════════════════════════════════════════════ */
-  @media (prefers-color-scheme:dark){
-    /* 1) 히어로 뒤에 깔린 색 얼룩 — 밝은 분홍·라벤더라서 흰색 제목이 묻혔습니다 */
-    .hero .blob.a{background:#1a2150}
-    .hero .blob.b{background:#33193a}
-
-    /* 2) 새초롱이 오른쪽 말풍선 — 배경이 밝은 색으로 뒤집히므로 글씨는 어둡게 */
-    .bubble.r{color:var(--bg)}
-
-    /* 3) '이런 생각' 판 */
-    .thoughts{background:#231a45}
-    .thought{color:var(--text);box-shadow:0 10px 26px rgba(0,0,0,.36)}
-    .thought[data-tone="w"]{background:var(--surface)}
-    .thought[data-tone="v"]{background:var(--lav)}
-    .thought:hover{box-shadow:0 18px 36px rgba(0,0,0,.5)}
-    .thoughts .mid h2{color:#4fd6bd}
-    .thoughts .mid p{color:var(--muted)}
-    .thoughts .mid .btn{background:var(--lav);color:var(--text)}
-
-    /* 4) '한마디' 판 */
-    .voices{background:linear-gradient(180deg,#1d1540 0%,var(--bg) 100%)}
-    .voices h2 em{color:#c6a2ff}
-    .voice{background:var(--surface);color:var(--text);box-shadow:0 8px 22px rgba(0,0,0,.36)}
-    .voice-col.l .voice{border-color:#2f5f52}
-    .voice-col.r .voice{border-color:#5e2f42}
-    @media (hover:hover){ .voice:hover{box-shadow:0 18px 34px rgba(0,0,0,.5)} }
-
-    /* 5) 분홍 위의 흰 글씨 — 다크모드에서는 분홍(--brand)이 밝아져서
-          흰 글씨와의 대비가 2.6:1 까지 떨어집니다. 글씨를 어둡게 바꾸면 6.4:1 */
-    .btn.primary{color:var(--bg)}
-    .gb-cta{color:var(--bg)}
-    .cal .day.today .dnum{color:var(--bg)}
-
-    /* 6) 사진이 아직 없을 때 보이는 빈 자리 */
-    .news-card .ph,.feat-card .ph,.side-item .ph{background:linear-gradient(150deg,var(--surface-2),#2b2440)}
-    .tb-art.ph{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.18)}
-  }
 </style>
 </head>
 <body>
@@ -728,10 +662,9 @@
 <div id="appView" style="display:none">
   <header class="topnav">
     <button class="brandbtn" id="brandBtn">
-      <!-- 로고 두 장을 넣어 두고 CSS 가 하나만 보여 줍니다(.molab-light / .molab-dark).
-           jpg 를 안 쓰는 이유: 흰 배경이 박혀 있어 다크모드에서 흰 상자로 보입니다. -->
-      <img class="molab molab-light" src="assets/logo-molab.png" alt="고용노동부">
-      <img class="molab molab-dark" src="assets/logo-molab-white.png" alt="고용노동부">
+      <!-- jpg 가 아니라 배경이 투명한 png 를 씁니다.
+           jpg 는 흰 바탕이 이미지에 박혀 있어 흰 상자로 보일 수 있습니다. -->
+      <img src="assets/logo-molab.png" alt="고용노동부">
       <span class="wordmark">새소리단</span>
     </button>
     <nav class="mainnav" id="navArea"></nav>
@@ -749,9 +682,7 @@
       <div class="foot-top">
         <h2>작은 목소리가<br>일하는 방식을 <em>바꿉니다</em></h2>
         <div class="foot-links">
-          <!-- 다크모드 푸터는 짙은 남색이라 원본 로고(짙은 남색 글씨)가 묻힙니다 -->
-          <img class="foot-logo molab-light" src="assets/logo-molab.png" alt="고용노동부">
-          <img class="foot-logo molab-dark" src="assets/logo-molab-white.png" alt="고용노동부">
+          <img class="foot-logo" src="assets/logo-molab.png" alt="고용노동부">
         </div>
       </div>
       <div class="foot-meta">
