@@ -51,6 +51,17 @@
   @media (prefers-color-scheme:dark){ .topnav{background:rgba(23,29,71,.92);border-bottom-color:rgba(255,255,255,.08)} }
   .brandbtn{display:flex;align-items:center;gap:11px;border:0;background:transparent;cursor:pointer;padding:0;flex:none}
   .brandbtn img{display:block;height:32px;width:auto}
+  /* 고용노동부 로고 — 밝은 배경용·어두운 배경용 두 장을 넣어 두고 CSS 로 하나만 보여 줍니다.
+     picture+source 를 쓰지 않는 이유: 브라우저가 페이지를 열 때 한 번만 고르기 때문에,
+     보고 있는 도중 휴대폰이 다크모드로 바뀌면 로고가 따라오지 않습니다.
+     display 로 바꾸면 테마가 바뀌는 즉시 같이 바뀝니다. */
+  /* 선택자를 둘씩 겹쳐 쓰는 이유: 위의 .brandbtn img{display:block} 과
+     .foot-logo{display:block} 보다 세야 숨기기가 먹습니다 */
+  .brandbtn .molab-dark,.foot-logo.molab-dark{display:none}
+  @media (prefers-color-scheme:dark){
+    .brandbtn .molab-light,.foot-logo.molab-light{display:none}
+    .brandbtn .molab-dark,.foot-logo.molab-dark{display:block}
+  }
   .brandbtn .wordmark{font-size:17px;font-weight:900;color:var(--text);letter-spacing:-.03em}
   .mainnav{display:flex;gap:2px;align-items:center;flex:1;flex-wrap:wrap}
   .nav-btn{border:0;background:transparent;font-family:inherit;font-size:14.5px;font-weight:700;
@@ -84,6 +95,7 @@
   .foot-top h2 em{font-style:normal;color:var(--accent)}
   .foot-links{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
   /* 배경 투명 원본 로고 — 밝은 푸터라 판을 깔지 않습니다 */
+  /* 다크모드는 위 .molab-* 규칙이 흰색 로고로 교체합니다 */
   .foot-logo{height:44px;width:auto;display:block}
   .foot-links button{border:0;background:transparent;color:var(--text);font-family:inherit;font-size:14px;
     font-weight:800;cursor:pointer;padding:0}
@@ -292,6 +304,8 @@
   .thoughts{border-radius:32px;background:#ffeef5;padding:44px 40px 52px;overflow:hidden}
   .thought-wrap{display:flex;flex-wrap:wrap;gap:26px 22px;justify-content:center;align-items:flex-start;margin-bottom:34px}
   /* --r(기울기)·--ty(위아래 위치)를 항목마다 다르게 줘서 격자처럼 반듯하지 않고 자유롭게 흩어진 느낌을 냅니다 */
+  .thought[data-tone="w"]{background:#fff}
+  .thought[data-tone="v"]{background:#e9e5ff}
   .thought{background:#fff;color:#16225c;font-weight:800;line-height:1.5;word-break:keep-all;
     box-shadow:0 10px 26px rgba(28,38,90,.1);font-size:23px;max-width:440px;padding:20px 27px;
     transform:rotate(var(--r,0deg)) translateY(var(--ty,0px));
@@ -664,6 +678,51 @@
     .hero .cta{flex-direction:column;align-items:stretch}
     .hero .cta .btn{width:100%;justify-content:center}
   }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     다크모드 마무리   (index.html 과 같은 내용)
+
+     위쪽 규칙 중에 색을 직접 박아 둔 곳(#fff, #ffeef5 처럼)은 기기를 다크모드로
+     두면 그대로 밝게 남아, 흰 글씨가 밝은 판 위에 올라가 안 보이게 됩니다.
+     그런 자리를 여기 한곳에 모아 어둡게 바꿉니다.
+     라이트모드에서는 이 블록이 통째로 꺼지므로 지금 화면은 그대로입니다.
+     ══════════════════════════════════════════════════════════════════════════ */
+  @media (prefers-color-scheme:dark){
+    /* 1) 히어로 뒤에 깔린 색 얼룩 — 밝은 분홍·라벤더라서 흰색 제목이 묻혔습니다 */
+    .hero .blob.a{background:#1a2150}
+    .hero .blob.b{background:#33193a}
+
+    /* 2) 새초롱이 오른쪽 말풍선 — 배경이 밝은 색으로 뒤집히므로 글씨는 어둡게 */
+    .bubble.r{color:var(--bg)}
+
+    /* 3) '이런 생각' 판 */
+    .thoughts{background:#231a45}
+    .thought{color:var(--text);box-shadow:0 10px 26px rgba(0,0,0,.36)}
+    .thought[data-tone="w"]{background:var(--surface)}
+    .thought[data-tone="v"]{background:var(--lav)}
+    .thought:hover{box-shadow:0 18px 36px rgba(0,0,0,.5)}
+    .thoughts .mid h2{color:#4fd6bd}
+    .thoughts .mid p{color:var(--muted)}
+    .thoughts .mid .btn{background:var(--lav);color:var(--text)}
+
+    /* 4) '한마디' 판 */
+    .voices{background:linear-gradient(180deg,#1d1540 0%,var(--bg) 100%)}
+    .voices h2 em{color:#c6a2ff}
+    .voice{background:var(--surface);color:var(--text);box-shadow:0 8px 22px rgba(0,0,0,.36)}
+    .voice-col.l .voice{border-color:#2f5f52}
+    .voice-col.r .voice{border-color:#5e2f42}
+    @media (hover:hover){ .voice:hover{box-shadow:0 18px 34px rgba(0,0,0,.5)} }
+
+    /* 5) 분홍 위의 흰 글씨 — 다크모드에서는 분홍(--brand)이 밝아져서
+          흰 글씨와의 대비가 2.6:1 까지 떨어집니다. 글씨를 어둡게 바꾸면 6.4:1 */
+    .btn.primary{color:var(--bg)}
+    .gb-cta{color:var(--bg)}
+    .cal .day.today .dnum{color:var(--bg)}
+
+    /* 6) 사진이 아직 없을 때 보이는 빈 자리 */
+    .news-card .ph,.feat-card .ph,.side-item .ph{background:linear-gradient(150deg,var(--surface-2),#2b2440)}
+    .tb-art.ph{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.18)}
+  }
 </style>
 </head>
 <body>
@@ -674,7 +733,10 @@
 <div id="appView" style="display:none">
   <header class="topnav">
     <button class="brandbtn" id="brandBtn">
-      <img src="assets/logo-molab.jpg" alt="고용노동부">
+      <!-- 로고 두 장을 넣어 두고 CSS 가 하나만 보여 줍니다(.molab-light / .molab-dark).
+           jpg 를 안 쓰는 이유: 흰 배경이 박혀 있어 다크모드에서 흰 상자로 보입니다. -->
+      <img class="molab molab-light" src="assets/logo-molab.png" alt="고용노동부">
+      <img class="molab molab-dark" src="assets/logo-molab-white.png" alt="고용노동부">
       <span class="wordmark">새소리단</span>
     </button>
     <nav class="mainnav" id="navArea"></nav>
@@ -692,7 +754,9 @@
       <div class="foot-top">
         <h2>작은 목소리가<br>일하는 방식을 <em>바꿉니다</em></h2>
         <div class="foot-links">
-          <img class="foot-logo" src="assets/logo-molab.png" alt="고용노동부">
+          <!-- 다크모드 푸터는 짙은 남색이라 원본 로고(짙은 남색 글씨)가 묻힙니다 -->
+          <img class="foot-logo molab-light" src="assets/logo-molab.png" alt="고용노동부">
+          <img class="foot-logo molab-dark" src="assets/logo-molab-white.png" alt="고용노동부">
         </div>
       </div>
       <div class="foot-meta">
@@ -1129,7 +1193,10 @@ function bindSearch(viewId){
    ============================================================ */
 /* "이런 생각" 말풍선: 크기·글씨는 전부 동일하게 두고, 흰색 3개 · 보라색 3개로 고정합니다.
    꼬리 방향과 기울기·상하 위치를 항목마다 다르게 줘서 격자처럼 반듯하지 않고 자유롭게 흩어져 보이게 합니다 */
-const THOUGHT_BG = ['#fff','#fff','#fff','#e9e5ff','#e9e5ff','#e9e5ff'];
+/* 색을 직접 쓰지 않고 'w'(흰색)·'v'(보라색)만 표시합니다.
+   실제 색은 CSS 의 .thought[data-tone] 에 있어서 다크모드에서 어둡게 바뀝니다.
+   (색을 style 속성에 직접 넣으면 다크모드 규칙이 이기지 못합니다) */
+const THOUGHT_BG = ['w','w','w','v','v','v'];
 const THOUGHT_TAIL = ['24px 24px 24px 8px','24px 24px 8px 24px'];
 const THOUGHT_TILT = [
   { r:-3,  ty:8   }, { r:2,   ty:-14 }, { r:-1.5, ty:16 },
@@ -1266,7 +1333,7 @@ VIEWS.home = () => {
     <div class="thoughts">
       <div class="thought-wrap">
         ${THOUGHTS.map((t,i)=>{ const k=THOUGHT_TILT[i];
-          return `<div class="thought" style="border-radius:${THOUGHT_TAIL[i%2]};background:${THOUGHT_BG[i]};--r:${k.r}deg;--ty:${k.ty}px">${esc(t)}</div>`;
+          return `<div class="thought" data-tone="${THOUGHT_BG[i]}" style="border-radius:${THOUGHT_TAIL[i%2]};--r:${k.r}deg;--ty:${k.ty}px">${esc(t)}</div>`;
         }).join('')}
       </div>
       <div class="mid">
