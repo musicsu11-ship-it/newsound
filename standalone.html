@@ -331,31 +331,28 @@
   .voice-col{display:flex;flex-direction:column;gap:16px}
   .voice-col.l{align-items:flex-end}
   .voice-col.r{align-items:flex-start}
-  /* 격자처럼 반듯하게 놓이지 않도록 말풍선마다 기울기(--r)와
-     좌우·위아래 밀기(--tx/--ty)를 다르게 줍니다. 값은 아래 VOICE_TILT 에 있습니다.
-     --sx 는 좌우 밀기 배율 — 휴대폰에서는 말풍선이 화면 폭을 꽉 채우므로
-     0 으로 꺼서 가로로 삐져나가지 않게 합니다. */
+  /* 말풍선은 기울이지 않고 반듯하게 놓습니다.
+     새초롱이 쪽 안쪽 모서리가 세로로 딱 맞고, 바깥쪽은 글 길이만큼만 늘어납니다 */
   .voice{background:#fff;border:2px solid #cfe9de;border-radius:34px;padding:20px 30px;text-align:left;
     font-size:clamp(15px,1.6vw,21px);font-weight:700;line-height:1.55;color:#16225c;word-break:keep-all;max-width:560px;
     cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
     box-shadow:0 8px 22px rgba(28,38,90,.07);
-    transform:rotate(var(--r,0deg)) translate(calc(var(--tx,0px) * var(--sx,1)), var(--ty,0px));
     transition:transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease}
   .voice-col.r .voice{border-color:#f6cdd9}
   /* 마우스가 있는 기기에서만 — 손가락 화면에서 hover 가 눌린 채로 남는 것을 막습니다 */
   @media (hover:hover){
-    .voice:hover{box-shadow:0 18px 34px rgba(28,38,90,.15);
-      transform:rotate(var(--r,0deg)) translate(calc(var(--tx,0px) * var(--sx,1)), calc(var(--ty,0px) - 6px)) scale(1.03)}
+    .voice:hover{box-shadow:0 18px 34px rgba(28,38,90,.15);transform:translateY(-6px) scale(1.03)}
   }
-  .voice:active{transform:rotate(var(--r,0deg)) translate(calc(var(--tx,0px) * var(--sx,1)), var(--ty,0px)) scale(.96)}
-  /* 누르는 순간 톡 튀어올랐다 좌우로 한 번 흔들리고 제자리로 */
+  .voice:active{transform:scale(.96)}
+  /* 누르는 순간 톡 튀어올랐다 좌우로 한 번 흔들리고 제자리로.
+     흔들리는 건 누르는 동안뿐이고, 끝나면 다시 반듯하게 돌아옵니다 */
   .voice.pop{animation:voicePop .62s cubic-bezier(.34,1.56,.64,1)}
   @keyframes voicePop{
-    0%  {transform:rotate(var(--r,0deg)) translate(calc(var(--tx,0px) * var(--sx,1)), var(--ty,0px)) scale(.94)}
-    30% {transform:rotate(calc(var(--r,0deg) - 3deg)) translate(calc(var(--tx,0px) * var(--sx,1)), calc(var(--ty,0px) - 14px)) scale(1.07)}
-    55% {transform:rotate(calc(var(--r,0deg) + 2.5deg)) translate(calc(var(--tx,0px) * var(--sx,1)), calc(var(--ty,0px) + 3px)) scale(.99)}
-    78% {transform:rotate(calc(var(--r,0deg) - 1deg)) translate(calc(var(--tx,0px) * var(--sx,1)), calc(var(--ty,0px) - 4px)) scale(1.02)}
-    100%{transform:rotate(var(--r,0deg)) translate(calc(var(--tx,0px) * var(--sx,1)), var(--ty,0px)) scale(1)}
+    0%  {transform:scale(.94)}
+    30% {transform:translateY(-14px) rotate(-3deg) scale(1.07)}
+    55% {transform:translateY(3px) rotate(2.5deg) scale(.99)}
+    78% {transform:translateY(-4px) rotate(-1deg) scale(1.02)}
+    100%{transform:none}
   }
   .voice-mid img{display:block;width:clamp(150px,22vw,300px);max-width:100%;
     filter:drop-shadow(0 20px 30px rgba(28,38,90,.2));animation:floaty 5.6s ease-in-out infinite}
@@ -620,9 +617,7 @@
     .news-card p{font-size:12.5px;line-height:1.55;margin:0 0 9px}
     .news-card .dt{font-size:11.5px}
     .news-card .tag{font-size:11px;padding:3px 9px}
-    /* 한 줄로 쌓이면 말풍선이 화면 폭을 꽉 채우므로 좌우 밀기(--sx)는 끕니다.
-       기울기와 위아래 밀기는 그대로 둬서 반듯하지 않은 느낌은 유지합니다 */
-    .voice-grid{grid-template-columns:minmax(0,1fr);gap:16px;--sx:0}
+    .voice-grid{grid-template-columns:minmax(0,1fr);gap:16px}
     .voice-col.l,.voice-col.r{align-items:stretch}
     .voice-mid{order:-1;display:flex;justify-content:center}
     .voice{font-size:15px;padding:16px 20px;max-width:none}
@@ -1211,7 +1206,6 @@ const VOICES_L = [
   '🏖️ 휴가 쓸 때 눈치 보이지 않으면 좋겠어요',
   '💬 불필요한 회의는 줄이고, 꼭 필요한 이야기만 나눴으면 좋겠어요',
   '🤝 서로 편하게 질문할 수 있는 분위기가 되었으면 좋겠어요',
-  '💻 불필요한 보고나 중복 자료 작성이 줄었으면 좋겠어요',
 ];
 const VOICES_R = [
   '🙈 연가 쓰는데 어디 가는지 묻지 않았으면 합니다',
@@ -1219,27 +1213,6 @@ const VOICES_R = [
   '🔄 담당자가 바뀌어도 업무가 끊기지 않도록 인수인계가 잘 되었으면 좋겠어요',
   '🧑‍🤝‍🧑 부서가 달라도 서로 업무를 이해하고 협업하기 쉬웠으면 좋겠어요',
 ];
-/* 말풍선 하나하나의 기울기와 밀기 — 손으로 툭툭 붙여 놓은 것처럼 보이게 합니다.
-   r  기울기(도). 옆 말풍선과 반대 방향이 되게 부호를 번갈아 줬습니다.
-   tx 좌우 밀기(px). 새초롱이 쪽(+)과 바깥쪽(-)을 섞어 가장자리를 들쭉날쭉하게.
-   ty 위아래 밀기(px). 줄 간격이 일정해 보이지 않게 합니다.
-   숫자를 키우면 더 흐트러지고, 0 으로 두면 반듯해집니다.
-   바깥쪽(왼쪽 칸의 음수 · 오른쪽 칸의 양수)은 화면 가장자리로 가는 방향이라
-   좁은 화면에서 여백이 모자라지 않게 -18 ~ +18 안쪽으로 잡았습니다. */
-const VOICE_TILT_L = [
-  { r:-2.4, tx:-13, ty:  4 },
-  { r: 1.7, tx: 12, ty:-10 },
-  { r:-1.2, tx:-18, ty:  9 },
-  { r: 2.3, tx:  8, ty: -5 },
-  { r:-1.8, tx: -8, ty: 12 },
-];
-const VOICE_TILT_R = [
-  { r: 2.1, tx: 12, ty: -7 },
-  { r:-1.5, tx: -8, ty: 10 },
-  { r: 2.6, tx: 18, ty: -3 },
-  { r:-1.3, tx:  4, ty: 13 },
-];
-const voiceStyle = (k) => k ? `--r:${k.r}deg;--tx:${k.tx}px;--ty:${k.ty}px` : '';
 
 /* 홈 캘린더 — 이번 달을 읽기 전용으로 보여줍니다 */
 const HM = { y:new Date().getFullYear(), m:new Date().getMonth() };
@@ -1351,9 +1324,9 @@ VIEWS.home = () => {
       <div class="eyebrow">새소리단에게 들려줄 이야기, 있으신가요?</div>
       <h2>새소리단이<br>당신의 <em>한마디</em>를 기다립니다</h2>
       <div class="voice-grid">
-        <div class="voice-col l">${VOICES_L.map((v,i)=>`<div class="voice" style="${voiceStyle(VOICE_TILT_L[i])}">${esc(v)}</div>`).join('')}</div>
+        <div class="voice-col l">${VOICES_L.map(v=>`<div class="voice">${esc(v)}</div>`).join('')}</div>
         <div class="voice-mid"><img src="assets/bird-large.png" alt="새초롱이"></div>
-        <div class="voice-col r">${VOICES_R.map((v,i)=>`<div class="voice" style="${voiceStyle(VOICE_TILT_R[i])}">${esc(v)}</div>`).join('')}</div>
+        <div class="voice-col r">${VOICES_R.map(v=>`<div class="voice">${esc(v)}</div>`).join('')}</div>
       </div>
     </div>
   </section>
