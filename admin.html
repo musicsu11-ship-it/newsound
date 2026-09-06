@@ -589,7 +589,9 @@ VIEWS.posts = () => {
       ${q?`<button class="btn ghost" id="pqClear">초기화</button>`:''}</div>
     <div class="card">
       ${list.length ? table(['','제목','작성자','올린 날짜','관리']) + list.map(p=>`<tr>
-        <td>${(p.images||[])[0] ? `<img src="${esc(mediaUrl(p.images[0].path))}" style="width:52px;height:40px;object-fit:cover;border-radius:6px" alt="">` : '<span class="hint">—</span>'}</td>
+        <td>${(()=>{ const im=(p.images||[]).find(a=>a.kind!=='doc');
+          return im ? `<img src="${esc(mediaUrl(im.path))}" style="width:52px;height:40px;object-fit:cover;border-radius:6px" alt="">`
+                    : '<span class="hint">—</span>'; })()}</td>
         <td>${p.pinned?'<span class="tag brand">공지</span> ':''}${esc(p.title)}
           <div class="hint">${esc(excerpt(p.body,64))}</div></td>
         <td>${esc(p.author_name)}</td><td class="hint">${fmtDay(p.created_at)}</td>
@@ -621,8 +623,14 @@ function postForm(board, editId){
     </label>
     <label class="field">제목 <span class="req">*</span><input id="fTitle" value="${esc(p?.title||'')}"></label>
     <label class="field">내용 <span class="req">*</span><textarea id="fBody" style="min-height:160px">${esc(p?.body||'')}</textarea></label>
-    <label class="field">사진 추가<input id="fFiles" type="file" multiple accept="image/*">
-      <span class="hint">소식·활동 공유방은 첫 사진이 홈페이지 목록에 크게 표시됩니다.</span></label>
+    <div class="grid c2">
+      <label class="field">작성자 소속<select id="fTeam">${authorTeamOptions(p?.author_team)}</select></label>
+      <label class="field">소속청 · 부서<input id="fDept" placeholder="예) 서울지방고용노동청 근로개선지도과"
+        value="${esc(p?.author_dept||'')}"></label>
+    </div>
+    <label class="field">첨부파일 추가
+      <input id="fFiles" type="file" multiple accept="image/*,.pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx,.zip,.txt">
+      <span class="hint">사진과 문서를 함께 올릴 수 있습니다. 소식·활동 공유방은 첫 사진이 홈페이지 목록에 크게 표시됩니다.</span></label>
     <div class="thumbs" id="fNew"></div>
     ${p && (p.images||[]).length ? `<label class="field" style="margin-top:10px">기존 사진 <span class="hint" style="display:inline">클릭하면 삭제 표시됩니다</span></label>
       <div class="thumbs" id="fOld">${p.images.map((im,i)=>
@@ -632,10 +640,14 @@ function postForm(board, editId){
     <div class="row-actions"><button class="btn primary" id="fSave">${p?'수정 저장':'등록'}</button>
       <button class="btn ghost" id="fCancel">취소</button></div>`);
 
-  let picked=[], removed=new Set();
+  let picked=[], docPicked=[], removed=new Set();
   $('#fFiles').addEventListener('change', async e=>{
-    picked = await prepImages(e.target.files);
-    $('#fNew').innerHTML = picked.map(x=>`<img src="${x.preview}" alt="">`).join('');
+    const imgs=[], docs=[];
+    for(const f of e.target.files){ (f.type.startsWith('image/') ? imgs : docs).push(f); }
+    picked = await prepImages(imgs);
+    docPicked = prepDocs(docs);
+    $('#fNew').innerHTML = picked.map(x=>`<img src="${x.preview}" alt="">`).join('')
+      + docPicked.map(x=>`<span class="tag brand" style="margin:4px 6px 4px 0">📎 ${esc(x.name)}</span>`).join('');
   });
   $$('#modalBody [data-old]').forEach(im=>im.addEventListener('click',()=>{
     const i = +im.dataset.old;
@@ -648,18 +660,22 @@ function postForm(board, editId){
     if(!title||!body){ toast('제목과 내용을 입력하세요'); return; }
     const btn=$('#fSave'); btn.disabled=true; busy(true);
     try{
-      const uploaded = await uploadAll('media', picked, 'posts');
+      const uploadedImgs = await uploadAll('media', picked, 'posts');
+      const uploadedDocs = await uploadDocs('media', docPicked, 'posts');
+      const uploaded = [...uploadedImgs.map(x=>({...x, kind:'image'})), ...uploadedDocs];
+      const meta = { title, body, author_team:$('#fTeam').value, author_dept:$('#fDept').value.trim(),
+                     pinned:$('#fPin').checked };
       if(p){
         const kept = (p.images||[]).filter((_,i)=>!removed.has(i));
         const gone = (p.images||[]).filter((_,i)=>removed.has(i));
         const { error } = await sb.from('posts').update({
-          title, body, images:[...kept, ...uploaded], pinned:$('#fPin').checked }).eq('id', p.id);
+          ...meta, images:[...kept, ...uploaded] }).eq('id', p.id);
         if(error) throw error;
         if(gone.length) await sb.storage.from('media').remove(gone.map(g=>g.path));
       }else{
         const { error } = await sb.from('posts').insert({
-          board:$('#fBoard').value, title, body, images:uploaded,
-          author_id:S.user.id, author_name:myName(), pinned:$('#fPin').checked });
+          board:$('#fBoard').value, images:uploaded,
+          author_id:S.user.id, author_name:myName(), ...meta });
         if(error) throw error;
       }
       await refresh(); closeModal();
@@ -688,7 +704,9 @@ VIEWS.events = () => {
   const row = e => `<tr><td>${esc(e.ev_date)}${e.ev_time?` <span class="tag brand">${esc(e.ev_time)}</span>`:''}</td>
     <td>${esc(e.title)}${e.descr?`<div class="hint">${esc(excerpt(e.descr,60))}</div>`:''}</td>
     <td>${esc(e.place||'-')}</td><td>${esc(e.author_name)}</td>
-    <td><button class="btn sm danger" data-delev="${e.id}">삭제</button></td></tr>`;
+    <td><div class="row-actions" style="margin:0">
+      <button class="btn sm" data-editev="${e.id}">수정</button>
+      <button class="btn sm danger" data-delev="${e.id}">삭제</button></div></td></tr>`;
   return pageHead('일정 관리','등록한 일정은 홈페이지 캘린더에 즉시 표시됩니다.',
     `<button class="btn primary" id="newEv">＋ 일정 등록</button>`)
   + `<div class="card"><h2>예정된 일정 (${up.length})</h2>
@@ -699,7 +717,11 @@ VIEWS.events = () => {
         : `<div class="empty">지난 일정이 없습니다.</div>`}</div>`;
 };
 BIND.events = () => {
-  $('#newEv').addEventListener('click', evForm);
+  $('#newEv').addEventListener('click', ()=>evForm());
+  $$('#main [data-editev]').forEach(b=>b.addEventListener('click', ()=>{
+    const ev = S.events.find(x=>x.id===b.dataset.editev);
+    if(ev) evForm(ev);
+  }));
   $$('#main [data-delev]').forEach(b=>b.addEventListener('click', async ()=>{
     if(!confirm('이 일정을 삭제할까요?')) return;
     busy(true);
@@ -709,26 +731,32 @@ BIND.events = () => {
     await refresh(); toast('삭제되었습니다'); go('events');
   }));
 };
-function evForm(){
-  openModal('일정 등록', `
+function evForm(edit){
+  const e0 = edit || null;
+  openModal(e0 ? '일정 수정' : '일정 등록', `
     <div class="grid c2">
-      <label class="field">날짜 <span class="req">*</span><input id="eDate" type="date" value="${ymd(new Date())}"></label>
-      <label class="field">시간<input id="eTime" type="time"></label></div>
-    <label class="field">행사명 <span class="req">*</span><input id="eTitle" placeholder="예) 3분기 정기 활동일"></label>
-    <label class="field">장소<input id="ePlace" placeholder="예) 구청 3층 회의실"></label>
-    <label class="field">상세 내용<textarea id="eDesc"></textarea></label>
-    <div class="row-actions"><button class="btn primary" id="eSave">등록</button>
+      <label class="field">날짜 <span class="req">*</span>
+        <input id="eDate" type="date" value="${esc(e0?.ev_date || ymd(new Date()))}"></label>
+      <label class="field">시간<input id="eTime" type="time" value="${esc(e0?.ev_time||'')}"></label></div>
+    <label class="field">행사명 <span class="req">*</span>
+      <input id="eTitle" placeholder="예) 3분기 정기 활동일" value="${esc(e0?.title||'')}"></label>
+    <label class="field">장소<input id="ePlace" placeholder="예) 구청 3층 회의실" value="${esc(e0?.place||'')}"></label>
+    <label class="field">상세 내용<textarea id="eDesc">${esc(e0?.descr||'')}</textarea></label>
+    <div class="row-actions"><button class="btn primary" id="eSave">${e0?'수정 저장':'등록'}</button>
       <button class="btn ghost" onclick="closeModal()">취소</button></div>`);
   $('#eSave').addEventListener('click', async ()=>{
     const d=$('#eDate').value, t=$('#eTitle').value.trim();
     if(!d||!t){ toast('날짜와 행사명은 필수입니다'); return; }
     const btn=$('#eSave'); btn.disabled=true; busy(true);
-    const { error } = await sb.from('events').insert({ ev_date:d, ev_time:$('#eTime').value, title:t,
-      place:$('#ePlace').value.trim(), descr:$('#eDesc').value.trim(),
-      author_id:S.user.id, author_name:myName() });
+    const fields = { ev_date:d, ev_time:$('#eTime').value, title:t,
+      place:$('#ePlace').value.trim(), descr:$('#eDesc').value.trim() };
+    const { error } = e0
+      ? await sb.from('events').update(fields).eq('id', e0.id)
+      : await sb.from('events').insert({ ...fields, author_id:S.user.id, author_name:myName() });
     busy(false); btn.disabled=false;
-    if(error) return failed('일정 등록', error);
-    await refresh(); closeModal(); toast('등록되었습니다. 홈페이지에 즉시 반영됩니다.'); go('events');
+    if(error) return failed(e0?'일정 수정':'일정 등록', error);
+    await refresh(); closeModal();
+    toast((e0?'수정':'등록')+'되었습니다. 홈페이지에 즉시 반영됩니다.'); go('events');
   });
 }
 
@@ -969,10 +997,10 @@ function showReport(id){
 function showExpense(id){
   const r=S.expenses.find(x=>x.id===id); if(!r) return;
   openModal('정산 · '+r.activity, `<dl>
-    <dt>신청자</dt><dd>${esc(r.author_name)}${r.contact?' · '+esc(r.contact):''}</dd>
+    <dt>신청자</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}${r.contact?' · '+esc(r.contact):''}</dd>
     <dt>활동일자 / 활동명</dt><dd>${esc(r.act_date)} · ${esc(r.activity)}</dd>
     <dt>사용처 / 항목</dt><dd>${esc(r.item)}</dd>
-    <dt>금액</dt><dd>${won(r.amount)} (${esc(r.pay_method)})</dd>
+    <dt>금액</dt><dd>${won(r.amount)}</dd>
     ${r.bank?`<dt>입금 계좌</dt><dd>${esc(r.bank)}</dd>`:''}
     <dt>상세 / 비고</dt><dd>${esc(r.note)||'-'}</dd>
     <dt>영수증 (${(r.receipts||[]).length}장)</dt><dd>${attHTML(r.receipts)}</dd>
@@ -1039,6 +1067,36 @@ async function uploadAll(bucket, picked, folder){
   }
   return out;
 }
+
+/* 문서 첨부 — 사진처럼 축소하지 않고 원본 그대로 올립니다 */
+const DOC_EXT_RE = /\.(pdf|docx?|hwpx?|pptx?|xlsx?|zip|txt)$/i;
+function prepDocs(fileList){
+  const out=[];
+  for(const f of fileList){
+    if(!DOC_EXT_RE.test(f.name)){ toast(`${f.name}: 올릴 수 없는 형식입니다`); continue; }
+    if(f.size > 20*1024*1024){ toast(`${f.name}: 20MB 이하만 첨부할 수 있습니다`); continue; }
+    out.push({ file:f, name:f.name });
+  }
+  return out;
+}
+async function uploadDocs(bucket, picked, folder){
+  const out=[];
+  for(const p of picked){
+    const safe = p.name.replace(/[^\w.\-가-힣]/g,'_');
+    const path = `${folder}/${S.user.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safe}`;
+    const { error } = await sb.storage.from(bucket).upload(path, p.file, { contentType: p.file.type || 'application/octet-stream' });
+    if(error) throw error;
+    out.push({ path, name:p.name, kind:'doc' });
+  }
+  return out;
+}
+
+/* 작성자 소속 선택지 — 팀 목록 + 혁신행정담당관 */
+const authorTeamOptions = (selected) => {
+  const list = [...(intro().teams||[]).map(t=>t.name), '혁신행정담당관'];
+  return `<option value="">선택 안 함</option>` +
+    list.map(n=>`<option ${n===selected?'selected':''}>${esc(n)}</option>`).join('');
+};
 
 /* ============================================================================
    UI 공통

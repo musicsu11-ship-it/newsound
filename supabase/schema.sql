@@ -613,3 +613,15 @@ language sql stable security definer set search_path = public as $$
    group by g
    order by g
 $$;
+
+-- ============================================================================
+--  13. 추가 컬럼 (나중에 붙인 기능들)
+--      이미 있으면 그냥 넘어가므로 몇 번을 다시 실행해도 안전합니다.
+-- ============================================================================
+
+-- 정산 신청: 소속 팀 (결제수단은 더 이상 입력받지 않습니다)
+alter table public.expenses add column if not exists team text default '';
+
+-- 게시글 작성자 표기: 팀 또는 "혁신행정담당관", 그리고 소속청·부서
+alter table public.posts add column if not exists author_team text default '';
+alter table public.posts add column if not exists author_dept text default '';

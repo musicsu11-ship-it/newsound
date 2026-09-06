@@ -274,7 +274,7 @@
   .hero-art{position:relative;display:flex;align-items:center;justify-content:center;min-height:440px}
   .hero-art img{display:block;width:min(124%,900px);margin-right:-8%;
     filter:drop-shadow(0 22px 34px rgba(28,38,90,.16));animation:bob 6.4s ease-in-out infinite}
-  .bubble{position:absolute;padding:11px 16px;font-weight:800;font-size:13.5px;white-space:nowrap;
+  .bubble{position:absolute;padding:11px 16px;font-weight:800;font-size:13.5px;white-space:nowrap;word-break:keep-all;
     box-shadow:0 14px 40px rgba(28,38,90,.14);z-index:3}
   .bubble.l{left:-6px;top:26px;background:var(--surface);color:var(--text);border-radius:18px 18px 18px 4px}
   .bubble.r{right:-10px;bottom:96px;background:var(--text);color:#fff;border-radius:18px 18px 4px 18px}
@@ -295,15 +295,15 @@
   .thoughts .mid-art{position:absolute;left:0;right:0;top:0;margin:0 auto;
     width:clamp(220px,26vw,340px);opacity:.24;pointer-events:none;z-index:0}
   .thoughts .mid h2{position:relative;z-index:1;font-size:clamp(26px,3.6vw,38px);font-weight:900;
-    letter-spacing:-.03em;color:#12b39a;margin:0 0 22px}
-  .thoughts .mid p{position:relative;z-index:1;margin:0 0 22px;font-size:16px;line-height:1.8;color:#5b6591}
+    letter-spacing:-.03em;color:#12b39a;margin:0 0 22px;word-break:keep-all}
+  .thoughts .mid p{position:relative;z-index:1;margin:0 0 22px;font-size:16px;line-height:1.8;color:#5b6591;word-break:keep-all}
   .thoughts .mid .btn{position:relative;z-index:1;background:#16225c;color:#fff;border:0;border-radius:12px;
     padding:15px 30px;font-size:15.5px;box-shadow:none}
   .thoughts .mid .btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
 
   /* 3. 한마디 */
   .voices{background:linear-gradient(180deg,#fff6f9 0%,#f3f2fd 100%);padding:64px 0 70px;text-align:center}
-  .voices .eyebrow{font-size:24px;font-weight:900;color:var(--brand);margin-bottom:16px}
+  .voices .eyebrow{font-size:24px;font-weight:900;color:var(--brand);margin-bottom:16px;word-break:keep-all}
   .voices h2{font-size:clamp(26px,4vw,46px);font-weight:900;letter-spacing:-.04em;line-height:1.25;margin:0 0 34px}
   .voices h2 em{font-style:normal;color:#7b2ff2}
   .voice-grid{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:26px;align-items:center;max-width:1400px;margin:0 auto}
@@ -318,7 +318,7 @@
 
   /* 4. 우리가 하는 일 */
   .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin:0 0 26px;flex-wrap:wrap}
-  .pill-label{display:inline-flex;color:var(--brand);background:var(--brand-weak);font-size:13.5px;
+  .pill-label{display:inline-flex;color:var(--brand);background:var(--brand-weak);font-size:13.5px;word-break:keep-all;
     font-weight:800;padding:6px 12px;border-radius:999px;margin-bottom:12px}
   .sec-head h2{font-size:clamp(24px,3.2vw,34px);font-weight:900;letter-spacing:-.03em;margin:0}
   .btn.softpink{background:var(--brand-weak);color:var(--brand);border:0;border-radius:14px;padding:12px 18px;box-shadow:none}
@@ -407,7 +407,7 @@
   /* 그림이 배너를 꽉 채우되 말풍선·캐릭터가 잘리지 않도록 위쪽을 살려 자릅니다 */
   /* 원본을 자르지 않고 전체를 보여줍니다 */
   .gamebanner img{display:block;width:100%;height:auto}
-  .gb-cta{position:absolute;right:22px;bottom:20px;background:var(--brand);color:#fff;
+  .gb-cta{position:absolute;right:22px;bottom:20px;background:var(--brand);color:#fff;word-break:keep-all;
     font-family:inherit;font-size:14.5px;font-weight:800;padding:11px 20px;border-radius:999px;
     line-height:1;box-shadow:0 8px 22px rgba(214,30,92,.3)}
 
@@ -1329,8 +1329,9 @@ function homeCalendar(){
 VIEWS.home = () => {
   const r = role();
   const today = ymd(new Date());
-  /* S.posts 는 전체적으로 최신순(내림차순)이라, 홈은 오래된 순으로 보이도록 뒤집어서 앞 3개를 뽑습니다 */
-  const news = S.posts.filter(p => p.board==='news').slice().reverse().slice(0,3);
+  /* S.posts 는 최신순(내림차순)이라 그대로 앞에서 6개.
+     6개면 모바일 2열(3줄)·PC 3열(2줄) 모두 빈칸 없이 딱 떨어집니다 */
+  const news = S.posts.filter(p => p.board==='news').slice(0,6);
   const works = intro().teams || [];
 
   /* 관리자·담당관용 알림은 히어로 위에 얇게 */
@@ -1701,7 +1702,8 @@ function boardView(key){
     </div>`).join('')}</div>`
     : `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 등록된 글이 없습니다.'}</div></div>`}`;
 }
-const photoOf = (p) => { const im=(p.images||[])[0]; return im ? mediaUrl(im.path) : ''; };
+/* 목록 카드 썸네일 — 문서 첨부는 건너뛰고 사진만 씁니다 */
+const photoOf = (p) => { const im=(p.images||[]).find(a=>a.kind!=='doc'); return im ? mediaUrl(im.path) : ''; };
 
 Object.keys(BOARDS).forEach(key=>{
   VIEWS[key] = () => boardView(key);
@@ -1713,57 +1715,93 @@ Object.keys(BOARDS).forEach(key=>{
   };
 });
 
-function openPostForm(key){
+/* 작성자 소속 선택지 — 팀 목록 + 혁신행정담당관 */
+const authorTeamOptions = (selected) => {
+  const list = [...(intro().teams||[]).map(t=>t.name), '혁신행정담당관'];
+  return `<option value="">선택 안 함</option>` +
+    list.map(n=>`<option ${n===selected?'selected':''}>${esc(n)}</option>`).join('');
+};
+
+function openPostForm(key, edit){
   const b = BOARDS[key];
   const photo = b.layout==='photo';
-  openModal(`${b.icon} ${b.label} · 글쓰기`, `
-    <label class="field">제목 <span class="req">*</span><input id="pfTitle"></label>
-    <label class="field">내용 <span class="req">*</span><textarea id="pfBody" style="min-height:150px"></textarea></label>
-    <label class="field">사진${photo?' <span class="req">*</span>':' <span class="hint" style="display:inline">선택</span>'}
-      <input id="pfFiles" type="file" multiple accept="image/*">
-      <span class="hint">${photo?'첫 번째 사진이 목록에서 크게 표시됩니다.':''} 사진은 업로드 전에 자동 축소됩니다.</span>
+  const e0 = edit || null;
+  openModal(`${b.icon} ${b.label} · ${e0?'글 수정':'글쓰기'}`, `
+    <label class="field">제목 <span class="req">*</span><input id="pfTitle" value="${e0?esc(e0.title):''}"></label>
+    <label class="field">내용 <span class="req">*</span><textarea id="pfBody" style="min-height:150px">${e0?esc(e0.body):''}</textarea></label>
+    <div class="grid c2">
+      <label class="field">작성자 소속<select id="pfTeam">${authorTeamOptions(e0?.author_team)}</select></label>
+      <label class="field">소속청 · 부서 <span class="hint" style="display:inline">선택</span>
+        <input id="pfDept" placeholder="예) 서울지방고용노동청 근로개선지도과" value="${e0?esc(e0.author_dept||''):''}"></label>
+    </div>
+    <label class="field">첨부파일${photo && !e0?' <span class="req">*</span>':' <span class="hint" style="display:inline">선택</span>'}
+      <input id="pfFiles" type="file" multiple
+             accept="image/*,.pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx,.zip,.txt">
+      <span class="hint">사진과 문서(pdf·hwp·doc·ppt·xls·zip·txt)를 함께 올릴 수 있습니다.
+        사진은 업로드 전에 자동 축소됩니다.${photo?' 첫 번째 사진이 목록에서 크게 표시됩니다.':''}
+        ${e0?'<br><b>파일을 새로 고르면 기존 첨부는 교체됩니다.</b> 그대로 두려면 건드리지 마세요.':''}</span>
     </label>
     <div class="thumbs" id="pfThumbs"></div>
     ${isOfficer() ? `<label class="field" style="display:flex;align-items:center;gap:8px">
-      <input type="checkbox" id="pfPin" style="width:auto;margin:0"> 상단 고정(공지)</label>` : ''}
-    <div class="row-actions"><button class="btn primary" id="pfSave">등록</button></div>`);
+      <input type="checkbox" id="pfPin" style="width:auto;margin:0" ${e0?.pinned?'checked':''}> 상단 고정(공지)</label>` : ''}
+    <div class="row-actions"><button class="btn primary" id="pfSave">${e0?'수정 저장':'등록'}</button></div>`);
 
-  let picked = [];
-  $('#pfFiles').addEventListener('change', async e=>{
-    picked = await prepImages(e.target.files);
-    previewLocal('#pfThumbs', picked);
+  let imgPicked = [], docPicked = [], touched = false;
+  $('#pfFiles').addEventListener('change', async ev=>{
+    touched = true;
+    const { imgs, docs } = prepMixed(ev.target.files);
+    imgPicked = await prepImages(imgs);
+    docPicked = prepDocs(docs);
+    previewMixedLocal('#pfThumbs', imgPicked, docPicked);
   });
   $('#pfSave').addEventListener('click', async ()=>{
     const title = $('#pfTitle').value.trim(), body = $('#pfBody').value.trim();
     if(!title || !body){ toast('제목과 내용을 입력하세요'); return; }
-    if(photo && !picked.length){ toast('사진을 1장 이상 첨부하세요'); return; }
+    if(photo && !e0 && !imgPicked.length){ toast('사진을 1장 이상 첨부하세요'); return; }
     const btn = $('#pfSave'); btn.disabled = true; busy(true);
     try{
-      const images = await uploadAll('media', picked, 'posts');
-      const { error } = await sb.from('posts').insert({
-        board:key, title, body, images,
-        author_id:S.user?.id, author_name:myName(),
+      const fields = {
+        title, body,
+        author_team: $('#pfTeam').value,
+        author_dept: $('#pfDept').value.trim(),
         pinned: !!$('#pfPin')?.checked
-      });
-      if(error) throw error;
-      await refresh(); closeModal(); toast('등록되었습니다'); go(key);
-    }catch(e){ failed('글 등록', e); btn.disabled = false; }
+      };
+      if(e0){
+        /* 파일을 새로 고른 경우에만 첨부를 교체합니다 */
+        if(touched) fields.images = await uploadMixed('media', imgPicked, docPicked, 'posts');
+        const { error } = await sb.from('posts').update(fields).eq('id', e0.id);
+        if(error) throw error;
+        await refresh(); closeModal(); toast('수정되었습니다'); go(CURRENT);
+      }else{
+        const images = await uploadMixed('media', imgPicked, docPicked, 'posts');
+        const { error } = await sb.from('posts').insert({
+          board:key, images, author_id:S.user?.id, author_name:myName(), ...fields });
+        if(error) throw error;
+        await refresh(); closeModal(); toast('등록되었습니다'); go(key);
+      }
+    }catch(err){ failed(e0?'글 수정':'글 등록', err); btn.disabled = false; }
     finally{ busy(false); }
   });
 }
 
 function openPost(id){
   const p = S.posts.find(x=>x.id===id); if(!p) return;
-  const imgs = p.images || [];
+  const imgs = imagesOf(p), docs = docsOf(p);
   const mine = p.author_id===S.user?.id || isAdmin();
+  const who = [p.author_name, p.author_team, p.author_dept].filter(Boolean).map(esc).join(' · ');
   openModal(p.title, `
-    <div class="hint" style="margin-bottom:14px">${esc(p.author_name)} · ${fmt(p.created_at)} · ${esc(BOARDS[p.board]?.label||'')}</div>
+    <div class="hint" style="margin-bottom:14px">${who} · ${fmt(p.created_at)} · ${esc(BOARDS[p.board]?.label||'')}</div>
     ${imgs.length ? `<div class="big-imgs">${imgs.map(a=>{
       const u = mediaUrl(a.path);
       return `<img src="${esc(u)}" alt="${esc(a.name||'')}" data-zoom="${esc(u)}">`; }).join('')}</div>` : ''}
     <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
-    ${mine ? `<div class="row-actions" style="margin-top:18px"><button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
+    ${docs.length ? `<div class="thumbs" style="margin-top:16px">${docs.map(a=>
+      `<a class="tag brand" href="${esc(mediaUrl(a.path))}" target="_blank" rel="noopener">📎 ${esc(a.name||'파일')}</a>`).join('')}</div>` : ''}
+    ${mine ? `<div class="row-actions" style="margin-top:18px">
+      <button class="btn sm" id="ppEdit">글 수정</button>
+      <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
   bindZoom();
+  $('#ppEdit')?.addEventListener('click', ()=>{ closeModal(); openPostForm(p.board, p); });
   $('#ppDel')?.addEventListener('click', async ()=>{
     if(!confirm('이 글을 삭제할까요? 되돌릴 수 없습니다.')) return;
     busy(true);
@@ -1966,7 +2004,9 @@ VIEWS.calendar = () => {
           ${[e.place,e.ev_time].some(Boolean) ? `<div class="hint" style="margin:0 0 10px">
             ${[e.place,e.ev_time].filter(Boolean).map(esc).join(' · ')}</div>` : ''}
           ${(e.author_id===S.user?.id || isOfficer())
-            ? `<button class="btn sm danger" data-evdel="${e.id}">삭제</button>` : ''}
+            ? `<div class="row-actions" style="margin:0">
+                 <button class="btn sm" data-evedit="${e.id}">수정</button>
+                 <button class="btn sm danger" data-evdel="${e.id}">삭제</button></div>` : ''}
         </div>`).join('') : `<div class="empty" style="padding:22px 0">이 날짜에 등록된 일정이 없습니다.</div>`}
       </div>
 
@@ -1987,6 +2027,10 @@ BIND.calendar = () => {
     const t=new Date(); CAL.y=t.getFullYear(); CAL.m=t.getMonth(); CAL.sel=ymd(t); go('calendar'); });
   $$('#main [data-day]').forEach(d => d.addEventListener('click', ()=>{ CAL.sel=d.dataset.day; go('calendar'); }));
   $('#calAdd')?.addEventListener('click', ()=> openEventForm(CAL.sel));
+  $$('#main [data-evedit]').forEach(b => b.addEventListener('click', ()=>{
+    const ev = S.events.find(x=>x.id===b.dataset.evedit);
+    if(ev) openEventForm(ev.ev_date, ev);
+  }));
   $$('#main [data-evdel]').forEach(b => b.addEventListener('click', async ()=>{
     if(!confirm('이 일정을 삭제할까요?')) return;
     busy(true);
@@ -1996,28 +2040,33 @@ BIND.calendar = () => {
     await refresh(); toast('삭제되었습니다'); go('calendar');
   }));
 };
-function openEventForm(date){
-  openModal('일정 등록', `
+function openEventForm(date, edit){
+  const e0 = edit || null;
+  openModal(e0 ? '일정 수정' : '일정 등록', `
     <div class="grid c2">
-      <label class="field">날짜 <span class="req">*</span><input id="evDate" type="date" value="${esc(date)}"></label>
-      <label class="field">시간 <span class="hint" style="display:inline">선택</span><input id="evTime" type="time"></label>
+      <label class="field">날짜 <span class="req">*</span>
+        <input id="evDate" type="date" value="${esc(e0?e0.ev_date:date)}"></label>
+      <label class="field">시간 <span class="hint" style="display:inline">선택</span>
+        <input id="evTime" type="time" value="${esc(e0?.ev_time||'')}"></label>
     </div>
-    <label class="field">행사명 <span class="req">*</span><input id="evTitle" placeholder="예) 3분기 정기 활동일"></label>
-    <label class="field">장소<input id="evPlace" placeholder="예) 구청 3층 회의실"></label>
-    <label class="field">상세 내용<textarea id="evDesc"></textarea></label>
-    <div class="row-actions"><button class="btn primary" id="evSave">등록</button></div>`);
+    <label class="field">행사명 <span class="req">*</span>
+      <input id="evTitle" placeholder="예) 3분기 정기 활동일" value="${e0?esc(e0.title):''}"></label>
+    <label class="field">장소<input id="evPlace" placeholder="예) 구청 3층 회의실" value="${e0?esc(e0.place||''):''}"></label>
+    <label class="field">상세 내용<textarea id="evDesc">${e0?esc(e0.descr||''):''}</textarea></label>
+    <div class="row-actions"><button class="btn primary" id="evSave">${e0?'수정 저장':'등록'}</button></div>`);
   $('#evSave').addEventListener('click', async ()=>{
     const d = $('#evDate').value, t = $('#evTitle').value.trim();
     if(!d || !t){ toast('날짜와 행사명은 필수입니다'); return; }
     const btn = $('#evSave'); btn.disabled = true; busy(true);
-    const { error } = await sb.from('events').insert({
-      ev_date:d, ev_time:$('#evTime').value, title:t,
-      place:$('#evPlace').value.trim(), descr:$('#evDesc').value.trim(),
-      author_id:S.user?.id, author_name:myName() });
+    const fields = { ev_date:d, ev_time:$('#evTime').value, title:t,
+      place:$('#evPlace').value.trim(), descr:$('#evDesc').value.trim() };
+    const { error } = e0
+      ? await sb.from('events').update(fields).eq('id', e0.id)
+      : await sb.from('events').insert({ ...fields, author_id:S.user?.id, author_name:myName() });
     busy(false); btn.disabled = false;
-    if(error) return failed('일정 등록', error);
+    if(error) return failed(e0?'일정 수정':'일정 등록', error);
     CAL.sel = d; const dt = new Date(d); CAL.y = dt.getFullYear(); CAL.m = dt.getMonth();
-    await refresh(); closeModal(); toast('일정을 등록했습니다'); go('calendar');
+    await refresh(); closeModal(); toast(e0?'일정을 수정했습니다':'일정을 등록했습니다'); go('calendar');
   });
 }
 
@@ -2145,11 +2194,11 @@ BIND.settings = () => {
 VIEWS.report = () => pageHead('결과보고서 제출','작성한 결과보고서 파일을 올리면 혁신행정담당관이 검토합니다.')
   + `<div class="card"><h2>결과보고서 제출</h2>
     <div class="grid c2">
-      <label class="field">활동 일자 <span class="req">*</span><input id="rpDate" type="date"></label>
       <label class="field">작성자<input id="rpAuthor" value="${esc(myName())}"></label>
       <label class="field">소속 팀<select id="rpTeam"><option value="">선택 안 함</option>
         ${(intro().teams||[]).map(t=>`<option>${esc(t.name)}</option>`).join('')}</select></label>
     </div>
+    <p class="hint" style="margin:0 0 12px">제출일(${ymd(new Date())})이 자동으로 기록됩니다.</p>
     <label class="field">결과보고서 파일 <span class="req">*</span>
       <input id="rpFiles" type="file" multiple accept=".pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx">
       <span class="hint">pdf · hwp · doc · ppt · xls 파일을 올려주세요(여러 개 첨부 가능, 개당 20MB 이하).
@@ -2162,8 +2211,7 @@ BIND.report = () => {
   $('#rpFiles').addEventListener('change', e=>{
     picked = prepDocs(e.target.files); previewDocsLocal('#rpThumbs', picked); });
   $('#rpSubmit').addEventListener('click', async ()=>{
-    const d=$('#rpDate').value;
-    if(!d){ toast('활동일자를 입력하세요'); return; }
+    const d = ymd(new Date());   /* 활동일자는 제출한 날짜로 자동 기록 */
     if(!picked.length){ toast('결과보고서 파일을 첨부하세요'); return; }
     const btn = $('#rpSubmit'); btn.disabled = true; busy(true);
     try{
@@ -2188,12 +2236,12 @@ VIEWS.expense = () => pageHead('활동비 정산 신청','활동비 사용 내�
     <div class="grid c2">
       <label class="field">신청자 <span class="req">*</span><input id="exName" value="${esc(myName())}"></label>
       <label class="field">연락처 <span class="hint" style="display:inline">선택</span><input id="exContact"></label>
+      <label class="field">소속 팀<select id="exTeam"><option value="">선택 안 함</option>
+        ${(intro().teams||[]).map(t=>`<option>${esc(t.name)}</option>`).join('')}</select></label>
       <label class="field">활동일자 <span class="req">*</span><input id="exDate" type="date"></label>
-      <label class="field">활동명 <span class="req">*</span><input id="exActivity" placeholder="예) 하천 조류 조사"></label>
+      <label class="field">활동명 <span class="req">*</span><input id="exActivity" placeholder="예) 팀별 회의"></label>
       <label class="field">사용처 / 항목 <span class="req">*</span><input id="exItem" placeholder="예) 간식비, 교통비, 소모품"></label>
       <label class="field">금액(원) <span class="req">*</span><input id="exAmount" type="number" min="0" placeholder="숫자만"></label>
-      <label class="field">결제수단<select id="exPay">
-        <option>개인카드</option><option>현금</option><option>계좌이체</option><option>기타</option></select></label>
       <label class="field">입금 계좌 <span class="hint" style="display:inline">승인 시 지급</span>
         <input id="exBank" placeholder="은행 / 계좌번호 / 예금주"></label>
     </div>
@@ -2218,7 +2266,7 @@ BIND.expense = () => {
       const receipts = await uploadAll('docs', picked, 'receipts');
       const { error } = await sb.from('expenses').insert({
         act_date:date, activity:act, item, amount:Number(amount),
-        pay_method:$('#exPay').value, bank:$('#exBank').value.trim(),
+        team:$('#exTeam').value, bank:$('#exBank').value.trim(),
         contact:$('#exContact').value.trim(), note:$('#exNote').value.trim(),
         receipts, author_id:S.user?.id, author_name:name });
       if(error) throw error;
@@ -2350,10 +2398,10 @@ function showReport(id, canProcess){
 function showExpense(id, canProcess){
   const r = S.expenses.find(x=>x.id===id); if(!r) return;
   openModal('정산 신청 · ' + r.activity, `<dl>
-    <dt>신청자</dt><dd>${esc(r.author_name)}${r.contact?' · '+esc(r.contact):''}</dd>
+    <dt>신청자</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}${r.contact?' · '+esc(r.contact):''}</dd>
     <dt>활동일자 / 활동명</dt><dd>${esc(r.act_date)} · ${esc(r.activity)}</dd>
     <dt>사용처 / 항목</dt><dd>${esc(r.item)}</dd>
-    <dt>금액</dt><dd>${won(r.amount)} (${esc(r.pay_method)})</dd>
+    <dt>금액</dt><dd>${won(r.amount)}</dd>
     ${r.bank?`<dt>입금 계좌</dt><dd>${esc(r.bank)}</dd>`:''}
     <dt>상세 / 비고</dt><dd>${esc(r.note)||'-'}</dd>
     <dt>상태</dt><dd>${statusTag(r.status)}</dd>
@@ -2470,10 +2518,34 @@ async function uploadDocs(bucket, picked, folder){
     const path = `${folder}/${S.user?.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safe}`;
     const { error } = await sb.storage.from(bucket).upload(path, p.file, { contentType: p.file.type || 'application/octet-stream' });
     if(error) throw error;
-    out.push({ path, name:p.name });
+    out.push({ path, name:p.name, kind:'doc' });
   }
   return out;
 }
+
+/* 게시판 첨부 — 사진과 문서를 함께 받습니다.
+   사진은 예전처럼 축소해서 올리고, 문서는 원본 그대로 올립니다. */
+function prepMixed(fileList){
+  const imgs = [], docs = [];
+  for(const f of fileList){ (f.type.startsWith('image/') ? imgs : docs).push(f); }
+  return { imgs, docs };
+}
+async function uploadMixed(bucket, imgPicked, docPicked, folder){
+  const a = await uploadAll(bucket, imgPicked, folder);
+  const b = await uploadDocs(bucket, docPicked, folder);
+  return [...a.map(x=>({...x, kind:'image'})), ...b];
+}
+/* 첨부 목록을 사진은 썸네일로, 문서는 파일 이름표로 보여줍니다 */
+function previewMixedLocal(sel, imgPicked, docPicked){
+  const el = $(sel); if(!el) return;
+  el.innerHTML =
+    imgPicked.map(p=>`<img src="${p.preview}" alt="${esc(p.name)}" data-zoom="${p.preview}">`).join('') +
+    docPicked.map(p=>`<span class="tag brand" style="margin:4px 6px 4px 0">📎 ${esc(p.name)}</span>`).join('');
+  el.querySelectorAll('[data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
+}
+/* 저장된 첨부에서 사진만 골라냅니다(예전 글은 kind 가 없으므로 사진으로 봅니다) */
+const imagesOf = (p) => (p.images||[]).filter(a => a.kind !== 'doc');
+const docsOf   = (p) => (p.images||[]).filter(a => a.kind === 'doc');
 function previewDocsLocal(sel, picked){
   const el = $(sel); if(!el) return;
   el.innerHTML = picked.map(p=>`<span class="tag brand" style="margin:4px 6px 4px 0">📎 ${esc(p.name)}</span>`).join('');
