@@ -15,6 +15,8 @@
     --accent:#f5326b; --lav:#e9e5ff;
     --ok:#0e8a6a; --ok-weak:#d9f5ef; --warn:#a86a00; --warn-weak:#fff2d8;
     --danger:#d61e5c; --danger-weak:#ffe9f1;
+    /* 공휴일 — 일정 말풍선(마젠타)과 구별되도록 살짝 주황빛이 도는 빨강 */
+    --hol:#e0342b; --hol-weak:#ffe7e4;
     --shadow:0 14px 40px rgba(28,38,90,.11);
     --shadow-lg:0 20px 44px rgba(28,38,90,.16);
     /* 본문 최대 폭 — 좌우 여백을 한 곳에서 조절합니다 */
@@ -28,6 +30,7 @@
       --accent:#ff85ab; --lav:#2a2f63;
       --ok:#4ecfa8; --ok-weak:#0f3a31; --warn:#e8b055; --warn-weak:#3a2c10;
       --danger:#ff7a9c; --danger-weak:#3f1a2b;
+      --hol:#ff8f83; --hol-weak:#41211d;
       --shadow:0 14px 40px rgba(0,0,0,.42);
       --shadow-lg:0 20px 46px rgba(0,0,0,.5);
     }
@@ -130,6 +133,7 @@
   .tag.approve{background:var(--ok-weak);color:var(--ok)}
   .tag.reject{background:var(--danger-weak);color:var(--danger)}
   .tag.brand{background:var(--brand-weak);color:var(--brand)}
+  .tag.hol{background:var(--hol-weak);color:var(--hol)}
   table{width:100%;border-collapse:collapse;font-size:13.5px}
   th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
   th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
@@ -200,6 +204,13 @@
   .cal .ev{font-size:11px;background:var(--brand-weak);color:var(--brand);border-radius:5px;
     padding:1px 5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;
     min-width:0;max-width:100%}
+  /* 공휴일 — 날짜를 빨갛게, 이름은 배경 없는 잔글씨로. 활동 일정 말풍선이
+     계속 눈에 먼저 들어오도록 일부러 얌전하게 둡니다.
+     :not(.today) — 오늘이 공휴일이면 위 원형 배지 규칙이 이깁니다 */
+  .cal .day.hol:not(.today) .dnum{color:var(--hol)}
+  .cal .day.today.hol .dnum{background:var(--hol)}
+  .cal .holname{font-size:10.5px;font-weight:800;color:var(--hol);line-height:1.35;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:100%}
 
   /* ---------- Intro ---------- */
   .team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:14px}
@@ -576,7 +587,8 @@
     .gamebanner{border-radius:20px}
     .gb-cta{right:12px;bottom:12px;font-size:12.5px;padding:9px 15px}
     .schedcard{padding:22px 20px}
-    .cal .day{min-height:64px}
+    /* 좌우 여백을 줄여 달력 칸 안에서 공휴일 이름이 잘리지 않게 합니다 */
+    .cal .day{min-height:64px;padding:6px 4px}
     .cal .ev{font-size:11px}
 
     /* 손가락으로 누르는 화면 — 터치 영역을 최소 44px로 키웁니다 */
@@ -592,6 +604,10 @@
     .cal .ev{width:6px;height:6px;padding:0;border-radius:50%;background:var(--brand);
       font-size:0;line-height:0;overflow:hidden;margin:1px 0 0 1px;flex:0 0 auto}
     .cal .day{gap:2px}
+    /* 칸이 좁아지는 구간부터 공휴일 이름도 같이 줄입니다.
+       .long 은 '대체공휴일'처럼 다섯 글자가 넘는 이름 */
+    .cal .holname{font-size:9.5px;letter-spacing:-.05em}
+    .cal .holname.long{font-size:8.8px;letter-spacing:-.07em}
   }
 
   /* 손가락으로 조작하는 기기(태블릿 가로 포함) — 폭과 무관하게 터치 영역 확보 */
@@ -605,7 +621,10 @@
   @media (max-width:420px){
     .cal .dow{font-size:11px;padding:7px 0}
     .cal .dnum{font-size:12px}
-    .cal .day{min-height:58px;padding:5px 4px}
+    /* 좌우 여백을 더 줄이고, 다섯 글자가 넘는 이름만 한 단계 더 줄입니다 */
+    .cal .day{min-height:58px;padding:5px 1px}
+    .cal .holname{font-size:9px;letter-spacing:-.06em}
+    .cal .holname.long{font-size:8.4px;letter-spacing:-.08em}
     .news-grid{gap:9px}
     .news-card .bd{padding:10px 10px 13px}
     .news-card h3{font-size:13.5px;letter-spacing:-.04em}
@@ -706,6 +725,99 @@ const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())
 const won = (n) => (Number(n)||0).toLocaleString('ko-KR') + '원';
 const esc = (s) => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const excerpt = (s,n=120) => { const t=String(s||'').replace(/\s+/g,' ').trim(); return t.length>n ? t.slice(0,n)+'…' : t; };
+
+/* ============================================================================
+   법정 공휴일  ―「관공서의 공휴일에 관한 규정」   (index.html 과 같은 내용)
+
+   양력으로 날짜가 고정된 공휴일(신정·삼일절·어린이날·현충일·광복절·개천절·
+   한글날·성탄절)과 대체공휴일은 규정 그대로 아래에서 자동으로 계산합니다.
+   해마다 날짜가 달라지는 음력 공휴일 셋만 표로 적어 둡니다.
+
+   ★ 표 고치는 법
+     LUNAR_HOL — [설날, 부처님오신날, 추석] '당일' 날짜만 적으면 됩니다.
+                 설날·추석은 앞뒤 하루씩 연휴로 알아서 잡습니다.
+                 2031년 이후를 보려면 여기에 한 줄만 더 붙이세요.
+     EXTRA_HOL — 선거일·임시공휴일처럼 그해에만 생기는 공휴일.
+                 정부가 임시공휴일을 발표하면 여기에 한 줄 추가하세요.
+     (index.html 을 고칠 때 이 표도 같이 고쳐 주세요.)
+   ============================================================================ */
+const LUNAR_HOL = {
+  /*        설날            부처님오신날      추석      */
+  2024: ['2024-02-10', '2024-05-15', '2024-09-17'],
+  2025: ['2025-01-29', '2025-05-05', '2025-10-06'],
+  2026: ['2026-02-17', '2026-05-24', '2026-09-25'],
+  2027: ['2027-02-06', '2027-05-13', '2027-09-15'],
+  2028: ['2028-01-26', '2028-05-02', '2028-10-03'],
+  2029: ['2029-02-13', '2029-05-20', '2029-09-22'],
+  2030: ['2030-02-03', '2030-05-09', '2030-09-12'],
+};
+const EXTRA_HOL = {
+  '2025-01-27': '임시공휴일',
+  '2025-06-03': '대통령선거일',
+  '2026-06-03': '지방선거일',
+  '2028-04-12': '국회의원선거일',
+};
+
+const _holCache = {};
+/* 그 해 공휴일을 { '2026-03-01':'삼일절', … } 로 돌려줍니다 */
+function holidaysOf(year){
+  if(_holCache[year]) return _holCache[year];
+
+  const move = (iso,n) => { const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return ymd(d); };
+  const dow  = (iso) => new Date(iso+'T00:00:00').getDay();
+
+  /* [날짜, 이름, 대체공휴일 규칙]
+       'wknd' 토·일요일이나 다른 공휴일과 겹치면 대체공휴일
+              (삼일절·어린이날·부처님오신날·광복절·개천절·한글날·성탄절)
+       'sun'  일요일과 겹칠 때만 대체공휴일 (설날·추석 연휴)
+       null   대체공휴일 없음 (신정·현충일·선거일·임시공휴일)              */
+  const base = [
+    [`${year}-01-01`, '신정',     null  ],
+    [`${year}-03-01`, '삼일절',   'wknd'],
+    [`${year}-05-05`, '어린이날', 'wknd'],
+    [`${year}-06-06`, '현충일',   null  ],
+    [`${year}-08-15`, '광복절',   'wknd'],
+    [`${year}-10-03`, '개천절',   'wknd'],
+    [`${year}-10-09`, '한글날',   'wknd'],
+    [`${year}-12-25`, '성탄절',   'wknd'],
+  ];
+  const L = LUNAR_HOL[year];
+  if(L){
+    /* 연휴 이름에 띄어쓰기를 넣지 않는 이유: 휴대폰 달력 칸이 좁아서
+       '추석 연휴'는 잘리고 '추석연휴'는 딱 들어갑니다 */
+    base.push([move(L[0],-1),'설날연휴','sun'], [L[0],'설날','sun'], [move(L[0],1),'설날연휴','sun']);
+    base.push([L[1],'부처님오신날','wknd']);
+    base.push([move(L[2],-1),'추석연휴','sun'], [L[2],'추석','sun'], [move(L[2],1),'추석연휴','sun']);
+  }
+  for(const [d,n] of Object.entries(EXTRA_HOL)) if(d.slice(0,4)===String(year)) base.push([d,n,null]);
+
+  /* 한 날에 공휴일이 둘 겹칠 수 있어서(2025년 어린이날·부처님오신날,
+     2028년 추석·개천절) 날짜로 먼저 묶습니다. 이때 대체공휴일은 하루뿐입니다 */
+  const byDate = {};
+  for(const [d,n,rule] of base){
+    (byDate[d] || (byDate[d] = { names:[], rules:[] }));
+    byDate[d].names.push(n); byDate[d].rules.push(rule);
+  }
+  const map = {}, taken = new Set(Object.keys(byDate));
+  for(const d of Object.keys(byDate)) map[d] = byDate[d].names.join('·');
+
+  /* 대체공휴일 = 공휴일도 주말도 아닌 다음 첫 날 */
+  const nextFree = (d) => { let x = move(d,1); while(taken.has(x) || dow(x)===0 || dow(x)===6) x = move(x,1); return x; };
+  for(const d of Object.keys(byDate).sort()){
+    const { names, rules } = byDate[d];
+    const clash = dow(d)===0 || dow(d)===6 || names.length>1;
+    const need  = rules.includes('wknd') ? clash : (rules.includes('sun') && dow(d)===0);
+    if(!need) continue;
+    const s = nextFree(d);
+    map[s] = '대체공휴일'; taken.add(s);
+  }
+  return (_holCache[year] = map);
+}
+/* 하루치 조회 — 공휴일이면 이름, 아니면 빈 문자열 */
+const holidayName = (key) => key ? (holidaysOf(+key.slice(0,4))[key] || '') : '';
+/* 달력 칸에 넣을 짧은 이름 — 하루에 둘이 겹치면(어린이날·부처님오신날) 앞의 것만.
+   전체 이름은 마우스를 올리거나 날짜를 눌렀을 때 아래 패널에서 볼 수 있습니다 */
+const holidayShort = (name) => String(name||'').split('·')[0];
 const firstImg = (atts) => (atts||[]).find(a=>a.data && a.type?.startsWith('image/'));
 
 /* ---------- data ---------- */
@@ -1013,18 +1125,21 @@ function homeCalendar(){
   const prevDays = new Date(HM.y, HM.m, 0).getDate();
   const today = ymd(new Date());
 
+  /* 지난달·다음달 칸에도 진짜 날짜를 넣습니다 — 흐리게 보여도 공휴일은 표시돼야 하니까요 */
   const cells = [];
-  for(let i=startDow-1;i>=0;i--) cells.push({ d:prevDays-i, dim:true, key:null });
+  for(let i=startDow-1;i>=0;i--) cells.push({ d:prevDays-i, dim:true, key:ymd(new Date(HM.y, HM.m-1, prevDays-i)) });
   for(let d=1;d<=daysInMonth;d++) cells.push({ d, dim:false, key:`${HM.y}-${pad(HM.m+1)}-${pad(d)}` });
-  let tail = 1; while(cells.length % 7 !== 0) cells.push({ d:tail++, dim:true, key:null });
+  let tail = 1; while(cells.length % 7 !== 0){ cells.push({ d:tail, dim:true, key:ymd(new Date(HM.y, HM.m+1, tail)) }); tail++; }
 
   return `<div class="cal home-cal">
     ${['일','월','화','수','목','금','토'].map(w=>`<div class="dow">${w}</div>`).join('')}
     ${cells.map((c,i)=>{
-      const evs = c.key ? DB.events().filter(e=>e.date===c.key) : [];
-      const cls = ['day', c.dim?'dim':'', c.key===today?'today':'', i%7===0?'sun':''].filter(Boolean).join(' ');
+      const evs = c.dim ? [] : DB.events().filter(e=>e.date===c.key);
+      const hol = holidayName(c.key);
+      const cls = ['day', c.dim?'dim':'', c.key===today?'today':'', hol?'hol':'', i%7===0?'sun':''].filter(Boolean).join(' ');
       return `<div class="${cls}">
         <span class="dnum">${c.d}</span>
+        ${hol?`<span class="holname${holidayShort(hol).length>4?' long':''}" title="${esc(hol)}">${esc(holidayShort(hol))}</span>`:''}
         ${evs.slice(0,2).map(e=>`<span class="ev" title="${esc(e.title)}${e.place?' · '+esc(e.place):''}">${esc(e.title)}</span>`).join('')}
         ${evs.length>2?`<span class="hint" style="margin:0">+${evs.length-2}</span>`:''}</div>`;
     }).join('')}</div>`;
@@ -1606,19 +1721,24 @@ VIEWS.calendar = () => {
   const prevDays = new Date(CAL.y, CAL.m, 0).getDate();
   const today = ymd(new Date());
 
+  /* 지난달·다음달 칸에도 진짜 날짜를 넣습니다 — 흐리게 보여도 공휴일은 표시돼야 하니까요.
+     대신 data-day 는 이번 달에만 달아서 클릭 동작은 그대로 둡니다 */
   const cells = [];
-  for(let i=startDow-1; i>=0; i--) cells.push({ d:prevDays-i, dim:true, key:null });
+  for(let i=startDow-1; i>=0; i--) cells.push({ d:prevDays-i, dim:true, key:ymd(new Date(CAL.y, CAL.m-1, prevDays-i)) });
   for(let d=1; d<=daysInMonth; d++) cells.push({ d, dim:false, key:`${CAL.y}-${pad(CAL.m+1)}-${pad(d)}` });
-  while(cells.length % 7 !== 0) cells.push({ d:cells.length-startDow-daysInMonth+1, dim:true, key:null });
+  let tail = 1; while(cells.length % 7 !== 0){ cells.push({ d:tail, dim:true, key:ymd(new Date(CAL.y, CAL.m+1, tail)) }); tail++; }
 
   const dows = ['일','월','화','수','목','금','토'];
   const grid = `<div class="cal">
     ${dows.map(w=>`<div class="dow">${w}</div>`).join('')}
     ${cells.map((c,i)=>{
-      const dayEvs = c.key ? evs.filter(e=>e.date===c.key) : [];
-      const cls = ['day', c.dim?'dim':'', c.key===today?'today':'', c.key===CAL.sel?'sel':'', i%7===0?'sun':''].filter(Boolean).join(' ');
-      return `<div class="${cls}" ${c.key?`data-day="${c.key}"`:''}>
+      const dayEvs = c.dim ? [] : evs.filter(e=>e.date===c.key);
+      const hol = holidayName(c.key);
+      const cls = ['day', c.dim?'dim':'', c.key===today?'today':'',
+                   (!c.dim && c.key===CAL.sel)?'sel':'', hol?'hol':'', i%7===0?'sun':''].filter(Boolean).join(' ');
+      return `<div class="${cls}" ${c.dim?'':`data-day="${c.key}"`}>
         <span class="dnum">${c.d}</span>
+        ${hol?`<span class="holname${holidayShort(hol).length>4?' long':''}" title="${esc(hol)}">${esc(holidayShort(hol))}</span>`:''}
         ${dayEvs.slice(0,3).map(e=>`<span class="ev" title="${esc(e.title)}">${esc(e.title)}</span>`).join('')}
         ${dayEvs.length>3?`<span class="hint" style="margin:0">+${dayEvs.length-3}건</span>`:''}
       </div>`;
@@ -1626,6 +1746,7 @@ VIEWS.calendar = () => {
   </div>`;
 
   const selEvs = evs.filter(e=>e.date===CAL.sel).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const selHol = holidayName(CAL.sel);
   const addBtn = canEvent() ? `<button class="btn primary" id="calAdd">＋ 일정 등록</button>` : '';
 
   return pageHead('일정 관리','새소리단 행사 일정입니다. 날짜를 눌러 그날 일정을 확인하세요.', addBtn)
@@ -1641,7 +1762,8 @@ VIEWS.calendar = () => {
       ${grid}
     </div>
     <div class="card">
-      <h2>${esc(CAL.sel)} 일정 (${selEvs.length})</h2>
+      <h2>${esc(CAL.sel)} (${'일월화수목금토'[new Date(CAL.sel+'T00:00:00').getDay()]}) 일정 ${selEvs.length}건
+        ${selHol?` <span class="tag hol">${esc(selHol)}</span>`:''}</h2>
       <p class="sub">${canEvent()?'단원 이상 권한으로 일정을 등록·삭제할 수 있습니다.':'일정 등록은 새소리단 단원만 가능합니다.'}</p>
       ${selEvs.length ? selEvs.map(e=>`
         <div class="post-row" style="cursor:default">
