@@ -367,14 +367,11 @@
   .hist-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:16px}
   .hist-dot{position:relative;z-index:1;width:34px;height:34px;border-radius:50%;background:#fff;
     border:2px solid var(--text);display:grid;place-items:center;color:var(--brand);font-size:16px}
-  /* 연도 박스 — 지난 해에서 올해로 올수록 색이 진해집니다.
-     step1(가장 오래됨) → step2 → now(현재). 연도가 늘어나면 클래스만 바꿔 주세요.
-     step1 의 글씨를 --brand(#d61e5c) 가 아니라 조금 더 진한 #b8164c 로 둔 이유:
-     연분홍 바탕에 --brand 를 쓰면 대비가 4.1:1 이라 읽기 기준(4.5:1)에 못 미칩니다. */
+  /* 연도 박스 — 지난 해는 네이비, 올해(현재)만 진분홍으로 눈에 띄게 합니다.
+     연도가 늘어나면 지난 해에 past 를, 그해에 now 를 달아 주세요. */
   .hist-year{display:inline-block;padding:9px 24px;border-radius:999px;font-weight:900;font-size:17px;color:#fff}
-  .hist-year.step1{background:var(--brand-weak);color:#b8164c}
-  .hist-year.step2{background:var(--brand)}
-  .hist-year.now{background:var(--text)}
+  .hist-year.past{background:var(--text)}
+  .hist-year.now{background:var(--brand)}
   .hist-year i{font-style:normal;font-size:13px;opacity:.85;margin-left:2px}
   .hist-card{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);
     padding:28px 24px;width:100%}
@@ -1355,7 +1352,7 @@ VIEWS.intro = () => {
         <div class="hist-line"></div>
         <div class="hist-item">
           <span class="hist-dot">♥</span>
-          <span class="hist-year step1">2019년</span>
+          <span class="hist-year past">2019년</span>
           <div class="hist-card">
             <h3>새내기 혁신 참견단으로 출범</h3>
             <p>새내기들의 목소리를 모아 더 나은 조직문화를 만들기 위해 첫 걸음을 내딛었습니다.</p>
@@ -1363,7 +1360,7 @@ VIEWS.intro = () => {
         </div>
         <div class="hist-item">
           <span class="hist-dot">♥</span>
-          <span class="hist-year step2">2023년</span>
+          <span class="hist-year past">2023년</span>
           <div class="hist-card">
             <h3>새소리단(새내기 소통 리더단)으로 개명</h3>
             <p>소통을 중심으로 활동 범위를 넓히고, 소통 리더단으로 새롭게 도약했습니다.</p>
