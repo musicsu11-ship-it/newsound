@@ -831,3 +831,60 @@ delete from public.profiles p
       where u.id = p.id
         and coalesce((to_jsonb(u) ->> 'is_anonymous')::boolean, false)
    );
+
+-- ============================================================================
+--  16. 의견함 '공감해요'
+--
+--  한 계정이 한 의견에 한 번만 누를 수 있습니다(다시 누르면 취소).
+--  기본키가 (의견, 사람) 이라 같은 사람이 두 번 저장되는 것 자체가 막힙니다.
+--
+--  누가 눌렀는지는 남에게 보이지 않게 했습니다.
+--  의견함이 익명인데 '누가 어디에 공감했는지' 가 보이면 익명이 아니게 됩니다.
+--    · 공감 표는 '내가 누른 것' 만 읽을 수 있습니다 (하트를 칠할지 판단용)
+--    · 전체 개수는 opinions.likes 칸에 숫자로만 쌓아 두고 그걸 보여 줍니다
+-- ============================================================================
+
+alter table public.opinions add column if not exists likes int not null default 0;
+
+create table if not exists public.opinion_likes (
+  opinion_id uuid not null references public.opinions on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (opinion_id, user_id)          -- 한 사람이 한 의견에 한 번만
+);
+alter table public.opinion_likes enable row level security;
+
+drop policy if exists oplike_select on public.opinion_likes;
+create policy oplike_select on public.opinion_likes for select
+  using ( user_id = auth.uid() );            -- 내가 누른 것만 보입니다
+
+drop policy if exists oplike_insert on public.opinion_likes;
+create policy oplike_insert on public.opinion_likes for insert
+  with check ( user_id = auth.uid() );
+
+drop policy if exists oplike_delete on public.opinion_likes;
+create policy oplike_delete on public.opinion_likes for delete
+  using ( user_id = auth.uid() );            -- 자기가 누른 것만 취소
+
+-- 공감 개수를 opinions.likes 에 반영합니다.
+-- security definer 로 두어 공감 표를 못 읽는 사람도 개수는 정확히 쌓이게 합니다.
+create or replace function public.bump_like()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    update public.opinions set likes = likes + 1 where id = new.opinion_id;
+    return new;
+  else
+    update public.opinions set likes = greatest(likes - 1, 0) where id = old.opinion_id;
+    return old;
+  end if;
+end $$;
+
+drop trigger if exists opinion_likes_bump on public.opinion_likes;
+create trigger opinion_likes_bump
+  after insert or delete on public.opinion_likes
+  for each row execute function public.bump_like();
+
+-- 이미 눌린 공감이 있다면 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
+update public.opinions o
+   set likes = (select count(*) from public.opinion_likes l where l.opinion_id = o.id);

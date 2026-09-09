@@ -97,6 +97,10 @@
   .btn.ghost{background:transparent}
   .btn.sm{padding:6px 10px;font-size:12.5px}
   .btn.danger{color:var(--danger);border-color:var(--danger-weak)}
+  /* 공감해요 — 누르기 전은 흰 버튼, 누른 뒤에는 분홍으로 채웁니다 */
+  .btn.like{gap:6px}
+  .btn.like b{font-weight:900}
+  .btn.like.on{color:#fff;background:var(--brand);border-color:var(--brand)}
   label.field{display:block;margin-bottom:12px;font-size:13px;font-weight:600}
   label.field .req{color:var(--danger)}
   input,select,textarea{width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--border);border-radius:9px;
@@ -1599,6 +1603,20 @@ const myOps   = () => LS.get('sm_myops', []);
 const isMine  = (id) => myOps().includes(id);
 const addMyOp = (id) => { const a = myOps(); a.push(id); LS.set('sm_myops', a); };
 const dropMyOp= (id) => LS.set('sm_myops', myOps().filter(x=>x!==id));
+
+/* 공감해요 — 이 기기에서 공감을 누른 의견 목록입니다.
+   연습용 파일이라 계정이 따로 없어서 '이 기기 = 한 사람' 으로 봅니다.
+   실제 사이트(index.html)에서는 계정 기준이라 다른 기기에서도 한 번만 됩니다. */
+const myLikes  = () => LS.get('sm_mylikes', []);
+const likedOp  = (id) => myLikes().includes(id);
+const toggleLike = (id) => {
+  const a = myLikes();
+  const on = a.includes(id);
+  LS.set('sm_mylikes', on ? a.filter(x=>x!==id) : a.concat(id));
+  const arr = DB.opinions();
+  const o = arr.find(x=>x.id===id);
+  if(o){ o.likes = Math.max((o.likes||0) + (on ? -1 : 1), 0); DB.saveOpinions(arr); }
+};
 function hashPin(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0 } return h.toString(36); }
 
 /* 의견 분류 — 여기만 고치면 작성 폼에 그대로 반영됩니다 */
@@ -1660,7 +1678,11 @@ VIEWS.opinion = () => {
             <span class="hint">${fmt(o.at)}</span>
           </div>
           <div class="op-body">${highlight(o.body, Q.opinion)}</div>
-          ${btns?`<div class="row-actions">${btns}</div>`:''}
+          <div class="row-actions">
+            <button class="btn sm like${likedOp(o.id)?' on':''}" data-like="${o.id}">
+              ${likedOp(o.id)?'♥':'♡'} 공감해요 <b>${o.likes||0}</b></button>
+            ${btns}
+          </div>
           <div class="cmt-list">
             ${cmts.length ? cmts.map(c=>{
               const cm = isMine(c.id);
@@ -1681,6 +1703,12 @@ VIEWS.opinion = () => {
 };
 BIND.opinion = () => {
   bindSearch('opinion');
+
+  /* 공감해요 — 한 번만 누를 수 있고, 다시 누르면 취소됩니다 */
+  $$('#main [data-like]').forEach(b => b.addEventListener('click', ()=>{
+    toggleLike(b.dataset.like);
+    go('opinion');
+  }));
 
   $('#opSubmit').addEventListener('click', ()=>{
     const body = $('#opBody').value.trim();

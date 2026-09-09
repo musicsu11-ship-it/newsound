@@ -97,6 +97,10 @@
   .btn.ghost{background:transparent;box-shadow:none}
   .btn.sm{padding:6px 13px;font-size:12.5px}
   .btn.danger{color:var(--danger);border-color:var(--danger-weak);background:var(--danger-weak)}
+  /* 공감해요 — 누르기 전은 흰 버튼, 누른 뒤에는 분홍으로 채웁니다 */
+  .btn.like{gap:6px}
+  .btn.like b{font-weight:900}
+  .btn.like.on{color:#fff;background:var(--brand);border-color:var(--brand)}
   label.field{display:block;margin-bottom:12px;font-size:13px;font-weight:800}
   label.field .req{color:var(--danger)}
   input,select,textarea{width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--border);border-radius:14px;
@@ -500,6 +504,11 @@
   .op-table tbody tr{cursor:pointer}
   .op-table .no{color:var(--muted);font-weight:800;width:56px}
   .op-table .subj b{display:block;font-size:15px;font-weight:800;margin-bottom:4px}
+  /* 의견 내용을 자르지 않고 전부 보여 줍니다.
+     pre-wrap  : 글쓴이가 넣은 줄바꿈을 그대로 살립니다
+     keep-all  : 한글 단어가 중간에서 쪼개지지 않게 합니다
+     word-break: 띄어쓰기 없는 긴 글자·주소가 표를 밀어내지 않게 잘라 줍니다 */
+  .op-table .op-body{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;line-height:1.6}
   .op-table .subj span{font-size:12px;color:var(--muted)}
   /* 분류를 소식 카드와 같은 태그 알약 모양으로 — 표가 카드와 따로 노는 느낌을 줄입니다 */
   .op-table .c-cat .tag{white-space:nowrap}
@@ -897,7 +906,9 @@ function failed(where, error){
 const S = {
   user:null, profile:null,
   posts:[], opinions:[], comments:[], reports:[], expenses:[], events:[],
-  site:null, profiles:[], adminExists:true, visits:null
+  site:null, profiles:[], adminExists:true, visits:null,
+  myLikes:new Set(),               // 내가 공감을 누른 의견 id (하트 색칠용)
+  likesReady:false                 // schema.sql 을 실행해 공감 표가 준비됐는지
 };
 const SIGNED = {};                 // docs 버킷 파일의 임시 열람 URL 캐시
 const role = () => S.profile?.role || 'visitor';
@@ -1048,6 +1059,17 @@ async function refresh(){
     S.reports  = isInner() ? (res[i++].data || []) : [];
     S.expenses = isInner() ? (res[i++].data || []) : [];
     S.profiles = isOfficer() ? (res[i++].data || []) : [];
+
+    /* 공감 표는 따로 읽습니다. 위 묶음에 넣으면, schema.sql 을 아직 실행하지 않아
+       표가 없을 때 사이트 전체가 "데이터를 불러오지 못했습니다" 로 멈춥니다.
+       여기서는 실패해도 공감 기능만 조용히 쉬고 나머지는 그대로 나옵니다.
+       (권한을 그렇게 걸어 두어서 '내가 누른 것' 만 돌아옵니다. 하트 색칠용이고
+        전체 개수는 opinions.likes 숫자를 씁니다.) */
+    try{
+      const { data, error } = await sb.from('opinion_likes').select('opinion_id');
+      S.likesReady = !error;
+      S.myLikes = new Set((data || []).map(r => r.opinion_id));
+    }catch(e){ S.likesReady = false; S.myLikes = new Set(); }
 
     await signDocs();
 
@@ -2021,10 +2043,11 @@ VIEWS.opinion = () => {
   ${list.length ? `<div class="op-table">${table(['번호','내용','분류','작성자'])}
     ${list.map((o,i)=>{
       const mine = o.author_id===S.user?.id;
+      const n    = o.likes || 0;
       return `<tr data-opopen="${o.id}">
         <td class="no">${list.length - i}</td>
-        <td class="subj"><b>${highlight(excerpt(o.body,44), Q.opinion)}</b>
-          <span><i class="m-only">${esc(o.cat)} · ${esc(o.alias||'익명')} · </i>${fmtDay(o.created_at)} 접수${cmtsOf(o.id).length?` · 댓글 ${cmtsOf(o.id).length}`:''}${mine?' · 내 글':''}</span></td>
+        <td class="subj"><b class="op-body">${highlight(o.body, Q.opinion)}</b>
+          <span><i class="m-only">${esc(o.cat)} · ${esc(o.alias||'익명')} · </i>${fmtDay(o.created_at)} 접수${cmtsOf(o.id).length?` · 댓글 ${cmtsOf(o.id).length}`:''}${n?` · 공감 ${n}`:''}${mine?' · 내 글':''}</span></td>
         <td class="c-cat">${catTag(o.cat)}</td>
         <td class="c-alias">${esc(o.alias||'익명')}</td>
       </tr>`;
@@ -2037,11 +2060,15 @@ function openOpinion(id){
   const o = S.opinions.find(x=>x.id===id); if(!o) return;
   const cs = S.comments.filter(c=>c.opinion_id===o.id);
   const mine = o.author_id===S.user?.id;
+  const liked = S.myLikes.has(o.id);
   openModal(`${o.cat} · ${o.alias||'익명'}`, `
     <div class="hint" style="margin-bottom:12px">${fmt(o.created_at)} 접수</div>
     <div style="white-space:pre-wrap;font-size:15px;font-weight:600">${esc(o.body)}</div>
-    ${(mine||isAdmin()) ? `<div class="row-actions" style="margin-top:16px">
-      <button class="btn sm danger" id="opDel">${mine?'내 글 삭제':'관리자 삭제'}</button></div>`:''}
+    <div class="row-actions" style="margin-top:16px">
+      ${S.likesReady ? `<button class="btn sm like${liked?' on':''}" id="opLike">
+        ${liked?'♥':'♡'} 공감해요 <b>${o.likes||0}</b></button>` : ''}
+      ${(mine||isAdmin()) ? `<button class="btn sm danger" id="opDel">${mine?'내 글 삭제':'관리자 삭제'}</button>`:''}
+    </div>
     <div class="cmt-list" style="margin-top:18px">
       ${cs.length ? cs.map(c=>{
         const cm = c.author_id===S.user?.id;
@@ -2052,6 +2079,24 @@ function openOpinion(id){
       <div class="cmt-form"><input id="opCmt" placeholder="익명으로 댓글 남기기">
         <button class="btn sm" id="opCmtAdd">등록</button></div>
     </div>`);
+
+  /* 공감해요 — 한 계정이 한 의견에 한 번만. 다시 누르면 취소됩니다.
+     같은 사람이 두 번 저장되는 것은 데이터베이스에서도 막아 두었습니다. */
+  $('#opLike')?.addEventListener('click', async ()=>{
+    if(!S.user){ toast('잠시 후 다시 시도해 주세요'); return; }
+    const btn = $('#opLike'); btn.disabled = true; busy(true);
+    const on = S.myLikes.has(o.id);
+    const { error } = on
+      ? await sb.from('opinion_likes').delete().eq('opinion_id', o.id).eq('user_id', S.user.id)
+      : await sb.from('opinion_likes').insert({ opinion_id: o.id, user_id: S.user.id });
+    busy(false); btn.disabled = false;
+    if(error){
+      /* 두 번 눌렸을 때 나는 중복 오류는 이미 공감한 것이므로 조용히 넘어갑니다 */
+      if(!/duplicate key|already exists/i.test(error.message||'')) return failed('공감', error);
+    }
+    await refresh();
+    go('opinion'); openOpinion(o.id);          // 목록과 이 창을 함께 새로 그립니다
+  });
 
   $('#opDel')?.addEventListener('click', async ()=>{
     if(!confirm('이 의견을 삭제할까요? 댓글도 함께 삭제됩니다.')) return;
