@@ -787,3 +787,47 @@ end $$;
 --  -- 지금 의견함에 붙어 있는 별칭 (서로 다른 사람이면 번호가 달라야 합니다)
 --  select alias, author_id, created_at from public.opinions order by created_at;
 -- ---------------------------------------------------------------------------
+
+-- ============================================================================
+--  15. 익명 접속은 회원 명부에 넣지 않기
+--
+--  이 사이트는 로그인하지 않은 사람에게도 익명 계정을 자동으로 만들어 줍니다
+--  (글을 못 써도 화면은 볼 수 있어야 하고, 의견함 별칭도 그 계정으로 나눕니다).
+--  그런데 auth.users 에 한 줄 생길 때마다 profiles 에도 한 줄이 생기다 보니,
+--  관리자 콘솔 '회원 · 권한 관리' 명부가 이름 없는 익명 접속으로 가득 찹니다.
+--
+--  -> 앞으로는 익명 계정이면 profiles 를 만들지 않습니다.
+--     화면 쪽은 이미 프로필이 없어도 '방문자' 로 처리하게 되어 있어 문제없습니다.
+--     이미 쌓여 있던 익명 프로필도 아래에서 지웁니다.
+--
+--  지우는 대상은 세 조건을 모두 만족하는 행뿐입니다.
+--    · 권한이 '일반 방문자' 이고           (단원·담당관·관리자는 절대 안 지웁니다)
+--    · 이름이 비어 있고                    (가입할 때 이름은 필수라 가입자는 이름이 있습니다)
+--    · auth.users 에서 익명으로 표시된 계정
+--  profiles 를 참조하는 다른 표가 없어서 지워도 다른 자료는 그대로입니다.
+-- ============================================================================
+
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  -- 익명 계정이면 회원 명부에 넣지 않습니다.
+  -- to_jsonb 로 꺼내는 이유: is_anonymous 칸이 없는 예전 프로젝트에서도 오류가 안 나게.
+  if coalesce((to_jsonb(new) ->> 'is_anonymous')::boolean, false) then
+    return new;
+  end if;
+
+  insert into public.profiles (id, name)
+  values (new.id, coalesce(new.raw_user_meta_data->>'name', ''))
+  on conflict (id) do nothing;
+  return new;
+end $$;
+
+-- 이미 쌓여 있던 익명 프로필 정리
+delete from public.profiles p
+ where p.role = 'visitor'
+   and coalesce(p.name, '') = ''
+   and exists (
+     select 1 from auth.users u
+      where u.id = p.id
+        and coalesce((to_jsonb(u) ->> 'is_anonymous')::boolean, false)
+   );

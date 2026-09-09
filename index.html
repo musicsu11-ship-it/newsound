@@ -909,6 +909,15 @@ const isOfficer = () => OFFICER.includes(role());
 const isAdmin   = () => role()==='admin';
 const ROLE_LABEL = { visitor:'일반 방문자', member:'새소리단 단원', officer:'혁신행정담당관', admin:'운영 관리자' };
 
+/* 회원 명부에서 '그냥 구경만 한 익명 접속'을 걸러 냅니다.
+   이 사이트는 로그인하지 않은 사람에게도 익명 계정을 자동으로 만들어 줍니다.
+   그때마다 회원 명부에 한 줄씩 쌓여서, 놔두면 명부가 익명 접속으로 가득 찹니다.
+   가입할 때 이름은 필수라서, 이름이 없는 일반 방문자 = 익명 접속입니다.
+   가입한 사람은 아직 권한을 못 받아 '일반 방문자'여도 명부에 남깁니다.
+   그래야 단원으로 올려 줄 수 있습니다. */
+const realMembers = () =>
+  S.profiles.filter(p => !(p.role === 'visitor' && !String(p.name || '').trim()));
+
 const DEFAULT_INTRO = {
   mission:'새소리단은 새내기의 시선으로 직원들의 다양한 목소리를 모아, 더 나은 고용노동부를 만들어갑니다.\n사소한 생각, 아이디어도 변화의 시작이 될 수 있습니다.\n여러분의 생각과 이야기를 들려주세요!',
   roles:[
@@ -2496,17 +2505,18 @@ BIND['review-expense'] = () => $$('#main [data-review-expense]').forEach(b =>
   b.addEventListener('click', ()=> showExpense(b.dataset.reviewExpense, true)));
 
 VIEWS.members = () => {
-  const ps = S.profiles;
+  const ps = realMembers();                    // 익명 접속은 명부에서 제외
   const cnt = r => ps.filter(p=>p.role===r).length;
   return pageHead('회원 · 권한 관리','가입한 사람에게 단원·담당관 권한을 부여합니다.'
     + (isAdmin() ? '' : ' (변경은 운영 관리자만 가능합니다)'))
   + `<div class="stat-row">
-      <div class="stat"><b>${cnt('visitor')}</b><span>일반 방문자</span></div>
+      <div class="stat"><b>${cnt('visitor')}</b><span>권한 대기</span></div>
       <div class="stat"><b>${cnt('member')}</b><span>새소리단 단원</span></div>
       <div class="stat"><b>${cnt('officer')}</b><span>혁신행정담당관</span></div>
       <div class="stat"><b>${cnt('admin')}</b><span>운영 관리자</span></div></div>
     <div class="card"><h2>회원 목록 (${ps.length})</h2>
-      <p class="sub">가입 직후에는 모두 일반 방문자입니다. 확인 후 권한을 올려주세요.</p>
+      <p class="sub">가입한 사람만 나옵니다. 로그인 없이 둘러본 익명 접속은 표시하지 않습니다.<br>
+        가입 직후에는 '일반 방문자'이니 확인 후 권한을 올려주세요.</p>
       ${ps.length ? table(['이름','팀','권한','가입일', isAdmin()?'권한 변경':'']) + ps.map(p=>`<tr>
         <td>${esc(p.name||'(이름 없음)')}${p.id===S.user?.id?' <span class="tag brand">나</span>':''}</td>
         <td>${esc(p.team||'-')}</td>

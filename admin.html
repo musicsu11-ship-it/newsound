@@ -252,6 +252,15 @@ const isAdmin = () => role()==='admin';
 const isOfficer = () => ['officer','admin'].includes(role());
 const ROLE_LABEL = { visitor:'일반 방문자', member:'새소리단 단원', officer:'혁신행정담당관', admin:'운영 관리자' };
 
+/* 회원 명부에서 '그냥 구경만 한 익명 접속'을 걸러 냅니다.
+   이 사이트는 로그인하지 않은 사람에게도 익명 계정을 자동으로 만들어 줍니다.
+   그때마다 회원 명부에 한 줄씩 쌓여서, 놔두면 명부가 익명 접속으로 가득 찹니다.
+   가입할 때 이름은 필수라서, 이름이 없는 일반 방문자 = 익명 접속입니다.
+   가입한 사람은 아직 권한을 못 받아 '일반 방문자'여도 명부에 남깁니다.
+   그래야 단원으로 올려 줄 수 있습니다. */
+const realMembers = () =>
+  S.profiles.filter(p => !(p.role === 'visitor' && !String(p.name || '').trim()));
+
 const BOARDS = {
   news:   { label:'새소리단 소식', icon:'📰', photo:true,  adminOnly:false },
   notice: { label:'공지방',       icon:'📢', photo:false, adminOnly:false },
@@ -468,7 +477,8 @@ const tableEnd=`</tbody></table></div>`;
 VIEWS.dash = () => {
   const pendR = S.reports.filter(x=>!['승인','반려'].includes(x.status));
   const pendE = S.expenses.filter(x=>!['승인','반려'].includes(x.status));
-  const newbies = S.profiles.filter(p=>p.role==='visitor');
+  /* 익명 접속은 빼고, 가입했는데 아직 권한을 못 받은 사람만 셉니다 */
+  const newbies = realMembers().filter(p=>p.role==='visitor');
   return pageHead('대시보드', '처리해야 할 일과 최근 활동입니다.',
     `<button class="btn primary" id="quickPost">✏️ 새 글 쓰기</button>`)
   + `<div class="stat-row">
@@ -923,18 +933,19 @@ BIND.opinions = () => {
 
 /* ---------- 회원 ---------- */
 VIEWS.members = () => {
-  const ps = S.profiles;
+  const ps = realMembers();                    // 익명 접속은 명부에서 제외
   const teams = intro().teams || [];
   const cnt = r => ps.filter(p=>p.role===r).length;
   return pageHead('회원 · 권한 관리','권한을 바꾸면 그 사람 화면에 즉시 반영됩니다.'
     + (isAdmin()?'':' (변경은 운영 관리자만 가능합니다)'))
   + `<div class="stat-row">
-      <div class="stat"><b>${cnt('visitor')}</b><span>일반 방문자</span></div>
+      <div class="stat"><b>${cnt('visitor')}</b><span>권한 대기</span></div>
       <div class="stat"><b>${cnt('member')}</b><span>새소리단 단원</span></div>
       <div class="stat"><b>${cnt('officer')}</b><span>혁신행정담당관</span></div>
       <div class="stat"><b>${cnt('admin')}</b><span>운영 관리자</span></div></div>
     <div class="card"><h2>회원 목록 (${ps.length})</h2>
-      <p class="sub">가입 직후에는 모두 일반 방문자입니다. 확인 후 권한을 올려주세요.</p>
+      <p class="sub">가입한 사람만 나옵니다. 로그인 없이 둘러본 익명 접속은 표시하지 않습니다.<br>
+        가입 직후에는 '일반 방문자'이니 확인 후 권한을 올려주세요.</p>
       ${ps.length ? table(['이름','소속 팀','현재 권한','가입일', isAdmin()?'권한 변경':''])+ps.map(p=>`<tr>
         <td>${esc(p.name||'(이름 없음)')}${p.id===S.user.id?' <span class="tag brand">나</span>':''}</td>
         <td>${isAdmin() ? `<select data-team-for="${p.id}" style="margin:0;min-width:130px">
