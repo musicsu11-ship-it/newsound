@@ -172,13 +172,14 @@
     display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 
   /* ---------- Opinion / comments ---------- */
-  .op-item{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:12px;background:var(--surface)}
+  .op-item{border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;background:var(--surface)}
   .op-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
-  .op-body{margin-top:8px;white-space:pre-wrap}
+  .op-body{margin-top:10px;white-space:pre-wrap;font-size:16px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
   .cmt-list{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px}
-  .cmt{padding:7px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
+  .cmt{padding:12px 0;border-bottom:1px dashed var(--border);font-size:14.5px;line-height:1.7}
+  .cmt .cm-body{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;margin:2px 0 6px}
   .cmt:last-child{border-bottom:0}
-  .cmt .cm-meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center}
+  .cmt .cm-meta{color:var(--muted);font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .cmt-form{display:flex;gap:8px;margin-top:10px}
   .cmt-form input{margin-top:0}
 
@@ -1617,6 +1618,18 @@ const toggleLike = (id) => {
   const o = arr.find(x=>x.id===id);
   if(o){ o.likes = Math.max((o.likes||0) + (on ? -1 : 1), 0); DB.saveOpinions(arr); }
 };
+
+/* 댓글 공감 — 의견 공감과 같은 방식입니다 */
+const myCLikes  = () => LS.get('sm_myclikes', []);
+const likedCmt  = (id) => myCLikes().includes(id);
+const toggleCLike = (opId, cId) => {
+  const a = myCLikes();
+  const on = a.includes(cId);
+  LS.set('sm_myclikes', on ? a.filter(x=>x!==cId) : a.concat(cId));
+  const arr = DB.opinions();
+  const c = arr.find(x=>x.id===opId)?.comments?.find(x=>x.id===cId);
+  if(c){ c.likes = Math.max((c.likes||0) + (on ? -1 : 1), 0); DB.saveOpinions(arr); }
+};
 function hashPin(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0 } return h.toString(36); }
 
 /* 의견 분류 — 여기만 고치면 작성 폼에 그대로 반영됩니다 */
@@ -1686,11 +1699,14 @@ VIEWS.opinion = () => {
           <div class="cmt-list">
             ${cmts.length ? cmts.map(c=>{
               const cm = isMine(c.id);
+              const cl = likedCmt(c.id);
               return `<div class="cmt">
                 <div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.at)}</span>
                   ${(cm||isAdmin)?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px"
                       data-cdel="${o.id}:${c.id}">삭제</button>`:''}</div>
-                <div>${highlight(c.body, Q.opinion)}</div></div>`;
+                <div class="cm-body">${highlight(c.body, Q.opinion)}</div>
+                <button class="btn sm like${cl?' on':''}" style="padding:3px 11px;font-size:12px"
+                  data-clike="${o.id}:${c.id}">${cl?'♥':'♡'} 공감 <b>${c.likes||0}</b></button></div>`;
             }).join('') : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
             <div class="cmt-form">
               <input data-cinput="${o.id}" placeholder="${esc(myAlias())}(으)로 댓글 남기기">
@@ -1707,6 +1723,11 @@ BIND.opinion = () => {
   /* 공감해요 — 한 번만 누를 수 있고, 다시 누르면 취소됩니다 */
   $$('#main [data-like]').forEach(b => b.addEventListener('click', ()=>{
     toggleLike(b.dataset.like);
+    go('opinion');
+  }));
+  $$('#main [data-clike]').forEach(b => b.addEventListener('click', ()=>{
+    const [opId, cId] = b.dataset.clike.split(':');
+    toggleCLike(opId, cId);
     go('opinion');
   }));
 

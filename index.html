@@ -181,9 +181,10 @@
   .op-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
   .op-body{margin-top:8px;white-space:pre-wrap}
   .cmt-list{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px}
-  .cmt{padding:7px 0;border-bottom:1px dashed var(--border);font-size:13.5px}
+  .cmt{padding:12px 0;border-bottom:1px dashed var(--border);font-size:14.5px;line-height:1.7}
+  .cmt .cm-body{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;margin:2px 0 6px}
   .cmt:last-child{border-bottom:0}
-  .cmt .cm-meta{color:var(--muted);font-size:12px;display:flex;gap:8px;align-items:center}
+  .cmt .cm-meta{color:var(--muted);font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .cmt-form{display:flex;gap:8px;margin-top:10px}
   .cmt-form input{margin-top:0}
 
@@ -498,18 +499,22 @@
   /* 의견함 — 표 */
   .op-table{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:22px;
     box-shadow:var(--shadow);overflow:hidden}
-  .op-table table{font-size:13.5px}
-  .op-table th{background:var(--surface-2);padding:14px 18px;font-size:12px;text-transform:none;font-weight:800;white-space:nowrap}
-  .op-table td{padding:16px 18px}
+  /* 의견을 읽는 화면이라 본문 글씨를 키우고 줄·칸 간격도 넉넉하게 뒀습니다 */
+  .op-table table{font-size:14.5px}
+  .op-table th{background:var(--surface-2);padding:15px 20px;font-size:12.5px;text-transform:none;font-weight:800;white-space:nowrap}
+  .op-table td{padding:22px 20px;vertical-align:top}
   .op-table tbody tr{cursor:pointer}
-  .op-table .no{color:var(--muted);font-weight:800;width:56px}
-  .op-table .subj b{display:block;font-size:15px;font-weight:800;margin-bottom:4px}
+  .op-table tbody tr:hover{background:var(--surface-2)}
+  .op-table .no{color:var(--muted);font-weight:800;width:60px;font-size:15px}
+  .op-table .subj b{display:block;font-size:17px;font-weight:800;margin-bottom:8px}
   /* 의견 내용을 자르지 않고 전부 보여 줍니다.
      pre-wrap  : 글쓴이가 넣은 줄바꿈을 그대로 살립니다
      keep-all  : 한글 단어가 중간에서 쪼개지지 않게 합니다
      word-break: 띄어쓰기 없는 긴 글자·주소가 표를 밀어내지 않게 잘라 줍니다 */
-  .op-table .op-body{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;line-height:1.6}
-  .op-table .subj span{font-size:12px;color:var(--muted)}
+  .op-table .op-body{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;line-height:1.7}
+  .op-table .subj span{font-size:13px;color:var(--muted)}
+  .op-table .c-cat,.op-table .c-alias{font-size:14px}
+  .op-table .c-alias{color:var(--muted);font-weight:700;white-space:nowrap}
   /* 분류를 소식 카드와 같은 태그 알약 모양으로 — 표가 카드와 따로 노는 느낌을 줄입니다 */
   .op-table .c-cat .tag{white-space:nowrap}
   /* 분류·작성자는 넓은 화면에서만 별도 열로, 좁은 화면에서는 내용 아래 한 줄로 합칩니다 */
@@ -637,9 +642,12 @@
     .op-table th:nth-child(3),.op-table td:nth-child(3),
     .op-table th:nth-child(4),.op-table td:nth-child(4){display:none}
     .op-table .m-only{display:inline;font-style:normal;font-weight:700;color:var(--brand)}
-    .op-table th,.op-table td{padding:14px 14px}
+    .op-table th,.op-table td{padding:18px 15px}
     .op-table th{white-space:nowrap}
-    .op-table .no{width:52px}
+    .op-table .no{width:44px}
+    /* 좁은 화면에서는 글씨를 조금만 줄입니다(데스크톱 17px → 16px) */
+    .op-table .subj b{font-size:16px}
+    .op-table .subj span{font-size:12.5px;line-height:1.7}
   }
 
   @media (max-width:1200px){
@@ -908,7 +916,9 @@ const S = {
   posts:[], opinions:[], comments:[], reports:[], expenses:[], events:[],
   site:null, profiles:[], adminExists:true, visits:null,
   myLikes:new Set(),               // 내가 공감을 누른 의견 id (하트 색칠용)
-  likesReady:false                 // schema.sql 을 실행해 공감 표가 준비됐는지
+  myCLikes:new Set(),              // 내가 공감을 누른 댓글 id
+  likesReady:false,                // schema.sql 을 실행해 의견 공감 표가 준비됐는지
+  cLikesReady:false                // 댓글 공감 표가 준비됐는지
 };
 const SIGNED = {};                 // docs 버킷 파일의 임시 열람 URL 캐시
 const role = () => S.profile?.role || 'visitor';
@@ -1066,10 +1076,18 @@ async function refresh(){
        (권한을 그렇게 걸어 두어서 '내가 누른 것' 만 돌아옵니다. 하트 색칠용이고
         전체 개수는 opinions.likes 숫자를 씁니다.) */
     try{
-      const { data, error } = await sb.from('opinion_likes').select('opinion_id');
-      S.likesReady = !error;
-      S.myLikes = new Set((data || []).map(r => r.opinion_id));
-    }catch(e){ S.likesReady = false; S.myLikes = new Set(); }
+      const [a, b] = await Promise.all([
+        sb.from('opinion_likes').select('opinion_id'),
+        sb.from('comment_likes').select('comment_id'),
+      ]);
+      S.likesReady  = !a.error;
+      S.myLikes     = new Set((a.data || []).map(r => r.opinion_id));
+      S.cLikesReady = !b.error;
+      S.myCLikes    = new Set((b.data || []).map(r => r.comment_id));
+    }catch(e){
+      S.likesReady = S.cLikesReady = false;
+      S.myLikes = new Set(); S.myCLikes = new Set();
+    }
 
     await signDocs();
 
@@ -2072,9 +2090,15 @@ function openOpinion(id){
     <div class="cmt-list" style="margin-top:18px">
       ${cs.length ? cs.map(c=>{
         const cm = c.author_id===S.user?.id;
-        return `<div class="cmt"><div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.created_at)}</span>
-          ${(cm||isAdmin())?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px" data-cdel="${c.id}">삭제</button>`:''}
-          </div><div>${esc(c.body)}</div></div>`; }).join('')
+        const cl = S.myCLikes.has(c.id);
+        return `<div class="cmt">
+          <div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.created_at)}</span>
+            ${(cm||isAdmin())?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px" data-cdel="${c.id}">삭제</button>`:''}
+          </div>
+          <div class="cm-body">${esc(c.body)}</div>
+          ${S.cLikesReady ? `<button class="btn sm like${cl?' on':''}" style="padding:3px 11px;font-size:12px"
+            data-clike="${c.id}">${cl?'♥':'♡'} 공감 <b>${c.likes||0}</b></button>` : ''}
+        </div>`; }).join('')
         : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
       <div class="cmt-form"><input id="opCmt" placeholder="익명으로 댓글 남기기">
         <button class="btn sm" id="opCmtAdd">등록</button></div>
@@ -2097,6 +2121,21 @@ function openOpinion(id){
     await refresh();
     go('opinion'); openOpinion(o.id);          // 목록과 이 창을 함께 새로 그립니다
   });
+
+  /* 댓글 공감 — 의견 공감과 같은 방식입니다 */
+  $$('#modalBody [data-clike]').forEach(b => b.addEventListener('click', async ()=>{
+    if(!S.user){ toast('잠시 후 다시 시도해 주세요'); return; }
+    const cid = b.dataset.clike;
+    b.disabled = true; busy(true);
+    const on = S.myCLikes.has(cid);
+    const { error } = on
+      ? await sb.from('comment_likes').delete().eq('comment_id', cid).eq('user_id', S.user.id)
+      : await sb.from('comment_likes').insert({ comment_id: cid, user_id: S.user.id });
+    busy(false); b.disabled = false;
+    if(error && !/duplicate key|already exists/i.test(error.message||'')) return failed('공감', error);
+    await refresh();
+    go('opinion'); openOpinion(o.id);
+  }));
 
   $('#opDel')?.addEventListener('click', async ()=>{
     if(!confirm('이 의견을 삭제할까요? 댓글도 함께 삭제됩니다.')) return;

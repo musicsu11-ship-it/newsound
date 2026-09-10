@@ -888,3 +888,52 @@ create trigger opinion_likes_bump
 -- 이미 눌린 공감이 있다면 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
 update public.opinions o
    set likes = (select count(*) from public.opinion_likes l where l.opinion_id = o.id);
+
+-- ============================================================================
+--  17. 댓글에도 '공감해요'
+--      16절 의견 공감과 똑같은 방식입니다.
+--      한 계정이 한 댓글에 한 번만, 누가 눌렀는지는 남에게 보이지 않습니다.
+-- ============================================================================
+
+alter table public.opinion_comments add column if not exists likes int not null default 0;
+
+create table if not exists public.comment_likes (
+  comment_id uuid not null references public.opinion_comments on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (comment_id, user_id)          -- 한 사람이 한 댓글에 한 번만
+);
+alter table public.comment_likes enable row level security;
+
+drop policy if exists cmtlike_select on public.comment_likes;
+create policy cmtlike_select on public.comment_likes for select
+  using ( user_id = auth.uid() );            -- 내가 누른 것만 보입니다
+
+drop policy if exists cmtlike_insert on public.comment_likes;
+create policy cmtlike_insert on public.comment_likes for insert
+  with check ( user_id = auth.uid() );
+
+drop policy if exists cmtlike_delete on public.comment_likes;
+create policy cmtlike_delete on public.comment_likes for delete
+  using ( user_id = auth.uid() );
+
+create or replace function public.bump_comment_like()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    update public.opinion_comments set likes = likes + 1 where id = new.comment_id;
+    return new;
+  else
+    update public.opinion_comments set likes = greatest(likes - 1, 0) where id = old.comment_id;
+    return old;
+  end if;
+end $$;
+
+drop trigger if exists comment_likes_bump on public.comment_likes;
+create trigger comment_likes_bump
+  after insert or delete on public.comment_likes
+  for each row execute function public.bump_comment_like();
+
+-- 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
+update public.opinion_comments c
+   set likes = (select count(*) from public.comment_likes l where l.comment_id = c.id);

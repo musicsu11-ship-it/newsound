@@ -1,5 +1,5 @@
 -- ============================================================================
---  새소리단 — 지금 실행해야 하는 SQL  (2026-09-09)
+--  새소리단 — 지금 실행해야 하는 SQL  (2026-09-10)
 --
 --  ▷ 하는 법
 --     1. 이 파일 안을 아무 데나 클릭
@@ -12,19 +12,20 @@
 --     네. 글·사진·가입한 회원은 지우지 않습니다.
 --     여러 번 실행해도 같은 결과가 나오게 만들어 두었습니다.
 --
---  ▷ 무엇이 바뀌나요?  (아래 네 가지)
+--  ▷ 무엇이 바뀌나요?  (아래 다섯 가지)
 --     1) 게시글 작성자의 팀·부서, 정산의 팀을 저장할 칸을 만듭니다.
 --        (이게 없으면 팀을 골라도 저장이 안 됩니다)
 --     2) 익명 별칭이 사람마다 다르게 나오도록 고칩니다.
---        지금은 서로 다른 사람이 똑같이 '새소리16' 을 받고 있습니다.
+--        서로 다른 사람이 똑같이 '새소리16' 을 받던 문제입니다.
 --     3) 로그인 없이 둘러본 익명 접속이 '회원 · 권한 관리' 명부에
 --        쌓이지 않게 합니다. 이미 쌓인 것도 정리합니다.
 --        (가입한 사람은 권한이 없어도 그대로 남습니다)
---     4) 의견함에 '공감해요' 를 추가합니다.
---        한 계정이 한 의견에 한 번만 누를 수 있고, 다시 누르면 취소됩니다.
---        누가 눌렀는지는 남에게 보이지 않고, 개수만 보입니다.
+--     4) 의견에 '공감해요' 를 추가합니다.
+--     5) 댓글에도 '공감해요' 를 추가합니다.
+--        4·5 모두 한 계정이 한 번만 누를 수 있고, 다시 누르면 취소됩니다.
+--        누가 눌렀는지는 남에게 보이지 않고 개수만 보입니다.
 --
---  ▷ 이 내용은 supabase/schema.sql 13~16절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 13~17절과 같습니다.
 --     schema.sql 이 원본이고, 이 파일은 복사하기 편하라고 뽑아 둔 것입니다.
 -- ============================================================================
 
@@ -303,3 +304,52 @@ create trigger opinion_likes_bump
 -- 이미 눌린 공감이 있다면 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
 update public.opinions o
    set likes = (select count(*) from public.opinion_likes l where l.opinion_id = o.id);
+
+-- ============================================================================
+--  17. 댓글에도 '공감해요'
+--      16절 의견 공감과 똑같은 방식입니다.
+--      한 계정이 한 댓글에 한 번만, 누가 눌렀는지는 남에게 보이지 않습니다.
+-- ============================================================================
+
+alter table public.opinion_comments add column if not exists likes int not null default 0;
+
+create table if not exists public.comment_likes (
+  comment_id uuid not null references public.opinion_comments on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (comment_id, user_id)          -- 한 사람이 한 댓글에 한 번만
+);
+alter table public.comment_likes enable row level security;
+
+drop policy if exists cmtlike_select on public.comment_likes;
+create policy cmtlike_select on public.comment_likes for select
+  using ( user_id = auth.uid() );            -- 내가 누른 것만 보입니다
+
+drop policy if exists cmtlike_insert on public.comment_likes;
+create policy cmtlike_insert on public.comment_likes for insert
+  with check ( user_id = auth.uid() );
+
+drop policy if exists cmtlike_delete on public.comment_likes;
+create policy cmtlike_delete on public.comment_likes for delete
+  using ( user_id = auth.uid() );
+
+create or replace function public.bump_comment_like()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    update public.opinion_comments set likes = likes + 1 where id = new.comment_id;
+    return new;
+  else
+    update public.opinion_comments set likes = greatest(likes - 1, 0) where id = old.comment_id;
+    return old;
+  end if;
+end $$;
+
+drop trigger if exists comment_likes_bump on public.comment_likes;
+create trigger comment_likes_bump
+  after insert or delete on public.comment_likes
+  for each row execute function public.bump_comment_like();
+
+-- 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
+update public.opinion_comments c
+   set likes = (select count(*) from public.comment_likes l where l.comment_id = c.id);
