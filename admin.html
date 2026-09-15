@@ -225,6 +225,10 @@ const fmt = iso => { if(!iso) return '-'; const d=new Date(iso);
 const fmtDay = iso => iso ? String(iso).slice(0,10) : '-';
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const won = n => (Number(n)||0).toLocaleString('ko-KR') + '원';
+/* 입금 계좌 한 줄로 합치기 — 칸을 나누기 전 옛 신청서는 은행명 칸에 다 적혀 있어
+   그런 건 적힌 그대로 보여 줍니다 */
+const acctText = (r) => [r?.bank, r?.acct_no, r?.holder && `(${r.holder})`]
+  .map(v => String(v||'').trim()).filter(Boolean).join(' ');
 const esc = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const excerpt = (s,n=100) => { const t=String(s||'').replace(/\s+/g,' ').trim(); return t.length>n?t.slice(0,n)+'…':t; };
 
@@ -1012,7 +1016,7 @@ function showExpense(id){
     <dt>활동일자 / 활동명</dt><dd>${esc(r.act_date)} · ${esc(r.activity)}</dd>
     <dt>사용처 / 항목</dt><dd>${esc(r.item)}</dd>
     <dt>금액</dt><dd>${won(r.amount)}</dd>
-    ${r.bank?`<dt>입금 계좌</dt><dd>${esc(r.bank)}</dd>`:''}
+    ${acctText(r)?`<dt>입금 계좌</dt><dd>${esc(acctText(r))}</dd>`:''}
     <dt>상세 / 비고</dt><dd>${esc(r.note)||'-'}</dd>
     <dt>영수증 (${(r.receipts||[]).length}장)</dt><dd>${attHTML(r.receipts)}</dd>
     <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd></dl>` + processBlock(r.status, r.officer_comment));

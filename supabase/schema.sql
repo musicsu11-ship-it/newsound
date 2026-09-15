@@ -937,3 +937,18 @@ create trigger comment_likes_bump
 -- 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
 update public.opinion_comments c
    set likes = (select count(*) from public.comment_likes l where l.comment_id = c.id);
+
+-- ============================================================================
+--  18. 정산 입금 계좌를 칸 세 개로
+--
+--  전에는 bank 칸 하나에 "은행 / 계좌번호 / 예금주" 를 몰아 적었습니다.
+--  담당관이 그 값을 보고 그대로 이체하는데, 한 줄에 붙어 있으면
+--  계좌번호만 골라 복사하기가 번거롭습니다.
+--
+--  이제 bank 는 은행명만 담고, 계좌번호와 예금주는 새 칸에 따로 담습니다.
+--  칸을 나누기 전에 올라온 신청서는 bank 에 다 적혀 있는데,
+--  화면에서는 적힌 그대로 보여 주므로 옛 신청서도 그대로 읽힙니다.
+-- ============================================================================
+
+alter table public.expenses add column if not exists acct_no text default '';
+alter table public.expenses add column if not exists holder  text default '';

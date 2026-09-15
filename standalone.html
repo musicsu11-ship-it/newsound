@@ -742,6 +742,11 @@ const fmt = (iso) => { if(!iso) return '-'; const d=new Date(iso);
 const fmtDay = (iso) => iso ? new Date(iso).toISOString().slice(0,10) : '-';
 const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const won = (n) => (Number(n)||0).toLocaleString('ko-KR') + '원';
+/* 입금 계좌 한 줄로 합치기 — 예) "신한은행 110-123-456789 (이승연)"
+   칸을 나누기 전에 올라온 옛 신청서는 은행명 칸 하나에 다 적혀 있어서,
+   그런 건 적힌 그대로 보여 줍니다. */
+const acctText = (r) => [r?.bank, r?.acct_no, r?.holder && `(${r.holder})`]
+  .map(v => String(v||'').trim()).filter(Boolean).join(' ');
 const esc = (s) => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const excerpt = (s,n=120) => { const t=String(s||'').replace(/\s+/g,' ').trim(); return t.length>n ? t.slice(0,n)+'…' : t; };
 
@@ -2005,7 +2010,14 @@ VIEWS.expense = () => pageHead('활동비 정산 신청','활동비 사용 내�
       <label class="field">활동명 <span class="req">*</span><input id="exActivity" placeholder="예) 팀별 회의"></label>
       <label class="field">사용처 / 항목 <span class="req">*</span><input id="exItem" placeholder="예) 간식비, 교통비, 소모품"></label>
       <label class="field">금액(원) <span class="req">*</span><input id="exAmount" type="number" min="0" placeholder="숫자만"></label>
-      <label class="field">입금 계좌 <span class="hint" style="display:inline">승인 시 지급</span><input id="exBank" placeholder="은행 / 계좌번호 / 예금주"></label>
+    </div>
+    <!-- 입금 계좌는 담당관이 보고 그대로 이체하는 값이라 칸을 나눠 두었습니다.
+         한 칸에 몰아 적으면 계좌번호만 골라 복사하기가 번거롭습니다. -->
+    <div class="field" style="margin-bottom:0">입금 계좌 <span class="hint" style="display:inline">승인 시 지급</span></div>
+    <div class="grid c3" style="margin-bottom:14px">
+      <label class="field" style="margin:0">은행명<input id="exBank" placeholder="예) 신한은행"></label>
+      <label class="field" style="margin:0">계좌번호<input id="exAcct" inputmode="numeric" placeholder="예) 110-123-456789"></label>
+      <label class="field" style="margin:0">예금주<input id="exHolder" placeholder="예) 이승연"></label>
     </div>
     <label class="field">상세 내역 / 비고<textarea id="exNote" placeholder="사용 목적, 참여 인원 등"></textarea></label>
     <label class="field">영수증 사진 <span class="req">*</span>
@@ -2025,7 +2037,8 @@ BIND.expense = () => {
     if(!receipts.length){ toast('영수증 사진을 1장 이상 첨부하세요'); return; }
     const arr = DB.expenses();
     arr.push({ id:uid(), submitter:name, contact:$('#exContact').value.trim(), date, activity:act,
-      item, amount:Number(amount), team:$('#exTeam').value, bank:$('#exBank').value.trim(),
+      item, amount:Number(amount), team:$('#exTeam').value,
+      bank:$('#exBank').value.trim(), acct_no:$('#exAcct').value.trim(), holder:$('#exHolder').value.trim(),
       note:$('#exNote').value.trim(), receipts, status:'접수', comment:'', at:nowISO(), submittedBy:SESSION.name });
     if(DB.saveExpenses(arr)){ toast('정산 신청이 접수되었습니다'); go('mine'); }
   });
@@ -2131,7 +2144,7 @@ function showExpense(id, canProcess){
     <dt>활동일자 / 활동명</dt><dd>${esc(r.date)} · ${esc(r.activity)}</dd>
     <dt>사용처 / 항목</dt><dd>${esc(r.item)}</dd>
     <dt>금액</dt><dd>${won(r.amount)}</dd>
-    ${r.bank?`<dt>입금 계좌</dt><dd>${esc(r.bank)}</dd>`:''}
+    ${acctText(r)?`<dt>입금 계좌</dt><dd>${esc(acctText(r))}</dd>`:''}
     <dt>상세 / 비고</dt><dd>${esc(r.note)||'-'}</dd>
     <dt>상태</dt><dd>${statusTag(r.status)}</dd>
     ${r.comment?`<dt>담당관 코멘트</dt><dd>${esc(r.comment)}</dd>`:''}
