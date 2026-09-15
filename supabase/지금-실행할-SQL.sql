@@ -18,11 +18,12 @@
 --     2) 익명 별칭이 사람마다 다르게 나오도록 고칩니다.
 --     3) 로그인 없이 둘러본 익명 접속이 '회원 · 권한 관리' 명부에
 --        쌓이지 않게 합니다. 이미 쌓인 것도 정리합니다.
---     4) 의견에 '공감해요' 를 추가합니다.
+--     4) 의견에 '공감해요' 를 추가합니다.          ← 이건 이미 하신 것 같습니다
 --     5) 댓글에도 '공감해요' 를 추가합니다.
 --     6) 정산 신청의 입금 계좌를 은행명·계좌번호·예금주 세 칸으로 나눕니다.
+--     7) 댓글에 대댓글(답글)을 달 수 있게 합니다.
 --
---  ▷ 이 내용은 supabase/schema.sql 13~18절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 13~19절과 같습니다.
 --     schema.sql 이 원본이고, 이 파일은 복사하기 편하라고 뽑아 둔 것입니다.
 -- ============================================================================
 
@@ -365,3 +366,20 @@ update public.opinion_comments c
 
 alter table public.expenses add column if not exists acct_no text default '';
 alter table public.expenses add column if not exists holder  text default '';
+
+-- ============================================================================
+--  19. 댓글에 대댓글(답글)
+--
+--  댓글 표에 '어느 댓글에 달린 답글인지' 를 적는 칸 하나만 더합니다.
+--  비어 있으면 원래 댓글, 값이 있으면 그 댓글에 달린 답글입니다.
+--  원래 댓글을 지우면 거기 달린 답글도 함께 지워집니다(on delete cascade).
+--
+--  답글도 결국 같은 표의 댓글이라, 16·17절에서 만든 공감 기능이 그대로 됩니다.
+--  별칭을 붙이는 방식도 기존 댓글과 같습니다.
+-- ============================================================================
+
+alter table public.opinion_comments
+  add column if not exists parent_id uuid references public.opinion_comments(id) on delete cascade;
+
+create index if not exists opinion_comments_parent_idx
+  on public.opinion_comments (parent_id, created_at);

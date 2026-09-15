@@ -183,6 +183,11 @@
   .cmt-list{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px}
   .cmt{padding:12px 0;border-bottom:1px dashed var(--border);font-size:14.5px;line-height:1.7}
   .cmt .cm-body{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;margin:2px 0 6px}
+  .cmt .cm-acts{display:flex;gap:6px;flex-wrap:wrap}
+  /* 답글 — 한 칸 들여 쓰고 왼쪽에 선을 그어 어느 댓글에 달린 건지 보이게 합니다 */
+  .cmt.reply{margin-left:18px;padding-left:14px;border-left:2px solid var(--border);border-bottom:0}
+  .cmt .re-mark{color:var(--brand);font-weight:900}
+  .cmt-form.reply-form{margin:0 0 10px 18px}
   .cmt:last-child{border-bottom:0}
   .cmt .cm-meta{color:var(--muted);font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .cmt-form{display:flex;gap:8px;margin-top:10px}
@@ -923,7 +928,8 @@ const S = {
   myLikes:new Set(),               // 내가 공감을 누른 의견 id (하트 색칠용)
   myCLikes:new Set(),              // 내가 공감을 누른 댓글 id
   likesReady:false,                // schema.sql 을 실행해 의견 공감 표가 준비됐는지
-  cLikesReady:false                // 댓글 공감 표가 준비됐는지
+  cLikesReady:false,               // 댓글 공감 표가 준비됐는지
+  repliesReady:false               // 대댓글 칸이 준비됐는지
 };
 const SIGNED = {};                 // docs 버킷 파일의 임시 열람 URL 캐시
 const role = () => S.profile?.role || 'visitor';
@@ -1081,16 +1087,19 @@ async function refresh(){
        (권한을 그렇게 걸어 두어서 '내가 누른 것' 만 돌아옵니다. 하트 색칠용이고
         전체 개수는 opinions.likes 숫자를 씁니다.) */
     try{
-      const [a, b] = await Promise.all([
+      const [a, b, c] = await Promise.all([
         sb.from('opinion_likes').select('opinion_id'),
         sb.from('comment_likes').select('comment_id'),
+        /* 대댓글 칸이 있는지 한 줄만 찔러 봅니다 */
+        sb.from('opinion_comments').select('parent_id').limit(1),
       ]);
-      S.likesReady  = !a.error;
-      S.myLikes     = new Set((a.data || []).map(r => r.opinion_id));
-      S.cLikesReady = !b.error;
-      S.myCLikes    = new Set((b.data || []).map(r => r.comment_id));
+      S.likesReady   = !a.error;
+      S.myLikes      = new Set((a.data || []).map(r => r.opinion_id));
+      S.cLikesReady  = !b.error;
+      S.myCLikes     = new Set((b.data || []).map(r => r.comment_id));
+      S.repliesReady = !c.error;
     }catch(e){
-      S.likesReady = S.cLikesReady = false;
+      S.likesReady = S.cLikesReady = S.repliesReady = false;
       S.myLikes = new Set(); S.myCLikes = new Set();
     }
 
@@ -2084,6 +2093,29 @@ function openOpinion(id){
   const cs = S.comments.filter(c=>c.opinion_id===o.id);
   const mine = o.author_id===S.user?.id;
   const liked = S.myLikes.has(o.id);
+
+  /* 댓글과 답글 나누기.
+     parent_id 가 비어 있으면 원래 댓글, 값이 있으면 그 댓글에 달린 답글입니다.
+     답글은 한 단계까지만 둡니다 — 답글의 답글은 같은 원래 댓글 아래에 붙습니다.
+     계단처럼 깊어지면 휴대폰에서 글이 너무 좁아집니다. */
+  const tops       = cs.filter(c => !c.parent_id);
+  const repliesOf  = (pid) => cs.filter(c => c.parent_id === pid);
+  const cmtHtml = (c, isReply=false) => {
+    const cm = c.author_id===S.user?.id;
+    const cl = S.myCLikes.has(c.id);
+    return `<div class="cmt${isReply?' reply':''}">
+      <div class="cm-meta">${isReply?'<span class="re-mark">↳</span>':''}<b>${esc(c.alias)}</b><span>${fmt(c.created_at)}</span>
+        ${(cm||isAdmin())?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px" data-cdel="${c.id}">삭제</button>`:''}
+      </div>
+      <div class="cm-body">${esc(c.body)}</div>
+      <div class="cm-acts">
+        ${S.cLikesReady ? `<button class="btn sm like${cl?' on':''}" style="padding:3px 11px;font-size:12px"
+          data-clike="${c.id}">${cl?'♥':'♡'} 공감 <b>${c.likes||0}</b></button>` : ''}
+        ${S.repliesReady ? `<button class="btn sm ghost" style="padding:3px 11px;font-size:12px"
+          data-creply="${isReply ? c.parent_id : c.id}">답글</button>` : ''}
+      </div>
+    </div>`;
+  };
   openModal(`${o.cat} · ${o.alias||'익명'}`, `
     <div class="hint" style="margin-bottom:12px">${fmt(o.created_at)} 접수</div>
     <div style="white-space:pre-wrap;font-size:15px;font-weight:600">${esc(o.body)}</div>
@@ -2093,17 +2125,7 @@ function openOpinion(id){
       ${(mine||isAdmin()) ? `<button class="btn sm danger" id="opDel">${mine?'내 글 삭제':'관리자 삭제'}</button>`:''}
     </div>
     <div class="cmt-list" style="margin-top:18px">
-      ${cs.length ? cs.map(c=>{
-        const cm = c.author_id===S.user?.id;
-        const cl = S.myCLikes.has(c.id);
-        return `<div class="cmt">
-          <div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.created_at)}</span>
-            ${(cm||isAdmin())?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px" data-cdel="${c.id}">삭제</button>`:''}
-          </div>
-          <div class="cm-body">${esc(c.body)}</div>
-          ${S.cLikesReady ? `<button class="btn sm like${cl?' on':''}" style="padding:3px 11px;font-size:12px"
-            data-clike="${c.id}">${cl?'♥':'♡'} 공감 <b>${c.likes||0}</b></button>` : ''}
-        </div>`; }).join('')
+      ${cs.length ? tops.map(c => cmtHtml(c) + repliesOf(c.id).map(r => cmtHtml(r, true)).join('')).join('')
         : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
       <div class="cmt-form"><input id="opCmt" placeholder="익명으로 댓글 남기기">
         <button class="btn sm" id="opCmtAdd">등록</button></div>
@@ -2161,6 +2183,38 @@ function openOpinion(id){
   };
   $('#opCmtAdd').addEventListener('click', add);
   $('#opCmt').addEventListener('keydown', e=>{ if(e.key==='Enter') add(); });
+
+  /* 답글 — '답글' 을 누르면 그 댓글 바로 아래에 입력칸이 열립니다.
+     한 번 더 누르면 닫히고, 다른 댓글의 답글을 열면 먼저 열려 있던 칸은 사라집니다. */
+  $$('#modalBody [data-creply]').forEach(b => b.addEventListener('click', ()=>{
+    const pid = b.dataset.creply;
+    const open = $('#modalBody .reply-form');
+    const sameOne = open && open.dataset.for === pid;
+    open?.remove();
+    if(sameOne) return;                      // 열려 있던 것을 다시 누르면 닫기만 합니다
+
+    const box = document.createElement('div');
+    box.className = 'cmt-form reply-form';
+    box.dataset.for = pid;
+    box.innerHTML = `<input placeholder="답글 남기기"><button class="btn sm">등록</button>`;
+    b.closest('.cmt').after(box);
+    const inp = box.querySelector('input');
+    inp.focus();
+
+    const send = async ()=>{
+      const t = inp.value.trim();
+      if(!t){ toast('답글 내용을 입력하세요'); return; }
+      busy(true);
+      const { error } = await sb.from('opinion_comments')
+        .insert({ opinion_id:id, body:t, parent_id:pid, author_id:S.user?.id });
+      busy(false);
+      if(error) return failed('답글 등록', error);
+      await refresh(); toast('답글을 등록했습니다');
+      go('opinion'); openOpinion(id);         // 목록과 이 창을 함께 새로 그립니다
+    };
+    box.querySelector('button').addEventListener('click', send);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+  }));
   $$('#modalBody [data-cdel]').forEach(b=> b.addEventListener('click', async ()=>{
     if(!confirm('이 댓글을 삭제할까요?')) return;
     busy(true);

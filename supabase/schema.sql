@@ -952,3 +952,20 @@ update public.opinion_comments c
 
 alter table public.expenses add column if not exists acct_no text default '';
 alter table public.expenses add column if not exists holder  text default '';
+
+-- ============================================================================
+--  19. 댓글에 대댓글(답글)
+--
+--  댓글 표에 '어느 댓글에 달린 답글인지' 를 적는 칸 하나만 더합니다.
+--  비어 있으면 원래 댓글, 값이 있으면 그 댓글에 달린 답글입니다.
+--  원래 댓글을 지우면 거기 달린 답글도 함께 지워집니다(on delete cascade).
+--
+--  답글도 결국 같은 표의 댓글이라, 16·17절에서 만든 공감 기능이 그대로 됩니다.
+--  별칭을 붙이는 방식도 기존 댓글과 같습니다.
+-- ============================================================================
+
+alter table public.opinion_comments
+  add column if not exists parent_id uuid references public.opinion_comments(id) on delete cascade;
+
+create index if not exists opinion_comments_parent_idx
+  on public.opinion_comments (parent_id, created_at);

@@ -178,6 +178,11 @@
   .cmt-list{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px}
   .cmt{padding:12px 0;border-bottom:1px dashed var(--border);font-size:14.5px;line-height:1.7}
   .cmt .cm-body{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;margin:2px 0 6px}
+  .cmt .cm-acts{display:flex;gap:6px;flex-wrap:wrap}
+  /* 답글 — 한 칸 들여 쓰고 왼쪽에 선을 그어 어느 댓글에 달린 건지 보이게 합니다 */
+  .cmt.reply{margin-left:18px;padding-left:14px;border-left:2px solid var(--border);border-bottom:0}
+  .cmt .re-mark{color:var(--brand);font-weight:900}
+  .cmt-form.reply-form{margin:0 0 10px 18px}
   .cmt:last-child{border-bottom:0}
   .cmt .cm-meta{color:var(--muted);font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .cmt-form{display:flex;gap:8px;margin-top:10px}
@@ -1702,17 +1707,26 @@ VIEWS.opinion = () => {
             ${btns}
           </div>
           <div class="cmt-list">
-            ${cmts.length ? cmts.map(c=>{
-              const cm = isMine(c.id);
-              const cl = likedCmt(c.id);
-              return `<div class="cmt">
-                <div class="cm-meta"><b>${esc(c.alias)}</b><span>${fmt(c.at)}</span>
-                  ${(cm||isAdmin)?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px"
-                      data-cdel="${o.id}:${c.id}">삭제</button>`:''}</div>
-                <div class="cm-body">${highlight(c.body, Q.opinion)}</div>
-                <button class="btn sm like${cl?' on':''}" style="padding:3px 11px;font-size:12px"
-                  data-clike="${o.id}:${c.id}">${cl?'♥':'♡'} 공감 <b>${c.likes||0}</b></button></div>`;
-            }).join('') : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
+            ${cmts.length ? (() => {
+              /* 댓글과 답글 나누기 — parentId 가 비어 있으면 원래 댓글입니다.
+                 답글은 한 단계까지만 둡니다(답글의 답글은 같은 댓글 아래로). */
+              const tops = cmts.filter(c => !c.parentId);
+              const one = (c, isReply=false) => {
+                const cm = isMine(c.id), cl = likedCmt(c.id);
+                return `<div class="cmt${isReply?' reply':''}">
+                  <div class="cm-meta">${isReply?'<span class="re-mark">↳</span>':''}<b>${esc(c.alias)}</b><span>${fmt(c.at)}</span>
+                    ${(cm||isAdmin)?`<button class="btn sm ghost" style="padding:2px 7px;font-size:11px"
+                        data-cdel="${o.id}:${c.id}">삭제</button>`:''}</div>
+                  <div class="cm-body">${highlight(c.body, Q.opinion)}</div>
+                  <div class="cm-acts">
+                    <button class="btn sm like${cl?' on':''}" style="padding:3px 11px;font-size:12px"
+                      data-clike="${o.id}:${c.id}">${cl?'♥':'♡'} 공감 <b>${c.likes||0}</b></button>
+                    <button class="btn sm ghost" style="padding:3px 11px;font-size:12px"
+                      data-creply="${o.id}:${isReply ? c.parentId : c.id}">답글</button>
+                  </div></div>`;
+              };
+              return tops.map(c => one(c) + cmts.filter(r => r.parentId===c.id).map(r => one(r, true)).join('')).join('');
+            })() : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
             <div class="cmt-form">
               <input data-cinput="${o.id}" placeholder="${esc(myAlias())}(으)로 댓글 남기기">
               <button class="btn sm" data-cadd="${o.id}">등록</button>
@@ -1785,13 +1799,46 @@ BIND.opinion = () => {
     if(e.key==='Enter') addComment(i.dataset.cinput);
   }));
 
+  /* 답글 — '답글' 을 누르면 그 댓글 바로 아래에 입력칸이 열립니다.
+     한 번 더 누르면 닫히고, 다른 댓글의 답글을 열면 먼저 열려 있던 칸은 사라집니다. */
+  $$('#main [data-creply]').forEach(b => b.addEventListener('click', ()=>{
+    const [opId, pid] = b.dataset.creply.split(':');
+    const open = $('#main .reply-form');
+    const sameOne = open && open.dataset.for === pid;
+    open?.remove();
+    if(sameOne) return;
+
+    const box = document.createElement('div');
+    box.className = 'cmt-form reply-form';
+    box.dataset.for = pid;
+    box.innerHTML = `<input placeholder="${esc(myAlias())}(으)로 답글 남기기"><button class="btn sm">등록</button>`;
+    b.closest('.cmt').after(box);
+    const inp = box.querySelector('input');
+    inp.focus();
+
+    const send = ()=>{
+      const text = inp.value.trim();
+      if(!text){ toast('답글 내용을 입력하세요'); return; }
+      const arr = DB.opinions();
+      const o = arr.find(x=>x.id===opId); if(!o) return;
+      const cid = uid();
+      (o.comments = o.comments || []).push({ id:cid, body:text, alias:myAlias(), at:nowISO(), parentId:pid, likes:0 });
+      if(DB.saveOpinions(arr)){ addMyOp(cid); toast('답글을 등록했습니다'); go('opinion'); }
+    };
+    box.querySelector('button').addEventListener('click', send);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+  }));
+
   // 댓글 삭제
   $$('#main [data-cdel]').forEach(b => b.addEventListener('click', ()=>{
     const [opId, cId] = b.dataset.cdel.split(':');
-    if(!confirm('이 댓글을 삭제할까요?')) return;
     const arr = DB.opinions();
     const o = arr.find(x=>x.id===opId); if(!o) return;
-    o.comments = (o.comments||[]).filter(c=>c.id!==cId);
+    /* 원래 댓글을 지우면 거기 달린 답글도 같이 지웁니다(온라인판 DB 동작과 맞춤) */
+    const replies = (o.comments||[]).filter(c=>c.parentId===cId);
+    if(!confirm(replies.length ? `이 댓글을 삭제할까요? 달린 답글 ${replies.length}개도 함께 지워집니다.`
+                               : '이 댓글을 삭제할까요?')) return;
+    o.comments = (o.comments||[]).filter(c => c.id!==cId && c.parentId!==cId);
     if(DB.saveOpinions(arr)){ dropMyOp(cId); toast('댓글을 삭제했습니다'); go('opinion'); }
   }));
 };
