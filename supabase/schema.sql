@@ -1007,3 +1007,18 @@ alter table public.posts add constraint posts_board_check
 drop policy if exists posts_select on public.posts;
 create policy posts_select on public.posts for select
   using ( board in ('news','activity') or public.is_inner() );
+
+-- ============================================================================
+--  21. '활동' 게시판을 1~6팀 게시판으로 나누기
+--
+--  글마다 '몇 팀 게시판에 올린 글인지' 를 번호로 적는 칸을 더합니다.
+--  팀 순서는 소개 페이지에 등록된 팀 순서와 같습니다(1팀 = 첫 번째 팀).
+--
+--  이름이 아니라 번호로 적는 이유: 소개 페이지에서 팀 이름을 고쳐도
+--  이미 쓴 글이 엉뚱한 팀으로 가거나 어느 팀에도 안 보이게 되는 일이 없습니다.
+--  활동 게시판이 아닌 글은 이 칸을 비워 둡니다.
+-- ============================================================================
+
+alter table public.posts add column if not exists team_no int;
+create index if not exists posts_activity_team_idx
+  on public.posts (team_no, created_at desc) where board = 'activity';

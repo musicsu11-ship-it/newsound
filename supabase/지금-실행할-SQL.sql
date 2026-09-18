@@ -23,8 +23,9 @@
 --     6) 정산 신청의 입금 계좌를 은행명·계좌번호·예금주 세 칸으로 나눕니다.
 --     7) 댓글에 대댓글(답글)을 달 수 있게 합니다.
 --     8) '활동' 게시판을 만들고 일반 직원도 읽을 수 있게 엽니다.
+--     9) '활동' 게시판을 1~6팀 게시판으로 나눕니다.
 --
---  ▷ 이 내용은 supabase/schema.sql 13~20절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 13~21절과 같습니다.
 --     schema.sql 이 원본이고, 이 파일은 복사하기 편하라고 뽑아 둔 것입니다.
 -- ============================================================================
 
@@ -418,3 +419,18 @@ alter table public.posts add constraint posts_board_check
 drop policy if exists posts_select on public.posts;
 create policy posts_select on public.posts for select
   using ( board in ('news','activity') or public.is_inner() );
+
+-- ============================================================================
+--  21. '활동' 게시판을 1~6팀 게시판으로 나누기
+--
+--  글마다 '몇 팀 게시판에 올린 글인지' 를 번호로 적는 칸을 더합니다.
+--  팀 순서는 소개 페이지에 등록된 팀 순서와 같습니다(1팀 = 첫 번째 팀).
+--
+--  이름이 아니라 번호로 적는 이유: 소개 페이지에서 팀 이름을 고쳐도
+--  이미 쓴 글이 엉뚱한 팀으로 가거나 어느 팀에도 안 보이게 되는 일이 없습니다.
+--  활동 게시판이 아닌 글은 이 칸을 비워 둡니다.
+-- ============================================================================
+
+alter table public.posts add column if not exists team_no int;
+create index if not exists posts_activity_team_idx
+  on public.posts (team_no, created_at desc) where board = 'activity';

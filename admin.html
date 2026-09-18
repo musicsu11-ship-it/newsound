@@ -241,7 +241,7 @@ function failed(where, e){
   const m = e?.message || String(e);
   if(/row-level security|violates row-level/i.test(m)) toast(`${where}: 권한이 없습니다.`);
   /* 새 게시판을 화면에만 추가하고 schema.sql 을 아직 안 돌렸을 때 나는 오류 */
-  else if(/posts_board_check/i.test(m)) toast(`${where}: 이 게시판은 아직 데이터베이스에 등록되지 않았습니다. SQL을 실행하면 쓸 수 있습니다.`);
+  else if(/posts_board_check|'team_no' column/i.test(m)) toast(`${where}: 이 게시판은 아직 데이터베이스에 등록되지 않았습니다. SQL을 실행하면 쓸 수 있습니다.`);
   else if(/JWT|session/i.test(m)) toast(`${where}: 로그인이 만료되었습니다.`);
   else if(/Failed to fetch|NetworkError/i.test(m)) toast(`${where}: 서버에 연결하지 못했습니다.`);
   else toast(`${where}: ${m}`);
@@ -279,6 +279,17 @@ const DEFAULT_INTRO = {
   mission:'', roles:[], history:[], teams:[]
 };
 const intro = () => (S.site?.intro && S.site.intro.teams) ? S.site.intro : DEFAULT_INTRO;
+/* 활동 게시판의 팀 — 소개 페이지 팀 순서가 곧 1팀·2팀… (홈페이지와 같은 규칙).
+   글에는 팀 번호(team_no)를 저장합니다.
+   소개 내용이 아직 저장되지 않았으면 홈페이지(index.html) 기본값과 같은 6개 팀을 씁니다.
+   안 그러면 관리자 콘솔에서만 팀 목록이 비어 활동 글을 올릴 수 없게 됩니다. */
+const DEFAULT_ACT_TEAMS = ['일터 꾸미기','관행 타파','세대공감 시너지','활력 충전','스마트워킹','소식 전파'];
+const actTeams = () => {
+  const ts = intro().teams || [];
+  return (ts.length ? ts.map(t => t.name) : DEFAULT_ACT_TEAMS)
+    .map((name, i) => ({ no: i + 1, name: name || `${i+1}팀` }));
+};
+const actTeamLabel = (no) => { const t = actTeams().find(x => x.no === Number(no)); return t ? `${t.no}팀 ${t.name}` : ''; };
 
 const MENUS = [
   { id:'dash',    icon:'📊', label:'대시보드',      group:'현황', roles:['officer','admin'] },
@@ -609,7 +620,8 @@ VIEWS.posts = () => {
         <td>${(()=>{ const im=(p.images||[]).find(a=>a.kind!=='doc');
           return im ? `<img src="${esc(mediaUrl(im.path))}" style="width:52px;height:40px;object-fit:cover;border-radius:6px" alt="">`
                     : '<span class="hint">—</span>'; })()}</td>
-        <td>${p.pinned?'<span class="tag brand">공지</span> ':''}${esc(p.title)}
+        <td>${p.pinned?'<span class="tag brand">공지</span> ':''}${
+            p.board==='activity' && actTeamLabel(p.team_no) ? `<span class="tag" style="margin-right:4px">${esc(actTeamLabel(p.team_no))}</span>` : ''}${esc(p.title)}
           <div class="hint">${esc(excerpt(p.body,64))}</div></td>
         <td>${esc(p.author_name)}</td><td class="hint">${fmtDay(p.created_at)}</td>
         <td><div class="row-actions" style="margin:0">
@@ -638,6 +650,11 @@ function postForm(board, editId){
         `<option value="${k}" ${k===key?'selected':''}>${b.icon} ${esc(b.label)}</option>`).join('')}</select>
       ${p?'<span class="hint">게시판은 바꿀 수 없습니다. 옮기려면 삭제 후 다시 작성하세요.</span>':''}
     </label>
+    <!-- 활동 게시판을 고르면 나타납니다 — 어느 팀 게시판에 올릴지 -->
+    <label class="field" id="fActWrap" style="${key==='activity'?'':'display:none'}">팀 게시판 <span class="req">*</span>
+      <select id="fActTeam"><option value="">어느 팀 게시판에 올릴지 고르세요</option>
+        ${actTeams().map(t=>`<option value="${t.no}" ${Number(p?.team_no)===t.no?'selected':''}>${t.no}팀 · ${esc(t.name)}</option>`).join('')}
+      </select></label>
     <label class="field">제목 <span class="req">*</span><input id="fTitle" value="${esc(p?.title||'')}"></label>
     <label class="field">내용 <span class="req">*</span><textarea id="fBody" style="min-height:160px">${esc(p?.body||'')}</textarea></label>
     <div class="grid c2">
@@ -658,6 +675,10 @@ function postForm(board, editId){
       <button class="btn ghost" id="fCancel">취소</button></div>`);
 
   let picked=[], docPicked=[], removed=new Set();
+  /* 게시판을 바꾸면 '팀 게시판' 칸을 보이거나 숨깁니다 */
+  $('#fBoard').addEventListener('change', ()=>{
+    $('#fActWrap').style.display = $('#fBoard').value==='activity' ? '' : 'none';
+  });
   $('#fFiles').addEventListener('change', async e=>{
     const imgs=[], docs=[];
     for(const f of e.target.files){ (f.type.startsWith('image/') ? imgs : docs).push(f); }
@@ -674,6 +695,9 @@ function postForm(board, editId){
   $('#fCancel').addEventListener('click', closeModal);
   $('#fSave').addEventListener('click', async ()=>{
     const title=$('#fTitle').value.trim(), body=$('#fBody').value.trim();
+    const isAct = (p ? p.board : $('#fBoard').value) === 'activity';
+    const teamNo = isAct ? Number($('#fActTeam').value) : 0;
+    if(isAct && !teamNo){ toast('어느 팀 게시판에 올릴지 골라 주세요'); return; }
     if(!title||!body){ toast('제목과 내용을 입력하세요'); return; }
     const btn=$('#fSave'); btn.disabled=true; busy(true);
     try{
@@ -681,7 +705,7 @@ function postForm(board, editId){
       const uploadedDocs = await uploadDocs('media', docPicked, 'posts');
       const uploaded = [...uploadedImgs.map(x=>({...x, kind:'image'})), ...uploadedDocs];
       const meta = { title, body, author_team:$('#fTeam').value, author_dept:$('#fDept').value.trim(),
-                     pinned:$('#fPin').checked };
+                     pinned:$('#fPin').checked, ...(isAct ? { team_no:teamNo } : {}) };
       if(p){
         const kept = (p.images||[]).filter((_,i)=>!removed.has(i));
         const gone = (p.images||[]).filter((_,i)=>removed.has(i));

@@ -167,9 +167,51 @@
   .post-row{border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer}
   .post-row:hover{background:var(--surface-2)}
   .post-row .pr-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  /* 제목이 길어도 날짜는 한 줄로 — 안 그러면 휴대폰에서 "2026-09-" / "16" 으로 쪼개집니다 */
+  .post-row .pr-top > .hint{flex:none;white-space:nowrap}
   .post-row h3{margin:0;font-size:15px}
   .post-row .excerpt{color:var(--muted);font-size:13px;margin:4px 0 0;
     display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* ── 활동 게시판 (1~6팀) — index.html 과 같은 모양 ── */
+  .act-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+  .act-bar > b{font-size:15px;font-weight:900}
+  .act-all{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
+    font-size:13.5px;font-weight:800;padding:7px 14px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+  .act-all span{font-size:12px;font-weight:900;color:var(--muted)}
+  .act-all:hover{border-color:var(--text)}
+  .act-all.on{background:var(--text);border-color:var(--text);color:#fff}
+  .act-all.on span{color:rgba(255,255,255,.8)}
+  .act-teams{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:1fr;gap:10px;margin:0 0 18px}
+  .act-team{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;min-width:0;
+    background:var(--tint);border:2px solid transparent;border-radius:16px;padding:13px 14px 12px;
+    cursor:pointer;font:inherit;color:#16225c;transition:border-color .15s,box-shadow .15s,transform .15s}
+  .act-team .no{font-size:12.5px;font-weight:900;opacity:.7}
+  .act-team .nm{font-size:15.5px;font-weight:900;line-height:1.3;word-break:keep-all}
+  .act-team .ct{margin-top:auto;padding-top:6px;font-size:12.5px;font-weight:800;opacity:.75}
+  .act-team:hover{border-color:rgba(22,34,92,.28);transform:translateY(-1px)}
+  .act-team.on{border-color:#16225c;box-shadow:0 8px 18px rgba(22,34,92,.16)}
+  .act-head{display:flex;gap:16px;align-items:center;background:var(--tint);border-radius:20px;padding:20px 24px;margin:0 0 18px}
+  .act-head .act-no{flex:none;font-size:15px;font-weight:900;background:#fff;color:var(--text);border-radius:14px;padding:10px 14px}
+  .act-head h2{margin:0 0 4px;font-size:21px;font-weight:900;letter-spacing:-.02em;color:#16225c}
+  .act-head p{margin:0;color:#3a4478;font-size:14.5px;line-height:1.6;word-break:keep-all}
+  .act-list .post-row{padding:18px 8px}
+  .act-list .post-row h3{font-size:17px;font-weight:800;line-height:1.45;word-break:keep-all}
+  .act-list .post-row .excerpt{font-size:14.5px;line-height:1.65;-webkit-line-clamp:2;margin-top:6px;word-break:keep-all}
+  .act-meta{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+  .act-chip{background:var(--tint);color:#16225c;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 10px}
+  @media (max-width:900px){ .act-teams{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  @media (max-width:700px){
+    .act-teams{gap:8px}
+    .act-team{padding:11px 11px 10px;border-radius:14px}
+    .act-team .nm{font-size:14px}
+    .act-team .no,.act-team .ct{font-size:12px}
+    .act-head{padding:16px 18px;gap:12px}
+    .act-head .act-no{font-size:14px;padding:8px 11px}
+    .act-head h2{font-size:18px}
+    .act-head p{font-size:13.5px}
+    .act-list .post-row h3{font-size:16px}
+  }
 
   /* ---------- Opinion / comments ---------- */
   .op-item{border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;background:var(--surface)}
@@ -1473,12 +1515,64 @@ BIND['intro-edit'] = () => {
 /* ============================================================
    3) 게시판 (소식 / 공지방 / 자유방 / 활동 공유방)
    ============================================================ */
+/* ── 활동 게시판의 팀 (index.html 과 같은 규칙) ─────────────────────────
+   소개 페이지에 등록된 팀 순서가 곧 1팀·2팀… 입니다.
+   글에는 팀 이름 대신 번호(teamNo)를 저장해 팀 이름을 고쳐도 글이 떨어져 나가지 않습니다. */
+const actTeams = () => (DB.intro().teams || []).map((t, i) => ({
+  no: i + 1, name: t.name || `${i+1}팀`, desc: t.desc || '',
+  tint: (typeof TEAM_BANDS !== 'undefined' && TEAM_BANDS[i]?.bg) || '#f3f2fd',
+}));
+const actTeam = (no) => actTeams().find(t => t.no === Number(no)) || null;
+let ACT_TEAM = 0;                  // 활동 게시판에서 보고 있는 팀 (0 = 전체)
+
 function boardView(key){
   const b = BOARDS[key];
   const q = (Q[key]||'').toLowerCase();
   let list = DB.posts().filter(p => p.board===key);
   if(q) list = list.filter(p => (p.title+' '+p.body+' '+p.author).toLowerCase().includes(q));
   list.sort((a,b2)=> (b2.pinned?1:0)-(a.pinned?1:0) || b2.at.localeCompare(a.at));
+
+  /* ── 활동: 1~6팀 게시판 ── */
+  if(key === 'activity'){
+    const teams = actTeams();
+    const all   = DB.posts().filter(p => p.board === 'activity');
+    const cnt   = (no) => all.filter(p => Number(p.teamNo) === no).length;
+    const cur   = actTeam(ACT_TEAM);
+    if(!cur) ACT_TEAM = 0;
+    const shown = cur ? list.filter(p => Number(p.teamNo) === cur.no) : list;
+    const chip  = (p) => { const t = actTeam(p.teamNo);
+      return t ? `<span class="act-chip" style="--tint:${t.tint}">${t.no}팀 ${esc(t.name)}</span>` : ''; };
+
+    return pageHead('활동', `새소리단 ${teams.length}개 팀의 활동 기록입니다. 누구나 볼 수 있습니다.`,
+        canWrite(key) ? `<button class="btn primary" id="bdWrite">${cur ? `${cur.no}팀에 글쓰기` : '✏️ 글쓰기'}</button>` : '')
+      + `<div class="act-bar">
+          <b>팀 게시판</b>
+          <button class="act-all${cur ? '' : ' on'}" data-act-team="0">전체 보기 <span>${all.length}</span></button>
+        </div>
+        <div class="act-teams">
+          ${teams.map(t => `<button class="act-team${cur?.no === t.no ? ' on' : ''}" data-act-team="${t.no}" style="--tint:${t.tint}">
+              <span class="no">${t.no}팀</span>
+              <span class="nm">${esc(t.name)}</span>
+              <span class="ct">글 ${cnt(t.no)}개</span></button>`).join('')}
+        </div>
+        ${cur ? `<div class="act-head" style="--tint:${cur.tint}">
+            <span class="act-no">${cur.no}팀</span>
+            <div><h2>${esc(cur.name)} 게시판</h2>${cur.desc ? `<p>${esc(cur.desc)}</p>` : ''}</div>
+          </div>` : ''}`
+      + searchBar(key, cur ? `${cur.no}팀 글에서 제목·내용·작성자 검색` : '제목·내용·작성자로 검색')
+      + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
+      + (shown.length ? `<div class="card act-list">${shown.map(p => `
+          <div class="post-row" data-open-post="${p.id}">
+            <div class="pr-top">
+              <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}${
+                (p.atts||[]).length ? ` <span class="hint">📎${p.atts.length}</span>` : ''}</h3>
+              <span class="hint">${fmtDay(p.at)}</span></div>
+            <p class="excerpt">${highlight(excerpt(p.body,150),Q[key])}</p>
+            <div class="act-meta">${cur ? '' : chip(p)}<span>${esc(p.author)}</span></div>
+          </div>`).join('')}</div>`
+        : `<div class="empty">${q ? '검색 결과가 없습니다.'
+            : cur ? `${cur.no}팀 게시판에 아직 글이 없습니다.` : '아직 등록된 글이 없습니다.'}</div>`);
+  }
 
   const writeBtn = canWrite(key) ? `<button class="btn primary" id="bdWrite">✏️ 글쓰기</button>` : '';
   let body = '';
@@ -1517,6 +1611,11 @@ function bindBoard(key){
   bindSearch(key);
   $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
   $('#bdWrite')?.addEventListener('click', ()=> openPostForm(key));
+  /* 활동 게시판 팀 고르기 */
+  $$('#main [data-act-team]').forEach(el => el.addEventListener('click', ()=>{
+    ACT_TEAM = Number(el.dataset.actTeam) || 0;
+    go('activity');
+  }));
 }
 Object.keys(BOARDS).forEach(key=>{
   VIEWS[key] = () => boardView(key);
@@ -1535,7 +1634,14 @@ function openPostForm(key, edit){
   const b = BOARDS[key];
   const photo = b.layout==='photo';
   const e0 = edit || null;
+  /* 활동 게시판은 어느 팀 게시판에 올릴지 고릅니다(수정이면 원래 팀, 새 글이면 보고 있는 팀) */
+  const isAct   = key === 'activity';
+  const defTeam = isAct ? (Number(e0?.teamNo) || ACT_TEAM) : 0;
   openModal(`${b.icon} ${b.label} · ${e0?'글 수정':'글쓰기'}`, `
+    ${isAct ? `<label class="field">팀 게시판 <span class="req">*</span>
+      <select id="pfActTeam"><option value="">어느 팀 게시판에 올릴지 고르세요</option>
+        ${actTeams().map(t => `<option value="${t.no}" ${t.no===defTeam?'selected':''}>${t.no}팀 · ${esc(t.name)}</option>`).join('')}
+      </select></label>` : ''}
     <label class="field">제목 <span class="req">*</span>
       <input id="pfTitle" placeholder="제목을 입력하세요" value="${e0?esc(e0.title):''}"></label>
     <label class="field">내용 <span class="req">*</span>
@@ -1566,11 +1672,14 @@ function openPostForm(key, edit){
   });
   $('#pfSave').addEventListener('click', ()=>{
     const title = $('#pfTitle').value.trim(), body = $('#pfBody').value.trim();
+    const teamNo = isAct ? Number($('#pfActTeam').value) : 0;
+    if(isAct && !teamNo){ toast('어느 팀 게시판에 올릴지 골라 주세요'); return; }
     if(!title || !body){ toast('제목과 내용을 입력하세요'); return; }
     if(photo && !e0 && !atts.some(a=>a.type?.startsWith('image/'))){ toast('사진을 1장 이상 첨부하세요'); return; }
     const arr = DB.posts();
     const common = { title, body, authorTeam:$('#pfTeam').value, authorDept:$('#pfDept').value.trim(),
-                     pinned: !!$('#pfPin')?.checked };
+                     pinned: !!$('#pfPin')?.checked, ...(isAct ? { teamNo } : {}) };
+    if(isAct) ACT_TEAM = teamNo;       // 올린 뒤에는 그 팀 게시판이 열리게
     if(e0){
       const i = arr.findIndex(x=>x.id===e0.id);
       if(i<0){ toast('글을 찾을 수 없습니다'); return; }
@@ -1591,9 +1700,10 @@ function openPost(id){
   const docs = (p.atts||[]).filter(a=>!a.type?.startsWith('image/'));
   const mine = p.author===SESSION.name || SESSION.role==='admin';
   const who = [p.author, p.authorTeam, p.authorDept].filter(Boolean).map(esc).join(' · ');
+  const at  = p.board === 'activity' ? actTeam(p.teamNo) : null;
   openModal(p.title, `
     <div class="hint" style="margin-bottom:14px">
-      ${who} · ${fmt(p.at)} · ${esc(BOARDS[p.board]?.label||'')}
+      ${who} · ${fmt(p.at)} · ${esc(BOARDS[p.board]?.label||'')}${at ? ` · ${at.no}팀 ${esc(at.name)}` : ''}
     </div>
     ${imgs.length ? `<div class="big-imgs">${imgs.map(a=>`<img src="${a.data}" alt="${esc(a.name)}" data-zoom="${a.data}">`).join('')}</div>` : ''}
     <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
