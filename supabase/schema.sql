@@ -1022,3 +1022,78 @@ create policy posts_select on public.posts for select
 alter table public.posts add column if not exists team_no int;
 create index if not exists posts_activity_team_idx
   on public.posts (team_no, created_at desc) where board = 'activity';
+
+-- ============================================================================
+--  22. 회원 삭제 (운영 관리자만) — 계정만 지우고 그 사람이 남긴 기록은 보존
+--
+--  지금까지는 계정을 지우면 그 사람이 쓴 게시글·의견·댓글·일정·결과보고서·
+--  활동비 정산이 전부 함께 지워지게 걸려 있었습니다(on delete cascade).
+--  정산·보고서처럼 나중에 확인해야 하는 기록이 사라지면 안 되므로 바꿉니다.
+--
+--  ① 기록을 담는 표 6개의 author_id 를 '계정이 지워지면 비워 두기'
+--     (on delete set null) 로 바꿉니다. 글에는 작성자 이름(author_name)이
+--     따로 적혀 있어서 계정이 없어져도 누가 썼는지는 그대로 보입니다.
+--     주인이 없어진 글은 담당관·관리자만 고치거나 지울 수 있습니다.
+--  ② 운영 관리자만 부를 수 있는 삭제 함수를 만듭니다.
+--     브라우저에는 계정 삭제 권한(서비스 키)을 절대 두지 않고, 데이터베이스
+--     안에서 '부른 사람이 운영 관리자인지' 를 확인한 뒤에만 지웁니다.
+--
+--  공감(좋아요) 기록은 그대로 함께 지워집니다 — 그만큼 공감 수가 1씩 줄어듭니다.
+--  위쪽 create table 들에는 옛 규칙(not null, cascade)이 적혀 있지만,
+--  이 절이 뒤에 실행되며 덮어씁니다.
+-- ============================================================================
+
+-- ① 기록 보존으로 바꾸기
+do $$
+declare t text; c record;
+begin
+  foreach t in array array['posts','opinions','opinion_comments','reports','expenses','events'] loop
+    -- 계정이 지워지면 비워 둘 수 있게 '반드시 채움' 을 풉니다
+    execute format('alter table public.%I alter column author_id drop not null', t);
+    -- 이 표에서 auth.users 를 가리키는 규칙을 찾아 지우고
+    for c in
+      select conname from pg_constraint
+       where conrelid  = format('public.%I', t)::regclass
+         and contype   = 'f'
+         and confrelid = 'auth.users'::regclass
+    loop
+      execute format('alter table public.%I drop constraint %I', t, c.conname);
+    end loop;
+    -- '계정이 지워지면 비워 두기' 로 다시 겁니다
+    execute format(
+      'alter table public.%I add constraint %I foreign key (author_id) references auth.users(id) on delete set null',
+      t, t || '_author_id_fkey');
+  end loop;
+end $$;
+
+-- ② 회원 삭제 함수 — 운영 관리자만, 자기 자신은 못 지움
+create or replace function public.admin_delete_user(target uuid)
+returns text language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin()   then return 'forbidden'; end if;   -- 운영 관리자만
+  if target is null          then return 'no-target'; end if;
+  if target = auth.uid()     then return 'self';      end if;   -- 본인 삭제 금지(관리자가 0명이 되는 것 방지)
+
+  -- 안전장치: 기록을 담는 표 중에 아직 '계정과 함께 지우기' 로 걸린 곳이 하나라도 있으면
+  -- 지우지 않습니다. ① 이 어떤 이유로든 반영되지 않았을 때 기록이 날아가는 일을 막습니다.
+  if exists (
+    select 1 from pg_constraint
+     where contype = 'f'
+       and confrelid = 'auth.users'::regclass
+       and confdeltype = 'c'                                 -- c = cascade
+       and conrelid in ('public.posts'::regclass, 'public.opinions'::regclass,
+                        'public.opinion_comments'::regclass, 'public.reports'::regclass,
+                        'public.expenses'::regclass, 'public.events'::regclass)
+  ) then
+    return 'records-not-protected';
+  end if;
+
+  delete from auth.users where id = target;
+  if not found then return 'not-found'; end if;
+  return 'ok';
+exception when others then
+  return 'error: ' || sqlerrm;
+end $$;
+
+revoke all on function public.admin_delete_user(uuid) from public, anon;
+grant execute on function public.admin_delete_user(uuid) to authenticated;
