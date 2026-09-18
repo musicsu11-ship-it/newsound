@@ -223,11 +223,14 @@ grant execute on function public.visit_stats()   to anon, authenticated;
 grant execute on function public.visit_series(int) to authenticated;
 
 -- ============================================================================
---  3. 게시판 (소식 / 공지방 / 자유방 / 활동 공유방)
+--  3. 게시판 (소식 / 공지방 / 자유방 / 활동 공유방 / 활동)
+--     게시판을 새로 늘릴 때는 아래 board 목록과 posts_select 를 함께 고치고,
+--     이미 만들어진 데이터베이스용으로 20절처럼 규칙을 다시 거는 절도 넣어 주세요.
+--     (create table if not exists 는 표가 이미 있으면 건너뛰어서 여기만 고치면 반영이 안 됩니다)
 -- ============================================================================
 create table if not exists public.posts (
   id          uuid primary key default gen_random_uuid(),
-  board       text not null check (board in ('news','notice','free','share')),
+  board       text not null check (board in ('news','notice','free','share','activity')),
   title       text not null,
   body        text not null,
   images      jsonb not null default '[]'::jsonb,   -- media 버킷의 파일 경로 배열
@@ -242,7 +245,7 @@ alter table public.posts enable row level security;
 
 drop policy if exists posts_select on public.posts;
 create policy posts_select on public.posts for select
-  using ( board = 'news' or public.is_inner() );   -- 소식은 누구나, 나머지는 단원 이상
+  using ( board in ('news','activity') or public.is_inner() );   -- 소식·활동은 누구나, 나머지는 단원 이상
 
 drop policy if exists posts_insert on public.posts;
 create policy posts_insert on public.posts for insert
@@ -969,3 +972,38 @@ alter table public.opinion_comments
 
 create index if not exists opinion_comments_parent_idx
   on public.opinion_comments (parent_id, created_at);
+
+-- ============================================================================
+--  20. '활동' 게시판 — 일반 직원(방문자)도 읽을 수 있게
+--
+--  게시판을 늘리려면 두 군데를 같이 풀어야 합니다.
+--    ① 게시판 이름 목록 : posts.board 에 들어갈 수 있는 값이 정해져 있어서,
+--                        'activity' 를 넣지 않으면 글 저장 자체가 거절됩니다.
+--    ② 읽기 권한        : 지금까지는 '소식' 만 누구나 읽고 나머지는 단원 이상만
+--                        읽을 수 있었습니다. '활동' 도 누구나 읽게 엽니다.
+--  글쓰기 권한은 그대로입니다. 공지방은 담당관 이상, 나머지(활동 포함)는 단원 이상.
+-- ============================================================================
+
+-- ① 게시판 이름 목록 다시 걸기
+--    원래 규칙의 이름을 몰라도 되도록, posts 에 걸린 규칙 중 board 를 검사하는
+--    것을 찾아 지우고 새로 겁니다. 다시 실행해도 같은 결과가 됩니다.
+do $$
+declare c text;
+begin
+  for c in
+    select conname from pg_constraint
+     where conrelid = 'public.posts'::regclass
+       and contype  = 'c'
+       and pg_get_constraintdef(oid) ilike '%board%'
+  loop
+    execute format('alter table public.posts drop constraint %I', c);
+  end loop;
+end $$;
+
+alter table public.posts add constraint posts_board_check
+  check (board in ('news','notice','free','share','activity'));
+
+-- ② 읽기 권한 — 소식과 활동은 누구나, 나머지는 단원 이상
+drop policy if exists posts_select on public.posts;
+create policy posts_select on public.posts for select
+  using ( board in ('news','activity') or public.is_inner() );

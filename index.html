@@ -913,6 +913,8 @@ function failed(where, error){
   console.error(where, error);
   const m = error?.message || String(error);
   if(/row-level security|violates row-level/i.test(m)) toast(`${where}: 권한이 없습니다.`);
+  /* 새 게시판을 화면에만 추가하고 schema.sql 을 아직 안 돌렸을 때 나는 오류 */
+  else if(/posts_board_check/i.test(m)) toast(`${where}: 이 게시판은 아직 데이터베이스에 등록되지 않았습니다. 관리자가 SQL을 실행하면 쓸 수 있습니다.`);
   else if(/JWT|session/i.test(m)) toast(`${where}: 로그인이 만료되었습니다. 다시 로그인해 주세요.`);
   else if(/Failed to fetch|NetworkError/i.test(m)) toast(`${where}: 서버에 연결하지 못했습니다.`);
   else toast(`${where}: ${m}`);
@@ -1001,12 +1003,19 @@ const BOARDS = {
             desc:'단원끼리 자유롭게 이야기하는 공간입니다.', write:INNER },
   share:  { label:'새소리단 공간', icon:'📸', layout:'photo',
             desc:'활동 사진과 현장 기록을 공유하는 공간입니다.', write:INNER },
+  /* 활동 — 일반 직원(방문자)도 읽을 수 있는 게시판. 글은 단원 이상이 씁니다.
+     목록형이라 사진은 선택이고, 올리면 제목 옆에 📎 개수가 붙습니다.
+     누구나 읽게 하는 건 화면만으로는 안 되고 데이터베이스 규칙(schema.sql 20절)도
+     같이 풀려 있어야 합니다. */
+  activity: { label:'활동', icon:'📋', layout:'list',
+            desc:'새소리단의 활동을 기록하는 게시판입니다. 누구나 볼 수 있습니다.', write:INNER },
 };
 const ALL = ['visitor', ...INNER];
 const MENUS = [
   { id:'home',     icon:'🏠', label:'홈',           roles:ALL,   group:'홈' },
   { id:'intro',    icon:'🐦', label:'소개', roles:ALL,   group:'소개' },
   { id:'news',     icon:'📰', label:'소식', roles:ALL,   group:'소식' },
+  { id:'activity', icon:'📋', label:'활동', roles:ALL,   group:'활동' },
   { id:'opinion',  icon:'💬', label:'의견함',       roles:ALL,   group:'의견함' },
   { id:'calendar', icon:'📅', label:'일정',     roles:ALL,   group:'일정' },
   { id:'game',     icon:'🎮', label:'게임',         roles:ALL,   group:'일정' },
@@ -1381,7 +1390,7 @@ function queueRefresh(){
    내비게이션
    ============================================================================ */
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
-const PUBLIC_NAV = ['intro','news','opinion','calendar'];
+const PUBLIC_NAV = ['intro','news','activity','opinion','calendar'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(role()));
@@ -1844,7 +1853,7 @@ BIND['intro-edit'] = () => {
 /* ============================================================================
    게시판
    ============================================================================ */
-const CRUMB = { news:'소식', notice:'공지방', free:'자유방', share:'새소리단 공간' };
+const CRUMB = { news:'소식', notice:'공지방', free:'자유방', share:'새소리단 공간', activity:'활동' };
 
 function boardView(key){
   const b = BOARDS[key];

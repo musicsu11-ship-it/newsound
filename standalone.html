@@ -936,6 +936,10 @@ const BOARDS = {
   share:  { label:'새소리단 공간', icon:'📸', layout:'photo',
             desc:'활동 사진과 현장 기록을 공유하는 공간입니다.',
             read:INNER, write:INNER },
+  /* 활동 — 일반 직원(방문자)도 읽을 수 있는 게시판. 글은 단원 이상이 씁니다. */
+  activity: { label:'활동', icon:'📋', layout:'list',
+            desc:'새소리단의 활동을 기록하는 게시판입니다. 누구나 볼 수 있습니다.',
+            read:ALL,   write:INNER },
 };
 
 /* ---------- 메뉴 (권한별) ---------- */
@@ -943,6 +947,7 @@ const MENUS = [
   { id:'home',     icon:'🏠', label:'홈',            roles:ALL,   group:'홈' },
   { id:'intro',    icon:'🐦', label:'소개',           roles:ALL,   group:'소개' },
   { id:'news',     icon:'📰', label:'소식',           roles:ALL,   group:'소식' },
+  { id:'activity', icon:'📋', label:'활동',           roles:ALL,   group:'활동' },
   { id:'opinion',  icon:'💬', label:'의견함',        roles:ALL,   group:'의견함' },
   { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
   { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
@@ -1034,7 +1039,7 @@ function openLogin(){
    NAV
    ============================================================ */
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
-const PUBLIC_NAV = ['intro','news','opinion','calendar'];
+const PUBLIC_NAV = ['intro','news','activity','opinion','calendar'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));

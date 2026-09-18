@@ -1,5 +1,5 @@
 -- ============================================================================
---  새소리단 — 지금 실행해야 하는 SQL  (2026-09-15)
+--  새소리단 — 지금 실행해야 하는 SQL  (2026-09-18)
 --
 --  ▷ 하는 법
 --     1. 이 파일 안을 아무 데나 클릭
@@ -18,15 +18,15 @@
 --     2) 익명 별칭이 사람마다 다르게 나오도록 고칩니다.
 --     3) 로그인 없이 둘러본 익명 접속이 '회원 · 권한 관리' 명부에
 --        쌓이지 않게 합니다. 이미 쌓인 것도 정리합니다.
---     4) 의견에 '공감해요' 를 추가합니다.          ← 이건 이미 하신 것 같습니다
+--     4) 의견에 '공감해요' 를 추가합니다.
 --     5) 댓글에도 '공감해요' 를 추가합니다.
 --     6) 정산 신청의 입금 계좌를 은행명·계좌번호·예금주 세 칸으로 나눕니다.
 --     7) 댓글에 대댓글(답글)을 달 수 있게 합니다.
+--     8) '활동' 게시판을 만들고 일반 직원도 읽을 수 있게 엽니다.
 --
---  ▷ 이 내용은 supabase/schema.sql 13~19절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 13~20절과 같습니다.
 --     schema.sql 이 원본이고, 이 파일은 복사하기 편하라고 뽑아 둔 것입니다.
 -- ============================================================================
-
 
 -- ============================================================================
 --  13. 추가 컬럼 (나중에 붙인 기능들)
@@ -383,3 +383,38 @@ alter table public.opinion_comments
 
 create index if not exists opinion_comments_parent_idx
   on public.opinion_comments (parent_id, created_at);
+
+-- ============================================================================
+--  20. '활동' 게시판 — 일반 직원(방문자)도 읽을 수 있게
+--
+--  게시판을 늘리려면 두 군데를 같이 풀어야 합니다.
+--    ① 게시판 이름 목록 : posts.board 에 들어갈 수 있는 값이 정해져 있어서,
+--                        'activity' 를 넣지 않으면 글 저장 자체가 거절됩니다.
+--    ② 읽기 권한        : 지금까지는 '소식' 만 누구나 읽고 나머지는 단원 이상만
+--                        읽을 수 있었습니다. '활동' 도 누구나 읽게 엽니다.
+--  글쓰기 권한은 그대로입니다. 공지방은 담당관 이상, 나머지(활동 포함)는 단원 이상.
+-- ============================================================================
+
+-- ① 게시판 이름 목록 다시 걸기
+--    원래 규칙의 이름을 몰라도 되도록, posts 에 걸린 규칙 중 board 를 검사하는
+--    것을 찾아 지우고 새로 겁니다. 다시 실행해도 같은 결과가 됩니다.
+do $$
+declare c text;
+begin
+  for c in
+    select conname from pg_constraint
+     where conrelid = 'public.posts'::regclass
+       and contype  = 'c'
+       and pg_get_constraintdef(oid) ilike '%board%'
+  loop
+    execute format('alter table public.posts drop constraint %I', c);
+  end loop;
+end $$;
+
+alter table public.posts add constraint posts_board_check
+  check (board in ('news','notice','free','share','activity'));
+
+-- ② 읽기 권한 — 소식과 활동은 누구나, 나머지는 단원 이상
+drop policy if exists posts_select on public.posts;
+create policy posts_select on public.posts for select
+  using ( board in ('news','activity') or public.is_inner() );

@@ -240,6 +240,8 @@ function failed(where, e){
   console.error(where, e);
   const m = e?.message || String(e);
   if(/row-level security|violates row-level/i.test(m)) toast(`${where}: 권한이 없습니다.`);
+  /* 새 게시판을 화면에만 추가하고 schema.sql 을 아직 안 돌렸을 때 나는 오류 */
+  else if(/posts_board_check/i.test(m)) toast(`${where}: 이 게시판은 아직 데이터베이스에 등록되지 않았습니다. SQL을 실행하면 쓸 수 있습니다.`);
   else if(/JWT|session/i.test(m)) toast(`${where}: 로그인이 만료되었습니다.`);
   else if(/Failed to fetch|NetworkError/i.test(m)) toast(`${where}: 서버에 연결하지 못했습니다.`);
   else toast(`${where}: ${m}`);
@@ -270,6 +272,7 @@ const BOARDS = {
   notice: { label:'공지방',       icon:'📢', photo:false, adminOnly:false },
   free:   { label:'자유방',       icon:'💭', photo:false, adminOnly:false },
   share:  { label:'활동 공유방',   icon:'📸', photo:true,  adminOnly:false },
+  activity:{ label:'활동',        icon:'📋', photo:false, adminOnly:false },   // 일반 직원도 읽는 게시판
 };
 
 const DEFAULT_INTRO = {
