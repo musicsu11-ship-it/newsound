@@ -194,23 +194,33 @@
   .act-all.on{background:var(--text);border-color:var(--text);color:#fff}
   .act-all.on span{color:rgba(255,255,255,.8)}
 
-  /* 팀 칸 — 같은 크기로 나란히. 팀 색 바탕에 번호·이름·글 개수 */
+  /* 팀 칸 — 같은 크기로 나란히. 팀 색 바탕에 팀 그림·번호·이름·글 개수 */
   /* grid-auto-rows:1fr — 팀 이름이 두 줄로 넘어가는 칸이 있어도 모든 줄 높이를 같게 */
   .act-teams{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:1fr;gap:10px;margin:0 0 18px}
   .act-team{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;min-width:0;
-    background:var(--tint);border:2px solid transparent;border-radius:16px;padding:13px 14px 12px;
+    background:var(--tint);border:2px solid transparent;border-radius:16px;padding:8px 8px 12px;
     cursor:pointer;font:inherit;color:#16225c;transition:border-color .15s,box-shadow .15s,transform .15s}
+  /* 팀 그림 — 소개 페이지 팀 띠와 같은 그림. 칸 폭에 맞춰 같은 비율로 잘라 보여 줍니다 */
+  .act-team .art{display:block;width:100%;aspect-ratio:6/5;border-radius:11px;overflow:hidden;
+    background:rgba(255,255,255,.6);margin-bottom:7px}
+  .act-team .art img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .25s}
+  .act-team:hover .art img{transform:scale(1.05)}
+  .act-team .no,.act-team .nm,.act-team .ct{padding:0 6px}
   .act-team .no{font-size:12.5px;font-weight:900;opacity:.7}
   .act-team .nm{font-size:15.5px;font-weight:900;line-height:1.3;word-break:keep-all}
   .act-team .ct{margin-top:auto;padding-top:6px;font-size:12.5px;font-weight:800;opacity:.75}
   .act-team:hover{border-color:rgba(22,34,92,.28);transform:translateY(-1px)}
   .act-team.on{border-color:#16225c;box-shadow:0 8px 18px rgba(22,34,92,.16)}
 
-  /* 팀을 고르면 나오는 머리말 — 팀 이름과 하는 일 */
-  .act-head{display:flex;gap:16px;align-items:center;background:var(--tint);border-radius:20px;
-    padding:20px 24px;margin:0 0 18px}
-  .act-head .act-no{flex:none;font-size:15px;font-weight:900;background:#fff;color:var(--text);
-    border-radius:14px;padding:10px 14px}
+  /* 팀을 고르면 나오는 머리말 — 팀 그림, 팀 번호·이름과 하는 일 */
+  .act-head{display:flex;gap:18px;align-items:center;background:var(--tint);border-radius:20px;
+    padding:16px 24px 16px 16px;margin:0 0 18px}
+  .act-head .act-art{flex:none;width:132px;aspect-ratio:6/5;border-radius:14px;overflow:hidden;
+    background:rgba(255,255,255,.6)}
+  .act-head .act-art img{display:block;width:100%;height:100%;object-fit:cover}
+  .act-head > div{min-width:0}
+  .act-head .act-no{display:inline-block;font-size:13px;font-weight:900;background:#fff;color:var(--text);
+    border-radius:999px;padding:4px 11px;margin-bottom:7px}
   .act-head h2{margin:0 0 4px;font-size:21px;font-weight:900;letter-spacing:-.02em;color:#16225c}
   .act-head p{margin:0;color:#3a4478;font-size:14.5px;line-height:1.6;word-break:keep-all}
 
@@ -780,11 +790,14 @@
   }
   @media (max-width:700px){
     .act-teams{gap:8px}
-    .act-team{padding:11px 11px 10px;border-radius:14px}
+    .act-team{padding:6px 6px 10px;border-radius:14px}
+    .act-team .art{border-radius:9px;margin-bottom:5px}
+    .act-team .no,.act-team .nm,.act-team .ct{padding:0 5px}
     .act-team .nm{font-size:14px}
     .act-team .no,.act-team .ct{font-size:12px}
-    .act-head{padding:16px 18px;gap:12px}
-    .act-head .act-no{font-size:14px;padding:8px 11px}
+    .act-head{padding:12px 16px 12px 12px;gap:12px}
+    .act-head .act-art{width:92px;border-radius:11px}
+    .act-head .act-no{font-size:12px;padding:3px 9px;margin-bottom:5px}
     .act-head h2{font-size:18px}
     .act-head p{font-size:13.5px}
     .act-list .post-row h3{font-size:16px}
@@ -2029,11 +2042,12 @@ const CRUMB = { news:'소식', notice:'공지방', free:'자유방', share:'새�
    소개 페이지에 등록된 팀 순서가 곧 1팀·2팀… 입니다. 팀을 늘리면 탭도 따라 늘어납니다.
    글에는 팀 '이름' 대신 '번호'(team_no)를 저장합니다. 소개에서 팀 이름을 고쳐도
    이미 쓴 글이 엉뚱한 팀으로 가거나 어느 팀에도 안 보이게 되는 일이 없습니다.
-   tint 는 소개 페이지 팀 띠와 같은 색이라, 같은 팀은 어디서 봐도 같은 색입니다. */
-const actTeams = () => (intro().teams || []).map((t, i) => ({
-  no: i + 1, name: t.name || `${i+1}팀`, desc: t.desc || '',
-  tint: (typeof TEAM_BANDS !== 'undefined' && TEAM_BANDS[i]?.bg) || '#f3f2fd',
-}));
+   tint·img 는 소개 페이지 팀 띠와 같은 색·그림이라, 같은 팀은 어디서 봐도 같은 모습입니다. */
+const actTeams = () => (intro().teams || []).map((t, i) => {
+  const band = TEAM_BANDS[i % TEAM_BANDS.length] || {};
+  return { no: i + 1, name: t.name || `${i+1}팀`, desc: t.desc || '',
+           tint: band.bg || '#f3f2fd', img: band.img || '' };
+});
 const actTeam = (no) => actTeams().find(t => t.no === Number(no)) || null;
 /* 내 프로필의 소속 팀이 활동 팀 중 하나면 그 번호 — 글쓰기 때 미리 골라 둡니다 */
 const myTeamNo = () => actTeams().find(t => t.name === S.profile?.team)?.no || 0;
@@ -2126,14 +2140,15 @@ function boardView(key){
     </div>
     <div class="act-teams">
       ${teams.map(t => `<button class="act-team${cur?.no === t.no ? ' on' : ''}" data-act-team="${t.no}" style="--tint:${t.tint}">
+          ${t.img ? `<span class="art"><img src="${t.img}" alt="" loading="lazy" decoding="async"></span>` : ''}
           <span class="no">${t.no}팀</span>
           <span class="nm">${esc(t.name)}</span>
           <span class="ct">글 ${cnt(t.no)}개</span></button>`).join('')}
     </div>
 
     ${cur ? `<div class="act-head" style="--tint:${cur.tint}">
-        <span class="act-no">${cur.no}팀</span>
-        <div><h2>${esc(cur.name)} 게시판</h2>${cur.desc ? `<p>${esc(cur.desc)}</p>` : ''}</div>
+        ${cur.img ? `<span class="act-art"><img src="${cur.img}" alt="${esc(cur.name)} 팀 일러스트"></span>` : ''}
+        <div><span class="act-no">${cur.no}팀</span><h2>${esc(cur.name)} 게시판</h2>${cur.desc ? `<p>${esc(cur.desc)}</p>` : ''}</div>
       </div>` : ''}
 
     ${searchBar(key, cur ? `${cur.no}팀 글에서 제목·내용·작성자 검색` : '제목·내용·작성자로 검색')}

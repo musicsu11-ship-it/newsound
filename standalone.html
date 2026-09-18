@@ -186,15 +186,24 @@
   .act-all.on span{color:rgba(255,255,255,.8)}
   .act-teams{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:1fr;gap:10px;margin:0 0 18px}
   .act-team{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;min-width:0;
-    background:var(--tint);border:2px solid transparent;border-radius:16px;padding:13px 14px 12px;
+    background:var(--tint);border:2px solid transparent;border-radius:16px;padding:8px 8px 12px;
     cursor:pointer;font:inherit;color:#16225c;transition:border-color .15s,box-shadow .15s,transform .15s}
+  /* 팀 그림 — 소개 페이지 팀 띠와 같은 그림 */
+  .act-team .art{display:block;width:100%;aspect-ratio:6/5;border-radius:11px;overflow:hidden;
+    background:rgba(255,255,255,.6);margin-bottom:7px}
+  .act-team .art img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .25s}
+  .act-team:hover .art img{transform:scale(1.05)}
+  .act-team .no,.act-team .nm,.act-team .ct{padding:0 6px}
   .act-team .no{font-size:12.5px;font-weight:900;opacity:.7}
   .act-team .nm{font-size:15.5px;font-weight:900;line-height:1.3;word-break:keep-all}
   .act-team .ct{margin-top:auto;padding-top:6px;font-size:12.5px;font-weight:800;opacity:.75}
   .act-team:hover{border-color:rgba(22,34,92,.28);transform:translateY(-1px)}
   .act-team.on{border-color:#16225c;box-shadow:0 8px 18px rgba(22,34,92,.16)}
-  .act-head{display:flex;gap:16px;align-items:center;background:var(--tint);border-radius:20px;padding:20px 24px;margin:0 0 18px}
-  .act-head .act-no{flex:none;font-size:15px;font-weight:900;background:#fff;color:var(--text);border-radius:14px;padding:10px 14px}
+  .act-head{display:flex;gap:18px;align-items:center;background:var(--tint);border-radius:20px;padding:16px 24px 16px 16px;margin:0 0 18px}
+  .act-head .act-art{flex:none;width:132px;aspect-ratio:6/5;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.6)}
+  .act-head .act-art img{display:block;width:100%;height:100%;object-fit:cover}
+  .act-head > div{min-width:0}
+  .act-head .act-no{display:inline-block;font-size:13px;font-weight:900;background:#fff;color:var(--text);border-radius:999px;padding:4px 11px;margin-bottom:7px}
   .act-head h2{margin:0 0 4px;font-size:21px;font-weight:900;letter-spacing:-.02em;color:#16225c}
   .act-head p{margin:0;color:#3a4478;font-size:14.5px;line-height:1.6;word-break:keep-all}
   .act-list .post-row{padding:18px 8px}
@@ -292,11 +301,14 @@
   @media (max-width:900px){ .act-teams{grid-template-columns:repeat(3,minmax(0,1fr))} }
   @media (max-width:700px){
     .act-teams{gap:8px}
-    .act-team{padding:11px 11px 10px;border-radius:14px}
+    .act-team{padding:6px 6px 10px;border-radius:14px}
+    .act-team .art{border-radius:9px;margin-bottom:5px}
+    .act-team .no,.act-team .nm,.act-team .ct{padding:0 5px}
     .act-team .nm{font-size:14px}
     .act-team .no,.act-team .ct{font-size:12px}
-    .act-head{padding:16px 18px;gap:12px}
-    .act-head .act-no{font-size:14px;padding:8px 11px}
+    .act-head{padding:12px 16px 12px 12px;gap:12px}
+    .act-head .act-art{width:92px;border-radius:11px}
+    .act-head .act-no{font-size:12px;padding:3px 9px;margin-bottom:5px}
     .act-head h2{font-size:18px}
     .act-head p{font-size:13.5px}
     .act-list .post-row h3{font-size:16px}
@@ -1612,11 +1624,13 @@ BIND['intro-edit'] = () => {
    ============================================================ */
 /* ── 활동 게시판의 팀 (index.html 과 같은 규칙) ─────────────────────────
    소개 페이지에 등록된 팀 순서가 곧 1팀·2팀… 입니다.
-   글에는 팀 이름 대신 번호(teamNo)를 저장해 팀 이름을 고쳐도 글이 떨어져 나가지 않습니다. */
-const actTeams = () => (DB.intro().teams || []).map((t, i) => ({
-  no: i + 1, name: t.name || `${i+1}팀`, desc: t.desc || '',
-  tint: (typeof TEAM_BANDS !== 'undefined' && TEAM_BANDS[i]?.bg) || '#f3f2fd',
-}));
+   글에는 팀 이름 대신 번호(teamNo)를 저장해 팀 이름을 고쳐도 글이 떨어져 나가지 않습니다.
+   tint·img 는 소개 페이지 팀 띠와 같은 색·그림입니다. */
+const actTeams = () => (DB.intro().teams || []).map((t, i) => {
+  const band = TEAM_BANDS[i % TEAM_BANDS.length] || {};
+  return { no: i + 1, name: t.name || `${i+1}팀`, desc: t.desc || '',
+           tint: band.bg || '#f3f2fd', img: band.img || '' };
+});
 const actTeam = (no) => actTeams().find(t => t.no === Number(no)) || null;
 let ACT_TEAM = 0;                  // 활동 게시판에서 보고 있는 팀 (0 = 전체)
 
@@ -1646,13 +1660,14 @@ function boardView(key){
         </div>
         <div class="act-teams">
           ${teams.map(t => `<button class="act-team${cur?.no === t.no ? ' on' : ''}" data-act-team="${t.no}" style="--tint:${t.tint}">
+              ${t.img ? `<span class="art"><img src="${t.img}" alt="" loading="lazy" decoding="async"></span>` : ''}
               <span class="no">${t.no}팀</span>
               <span class="nm">${esc(t.name)}</span>
               <span class="ct">글 ${cnt(t.no)}개</span></button>`).join('')}
         </div>
         ${cur ? `<div class="act-head" style="--tint:${cur.tint}">
-            <span class="act-no">${cur.no}팀</span>
-            <div><h2>${esc(cur.name)} 게시판</h2>${cur.desc ? `<p>${esc(cur.desc)}</p>` : ''}</div>
+            ${cur.img ? `<span class="act-art"><img src="${cur.img}" alt="${esc(cur.name)} 팀 일러스트"></span>` : ''}
+            <div><span class="act-no">${cur.no}팀</span><h2>${esc(cur.name)} 게시판</h2>${cur.desc ? `<p>${esc(cur.desc)}</p>` : ''}</div>
           </div>` : ''}`
       + searchBar(key, cur ? `${cur.no}팀 글에서 제목·내용·작성자 검색` : '제목·내용·작성자로 검색')
       + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
