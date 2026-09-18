@@ -1310,3 +1310,40 @@ begin
   end if;
   return new;
 end $$;
+
+-- ============================================================================
+--  25. 밸런스 게임 (투표 게시판 안의 'A vs B' 코너)
+--
+--  · 투표와 같은 표·같은 규칙(한 사람 한 표, 익명/실명, 마감)을 그대로 씁니다.
+--    다른 점은 종류(kind)가 'balance' 이고, 선택지가 딱 두 개(A·B)라는 것뿐입니다.
+--  · 올린 뒤에는 종류도 바꿀 수 없습니다(23·24절 규칙에 더함).
+-- ============================================================================
+
+alter table public.polls add column if not exists kind text not null default 'poll';
+
+do $$
+begin
+  -- 종류는 '투표(poll)' 아니면 '밸런스 게임(balance)'
+  if not exists (select 1 from pg_constraint where conname = 'polls_kind_check') then
+    alter table public.polls add constraint polls_kind_check check (kind in ('poll', 'balance'));
+  end if;
+  -- 밸런스 게임은 선택지 두 개, 하나만 고르기
+  if not exists (select 1 from pg_constraint where conname = 'polls_balance_shape') then
+    alter table public.polls add constraint polls_balance_shape
+      check (kind <> 'balance' or (cardinality(options) = 2 and not multi));
+  end if;
+end $$;
+
+create or replace function public.guard_poll_update()
+returns trigger language plpgsql as $$
+begin
+  if new.anonymous is distinct from old.anonymous
+     or new.options       is distinct from old.options
+     or new.option_images is distinct from old.option_images
+     or new.kind          is distinct from old.kind
+     or new.multi         is distinct from old.multi
+     or (new.author_id is distinct from old.author_id and new.author_id is not null) then
+    raise exception '투표를 올린 뒤에는 항목과 익명 여부를 바꿀 수 없습니다';
+  end if;
+  return new;
+end $$;

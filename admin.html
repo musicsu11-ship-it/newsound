@@ -242,6 +242,10 @@ function failed(where, e){
   if(/row-level security|violates row-level/i.test(m)) toast(`${where}: 권한이 없습니다.`);
   /* 새 게시판을 화면에만 추가하고 schema.sql 을 아직 안 돌렸을 때 나는 오류 */
   else if(/posts_board_check|'team_no' column/i.test(m)) toast(`${where}: 이 게시판은 아직 데이터베이스에 등록되지 않았습니다. SQL을 실행하면 쓸 수 있습니다.`);
+  /* 첨부파일 올리기 */
+  else if(/maximum allowed size|payload too large|entity too large|\b413\b/i.test(m)) toast(`${where}: 파일이 너무 큽니다. 파일 하나에 ${MAX_FILE_MB}MB까지 올릴 수 있습니다.`);
+  else if(/mime type|invalid_mime/i.test(m)) toast(`${where}: 저장소 설정에서 이 형식의 파일을 받지 않도록 되어 있습니다.`);
+  else if(/Invalid key/i.test(m)) toast(`${where}: 파일 이름 때문에 올리지 못했습니다. 파일 이름을 바꿔 다시 올려 주세요.`);
   else if(/JWT|session/i.test(m)) toast(`${where}: 로그인이 만료되었습니다.`);
   else if(/Failed to fetch|NetworkError/i.test(m)) toast(`${where}: 서버에 연결하지 못했습니다.`);
   else toast(`${where}: ${m}`);
@@ -663,12 +667,14 @@ function postForm(board, editId){
         value="${esc(p?.author_dept||'')}"></label>
     </div>
     <label class="field">첨부파일 추가
-      <input id="fFiles" type="file" multiple accept="image/*,.pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx,.zip,.txt">
-      <span class="hint">사진과 문서를 함께 올릴 수 있습니다. 소식·활동 공유방은 첫 사진이 홈페이지 목록에 크게 표시됩니다.</span></label>
+      <input id="fFiles" type="file" multiple>
+      <span class="hint">사진·문서·한글(hwp)·압축파일·영상 등 어떤 파일이든 올릴 수 있습니다(파일 하나에 ${MAX_FILE_MB}MB까지, 실행 파일 제외).
+        소식·활동 공유방은 첫 사진이 홈페이지 목록에 크게 표시됩니다.</span></label>
     <div class="thumbs" id="fNew"></div>
-    ${p && (p.images||[]).length ? `<label class="field" style="margin-top:10px">기존 사진 <span class="hint" style="display:inline">클릭하면 삭제 표시됩니다</span></label>
-      <div class="thumbs" id="fOld">${p.images.map((im,i)=>
-        `<img src="${esc(mediaUrl(im.path))}" data-old="${i}" title="클릭하면 삭제" alt="">`).join('')}</div>` : ''}
+    ${p && (p.images||[]).length ? `<label class="field" style="margin-top:10px">기존 첨부 <span class="hint" style="display:inline">클릭하면 삭제 표시됩니다</span></label>
+      <div class="thumbs" id="fOld">${p.images.map((im,i)=> im.kind==='doc'
+        ? `<span class="tag brand" data-old="${i}" title="클릭하면 삭제" style="cursor:pointer;margin:4px 6px 4px 0">📎 ${esc(im.name||'파일')}</span>`
+        : `<img src="${esc(mediaUrl(im.path))}" data-old="${i}" title="클릭하면 삭제" alt="">`).join('')}</div>` : ''}
     <label class="field" style="display:flex;align-items:center;gap:8px;margin-top:14px">
       <input type="checkbox" id="fPin" style="width:auto;margin:0" ${p?.pinned?'checked':''}> 상단 고정(공지)</label>
     <div class="row-actions"><button class="btn primary" id="fSave">${p?'수정 저장':'등록'}</button>
@@ -680,9 +686,15 @@ function postForm(board, editId){
     $('#fActWrap').style.display = $('#fBoard').value==='activity' ? '' : 'none';
   });
   $('#fFiles').addEventListener('change', async e=>{
+    /* 사진은 줄여서, 그 밖의 파일은 원본 그대로. 브라우저가 못 여는 사진(HEIC 등)도 원본 파일로 올립니다 */
     const imgs=[], docs=[];
-    for(const f of e.target.files){ (f.type.startsWith('image/') ? imgs : docs).push(f); }
-    picked = await prepImages(imgs);
+    for(const f of e.target.files){ (f.type.startsWith('image/') && f.type!=='image/svg+xml' ? imgs : docs).push(f); }
+    picked = [];
+    for(const f of imgs){
+      try{ const blob = await resizeToBlob(f);
+        picked.push({ blob, name:f.name.replace(/\.[^.]+$/,'')+'.jpg', preview:URL.createObjectURL(blob) }); }
+      catch(err){ docs.push(f); }
+    }
     docPicked = prepDocs(docs);
     $('#fNew').innerHTML = picked.map(x=>`<img src="${x.preview}" alt="">`).join('')
       + docPicked.map(x=>`<span class="tag brand" style="margin:4px 6px 4px 0">📎 ${esc(x.name)}</span>`).join('');
@@ -700,10 +712,11 @@ function postForm(board, editId){
     if(isAct && !teamNo){ toast('어느 팀 게시판에 올릴지 골라 주세요'); return; }
     if(!title||!body){ toast('제목과 내용을 입력하세요'); return; }
     const btn=$('#fSave'); btn.disabled=true; busy(true);
+    let uploaded = [];          // 저장이 실패하면 방금 올린 파일을 도로 지웁니다
     try{
       const uploadedImgs = await uploadAll('media', picked, 'posts');
-      const uploadedDocs = await uploadDocs('media', docPicked, 'posts');
-      const uploaded = [...uploadedImgs.map(x=>({...x, kind:'image'})), ...uploadedDocs];
+      uploaded = uploadedImgs.map(x=>({...x, kind:'image'}));
+      uploaded = [...uploaded, ...await uploadDocs('media', docPicked, 'posts')];
       const meta = { title, body, author_team:$('#fTeam').value, author_dept:$('#fDept').value.trim(),
                      pinned:$('#fPin').checked, ...(isAct ? { team_no:teamNo } : {}) };
       if(p){
@@ -722,7 +735,10 @@ function postForm(board, editId){
       await refresh(); closeModal();
       toast(p ? '수정되었습니다. 홈페이지에 즉시 반영됩니다.' : '등록되었습니다. 홈페이지에 즉시 반영됩니다.');
       go(CURRENT);
-    }catch(e){ failed(p?'글 수정':'글 등록', e); btn.disabled=false; }
+    }catch(e){
+      if(uploaded.length) await sb.storage.from('media').remove(uploaded.map(x=>x.path));
+      failed(p?'글 수정':'글 등록', e); btn.disabled=false;
+    }
     finally{ busy(false); }
   });
 }
@@ -1140,36 +1156,50 @@ function resizeToBlob(file, max=1600, q=0.75){
 }
 async function uploadAll(bucket, picked, folder){
   const out=[];
-  for(const p of picked){
-    const path=`${folder}/${S.user.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
-    const { error } = await sb.storage.from(bucket).upload(path, p.blob, { contentType:'image/jpeg' });
-    if(error) throw error;
-    out.push({ path, name:p.name });
+  try{
+    for(const p of picked){
+      const path=`${folder}/${S.user.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+      const { error } = await sb.storage.from(bucket).upload(path, p.blob, { contentType:'image/jpeg' });
+      if(error) throw error;
+      out.push({ path, name:p.name });
+    }
+    return out;
+  }catch(e){
+    if(out.length) await sb.storage.from(bucket).remove(out.map(x=>x.path));   // 반쯤 올라간 것은 도로 지웁니다
+    throw e;
   }
-  return out;
 }
 
-/* 문서 첨부 — 사진처럼 축소하지 않고 원본 그대로 올립니다 */
-const DOC_EXT_RE = /\.(pdf|docx?|hwpx?|pptx?|xlsx?|zip|txt)$/i;
+/* 문서·기타 파일 첨부 — 사진처럼 축소하지 않고 원본 그대로 올립니다(홈페이지 index.html 과 같은 규칙).
+   · 어떤 형식이든 받습니다. 보안을 위해 실행 파일(.exe 등)만 막습니다.
+   · 저장소는 한글이 든 저장 이름을 받지 않으므로("Invalid key") 저장 이름은 영문·숫자로 만들고,
+     원래 이름은 name 에 적어 둡니다. 홈페이지에서 내려받을 때 원래 이름으로 되살아납니다. */
+const MAX_FILE_MB  = 50;
+const BLOCK_EXT_RE = /\.(exe|msi|bat|cmd|com|scr|pif|cpl|msc|jar|js|jse|vbs|vbe|wsf|wsh|ps1|psm1|reg|lnk|hta|dll|sys|apk|sh)$/i;
+const extOf = (name) => { const m = /\.([A-Za-z0-9]{1,10})$/.exec(name || ''); return m ? '.' + m[1].toLowerCase() : ''; };
 function prepDocs(fileList){
   const out=[];
   for(const f of fileList){
-    if(!DOC_EXT_RE.test(f.name)){ toast(`${f.name}: 올릴 수 없는 형식입니다`); continue; }
-    if(f.size > 20*1024*1024){ toast(`${f.name}: 20MB 이하만 첨부할 수 있습니다`); continue; }
+    if(BLOCK_EXT_RE.test(f.name)){ toast(`${f.name}: 보안을 위해 실행 파일(.exe 등)은 올릴 수 없습니다`); continue; }
+    if(f.size > MAX_FILE_MB*1024*1024){ toast(`${f.name}: 파일 하나에 ${MAX_FILE_MB}MB까지 올릴 수 있습니다`); continue; }
     out.push({ file:f, name:f.name });
   }
   return out;
 }
 async function uploadDocs(bucket, picked, folder){
   const out=[];
-  for(const p of picked){
-    const safe = p.name.replace(/[^\w.\-가-힣]/g,'_');
-    const path = `${folder}/${S.user.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safe}`;
-    const { error } = await sb.storage.from(bucket).upload(path, p.file, { contentType: p.file.type || 'application/octet-stream' });
-    if(error) throw error;
-    out.push({ path, name:p.name, kind:'doc' });
+  try{
+    for(const p of picked){
+      const path = `${folder}/${S.user.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}${extOf(p.name)}`;
+      const { error } = await sb.storage.from(bucket).upload(path, p.file, { contentType: p.file.type || 'application/octet-stream' });
+      if(error) throw error;
+      out.push({ path, name:p.name, kind:'doc', size:p.file.size });
+    }
+    return out;
+  }catch(e){
+    if(out.length) await sb.storage.from(bucket).remove(out.map(x=>x.path));   // 반쯤 올라간 것은 도로 지웁니다
+    throw e;
   }
-  return out;
 }
 
 /* 작성자 소속 선택지 — 팀 목록 + 혁신행정담당관 */

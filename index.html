@@ -155,6 +155,19 @@
   .notice.red{background:var(--danger-weak);border-color:var(--danger)}
   .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .thumbs img{width:82px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer}
+  /* 첨부파일 — 파일마다 한 줄: 종류 아이콘 · 이름(크기) · [열기] [내려받기] */
+  .att-list{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+  .att{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:14px;
+    padding:9px 10px 9px 12px;background:var(--surface)}
+  .att-ic{flex:none;font-size:20px;line-height:1}
+  .att-nm{flex:1;min-width:0;font-size:14.5px;font-weight:700;color:var(--text);text-decoration:none;overflow-wrap:anywhere}
+  a.att-nm:hover{text-decoration:underline}
+  .att-nm em{font-style:normal;font-size:12.5px;font-weight:600;color:var(--muted);margin-left:6px;white-space:nowrap}
+  .att-act{flex:none;display:flex;gap:6px}
+  .att-act a.btn{text-decoration:none}
+  .att.locked{background:var(--surface-2)}
+  /* 휴대폰 — 자리가 되면 한 줄, 이름이 길면 버튼만 다음 줄 오른쪽으로 */
+  @media (max-width:520px){ .att{flex-wrap:wrap} .att-nm{flex:1 1 150px} .att-act{margin-left:auto} }
 
   .searchbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
   .searchbar input{margin-top:0;flex:1;min-width:200px}
@@ -232,7 +245,7 @@
   .act-chip{background:var(--tint);color:#16225c;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 10px}
 
   /* ── 투표 (카카오톡 투표처럼) ────────────────────────────────────────── */
-  .pv-tabs{display:flex;gap:8px;margin:0 0 16px}
+  .pv-tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
   .pv-tabs button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
     font-size:14.5px;font-weight:800;padding:9px 16px;border-radius:999px;cursor:pointer}
   .pv-tabs button b{margin-left:6px;color:var(--muted);font-weight:900}
@@ -320,6 +333,69 @@
   .pv-acts{display:flex;gap:6px}
   .pv-manage{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
 
+  /* ── 밸런스 게임 ── A(분홍) VS B(파랑) 두 칸. 칸 전체가 버튼이라 한 번 누르면 바로 투표 */
+  .pv-tag.bal{background:#16225c;color:#fff}
+  .bg-duel{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .bg-side{position:relative;min-width:0}
+  .bg-pick{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+    width:100%;height:100%;min-height:140px;padding:16px 12px;border:2px solid transparent;border-radius:18px;
+    font:inherit;color:#16225c;text-align:center;transition:transform .12s,box-shadow .12s,border-color .12s}
+  .bg-side.s0 .bg-pick{background:#ffe1ec}
+  .bg-side.s1 .bg-pick{background:#dfeaff}
+  button.bg-pick{cursor:pointer}
+  button.bg-pick:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 22px rgba(22,34,92,.14)}
+  .bg-side.s0 button.bg-pick:hover:not(:disabled){border-color:var(--brand)}
+  .bg-side.s1 button.bg-pick:hover:not(:disabled){border-color:#2b5fd9}
+  button.bg-pick:disabled{cursor:not-allowed;opacity:.6}
+  .bg-ab{position:absolute;top:10px;left:10px;z-index:1;display:grid;place-items:center;width:26px;height:26px;
+    border-radius:50%;font-size:13px;font-weight:900;color:#fff;box-shadow:0 2px 6px rgba(22,34,92,.2)}
+  .bg-side.s0 .bg-ab{background:var(--brand)}
+  .bg-side.s1 .bg-ab{background:#2b5fd9}
+  .bg-side.nophoto .bg-pick{padding-top:40px}     /* 사진이 없으면 A·B 표시와 글자가 겹치지 않게 위를 띄웁니다 */
+  .bg-ph{display:block;width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.6)}
+  .bg-ph img{display:block;width:100%;height:100%;object-fit:cover}
+  .bg-lbl{font-size:17px;font-weight:900;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}
+  .bg-res{display:flex;align-items:baseline;justify-content:center;gap:6px;flex-wrap:wrap}
+  .bg-res i{font-style:normal;font-size:20px}
+  .bg-res b{font-size:28px;font-weight:900;letter-spacing:-.03em;line-height:1.1}
+  .bg-side.s0 .bg-res b{color:#c2185b}
+  .bg-side.s1 .bg-res b{color:#1f4fc4}
+  .bg-res em{font-style:normal;font-size:13.5px;font-weight:800;color:#4a5382}
+  .bg-flag{font-size:12.5px;font-weight:900;border-radius:999px;padding:3px 11px;background:#16225c;color:#fff}
+  .bg-flag.was{background:#fff;color:#16225c;box-shadow:inset 0 0 0 1.5px #16225c}
+  .bg-side.mine .bg-pick{border-color:#16225c}
+  .bg-side.win .bg-pick{box-shadow:0 10px 24px rgba(22,34,92,.15)}
+  /* 사진 크게 보기 — 사진 오른쪽 위 */
+  .bg-zoom{position:absolute;top:22px;right:20px;z-index:1;display:grid;place-items:center;width:28px;height:28px;padding:0;
+    border:0;border-radius:50%;background:rgba(255,255,255,.94);color:#16225c;font-size:15px;font-weight:900;
+    box-shadow:0 1px 4px rgba(22,34,92,.3);cursor:zoom-in}
+  .bg-vs{position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,-50%);display:grid;place-items:center;
+    width:46px;height:46px;border-radius:50%;background:#16225c;color:#fff;font-size:15px;font-weight:900;
+    border:4px solid var(--surface);box-shadow:0 4px 12px rgba(22,34,92,.25)}
+  /* 결과 막대 — 왼쪽 A(분홍) · 오른쪽 B(파랑) 비율 */
+  .bg-split{display:flex;height:14px;margin:14px 0 0;border-radius:999px;overflow:hidden;background:var(--surface-2)}
+  .bg-split i{display:block;height:100%;transition:width .6s ease}
+  .bg-split .s0{background:#f06292}
+  .bg-split .s1{background:#5c8df6}
+  .bg-split.empty i{background:#e3e6f2}
+  .bg-tip{margin:10px 2px 0;text-align:center;font-size:13px;font-weight:700;color:var(--muted)}
+
+  /* 만들기 창 — 일반 투표 / 밸런스 게임 고르기 */
+  .pv-kind{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 16px;padding:5px;border-radius:14px;background:var(--surface-2)}
+  .pv-kind button{border:0;border-radius:10px;background:transparent;font:inherit;font-size:14.5px;font-weight:800;
+    color:var(--muted);padding:10px 8px;cursor:pointer}
+  .pv-kind button.on{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(22,34,92,.12)}
+  .pv-form .k-bal{display:none}
+  .pv-form.balance .k-poll{display:none}
+  .pv-form.balance .k-bal{display:inline}
+  .pv-form.balance .pv-optin:nth-child(n+3),.pv-form.balance #pvAdd,
+  .pv-form.balance [data-pv-rm],.pv-form.balance .pv-sw.multi{display:none}
+  .pv-form.balance #pvOpts{counter-reset:ab;margin-bottom:16px}
+  .pv-form.balance .pv-optin::before{counter-increment:ab;content:counter(ab, upper-alpha);flex:none;display:grid;place-items:center;
+    width:28px;height:28px;border-radius:50%;font-size:13px;font-weight:900;color:#fff}
+  .pv-form.balance .pv-optin:nth-child(1)::before{background:var(--brand)}
+  .pv-form.balance .pv-optin:nth-child(2)::before{background:#2b5fd9}
+
   /* 만들기 창 */
   .pv-optin{display:flex;gap:6px;align-items:center;margin-bottom:6px}
   .pv-optin input{margin:0;flex:1}
@@ -374,6 +450,16 @@
     /* 사진이 옆에 붙으면 항목 이름 칸이 좁아지므로, 퍼센트와 표 수를 위아래로 쌓아 자리를 내줍니다 */
     .pv-res.pic .bar{gap:8px;padding:10px 12px}
     .pv-res.pic .num{flex-direction:column;align-items:flex-end;gap:0;line-height:1.2}
+    .pv-tabs{gap:6px}
+    .pv-tabs button{padding:8px 12px;font-size:14px}
+    /* 밸런스 게임 — 휴대폰에서도 두 칸 나란히 */
+    .bg-duel{gap:10px}
+    .bg-pick{min-height:124px;padding:14px 8px;border-radius:16px;gap:6px}
+    .bg-lbl{font-size:15px}
+    .bg-res b{font-size:24px}
+    .bg-vs{width:40px;height:40px;font-size:13px;border-width:3px}
+    .bg-ab{top:8px;left:8px;width:24px;height:24px;font-size:12px}
+    .bg-zoom{top:19px;right:13px;width:26px;height:26px}
   }
 
   .op-item{border:1px solid var(--border);border-radius:18px;padding:14px 16px;margin-bottom:12px;background:var(--surface)}
@@ -1134,6 +1220,11 @@ function failed(where, error){
   /* 새 게시판을 화면에만 추가하고 schema.sql 을 아직 안 돌렸을 때 나는 오류 */
   else if(/posts_board_check|'team_no' column/i.test(m)) toast(`${where}: 이 게시판은 아직 데이터베이스에 등록되지 않았습니다. 관리자가 SQL을 실행하면 쓸 수 있습니다.`);
   else if(/option_images/i.test(m)) toast(`${where}: 투표 사진 기능이 아직 데이터베이스에 등록되지 않았습니다. 관리자가 SQL(24절)을 실행하면 쓸 수 있습니다.`);
+  else if(/'kind' column|polls_kind_check|polls_balance_shape/i.test(m)) toast(`${where}: 밸런스 게임 기능이 아직 데이터베이스에 등록되지 않았습니다. 관리자가 SQL(25절)을 실행하면 쓸 수 있습니다.`);
+  /* 첨부파일 올리기 */
+  else if(/maximum allowed size|payload too large|entity too large|\b413\b/i.test(m)) toast(`${where}: 파일이 너무 큽니다. 파일 하나에 ${MAX_FILE_MB}MB까지 올릴 수 있습니다.`);
+  else if(/mime type|invalid_mime/i.test(m)) toast(`${where}: 저장소 설정에서 이 형식의 파일을 받지 않도록 되어 있습니다.`);
+  else if(/Invalid key/i.test(m)) toast(`${where}: 파일 이름 때문에 올리지 못했습니다. 파일 이름을 바꿔 다시 올려 주세요.`);
   else if(/JWT|session/i.test(m)) toast(`${where}: 로그인이 만료되었습니다. 다시 로그인해 주세요.`);
   else if(/Failed to fetch|NetworkError/i.test(m)) toast(`${where}: 서버에 연결하지 못했습니다.`);
   else toast(`${where}: ${m}`);
@@ -1346,7 +1437,7 @@ async function refresh(){
       ]);
       S.votesReady  = !pa.error && !pb.error && !pr.error;
       S.polls       = pa.data || [];
-      if(S.polls.length) POLL_PICS_READY = 'option_images' in S.polls[0];   // 항목 사진 칸(24절)이 있는지
+      if(S.polls.length) ['option_images', 'kind'].forEach(c => POLL_COLS[c] = c in S.polls[0]);   // 새 칸(24·25절)이 있는지
       S.ballots     = pb.data || [];
       S.pollResults = Object.fromEntries((pr.data || []).map(r =>
         [r.poll_id, { tally: r.tally || [], voters: r.voters || 0 }]));
@@ -2290,10 +2381,10 @@ function openPostForm(key, edit){
         <input id="pfDept" placeholder="예) 서울지방고용노동청 근로개선지도과" value="${e0?esc(e0.author_dept||''):''}"></label>
     </div>
     <label class="field">첨부파일${photo && !e0?' <span class="req">*</span>':' <span class="hint" style="display:inline">선택</span>'}
-      <input id="pfFiles" type="file" multiple
-             accept="image/*,.pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx,.zip,.txt">
-      <span class="hint">사진과 문서(pdf·hwp·doc·ppt·xls·zip·txt)를 함께 올릴 수 있습니다.
-        사진은 업로드 전에 자동 축소됩니다.${photo?' 첫 번째 사진이 목록에서 크게 표시됩니다.':''}
+      <input id="pfFiles" type="file" multiple>
+      <span class="hint">사진·문서·한글(hwp)·엑셀·압축파일·영상 등 <b>어떤 파일이든</b> 올릴 수 있습니다
+        (파일 하나에 ${MAX_FILE_MB}MB까지, 실행 파일 제외). 사진은 자동으로 줄여서 올라가고,
+        다른 파일은 원본 그대로 올라가 누르면 열리거나 원래 이름으로 내려받아집니다.${photo?' 첫 번째 사진이 목록에서 크게 표시됩니다.':''}
         ${e0?'<br><b>파일을 새로 고르면 기존 첨부는 교체됩니다.</b> 그대로 두려면 건드리지 마세요.':''}</span>
     </label>
     <div class="thumbs" id="pfThumbs"></div>
@@ -2304,9 +2395,9 @@ function openPostForm(key, edit){
   let imgPicked = [], docPicked = [], touched = false;
   $('#pfFiles').addEventListener('change', async ev=>{
     touched = true;
-    const { imgs, docs } = prepMixed(ev.target.files);
-    imgPicked = await prepImages(imgs);
-    docPicked = prepDocs(docs);
+    busy(true);
+    ({ imgs: imgPicked, docs: docPicked } = await prepPostFiles([...ev.target.files]));
+    busy(false);
     previewMixedLocal('#pfThumbs', imgPicked, docPicked);
   });
   $('#pfSave').addEventListener('click', async ()=>{
@@ -2316,6 +2407,7 @@ function openPostForm(key, edit){
     if(!title || !body){ toast('제목과 내용을 입력하세요'); return; }
     if(photo && !e0 && !imgPicked.length){ toast('사진을 1장 이상 첨부하세요'); return; }
     const btn = $('#pfSave'); btn.disabled = true; busy(true);
+    let uploaded = [];            // 글 저장이 실패하면 방금 올린 파일을 도로 지웁니다
     try{
       const fields = {
         title, body,
@@ -2328,18 +2420,24 @@ function openPostForm(key, edit){
       if(isAct) ACT_TEAM = teamNo;
       if(e0){
         /* 파일을 새로 고른 경우에만 첨부를 교체합니다 */
-        if(touched) fields.images = await uploadMixed('media', imgPicked, docPicked, 'posts');
+        if(touched) fields.images = uploaded = await uploadMixed('media', imgPicked, docPicked, 'posts');
         const { error } = await sb.from('posts').update(fields).eq('id', e0.id);
         if(error) throw error;
+        /* 교체했으면 예전 첨부는 저장소에서 지웁니다(남겨 두면 아무도 못 보는 파일로 쌓입니다) */
+        const old = touched ? (e0.images||[]).map(a => a.path).filter(Boolean) : [];
+        if(old.length) await sb.storage.from('media').remove(old);
         await refresh(); closeModal(); toast('수정되었습니다'); go(CURRENT);
       }else{
-        const images = await uploadMixed('media', imgPicked, docPicked, 'posts');
+        const images = uploaded = await uploadMixed('media', imgPicked, docPicked, 'posts');
         const { error } = await sb.from('posts').insert({
           board:key, images, author_id:S.user?.id, author_name:myName(), ...fields });
         if(error) throw error;
         await refresh(); closeModal(); toast('등록되었습니다'); go(key);
       }
-    }catch(err){ failed(e0?'글 수정':'글 등록', err); btn.disabled = false; }
+    }catch(err){
+      if(uploaded.length) await sb.storage.from('media').remove(uploaded.map(a => a.path));
+      failed(e0?'글 수정':'글 등록', err); btn.disabled = false;
+    }
     finally{ busy(false); }
   });
 }
@@ -2358,8 +2456,7 @@ function openPost(id){
       const u = mediaUrl(a.path);
       return `<img src="${esc(u)}" alt="${esc(a.name||'')}" data-zoom="${esc(u)}">`; }).join('')}</div>` : ''}
     <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
-    ${docs.length ? `<div class="thumbs" style="margin-top:16px">${docs.map(a=>
-      `<a class="tag brand" href="${esc(mediaUrl(a.path))}" target="_blank" rel="noopener">📎 ${esc(a.name||'파일')}</a>`).join('')}</div>` : ''}
+    ${docs.length ? `<div class="att-list">${docs.map(a => fileRow(a, mediaUrl(a.path))).join('')}</div>` : ''}
     ${mine ? `<div class="row-actions" style="margin-top:18px">
       <button class="btn sm" id="ppEdit">글 수정</button>
       <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
@@ -2602,9 +2699,10 @@ BIND.opinion = () => {
    · 한 사람 한 표이고 마감 전에는 '다시 투표하기' 로 바꿀 수 있습니다.
    · 결과는 투표를 하고 나서(또는 마감된 뒤에) 보입니다 — 남의 결과를 보고
      따라 찍는 일을 줄이려는 것입니다. 만든 사람·관리자는 미리 볼 수 있습니다.
-   서버에서도 같은 규칙으로 막아 두었습니다(schema.sql 23절).
+   · 밸런스 게임(kind='balance')은 같은 표·같은 규칙을 쓰는 'A vs B' 두 칸짜리 투표입니다.
+   서버에서도 같은 규칙으로 막아 두었습니다(schema.sql 23~25절).
    ============================================================================ */
-let VOTE_TAB = 'open';                 // 'open' 진행 중 · 'done' 종료
+let VOTE_TAB = 'open';                 // 'open' 진행 중 · 'done' 종료 · 'balance' 밸런스 게임
 const VOTE_DRAFT = {};                 // 투표하기 전에 고르는 중인 항목 { 투표id: [번호…] }
 const VOTE_EDIT  = new Set();          // '다시 투표하기' 를 누른 투표
 const VOTE_PEEK  = new Set();          // 만든 사람·관리자가 '결과 미리 보기' 를 연 투표
@@ -2614,8 +2712,19 @@ const myBallot   = (pid) => S.ballots.find(b => b.poll_id === pid && b.user_id =
 const resultOf   = (pid) => S.pollResults[pid] || { tally: [], voters: 0 };
 const canManagePoll = (p) => (!!S.user && p.author_id === S.user.id) || isAdmin();
 
-/* 항목 사진 (schema.sql 24절) — option_images 는 항목 순서대로 저장소 경로, 사진 없는 항목은 '' */
-let POLL_PICS_READY = null;            // 사진 칸이 준비됐는지 (null = 아직 모름)
+/* 투표 표에 나중에 붙인 칸이 준비됐는지 — true/false (없으면 아직 모름)
+   option_images: 항목 사진(schema.sql 24절) · kind: 밸런스 게임(25절) */
+const POLL_COLS = {};
+async function checkPollCols(){
+  for(const c of ['option_images', 'kind']){
+    if(POLL_COLS[c] === true) continue;
+    const { error } = await sb.from('polls').select(c).limit(1);
+    POLL_COLS[c] = !error;
+  }
+}
+const isBalance = (p) => p.kind === 'balance';
+
+/* 항목 사진 — option_images 는 항목 순서대로 저장소 경로, 사진 없는 항목은 '' */
 const pollPic  = (p, i) => { const path = (p.option_images || [])[i]; return path ? mediaUrl(path) : ''; };
 const pollHasPics = (p) => (p.option_images || []).some(Boolean);
 /* 항목 왼쪽 사진 — 누르면 크게 보기. 사진 있는 투표에서 사진 없는 항목은 빈 칸으로 줄만 맞춥니다 */
@@ -2747,20 +2856,92 @@ function pollCard(p){
             <button class="btn primary sm" data-pv-vote ${draft.length ? '' : 'disabled'}>${editing ? '바꿔서 투표' : '투표하기'}</button></span>` : '')}
     </div>
 
-    ${canManagePoll(p) ? `<div class="pv-manage">
-        ${!closed && !mine ? `<button class="btn sm ghost" data-pv-peek>${peek ? '결과 닫기' : '결과 미리 보기'}</button>` : ''}
-        ${!closed ? '<button class="btn sm" data-pv-close>마감하기</button>' : ''}
-        <button class="btn sm danger" data-pv-del>삭제</button>
-      </div>` : ''}
+    ${pollManage(p, closed, mine, peek)}
+  </article>`;
+}
+
+/* 만든 사람·관리자용 — 결과 미리 보기 · 마감하기 · 삭제 */
+const pollManage = (p, closed, mine, peek) => canManagePoll(p) ? `<div class="pv-manage">
+    ${!closed && !mine ? `<button class="btn sm ghost" data-pv-peek>${peek ? '결과 닫기' : '결과 미리 보기'}</button>` : ''}
+    ${!closed ? '<button class="btn sm" data-pv-close>마감하기</button>' : ''}
+    <button class="btn sm danger" data-pv-del>삭제</button>
+  </div>` : '';
+
+/* ── 밸런스 게임 카드 ──
+   A(분홍)와 B(파랑) 두 칸을 나란히 두고 가운데 VS. 한쪽을 누르면 바로 투표됩니다.
+   고른 뒤(또는 마감 뒤)에는 두 칸에 퍼센트를 크게 쓰고, 아래 두 색 막대로 비율을 보여 줍니다.
+   더 많이 고른 쪽에 👑, 내가 고른 쪽에 '✓ 내 선택'. 사진은 오른쪽 위 ＋ 로 크게 봅니다. */
+function balanceCard(p){
+  const closed  = pollClosed(p);
+  const mine    = myBallot(p.id);
+  const res     = resultOf(p.id);
+  const editing = VOTE_EDIT.has(p.id);
+  const peek    = VOTE_PEEK.has(p.id) && canManagePoll(p);
+  const showRes = closed || (mine && !editing) || peek;
+  const block   = voteBlock(p);
+  const t   = [res.tally[0] || 0, res.tally[1] || 0];
+  const sum = t[0] + t[1];
+  const pct = sum ? [Math.round(t[0] * 100 / sum), 0] : [0, 0];
+  if(sum) pct[1] = 100 - pct[0];
+
+  const side = (i) => {
+    const u = pollPic(p, i);
+    const picked = !!mine?.choices?.includes(i);
+    const win = showRes && t[i] > t[1 - i];
+    const inner = `<span class="bg-ab" aria-hidden="true">${i ? 'B' : 'A'}</span>
+      ${u ? `<span class="bg-ph"><img src="${esc(u)}" alt="" loading="lazy"></span>` : ''}
+      <span class="bg-lbl">${esc(p.options[i])}</span>
+      ${showRes ? `<span class="bg-res">${win ? '<i title="더 많이 고른 쪽">👑</i>' : ''}<b>${pct[i]}%</b><em>${t[i]}표</em></span>` : ''}
+      ${showRes && picked ? '<span class="bg-flag">✓ 내 선택</span>' : ''}
+      ${!showRes && editing && picked ? '<span class="bg-flag was">지금 선택</span>' : ''}`;
+    return `<div class="bg-side s${i}${u ? '' : ' nophoto'}${showRes && picked ? ' mine' : ''}${win ? ' win' : ''}">
+      ${showRes ? `<div class="bg-pick">${inner}</div>`
+        : `<button type="button" class="bg-pick" data-bg-pick="${i}" ${block ? 'disabled' : ''}>${inner}</button>`}
+      ${u ? `<button type="button" class="bg-zoom" data-zoom="${esc(u)}" aria-label="${esc(p.options[i])} 사진 크게 보기">＋</button>` : ''}
+    </div>`;
+  };
+
+  return `<article class="pv-card bg-card${closed ? ' done' : ''}" data-pv="${p.id}">
+    <div class="pv-top">
+      <span class="pv-state ${closed ? 'off' : 'on'}">${closed ? '종료' : '진행 중'}</span>
+      <span class="pv-tag bal">⚖️ 밸런스 게임</span>
+      <span class="pv-tag${p.anonymous ? '' : ' named'}">${p.anonymous ? '익명' : '실명'}</span>
+      <span class="pv-left">${leftText(p)}</span>
+    </div>
+    <h3 class="pv-title">${esc(p.title)}</h3>
+    <div class="pv-meta">${esc(p.author_name || '')} · ${fmtDay(p.created_at)}${
+      p.closes_at ? ` · ${shortWhen(p.closes_at)} 마감` : ''}</div>
+
+    ${!showRes && !p.anonymous && !block
+      ? '<div class="pv-note named">실명 투표예요. 누가 어느 쪽을 골랐는지 모두에게 보입니다.</div>' : ''}
+    ${!showRes && block && !closed ? `<div class="pv-note">${esc(block)}</div>` : ''}
+
+    <div class="bg-duel">${side(0)}<span class="bg-vs" aria-hidden="true">VS</span>${side(1)}</div>
+    ${showRes
+      ? `<div class="bg-split${sum ? '' : ' empty'}" aria-hidden="true"><i class="s0" style="width:${sum ? pct[0] : 50}%"></i><i
+           class="s1" style="width:${sum ? pct[1] : 50}%"></i></div>`
+      : (!block ? `<p class="bg-tip">${editing ? '바꿀 쪽을 누르세요' : '👆 한쪽을 누르면 바로 투표돼요'}</p>` : '')}
+
+    <div class="pv-foot">
+      <div class="pv-sum"><span class="cnt">👥 ${res.voters}명 참여</span>${
+        showRes && !p.anonymous && res.voters ? '<button type="button" class="pv-whobtn" data-pv-who>참여자 보기 ›</button>' : ''}</div>
+      ${showRes
+        ? (!closed && mine && !block ? '<button class="btn sm" data-pv-again>다시 고르기</button>' : '')
+        : (editing ? '<button class="btn sm ghost" data-pv-cancel>취소</button>' : '')}
+    </div>
+    ${pollManage(p, closed, mine, peek)}
   </article>`;
 }
 
 VIEWS.vote = () => {
-  const head = `<div class="crumb">홈 · 투표</div>
+  const bal = VOTE_TAB === 'balance';
+  const head = `<div class="crumb">홈 · 투표${bal ? ' · 밸런스 게임' : ''}</div>
   <div class="pg-head">
     <div><h1 class="pg-title">투표</h1>
-      <p class="pg-sub">익명 또는 실명으로 의견을 모읍니다. 한 사람 한 표이고, 마감 전에는 다시 고를 수 있습니다.</p></div>
-    ${S.votesReady && isSignedIn() ? '<button class="btn primary" id="pvNew">＋ 투표 만들기</button>' : ''}
+      <p class="pg-sub">${bal
+        ? '둘 중 하나만 고른다면? 가볍게 골라 보는 밸런스 게임입니다. 한쪽을 누르면 바로 투표돼요.'
+        : '익명 또는 실명으로 의견을 모읍니다. 한 사람 한 표이고, 마감 전에는 다시 고를 수 있습니다.'}</p></div>
+    ${S.votesReady && isSignedIn() ? `<button class="btn primary" id="pvNew">${bal ? '⚖️ 밸런스 게임 만들기' : '＋ 투표 만들기'}</button>` : ''}
   </div>`;
 
   if(!S.votesReady){
@@ -2768,25 +2949,34 @@ VIEWS.vote = () => {
       isAdmin() ? '<br><span class="hint">관리자: Supabase 에서 SQL(23절)을 실행하면 열립니다.</span>' : ''}</div></div>`;
   }
 
-  const open = S.polls.filter(p => !pollClosed(p));
-  const done = S.polls.filter(p =>  pollClosed(p));
-  const list = VOTE_TAB === 'done' ? done : open;
+  /* 진행 중·종료 탭은 일반 투표, 밸런스 게임 탭은 게임만(진행 중인 것 먼저) */
+  const polls = S.polls.filter(p => !isBalance(p));
+  const games = S.polls.filter(isBalance)
+    .sort((a, b) => (pollClosed(a) - pollClosed(b)) || b.created_at.localeCompare(a.created_at));
+  const open = polls.filter(p => !pollClosed(p));
+  const done = polls.filter(p =>  pollClosed(p));
+  const list = bal ? games : VOTE_TAB === 'done' ? done : open;
+  const empty = bal
+    ? `아직 밸런스 게임이 없습니다.${isSignedIn() ? '<br>위의 ‘밸런스 게임 만들기’로 첫 게임을 올려 보세요.' : ''}`
+    : VOTE_TAB === 'done' ? '종료된 투표가 없습니다.'
+    : `진행 중인 투표가 없습니다.${isSignedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`;
   return head + `
-  ${!isSignedIn() ? '<p class="hint" style="margin:-8px 0 16px">투표를 만들려면 로그인하세요. 익명 투표에는 로그인 없이도 참여할 수 있습니다.</p>' : ''}
+  ${!isSignedIn() ? `<p class="hint" style="margin:-8px 0 16px">${bal ? '밸런스 게임을' : '투표를'} 만들려면 로그인하세요. 익명 ${
+    bal ? '게임' : '투표'}에는 로그인 없이도 참여할 수 있습니다.</p>` : ''}
   <div class="pv-tabs">
     <button class="${VOTE_TAB === 'open' ? 'on' : ''}" data-pv-tab="open">진행 중<b>${open.length}</b></button>
     <button class="${VOTE_TAB === 'done' ? 'on' : ''}" data-pv-tab="done">종료<b>${done.length}</b></button>
+    <button class="${bal ? 'on' : ''}" data-pv-tab="balance">⚖️ 밸런스 게임<b>${games.length}</b></button>
   </div>
-  ${list.length ? `<div class="pv-grid">${list.map(pollCard).join('')}</div>`
-    : `<div class="card"><div class="empty">${VOTE_TAB === 'done' ? '종료된 투표가 없습니다.'
-        : `진행 중인 투표가 없습니다.${isSignedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`}</div></div>`}`;
+  ${list.length ? `<div class="pv-grid">${list.map(p => isBalance(p) ? balanceCard(p) : pollCard(p)).join('')}</div>`
+    : `<div class="card"><div class="empty">${empty}</div></div>`}`;
 };
 
 /* 투표 화면을 다시 그리되 보던 위치는 그대로 — 아래쪽 카드에서 투표해도 맨 위로 튀지 않게 */
 function redrawVote(){ const y = window.scrollY; go('vote'); window.scrollTo(0, y); }
 
 BIND.vote = () => {
-  $('#pvNew')?.addEventListener('click', openPollForm);
+  $('#pvNew')?.addEventListener('click', ()=> openPollForm(VOTE_TAB === 'balance' ? 'balance' : 'poll'));
   $$('#main [data-pv-tab]').forEach(b => b.addEventListener('click', ()=>{ VOTE_TAB = b.dataset.pvTab; go('vote'); }));
 
   $$('#main [data-pv]').forEach(card => {
@@ -2828,10 +3018,24 @@ BIND.vote = () => {
       VOTE_PEEK.has(pid) ? VOTE_PEEK.delete(pid) : VOTE_PEEK.add(pid); redrawVote();
     });
     card.querySelector('[data-pv-who]')?.addEventListener('click', ()=> openVoters(p));
-    card.querySelectorAll('.pv-thumb[data-zoom]').forEach(b => b.addEventListener('click', ()=> lightbox(b.dataset.zoom)));
+    card.querySelectorAll('[data-zoom]').forEach(b => b.addEventListener('click', ()=> lightbox(b.dataset.zoom)));
+
+    /* 밸런스 게임 — 한쪽을 누르면 바로 투표합니다 */
+    card.querySelectorAll('[data-bg-pick]').forEach(btn => btn.addEventListener('click', async ()=>{
+      const why = voteBlock(p); if(why){ toast(why); return; }
+      const picks = card.querySelectorAll('[data-bg-pick]');
+      picks.forEach(b => b.disabled = true);           // 두 번 눌려 두 번 가지 않게
+      busy(true);
+      const { error } = await sb.from('poll_ballots')
+        .upsert({ poll_id: pid, user_id: S.user.id, choices: [Number(btn.dataset.bgPick)] }, { onConflict: 'poll_id,user_id' });
+      busy(false);
+      if(error){ picks.forEach(b => b.disabled = false); return failed('투표', error); }
+      VOTE_EDIT.delete(pid);
+      await refresh(); toast('골랐습니다! 결과를 확인해 보세요'); redrawVote();
+    }));
 
     card.querySelector('[data-pv-close]')?.addEventListener('click', async ()=>{
-      if(!confirm('이 투표를 지금 마감할까요? 마감하면 더는 투표할 수 없고 결과가 모두에게 보입니다.')) return;
+      if(!confirm(`${isBalance(p) ? '이 밸런스 게임을' : '이 투표를'} 지금 마감할까요? 마감하면 더는 투표할 수 없고 결과가 모두에게 보입니다.`)) return;
       busy(true);
       const { error } = await sb.from('polls').update({ closed: true }).eq('id', pid);
       busy(false);
@@ -2839,7 +3043,7 @@ BIND.vote = () => {
       await refresh(); toast('마감했습니다'); redrawVote();
     });
     card.querySelector('[data-pv-del]')?.addEventListener('click', async ()=>{
-      if(!confirm(`"${p.title}" 투표를 삭제할까요? 참여한 표도 모두 지워지고 되돌릴 수 없습니다.`)) return;
+      if(!confirm(`"${p.title}" ${isBalance(p) ? '밸런스 게임을' : '투표를'} 삭제할까요? 참여한 표도 모두 지워지고 되돌릴 수 없습니다.`)) return;
       busy(true);
       const { error } = await sb.from('polls').delete().eq('id', pid);
       const paths = (p.option_images || []).filter(Boolean);        // 항목 사진도 저장소에서 지웁니다
@@ -2852,24 +3056,30 @@ BIND.vote = () => {
 };
 
 /* 투표 만들기 — 카카오톡처럼 제목·항목(2~10개)·복수 선택·익명·마감을 정합니다.
-   항목마다 사진을 한 장씩 붙일 수 있습니다(📷). 사진은 올리기 전에 줄여서 올립니다. */
-async function openPollForm(){
-  /* 사진 칸(24절)이 있는지 모르면 한 번 물어봅니다. 없으면 📷 없이 예전처럼 만듭니다 */
-  if(POLL_PICS_READY !== true){
-    busy(true);
-    const { error } = await sb.from('polls').select('option_images').limit(1);
-    busy(false);
-    POLL_PICS_READY = !error;
+   항목마다 사진을 한 장씩 붙일 수 있습니다(📷). 사진은 올리기 전에 줄여서 올립니다.
+   위쪽에서 '밸런스 게임' 을 고르면 같은 창이 질문 + A·B 두 칸으로 바뀝니다. */
+async function openPollForm(kind = 'poll'){
+  /* 새 칸(24·25절)이 있는지 모르면 한 번 물어봅니다. 없으면 그 기능만 빼고 예전처럼 만듭니다 */
+  if(POLL_COLS.option_images !== true || POLL_COLS.kind !== true){ busy(true); await checkPollCols(); busy(false); }
+  const picsOn = POLL_COLS.option_images === true;
+  const balOn  = POLL_COLS.kind === true;
+  if(kind === 'balance' && !balOn){
+    toast(isAdmin() ? '밸런스 게임은 Supabase 에서 SQL(25절)을 실행하면 만들 수 있습니다.'
+                    : '밸런스 게임은 곧 열립니다. 조금만 기다려 주세요.');
+    return;
   }
-  const picsOn = POLL_PICS_READY;
   const optRow = () => `<div class="pv-optin">${picsOn ? '<div class="pv-picw"></div>' : ''}
     <input class="pv-optxt" maxlength="60" placeholder="항목 입력">
     <button type="button" class="btn sm ghost" data-pv-rm aria-label="항목 빼기">✕</button></div>`;
-  openModal('투표 만들기', `
-    <label class="field">투표 제목 <span class="req">*</span>
-      <input id="pvTitle" maxlength="120" placeholder="예) 새소리단 워크숍 장소는 어디가 좋을까요?"></label>
-    <div class="field" style="margin-bottom:6px">항목 <span class="req">*</span>
-      <span class="hint" style="display:inline">2~10개${picsOn ? ' · 📷 을 누르면 항목마다 사진을 넣을 수 있어요(선택)' : ''}</span></div>
+  openModal('투표 만들기', `<div class="pv-form" id="pvForm">
+    ${balOn ? `<div class="pv-kind">
+      <button type="button" data-kind="poll">📊 일반 투표</button>
+      <button type="button" data-kind="balance">⚖️ 밸런스 게임</button></div>` : ''}
+    <label class="field"><span class="k-poll">투표 제목</span><span class="k-bal">질문</span> <span class="req">*</span>
+      <input id="pvTitle" maxlength="120"></label>
+    <div class="field" style="margin-bottom:6px"><span class="k-poll">항목</span><span class="k-bal">두 가지 선택지</span> <span class="req">*</span>
+      <span class="hint" style="display:inline"><span class="k-poll">2~10개${picsOn ? ' · ' : ''}</span>${
+        picsOn ? '📷 을 누르면 사진을 넣을 수 있어요(선택)' : ''}</span></div>
     ${!picsOn && isAdmin() ? '<p class="hint" style="margin:0 0 8px">관리자: Supabase 에서 SQL(24절)을 실행하면 항목마다 사진을 넣을 수 있습니다.</p>' : ''}
     <div id="pvOpts">${optRow()}${optRow()}${optRow()}</div>
     <input type="file" id="pvFile" accept="image/*" hidden>
@@ -2877,7 +3087,7 @@ async function openPollForm(){
     <div class="pv-switches">
       <label class="pv-sw"><input type="checkbox" id="pvAnon" checked>
         <span><b>익명 투표</b><em>끄면 실명 투표 — 누가 무엇을 골랐는지 '참여자 보기'로 모두 볼 수 있고, 로그인한 회원만 참여합니다</em></span></label>
-      <label class="pv-sw"><input type="checkbox" id="pvMulti">
+      <label class="pv-sw multi"><input type="checkbox" id="pvMulti">
         <span><b>복수 선택</b><em>한 사람이 여러 항목을 고를 수 있습니다</em></span></label>
     </div>
     <div class="grid c2">
@@ -2889,7 +3099,26 @@ async function openPollForm(){
       <label class="field" id="pvDateWrap" hidden>마감 날짜 <span class="hint" style="display:inline">그날 23:59까지</span>
         <input type="date" id="pvDate"></label>
     </div>
-    <div class="row-actions"><button class="btn primary" id="pvSave">투표 올리기</button></div>`);
+    <div class="row-actions"><button class="btn primary" id="pvSave"><span class="k-poll">투표 올리기</span><span class="k-bal">밸런스 게임 올리기</span></button></div>
+  </div>`);
+
+  /* 일반 투표 ↔ 밸런스 게임 — 입력한 내용은 그대로 두고 보이는 칸과 안내만 바꿉니다
+     (밸런스 게임은 위의 두 줄만 A·B 로 쓰고, 나머지 줄·항목 추가·복수 선택은 숨깁니다) */
+  const PH = {
+    poll:    { title: '예) 새소리단 워크숍 장소는 어디가 좋을까요?', opts: ['항목 입력', '항목 입력'] },
+    balance: { title: '예) 평생 야근 없는 회사 vs 연봉 두 배 회사, 나의 선택은?',
+               opts: ['A — 예) 평생 야근 없는 회사', 'B — 예) 연봉 두 배 회사'] },
+  };
+  const setKind = (k) => {
+    kind = k;
+    $('#pvForm').classList.toggle('balance', k === 'balance');
+    $$('#pvForm [data-kind]').forEach(b => b.classList.toggle('on', b.dataset.kind === k));
+    $('#modalTitle').textContent = k === 'balance' ? '밸런스 게임 만들기' : '투표 만들기';
+    $('#pvTitle').placeholder = PH[k].title;
+    $$('#pvOpts .pv-optxt').forEach((inp, i) => inp.placeholder = i < 2 ? PH[k].opts[i] : '항목 입력');
+  };
+  $$('#pvForm [data-kind]').forEach(b => b.addEventListener('click', ()=> setKind(b.dataset.kind)));
+  setKind(kind);
 
   /* 항목 사진 — 줄마다 고른 사진을 기억해 둡니다 { blob, preview } */
   const PICS = new Map();
@@ -2934,14 +3163,16 @@ async function openPollForm(){
   $('#pvClose').addEventListener('change', ()=>{ $('#pvDateWrap').hidden = $('#pvClose').value !== 'date'; });
 
   $('#pvSave').addEventListener('click', async ()=>{
+    const bal   = kind === 'balance';
     const title = $('#pvTitle').value.trim();
-    const rows  = $$('#pvOpts .pv-optin').map(r => ({ text: r.querySelector('.pv-optxt').value.trim(), pic: PICS.get(r) || null }));
+    const all   = $$('#pvOpts .pv-optin');
+    const rows  = (bal ? all.slice(0, 2) : all).map(r => ({ text: r.querySelector('.pv-optxt').value.trim(), pic: PICS.get(r) || null }));
     const items = rows.filter(r => r.text);
     const options = items.map(r => r.text);
-    if(!title){ toast('투표 제목을 입력하세요'); return; }
-    if(rows.some(r => r.pic && !r.text)){ toast('사진을 넣은 항목에 이름도 입력하세요'); return; }
-    if(options.length < 2){ toast('항목을 2개 이상 입력하세요'); return; }
-    if(new Set(options).size !== options.length){ toast('같은 항목이 두 번 들어 있습니다'); return; }
+    if(!title){ toast(bal ? '질문을 입력하세요' : '투표 제목을 입력하세요'); return; }
+    if(rows.some(r => r.pic && !r.text)){ toast(bal ? '사진을 넣은 쪽에 선택지 이름도 입력하세요' : '사진을 넣은 항목에 이름도 입력하세요'); return; }
+    if(options.length < 2){ toast(bal ? 'A와 B 선택지를 모두 입력하세요' : '항목을 2개 이상 입력하세요'); return; }
+    if(new Set(options).size !== options.length){ toast(bal ? 'A와 B가 똑같습니다' : '같은 항목이 두 번 들어 있습니다'); return; }
 
     let closes_at = null;
     const c = $('#pvClose').value;
@@ -2956,8 +3187,9 @@ async function openPollForm(){
     }
 
     const btn = $('#pvSave'); btn.disabled = true; busy(true);
-    const row = { title, options, multi: $('#pvMulti').checked, anonymous: $('#pvAnon').checked,
+    const row = { title, options, multi: !bal && $('#pvMulti').checked, anonymous: $('#pvAnon').checked,
                   closes_at, author_id: S.user?.id, author_name: myName() };
+    if(bal) row.kind = 'balance';          // 일반 투표는 칸을 보내지 않아 25절 실행 전에도 그대로 올라갑니다
     const uploaded = [];          // 중간에 실패하면 올려 둔 사진을 도로 지웁니다
     let stage = 'upload';
     try{
@@ -2982,8 +3214,8 @@ async function openPollForm(){
       return failed(stage === 'upload' ? '사진 올리기' : '투표 만들기', e);
     }
     busy(false); btn.disabled = false;
-    VOTE_TAB = 'open';
-    await refresh(); closeModal(); toast('투표를 올렸습니다'); go('vote');
+    VOTE_TAB = bal ? 'balance' : 'open';
+    await refresh(); closeModal(); toast(bal ? '밸런스 게임을 올렸습니다' : '투표를 올렸습니다'); go('vote');
   });
 }
 
@@ -3251,7 +3483,7 @@ VIEWS.report = () => pageHead('결과보고서 제출','작성한 결과보고�
     <p class="hint" style="margin:0 0 12px">제출일(${ymd(new Date())})이 자동으로 기록됩니다.</p>
     <label class="field">결과보고서 파일 <span class="req">*</span>
       <input id="rpFiles" type="file" multiple accept=".pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx">
-      <span class="hint">pdf · hwp · doc · ppt · xls 파일을 올려주세요(여러 개 첨부 가능, 개당 20MB 이하).
+      <span class="hint">pdf · hwp · doc · ppt · xls 파일을 올려주세요(여러 개 첨부 가능, 개당 ${MAX_FILE_MB}MB 이하).
         첨부한 파일은 본인과 혁신행정담당관만 볼 수 있습니다.</span></label>
     <div class="thumbs" id="rpThumbs"></div>
     <div class="row-actions"><button class="btn primary" id="rpSubmit">보고서 제출</button></div>
@@ -3264,14 +3496,18 @@ BIND.report = () => {
     const d = ymd(new Date());   /* 활동일자는 제출한 날짜로 자동 기록 */
     if(!picked.length){ toast('결과보고서 파일을 첨부하세요'); return; }
     const btn = $('#rpSubmit'); btn.disabled = true; busy(true);
+    let files = [];
     try{
-      const files = await uploadDocs('docs', picked, 'reports');
+      files = await uploadDocs('docs', picked, 'reports');
       const { error } = await sb.from('reports').insert({
         title:'결과보고서', act_date:d, team:$('#rpTeam').value, files,
         author_id:S.user?.id, author_name:$('#rpAuthor').value.trim()||myName() });
       if(error) throw error;
       await refresh(); toast('보고서가 제출되었습니다'); go('mine');
-    }catch(e){ failed('보고서 제출', e); btn.disabled = false; }
+    }catch(e){
+      if(files.length) await sb.storage.from('docs').remove(files.map(f => f.path));   // 제출이 안 됐으면 올린 파일도 지웁니다
+      failed('보고서 제출', e); btn.disabled = false;
+    }
     finally{ busy(false); }
   });
 };
@@ -3518,14 +3754,14 @@ function showExpense(id, canProcess){
   });
 }
 const ATT_IMG_RE = /\.(jpe?g|png|gif|webp)$/i;
+/* 영수증·보고서 첨부 — 사진은 썸네일로, 나머지는 [열기][내려받기] 줄로 */
 function attHTML(files){
   if(!files || !files.length) return '<span class="hint">첨부 없음</span>';
-  return '<div class="thumbs">' + files.map(f=>{
-    const u = fileUrl(f);
-    if(!u) return `<span class="tag recv">🔒 ${esc(f.name||'파일')}</span>`;
-    if(ATT_IMG_RE.test(f.name||'')) return `<img src="${esc(u)}" alt="${esc(f.name||'')}" data-zoom="${esc(u)}">`;
-    return `<a class="tag brand" href="${esc(u)}" target="_blank" rel="noopener">📎 ${esc(f.name||'파일')}</a>`;
-  }).join('') + '</div>';
+  const imgs = files.filter(f => ATT_IMG_RE.test(f.name||'') && fileUrl(f));
+  const rest = files.filter(f => !imgs.includes(f));
+  return (imgs.length ? '<div class="thumbs">' + imgs.map(f => { const u = fileUrl(f);
+      return `<img src="${esc(u)}" alt="${esc(f.name||'')}" data-zoom="${esc(u)}">`; }).join('') + '</div>' : '')
+    + (rest.length ? '<div class="att-list">' + rest.map(f => fileRow(f, fileUrl(f))).join('') + '</div>' : '');
 }
 function bindZoom(){ $$('#modalBody [data-zoom]').forEach(im =>
   im.addEventListener('click', ()=> lightbox(im.dataset.zoom))); }
@@ -3585,60 +3821,124 @@ function resizeToBlob(file, max=1600, quality=0.75){
 }
 async function uploadAll(bucket, picked, folder){
   const out = [];
-  for(const p of picked){
-    const path = `${folder}/${S.user?.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
-    const { error } = await sb.storage.from(bucket).upload(path, p.blob, { contentType:'image/jpeg' });
-    if(error) throw error;
-    out.push({ path, name:p.name });
+  try{
+    for(const p of picked){
+      const path = `${folder}/${S.user?.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
+      const { error } = await sb.storage.from(bucket).upload(path, p.blob, { contentType:'image/jpeg' });
+      if(error) throw error;
+      out.push({ path, name:p.name });
+    }
+    return out;
+  }catch(e){
+    if(out.length) await sb.storage.from(bucket).remove(out.map(x => x.path));   // 반쯤 올라간 것은 도로 지웁니다
+    throw e;
   }
-  return out;
 }
 function previewLocal(sel, picked){
   const el = $(sel); if(!el) return;
   el.innerHTML = picked.map(p=>`<img src="${p.preview}" alt="${esc(p.name)}" data-zoom="${p.preview}">`).join('');
   el.querySelectorAll('[data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
 }
-/* 결과보고서 같은 문서 첨부 — 이미지처럼 리사이즈하지 않고 원본 파일 그대로 올립니다 */
-const DOC_EXT_RE = /\.(pdf|docx?|hwpx?|pptx?|xlsx?)$/i;
-function prepDocs(fileList){
+/* ── 원본 그대로 올리는 파일 ──────────────────────────────────────────────
+   저장소(Supabase)는 한글·특수문자가 든 저장 이름을 받지 않습니다("Invalid key").
+   그래서 저장 이름은 '시각-무작위.확장자' 로 만들고, 원래 이름은 name 에 따로 적어 둡니다.
+   내려받을 때 주소에 ?download=원래이름 을 붙이면 저장소가 원래 이름 그대로 내려 줍니다. */
+const MAX_FILE_MB   = 50;              // 파일 하나 한도 (Supabase 무료 요금제 기본값)
+const DOC_EXT_RE    = /\.(pdf|docx?|hwpx?|pptx?|xlsx?)$/i;                 // 결과보고서가 받는 문서
+const BLOCK_EXT_RE  = /\.(exe|msi|bat|cmd|com|scr|pif|cpl|msc|jar|js|jse|vbs|vbe|wsf|wsh|ps1|psm1|reg|lnk|hta|dll|sys|apk|sh)$/i;  // 실행 파일
+const INLINE_EXT_RE = /\.(pdf|png|jpe?g|gif|webp|mp4|webm|m4v|mov|mp3|m4a|wav|ogg|oga)$/i;         // 브라우저가 바로 보여 주는 형식
+const extOf    = (name) => { const m = /\.([A-Za-z0-9]{1,10})$/.exec(name || ''); return m ? '.' + m[1].toLowerCase() : ''; };
+const storeKey = (folder, name) => `${folder}/${S.user?.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}${extOf(name)}`;
+const fmtSize  = (n) => !n ? '' : n < 1024*1024 ? `${Math.max(1, Math.round(n/1024))}KB` : `${(n/1024/1024).toFixed(1)}MB`;
+function fileIcon(name){
+  const n = name || '';
+  return /\.pdf$/i.test(n) ? '📕'
+    : /\.(hwpx?|docx?|odt|rtf|txt|md)$/i.test(n) ? '📝'
+    : /\.(xlsx?|xlsm|csv|ods)$/i.test(n) ? '📊'
+    : /\.(pptx?|odp|key)$/i.test(n) ? '📽️'
+    : /\.(zip|7z|rar|alz|egg|tar|gz)$/i.test(n) ? '🗜️'
+    : /\.(mp4|webm|m4v|mov|avi|mkv|wmv)$/i.test(n) ? '🎬'
+    : /\.(mp3|m4a|wav|ogg|oga|flac|aac)$/i.test(n) ? '🎵'
+    : /\.(png|jpe?g|gif|webp|heic|heif|bmp|svg|tiff?)$/i.test(n) ? '🖼️' : '📎';
+}
+/* 첨부 한 줄 — 종류 아이콘 · 이름(크기) · [열기] [내려받기]
+   PDF·영상·음악처럼 브라우저가 보여 줄 수 있는 파일은 '열기' 로 바로 보고,
+   한글(hwp)·엑셀·압축파일 등은 원래 이름으로 내려받아 컴퓨터·휴대폰의 프로그램으로 엽니다. */
+function fileRow(a, url){
+  const name = a.name || String(a.path || '').split('/').pop() || '파일';
+  if(!url) return `<div class="att locked"><span class="att-ic" aria-hidden="true">🔒</span><span class="att-nm">${esc(name)}</span></div>`;
+  const dl = url + (url.includes('?') ? '&' : '?') + 'download=' + encodeURIComponent(name);
+  const inline = INLINE_EXT_RE.test(name);
+  return `<div class="att">
+    <span class="att-ic" aria-hidden="true">${fileIcon(name)}</span>
+    <a class="att-nm" href="${esc(inline ? url : dl)}" target="_blank" rel="noopener">${esc(name)}${a.size ? `<em>${fmtSize(a.size)}</em>` : ''}</a>
+    <span class="att-act">${inline ? `<a class="btn sm ghost" href="${esc(url)}" target="_blank" rel="noopener">열기</a>` : ''}<a
+      class="btn sm" href="${esc(dl)}" target="_blank" rel="noopener">내려받기</a></span>
+  </div>`;
+}
+
+/* anyType: 게시판은 어떤 형식이든(실행 파일만 빼고), 결과보고서는 문서만 받습니다 */
+function prepDocs(fileList, anyType = false){
   const out = [];
   for(const f of fileList){
-    if(!DOC_EXT_RE.test(f.name)){ toast(`${f.name}: pdf·hwp·doc·ppt·xls 파일만 첨부할 수 있습니다`); continue; }
-    if(f.size > 20*1024*1024){ toast(`${f.name}: 20MB 이하 파일만 첨부할 수 있습니다`); continue; }
+    if(BLOCK_EXT_RE.test(f.name)){ toast(`${f.name}: 보안을 위해 실행 파일(.exe 등)은 올릴 수 없습니다`); continue; }
+    if(!anyType && !DOC_EXT_RE.test(f.name)){ toast(`${f.name}: pdf·hwp·doc·ppt·xls 파일만 첨부할 수 있습니다`); continue; }
+    if(f.size > MAX_FILE_MB*1024*1024){ toast(`${f.name}: 파일 하나에 ${MAX_FILE_MB}MB까지 올릴 수 있습니다`); continue; }
     out.push({ file:f, name:f.name });
   }
   return out;
 }
 async function uploadDocs(bucket, picked, folder){
   const out = [];
-  for(const p of picked){
-    const safe = p.name.replace(/[^\w.\-가-힣]/g,'_');
-    const path = `${folder}/${S.user?.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}-${safe}`;
-    const { error } = await sb.storage.from(bucket).upload(path, p.file, { contentType: p.file.type || 'application/octet-stream' });
-    if(error) throw error;
-    out.push({ path, name:p.name, kind:'doc' });
+  try{
+    for(const p of picked){
+      const path = storeKey(folder, p.name);
+      const { error } = await sb.storage.from(bucket).upload(path, p.file, { contentType: p.file.type || 'application/octet-stream' });
+      if(error) throw error;
+      out.push({ path, name:p.name, kind:'doc', size:p.file.size });
+    }
+    return out;
+  }catch(e){
+    if(out.length) await sb.storage.from(bucket).remove(out.map(x => x.path));   // 반쯤 올라간 것은 도로 지웁니다
+    throw e;
   }
-  return out;
 }
 
-/* 게시판 첨부 — 사진과 문서를 함께 받습니다.
-   사진은 예전처럼 축소해서 올리고, 문서는 원본 그대로 올립니다. */
-function prepMixed(fileList){
-  const imgs = [], docs = [];
-  for(const f of fileList){ (f.type.startsWith('image/') ? imgs : docs).push(f); }
-  return { imgs, docs };
+/* 게시판 첨부 — 어떤 파일이든 받습니다(실행 파일만 빼고).
+   사진은 줄여서 올려 본문에 크게 보이고, 나머지는 원본 그대로 올려 누르면 열리거나 내려받아집니다.
+   사진이라도 브라우저가 못 여는 형식(아이폰 HEIC 등)은 줄이지 않고 원본 파일로 올립니다. */
+async function prepPostFiles(fileList){
+  const imgs = [], rest = [];
+  for(const f of fileList){
+    if(f.type.startsWith('image/') && f.type !== 'image/svg+xml' && !BLOCK_EXT_RE.test(f.name)){
+      try{
+        const blob = await resizeToBlob(f);
+        imgs.push({ blob, name:f.name.replace(/\.[^.]+$/,'') + '.jpg', preview:URL.createObjectURL(blob) });
+        continue;
+      }catch(e){ /* 못 여는 사진 → 아래에서 원본 파일로 */ }
+    }
+    rest.push(f);
+  }
+  return { imgs, docs: prepDocs(rest, true) };
 }
 async function uploadMixed(bucket, imgPicked, docPicked, folder){
-  const a = await uploadAll(bucket, imgPicked, folder);
-  const b = await uploadDocs(bucket, docPicked, folder);
-  return [...a.map(x=>({...x, kind:'image'})), ...b];
+  const imgs = await uploadAll(bucket, imgPicked, folder);
+  try{
+    const docs = await uploadDocs(bucket, docPicked, folder);
+    return [...imgs.map(x=>({...x, kind:'image'})), ...docs];
+  }catch(e){
+    if(imgs.length) await sb.storage.from(bucket).remove(imgs.map(x => x.path));
+    throw e;
+  }
 }
-/* 첨부 목록을 사진은 썸네일로, 문서는 파일 이름표로 보여줍니다 */
+/* 올리기 전 미리 보기 — 사진은 썸네일, 나머지는 종류 아이콘 + 이름 + 크기 */
+const fileChip = (p) => `<span class="tag brand" style="margin:4px 6px 4px 0">${fileIcon(p.name)} ${esc(p.name)}${
+  p.file?.size ? ` · ${fmtSize(p.file.size)}` : ''}</span>`;
 function previewMixedLocal(sel, imgPicked, docPicked){
   const el = $(sel); if(!el) return;
   el.innerHTML =
     imgPicked.map(p=>`<img src="${p.preview}" alt="${esc(p.name)}" data-zoom="${p.preview}">`).join('') +
-    docPicked.map(p=>`<span class="tag brand" style="margin:4px 6px 4px 0">📎 ${esc(p.name)}</span>`).join('');
+    docPicked.map(fileChip).join('');
   el.querySelectorAll('[data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
 }
 /* 저장된 첨부에서 사진만 골라냅니다(예전 글은 kind 가 없으므로 사진으로 봅니다) */
@@ -3646,7 +3946,7 @@ const imagesOf = (p) => (p.images||[]).filter(a => a.kind !== 'doc');
 const docsOf   = (p) => (p.images||[]).filter(a => a.kind === 'doc');
 function previewDocsLocal(sel, picked){
   const el = $(sel); if(!el) return;
-  el.innerHTML = picked.map(p=>`<span class="tag brand" style="margin:4px 6px 4px 0">📎 ${esc(p.name)}</span>`).join('');
+  el.innerHTML = picked.map(fileChip).join('');
 }
 
 /* ============================================================================
