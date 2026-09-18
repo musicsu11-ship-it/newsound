@@ -1097,3 +1097,166 @@ end $$;
 
 revoke all on function public.admin_delete_user(uuid) from public, anon;
 grant execute on function public.admin_delete_user(uuid) to authenticated;
+
+-- ============================================================================
+--  23. 투표 게시판 (카카오톡 투표처럼)
+--
+--  · 누구나 볼 수 있습니다.
+--  · 투표 만들기: 가입해서 로그인한 사람 (일반 직원·단원 모두). 익명 방문자는
+--    만들 수 없습니다(아무나 마구 만드는 것을 막기 위해).
+--  · 투표 하기  : 익명 투표는 누구나(로그인 안 해도), 실명 투표는 로그인한 사람만.
+--  · 한 사람 한 표. 마감 전에는 다시 투표해서 고를 수 있습니다.
+--
+--  익명 투표는 '누가 무엇을 골랐는지' 를 투표한 본인 말고는 아무도 볼 수 없습니다.
+--  관리자도 화면에서는 볼 수 없고, 사람들에게는 항목별 표 수만 보여 줍니다.
+--  실명 투표는 투표할 때 서버가 계정의 이름을 붙이므로 이름을 꾸며 넣을 수 없습니다.
+--
+--  회원이 삭제되면 그 사람이 올린 투표는 남고(작성자 이름 그대로), 그 사람이 던진
+--  표는 함께 지워져 표 수가 그만큼 줄어듭니다(공감과 같은 방식).
+-- ============================================================================
+
+create table if not exists public.polls (
+  id          uuid primary key default gen_random_uuid(),
+  title       text not null,
+  options     text[] not null,                     -- 항목들 (2~10개)
+  multi       boolean not null default false,      -- 복수 선택
+  anonymous   boolean not null default true,       -- 익명 투표 (끄면 실명)
+  closes_at   timestamptz,                         -- 마감 시각 (비우면 직접 마감할 때까지)
+  closed      boolean not null default false,      -- 만든 사람이 직접 마감
+  author_id   uuid default auth.uid() references auth.users on delete set null,
+  author_name text not null default '',
+  created_at  timestamptz not null default now(),
+  constraint polls_options_count check (array_length(options, 1) between 2 and 10)
+);
+create index if not exists polls_created_idx on public.polls (created_at desc);
+
+create table if not exists public.poll_ballots (
+  poll_id    uuid not null references public.polls on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  choices    int[] not null,                       -- 고른 항목 번호 (0부터)
+  voter_name text not null default '',             -- 실명 투표일 때만 서버가 채움
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (poll_id, user_id)                   -- 한 사람 한 표
+);
+
+alter table public.polls        enable row level security;
+alter table public.poll_ballots enable row level security;
+
+-- 가입한 계정인가? (익명 방문자 계정이 아닌가)
+create or replace function public.is_member_account()
+returns boolean language sql stable as $$
+  select auth.uid() is not null
+     and not coalesce((auth.jwt() ->> 'is_anonymous')::boolean, false)
+$$;
+
+drop policy if exists polls_select on public.polls;
+create policy polls_select on public.polls for select using ( true );
+
+drop policy if exists polls_insert on public.polls;
+create policy polls_insert on public.polls for insert
+  with check ( public.is_member_account() and author_id = auth.uid() );
+
+drop policy if exists polls_update on public.polls;            -- 마감하기
+create policy polls_update on public.polls for update
+  using ( author_id = auth.uid() or public.is_admin() );
+
+drop policy if exists polls_delete on public.polls;
+create policy polls_delete on public.polls for delete
+  using ( author_id = auth.uid() or public.is_admin() );
+
+-- 표: 내 표는 언제나, 실명 투표의 표는 모두에게 보입니다(누가 뭘 골랐는지 보여 주려고).
+--     익명 투표의 남의 표는 아무도 못 봅니다.
+drop policy if exists ballots_select on public.poll_ballots;
+create policy ballots_select on public.poll_ballots for select
+  using ( user_id = auth.uid()
+          or exists (select 1 from public.polls p where p.id = poll_id and not p.anonymous) );
+
+drop policy if exists ballots_insert on public.poll_ballots;
+create policy ballots_insert on public.poll_ballots for insert with check ( user_id = auth.uid() );
+
+drop policy if exists ballots_update on public.poll_ballots;
+create policy ballots_update on public.poll_ballots for update using ( user_id = auth.uid() );
+
+drop policy if exists ballots_delete on public.poll_ballots;
+create policy ballots_delete on public.poll_ballots for delete using ( user_id = auth.uid() );
+
+-- 표를 넣거나 바꿀 때 서버에서 확인합니다 (화면을 거치지 않고 보내도 똑같이 막힙니다)
+create or replace function public.check_ballot()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare p public.polls; n int; nm text;
+begin
+  select * into p from public.polls where id = new.poll_id;
+  if not found then raise exception '없는 투표입니다'; end if;
+  if p.closed or (p.closes_at is not null and p.closes_at <= now()) then
+    raise exception '마감된 투표입니다';
+  end if;
+
+  n := array_length(p.options, 1);
+  if new.choices is null or coalesce(array_length(new.choices, 1), 0) = 0 then
+    raise exception '항목을 하나 이상 골라 주세요';
+  end if;
+  if (select count(*) from unnest(new.choices) c where c < 0 or c >= n) > 0 then
+    raise exception '없는 항목이 들어 있습니다';
+  end if;
+  if (select count(distinct c) from unnest(new.choices) c) <> array_length(new.choices, 1) then
+    raise exception '같은 항목을 두 번 고를 수 없습니다';
+  end if;
+  if not p.multi and array_length(new.choices, 1) <> 1 then
+    raise exception '이 투표는 하나만 고를 수 있습니다';
+  end if;
+
+  if p.anonymous then
+    new.voter_name := '';                           -- 익명 투표는 이름을 아예 남기지 않습니다
+  else
+    if not public.is_member_account() then
+      raise exception '실명 투표는 로그인한 회원만 참여할 수 있습니다';
+    end if;
+    select name into nm from public.profiles where id = auth.uid();
+    if coalesce(trim(nm), '') = '' then
+      raise exception '이름이 등록된 계정만 실명 투표에 참여할 수 있습니다';
+    end if;
+    new.voter_name := trim(nm);                     -- 이름은 서버가 붙입니다(꾸밀 수 없음)
+  end if;
+
+  new.user_id    := auth.uid();
+  new.updated_at := now();
+  return new;
+end $$;
+
+drop trigger if exists poll_ballots_check on public.poll_ballots;
+create trigger poll_ballots_check before insert or update on public.poll_ballots
+  for each row execute function public.check_ballot();
+
+-- 결과 — 항목별 표 수와 참여 인원만 돌려줍니다(익명 투표도 이 숫자는 모두에게 공개)
+create or replace function public.poll_results()
+returns table(poll_id uuid, tally int[], voters int)
+language sql stable security definer set search_path = public as $$
+  select p.id,
+         array(select (select count(*) from public.poll_ballots b
+                        where b.poll_id = p.id and (i - 1) = any(b.choices))::int
+                 from generate_series(1, array_length(p.options, 1)) i
+                order by i),
+         (select count(*)::int from public.poll_ballots b where b.poll_id = p.id)
+    from public.polls p
+$$;
+grant execute on function public.poll_results() to anon, authenticated;
+
+-- 투표를 올린 뒤에는 항목·익명 여부·복수 선택을 바꿀 수 없게 합니다.
+-- 특히 '익명 → 실명' 으로 바꾸면 이미 익명으로 들어온 표가 드러날 수 있어서 막습니다.
+-- (마감하기, 마감 시각 조정만 허용. 작성자 계정이 삭제되어 author_id 가 비워지는 것도 허용)
+create or replace function public.guard_poll_update()
+returns trigger language plpgsql as $$
+begin
+  if new.anonymous is distinct from old.anonymous
+     or new.options is distinct from old.options
+     or new.multi   is distinct from old.multi
+     or (new.author_id is distinct from old.author_id and new.author_id is not null) then
+    raise exception '투표를 올린 뒤에는 항목과 익명 여부를 바꿀 수 없습니다';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists polls_guard on public.polls;
+create trigger polls_guard before update on public.polls
+  for each row execute function public.guard_poll_update();

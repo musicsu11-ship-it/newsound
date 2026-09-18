@@ -101,6 +101,8 @@
   .btn.like{gap:6px}
   .btn.like b{font-weight:900}
   .btn.like.on{color:#fff;background:var(--brand);border-color:var(--brand)}
+  /* hidden 을 단 요소는 무조건 숨깁니다(label.field{display:block} 이 덮어쓰지 못하게) */
+  [hidden]{display:none !important}
   label.field{display:block;margin-bottom:12px;font-size:13px;font-weight:600}
   label.field .req{color:var(--danger)}
   input,select,textarea{width:100%;margin-top:5px;padding:9px 11px;border:1px solid var(--border);border-radius:9px;
@@ -200,6 +202,93 @@
   .act-list .post-row .excerpt{font-size:14.5px;line-height:1.65;-webkit-line-clamp:2;margin-top:6px;word-break:keep-all}
   .act-meta{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
   .act-chip{background:var(--tint);color:#16225c;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 10px}
+  /* ── 투표 (카카오톡 투표처럼) ────────────────────────────────────────── */
+  .pv-tabs{display:flex;gap:8px;margin:0 0 16px}
+  .pv-tabs button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
+    font-size:14.5px;font-weight:800;padding:9px 16px;border-radius:999px;cursor:pointer}
+  .pv-tabs button b{margin-left:6px;color:var(--muted);font-weight:900}
+  .pv-tabs button.on{background:var(--text);border-color:var(--text);color:#fff}
+  .pv-tabs button.on b{color:rgba(255,255,255,.8)}
+  .pv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+
+  .pv-card{background:var(--surface);border:1px solid rgba(22,34,92,.08);border-radius:22px;
+    box-shadow:var(--shadow);padding:22px 22px 18px}
+  .pv-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .pv-state{font-size:12px;font-weight:900;padding:3px 10px;border-radius:999px}
+  .pv-state.on{background:#d9f5ef;color:#0b6b52}
+  .pv-state.off{background:var(--surface-2);color:var(--muted)}
+  .pv-tag{font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--lav);color:#3a3380}
+  .pv-tag.named{background:#fff2d9;color:#7a4f00}
+  .pv-left{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--brand)}
+  .pv-card.done .pv-left{color:var(--muted)}
+  .pv-title{margin:0 0 6px;font-size:19px;font-weight:900;line-height:1.4;letter-spacing:-.02em;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .pv-meta{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .pv-note{font-size:13px;font-weight:700;border-radius:12px;padding:9px 12px;margin:0 0 12px;
+    background:var(--surface-2);color:var(--muted);word-break:keep-all}
+  .pv-note.named{background:#fff2d9;color:#7a4f00}
+
+  /* 고르기 — 칸 전체가 버튼(누르기 쉽게 최소 50px) */
+  .pv-opts{display:flex;flex-direction:column;gap:8px}
+  .pv-opt{display:flex;align-items:center;gap:12px;width:100%;min-height:50px;text-align:left;font:inherit;
+    font-size:16px;font-weight:700;color:var(--text);background:var(--surface);border:1.5px solid var(--border);
+    border-radius:14px;padding:12px 14px;cursor:pointer;transition:border-color .12s,background .12s}
+  .pv-opt:hover:not(:disabled){border-color:var(--text)}
+  .pv-opt:disabled{cursor:not-allowed;opacity:.6}
+  .pv-opt .mk{flex:none;width:22px;height:22px;border:2px solid #b8bdd6;background:#fff;display:grid;place-items:center}
+  .pv-opt .mk.ci{border-radius:50%}
+  .pv-opt .mk.sq{border-radius:6px}
+  .pv-opt.on{border-color:var(--brand);background:var(--brand-weak)}
+  .pv-opt.on .mk{border-color:var(--brand);background:var(--brand)}
+  .pv-opt.on .mk::after{content:'✓';color:#fff;font-size:13px;font-weight:900;line-height:1}
+  .pv-opt .tx{word-break:keep-all;overflow-wrap:anywhere}
+
+  /* 결과 — 막대가 항목 칸 안을 채우고, 글씨는 막대 위에 얹힙니다.
+     글씨는 모두 짙은 남색이라 막대 색과 상관없이 또렷하게 읽힙니다.
+     1위(최다)는 분홍 막대 + '최다' 표, 내가 고른 항목은 분홍 테두리 + ✓ */
+  .pv-results{display:flex;flex-direction:column;gap:9px}
+  .pv-res .bar{position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;min-height:52px;
+    border-radius:14px;background:var(--surface-2);padding:12px 14px;border:1.5px solid transparent}
+  .pv-res .bar > i{position:absolute;left:0;top:0;bottom:0;background:#e1ddf7;transition:width .6s ease}
+  .pv-res.lead .bar > i{background:#ffcadb}
+  .pv-res .lbl,.pv-res .num{position:relative;color:#16225c}
+  .pv-res .lbl{flex:1;min-width:0;font-size:16px;font-weight:700;word-break:keep-all;overflow-wrap:anywhere}
+  .pv-res.lead .lbl{font-weight:900}
+  .pv-res .top{display:inline-block;margin-left:7px;font-size:11.5px;font-weight:900;color:#fff;background:var(--brand);
+    border-radius:999px;padding:1px 8px;vertical-align:2px}
+  .pv-res .num{flex:none;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+  .pv-res .num b{font-size:18px;font-weight:900;letter-spacing:-.02em}
+  .pv-res .num em{font-style:normal;font-size:13px;font-weight:700;color:#4a5382}
+  .pv-res.mine .bar{border-color:var(--brand)}
+  .pv-res .ck{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--brand);
+    color:#fff;font-size:12px;margin-right:7px;vertical-align:-3px}
+  /* 실명 투표 — 항목마다 고른 사람 이름. 8명이 넘으면 '더 보기' */
+  .pv-res .who{display:flex;flex-wrap:wrap;gap:5px;margin:7px 2px 2px}
+  .pv-res .who span{font-size:12.5px;font-weight:700;background:#fff2d9;color:#5c3d00;border-radius:999px;padding:2px 10px}
+  .pv-res .who.more span:nth-child(n+9){display:none}
+  .pv-res .who-more{border:0;background:none;font:inherit;font-size:12.5px;font-weight:800;color:var(--brand);cursor:pointer;padding:2px 4px}
+
+  .pv-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .pv-foot .cnt{font-size:14px;font-weight:800}
+  .pv-foot .cnt em{font-style:normal;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .pv-acts{display:flex;gap:6px}
+  .pv-manage{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+
+  /* 만들기 창 */
+  .pv-optin{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+  .pv-optin input{margin:0;flex:1}
+  .pv-switches{display:flex;flex-direction:column;gap:10px;margin:0 0 16px}
+  .pv-sw{display:flex;gap:10px;align-items:flex-start;cursor:pointer;background:var(--surface-2);border-radius:12px;padding:11px 13px}
+  .pv-sw input{width:18px;height:18px;margin:2px 0 0;flex:none;accent-color:var(--brand)}
+  .pv-sw b{display:block;font-size:14.5px}
+  .pv-sw em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);line-height:1.5;word-break:keep-all}
+
+  @media (max-width:860px){ .pv-grid{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:700px){
+    .pv-card{padding:18px 16px 14px}
+    .pv-title{font-size:17.5px}
+    .pv-res .num b{font-size:17px}
+  }
   @media (max-width:900px){ .act-teams{grid-template-columns:repeat(3,minmax(0,1fr))} }
   @media (max-width:700px){
     .act-teams{gap:8px}
@@ -943,6 +1032,11 @@ const DB = {
   saveEvents(v){ return LS.set('sm_events', v) },
   saveIntro(v){ return LS.set('sm_intro', v) },
   saveSettings(v){ return LS.set('sm_settings', v) },
+  /* 투표 — 투표 목록과 표(기기 하나 = 한 사람) */
+  polls(){ return LS.get('sm_polls', []) },
+  ballots(){ return LS.get('sm_ballots', []) },
+  savePolls(v){ return LS.set('sm_polls', v) },
+  saveBallots(v){ return LS.set('sm_ballots', v) },
 };
 
 /* ---------- session ---------- */
@@ -991,6 +1085,7 @@ const MENUS = [
   { id:'news',     icon:'📰', label:'소식',           roles:ALL,   group:'소식' },
   { id:'activity', icon:'📋', label:'활동',           roles:ALL,   group:'활동' },
   { id:'opinion',  icon:'💬', label:'의견함',        roles:ALL,   group:'의견함' },
+  { id:'vote',     icon:'🗳️', label:'투표',           roles:ALL,   group:'투표' },
   { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
   { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
 
@@ -1081,7 +1176,7 @@ function openLogin(){
    NAV
    ============================================================ */
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
-const PUBLIC_NAV = ['intro','news','activity','opinion','calendar'];
+const PUBLIC_NAV = ['intro','news','activity','opinion','vote','calendar'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
@@ -1957,6 +2052,252 @@ BIND.opinion = () => {
     if(DB.saveOpinions(arr)){ dropMyOp(cId); toast('댓글을 삭제했습니다'); go('opinion'); }
   }));
 };
+
+/* ============================================================
+   투표 (카카오톡 투표처럼) — index.html 과 같은 화면·같은 규칙
+   연습용 파일이라 서버가 없어서 '이 기기 = 한 사람' 으로 한 표를 셉니다.
+   · 로그인(단원 코드 입력)한 사람이 투표를 만들 수 있습니다.
+   · 익명 투표는 누구나, 실명 투표는 로그인한 사람만 참여합니다.
+   ============================================================ */
+let VOTE_TAB = 'open';
+const VOTE_DRAFT = {};
+const VOTE_EDIT  = new Set();
+const VOTE_PEEK  = new Set();
+
+const myVoterId  = () => { let k = LS.get('sm_visitor', null); if(!k){ k = uid(); LS.set('sm_visitor', k); } return k; };
+const signedIn   = () => !!SESSION && SESSION.role !== 'anon';
+const pollClosed = (p) => !!p.closed || (!!p.closes_at && new Date(p.closes_at) <= new Date());
+const myBallot   = (pid) => DB.ballots().find(b => b.poll_id === pid && b.voter === myVoterId());
+const resultOf   = (p) => {
+  const bs = DB.ballots().filter(b => b.poll_id === p.id);
+  return { voters: bs.length, tally: p.options.map((_, i) => bs.filter(b => b.choices.includes(i)).length) };
+};
+const canManagePoll = (p) => (signedIn() && p.author_name === SESSION.name) || SESSION?.role === 'admin';
+const votersOf = (pid, i) => DB.ballots()
+  .filter(b => b.poll_id === pid && b.choices.includes(i) && b.voter_name).map(b => b.voter_name);
+
+function leftText(p){
+  if(pollClosed(p)) return '마감됨';
+  if(!p.closes_at) return '마감 없음';
+  const ms = new Date(p.closes_at) - new Date();
+  const h = Math.floor(ms / 3600000), d = Math.floor(h / 24);
+  return d >= 1 ? `${d}일 남음` : h >= 1 ? `${h}시간 남음` : '곧 마감';
+}
+function shortWhen(iso){
+  const d = new Date(iso);
+  return `${d.getMonth()+1}/${d.getDate()}(${'일월화수목금토'[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function voteBlock(p){
+  if(pollClosed(p)) return '마감된 투표입니다.';
+  if(!p.anonymous){
+    if(!signedIn()) return '실명 투표는 로그인한 회원만 참여할 수 있습니다.';
+    if(!String(SESSION.name||'').trim()) return '이름이 등록된 계정만 실명 투표에 참여할 수 있습니다.';
+  }
+  return '';
+}
+
+function pollCard(p){
+  const closed  = pollClosed(p);
+  const mine    = myBallot(p.id);
+  const res     = resultOf(p);
+  const editing = VOTE_EDIT.has(p.id);
+  const peek    = VOTE_PEEK.has(p.id) && canManagePoll(p);
+  const showRes = closed || (mine && !editing) || peek;
+  const block   = voteBlock(p);
+
+  const max = Math.max(0, ...res.tally);
+  const results = () => `<div class="pv-results">${p.options.map((o, i) => {
+      const v = res.tally[i] || 0;
+      const pct = res.voters ? Math.round(v * 100 / res.voters) : 0;
+      const lead = v > 0 && v === max;
+      const picked = !!mine?.choices?.includes(i);
+      const names = p.anonymous ? [] : votersOf(p.id, i);
+      return `<div class="pv-res${lead ? ' lead' : ''}${picked ? ' mine' : ''}">
+        <div class="bar"><i style="width:${pct}%"></i>
+          <span class="lbl">${picked ? '<b class="ck" aria-label="내가 고른 항목">✓</b>' : ''}${esc(o)}${lead ? '<span class="top">최다</span>' : ''}</span>
+          <span class="num"><b>${pct}%</b><em>${v}표</em></span></div>
+        ${names.length ? `<div class="who${names.length > 8 ? ' more' : ''}">${
+            names.map(n => `<span>${esc(n)}</span>`).join('')}${
+            names.length > 8 ? `<button type="button" class="who-more">+${names.length - 8}명 더 보기</button>` : ''}</div>` : ''}
+      </div>`; }).join('')}</div>`;
+
+  const draft = VOTE_DRAFT[p.id] || (editing && mine ? mine.choices.slice() : []);
+  VOTE_DRAFT[p.id] = draft;
+  const picker = () => `<div class="pv-opts">${p.options.map((o, i) =>
+      `<button type="button" class="pv-opt${draft.includes(i) ? ' on' : ''}" data-pv-pick="${i}"
+         aria-pressed="${draft.includes(i)}" ${block ? 'disabled' : ''}>
+        <span class="mk ${p.multi ? 'sq' : 'ci'}"></span><span class="tx">${esc(o)}</span></button>`).join('')}</div>`;
+
+  return `<article class="pv-card${closed ? ' done' : ''}" data-pv="${p.id}">
+    <div class="pv-top">
+      <span class="pv-state ${closed ? 'off' : 'on'}">${closed ? '종료' : '진행 중'}</span>
+      <span class="pv-tag${p.anonymous ? '' : ' named'}">${p.anonymous ? '익명' : '실명'}</span>
+      ${p.multi ? '<span class="pv-tag">복수 선택</span>' : ''}
+      <span class="pv-left">${leftText(p)}</span>
+    </div>
+    <h3 class="pv-title">${esc(p.title)}</h3>
+    <div class="pv-meta">${esc(p.author_name || '')} · ${fmtDay(p.created_at)}${p.closes_at ? ` · ${shortWhen(p.closes_at)} 마감` : ''}</div>
+    ${!showRes && !p.anonymous && !block ? '<div class="pv-note named">실명 투표예요. 누가 어떤 항목을 골랐는지 모두에게 보입니다.</div>' : ''}
+    ${!showRes && block && !closed ? `<div class="pv-note">${esc(block)}</div>` : ''}
+    ${showRes ? results() : picker()}
+    <div class="pv-foot">
+      <span class="cnt">👥 ${res.voters}명 참여${showRes && p.multi && res.voters ? ' <em>· 복수 선택이라 합계가 100%를 넘을 수 있어요</em>' : ''}</span>
+      ${showRes
+        ? (!closed && mine && !block ? '<button class="btn sm" data-pv-again>다시 투표하기</button>' : '')
+        : (!block ? `<span class="pv-acts">${editing ? '<button class="btn sm ghost" data-pv-cancel>취소</button>' : ''}
+            <button class="btn primary sm" data-pv-vote ${draft.length ? '' : 'disabled'}>${editing ? '바꿔서 투표' : '투표하기'}</button></span>` : '')}
+    </div>
+    ${canManagePoll(p) ? `<div class="pv-manage">
+        ${!closed && !mine ? `<button class="btn sm ghost" data-pv-peek>${peek ? '결과 닫기' : '결과 미리 보기'}</button>` : ''}
+        ${!closed ? '<button class="btn sm" data-pv-close>마감하기</button>' : ''}
+        <button class="btn sm danger" data-pv-del>삭제</button>
+      </div>` : ''}
+  </article>`;
+}
+
+VIEWS.vote = () => {
+  const polls = DB.polls().slice().sort((a, b) => b.created_at.localeCompare(a.created_at));
+  const open = polls.filter(p => !pollClosed(p));
+  const done = polls.filter(p =>  pollClosed(p));
+  const list = VOTE_TAB === 'done' ? done : open;
+  return pageHead('투표', '익명 또는 실명으로 의견을 모읍니다. 한 사람 한 표이고, 마감 전에는 다시 고를 수 있습니다.',
+      signedIn() ? '<button class="btn primary" id="pvNew">＋ 투표 만들기</button>' : '')
+  + (!signedIn() ? '<p class="hint" style="margin:-8px 0 16px">투표를 만들려면 로그인하세요. 익명 투표에는 로그인 없이도 참여할 수 있습니다.</p>' : '')
+  + `<div class="pv-tabs">
+      <button class="${VOTE_TAB === 'open' ? 'on' : ''}" data-pv-tab="open">진행 중<b>${open.length}</b></button>
+      <button class="${VOTE_TAB === 'done' ? 'on' : ''}" data-pv-tab="done">종료<b>${done.length}</b></button>
+    </div>`
+  + (list.length ? `<div class="pv-grid">${list.map(pollCard).join('')}</div>`
+      : `<div class="empty">${VOTE_TAB === 'done' ? '종료된 투표가 없습니다.'
+          : `진행 중인 투표가 없습니다.${signedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`}</div>`);
+};
+
+function redrawVote(){ const y = window.scrollY; go('vote'); window.scrollTo(0, y); }
+
+BIND.vote = () => {
+  $('#pvNew')?.addEventListener('click', openPollForm);
+  $$('#main [data-pv-tab]').forEach(b => b.addEventListener('click', ()=>{ VOTE_TAB = b.dataset.pvTab; go('vote'); }));
+
+  $$('#main [data-pv]').forEach(card => {
+    const pid = card.dataset.pv;
+    const p = DB.polls().find(x => x.id === pid); if(!p) return;
+
+    card.querySelectorAll('[data-pv-pick]').forEach(btn => btn.addEventListener('click', ()=>{
+      const i = Number(btn.dataset.pvPick);
+      let d = VOTE_DRAFT[pid] || [];
+      d = p.multi ? (d.includes(i) ? d.filter(x => x !== i) : d.concat(i)) : [i];
+      VOTE_DRAFT[pid] = d;
+      card.querySelectorAll('[data-pv-pick]').forEach(b => {
+        const on = d.includes(Number(b.dataset.pvPick));
+        b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+      });
+      const vb = card.querySelector('[data-pv-vote]'); if(vb) vb.disabled = !d.length;
+    }));
+
+    card.querySelector('[data-pv-vote]')?.addEventListener('click', ()=>{
+      const choices = (VOTE_DRAFT[pid] || []).slice().sort((a, b) => a - b);
+      const why = voteBlock(p);
+      if(why){ toast(why); return; }
+      if(!choices.length){ toast('항목을 골라 주세요'); return; }
+      if(!p.multi && choices.length !== 1){ toast('이 투표는 하나만 고를 수 있습니다'); return; }
+      const me = myVoterId();
+      const bs = DB.ballots().filter(b => !(b.poll_id === pid && b.voter === me));   // 한 사람 한 표 — 있던 표는 바꿈
+      bs.push({ poll_id: pid, voter: me, choices, voter_name: p.anonymous ? '' : SESSION.name, at: nowISO() });
+      if(!DB.saveBallots(bs)) return;
+      VOTE_EDIT.delete(pid); delete VOTE_DRAFT[pid];
+      toast('투표했습니다'); redrawVote();
+    });
+
+    card.querySelector('[data-pv-again]')?.addEventListener('click', ()=>{
+      VOTE_EDIT.add(pid); VOTE_DRAFT[pid] = (myBallot(pid)?.choices || []).slice(); redrawVote();
+    });
+    card.querySelector('[data-pv-cancel]')?.addEventListener('click', ()=>{
+      VOTE_EDIT.delete(pid); delete VOTE_DRAFT[pid]; redrawVote();
+    });
+    card.querySelector('[data-pv-peek]')?.addEventListener('click', ()=>{
+      VOTE_PEEK.has(pid) ? VOTE_PEEK.delete(pid) : VOTE_PEEK.add(pid); redrawVote();
+    });
+    card.querySelectorAll('.who-more').forEach(b => b.addEventListener('click', ()=>{
+      b.parentElement.classList.remove('more'); b.remove();
+    }));
+    card.querySelector('[data-pv-close]')?.addEventListener('click', ()=>{
+      if(!confirm('이 투표를 지금 마감할까요? 마감하면 더는 투표할 수 없고 결과가 모두에게 보입니다.')) return;
+      DB.savePolls(DB.polls().map(x => x.id === pid ? { ...x, closed: true } : x));
+      toast('마감했습니다'); redrawVote();
+    });
+    card.querySelector('[data-pv-del]')?.addEventListener('click', ()=>{
+      if(!confirm(`"${p.title}" 투표를 삭제할까요? 참여한 표도 모두 지워지고 되돌릴 수 없습니다.`)) return;
+      DB.savePolls(DB.polls().filter(x => x.id !== pid));
+      DB.saveBallots(DB.ballots().filter(b => b.poll_id !== pid));
+      toast('삭제했습니다'); redrawVote();
+    });
+  });
+};
+
+function openPollForm(){
+  const optRow = (v='') => `<div class="pv-optin"><input maxlength="60" value="${esc(v)}" placeholder="항목 입력">
+    <button type="button" class="btn sm ghost" data-pv-rm aria-label="항목 빼기">✕</button></div>`;
+  openModal('투표 만들기', `
+    <label class="field">투표 제목 <span class="req">*</span>
+      <input id="pvTitle" maxlength="120" placeholder="예) 새소리단 워크숍 장소는 어디가 좋을까요?"></label>
+    <div class="field" style="margin-bottom:6px">항목 <span class="req">*</span>
+      <span class="hint" style="display:inline">2~10개</span></div>
+    <div id="pvOpts">${optRow()}${optRow()}${optRow()}</div>
+    <button type="button" class="btn sm" id="pvAdd" style="margin:4px 0 16px">＋ 항목 추가</button>
+    <div class="pv-switches">
+      <label class="pv-sw"><input type="checkbox" id="pvAnon" checked>
+        <span><b>익명 투표</b><em>끄면 실명 투표 — 누가 무엇을 골랐는지 모두에게 보이고, 로그인한 회원만 참여합니다</em></span></label>
+      <label class="pv-sw"><input type="checkbox" id="pvMulti">
+        <span><b>복수 선택</b><em>한 사람이 여러 항목을 고를 수 있습니다</em></span></label>
+    </div>
+    <div class="grid c2">
+      <label class="field">마감<select id="pvClose">
+        <option value="">마감 없음 (직접 마감)</option>
+        <option value="1">1일 뒤</option><option value="3">3일 뒤</option>
+        <option value="7" selected>7일 뒤</option><option value="14">14일 뒤</option>
+        <option value="date">날짜 직접 고르기</option></select></label>
+      <label class="field" id="pvDateWrap" hidden>마감 날짜 <span class="hint" style="display:inline">그날 23:59까지</span>
+        <input type="date" id="pvDate"></label>
+    </div>
+    <div class="row-actions"><button class="btn primary" id="pvSave">투표 올리기</button></div>`);
+
+  const refreshRm = () => {
+    const rows = $$('#pvOpts .pv-optin');
+    rows.forEach(r => r.querySelector('[data-pv-rm]').disabled = rows.length <= 2);
+    $('#pvAdd').disabled = rows.length >= 10;
+  };
+  const bindRm = (row) => row.querySelector('[data-pv-rm]').addEventListener('click', ()=>{ row.remove(); refreshRm(); });
+  $$('#pvOpts .pv-optin').forEach(bindRm); refreshRm();
+  $('#pvAdd').addEventListener('click', ()=>{
+    $('#pvOpts').insertAdjacentHTML('beforeend', optRow());
+    const row = $('#pvOpts').lastElementChild; bindRm(row); refreshRm(); row.querySelector('input').focus();
+  });
+  $('#pvClose').addEventListener('change', ()=>{ $('#pvDateWrap').hidden = $('#pvClose').value !== 'date'; });
+
+  $('#pvSave').addEventListener('click', ()=>{
+    const title = $('#pvTitle').value.trim();
+    const options = $$('#pvOpts input').map(i => i.value.trim()).filter(Boolean);
+    if(!title){ toast('투표 제목을 입력하세요'); return; }
+    if(options.length < 2){ toast('항목을 2개 이상 입력하세요'); return; }
+    if(new Set(options).size !== options.length){ toast('같은 항목이 두 번 들어 있습니다'); return; }
+    let closes_at = null;
+    const c = $('#pvClose').value;
+    if(c === 'date'){
+      const v = $('#pvDate').value;
+      if(!v){ toast('마감 날짜를 고르세요'); return; }
+      const d = new Date(v + 'T23:59:59');
+      if(d <= new Date()){ toast('마감 날짜는 오늘 이후로 골라 주세요'); return; }
+      closes_at = d.toISOString();
+    }else if(c){
+      closes_at = new Date(Date.now() + Number(c) * 86400000).toISOString();
+    }
+    const arr = DB.polls();
+    arr.push({ id: uid(), title, options, multi: $('#pvMulti').checked, anonymous: $('#pvAnon').checked,
+               closes_at, closed: false, author_name: SESSION.name, created_at: nowISO() });
+    if(!DB.savePolls(arr)) return;
+    VOTE_TAB = 'open'; closeModal(); toast('투표를 올렸습니다'); go('vote');
+  });
+}
 
 /* ============================================================
    5) 일정 관리 (캘린더)
