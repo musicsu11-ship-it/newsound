@@ -63,6 +63,8 @@
   label.field .req{color:var(--danger)}
   input,select,textarea{width:100%;margin-top:5px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;
     background:var(--bg);color:var(--text);font-size:13.5px;font-family:inherit}
+  input[type=checkbox]{width:18px;height:18px;margin:0;padding:0;accent-color:var(--brand);cursor:pointer}
+  [hidden]{display:none !important}
   textarea{min-height:90px;resize:vertical}
   input:focus,select:focus,textarea:focus{outline:2px solid var(--brand-weak);border-color:var(--brand)}
   .hint{font-weight:400;color:var(--muted);font-size:11.5px;margin-top:3px}
@@ -89,8 +91,23 @@
   th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:top}
   th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
   tr:hover td{background:var(--surface-2)}
+  /* 좁은 화면에서 칸이 짓눌려 글자가 세로로 쪼개지지 않게, 표는 옆으로 밀어서 봅니다 */
   .table-wrap{overflow-x:auto}
+  .table-wrap table{min-width:640px}
   .empty{text-align:center;color:var(--muted);padding:34px 10px;font-size:13.5px}
+  /* 회원 일괄 권한 변경 — 체크한 사람 수와 바꿀 권한이 화면 아래에 떠 있습니다 */
+  .bulkbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;
+    max-width:calc(100vw - 24px);padding:11px 14px;border:1px solid var(--brand);border-radius:18px;
+    background:var(--surface);box-shadow:0 12px 34px rgba(0,0,0,.5)}
+  .bulkbar b{font-size:13.5px;white-space:nowrap}
+  .bulkbar select{width:auto;margin:0;padding:6px 10px;font-size:13px}
+  .mb-cell{width:34px}
+  body.with-bulk .main{padding-bottom:96px}      /* 떠 있는 막대가 마지막 줄을 가리지 않게 */
+  @media (max-width:560px){
+    .bulkbar{left:10px;right:10px;transform:none;max-width:none;gap:8px;padding:10px 12px}
+    .bulkbar select{flex:1 1 130px}
+  }
   .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
   .stat{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px}
   .stat b{font-size:25px;display:block;font-weight:900;letter-spacing:-.03em}
@@ -472,6 +489,7 @@ let CURRENT='dash';
 function go(id){
   if(!can(id)) id='dash';
   CURRENT=id;
+  document.body.classList.remove('with-bulk');   // 회원 화면의 '떠 있는 막대' 자리 비움 (필요하면 다시 켭니다)
   try{ location.hash=id }catch(e){}
   $$('#navArea .nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.go===id));
   const m=MENUS.find(x=>x.id===id);
@@ -978,11 +996,26 @@ BIND.opinions = () => {
   }));
 };
 
-/* ---------- 회원 ---------- */
+/* ---------- 회원 ----------
+   여러 명을 한꺼번에 바꾸려고 왼쪽 칸에 체크한 사람들. 화면을 다시 그려도 체크가 남습니다. */
+const MB_SEL = new Set();
+const ROLES = ['visitor','member','officer','admin'];
+
 VIEWS.members = () => {
   const ps = realMembers();                    // 익명 접속은 명부에서 제외
   const teams = intro().teams || [];
   const cnt = r => ps.filter(p=>p.role===r).length;
+  const can = isAdmin();
+  /* 체크해 둔 사람이 명부에서 사라졌으면(삭제 등) 체크도 지웁니다 */
+  const pickable = ps.filter(p => p.id !== S.user.id);
+  MB_SEL.forEach(id => { if(!pickable.some(p => p.id === id)) MB_SEL.delete(id); });
+  const allOn = can && pickable.length > 0 && pickable.every(p => MB_SEL.has(p.id));
+  const chkTh = can ? `<input type="checkbox" id="mbAll" ${allOn?'checked':''} aria-label="전체 선택">` : '';
+  const chkTd = (p) => !can ? ''
+    : `<td class="mb-cell">${p.id === S.user.id ? ''
+        : `<input type="checkbox" class="mb-chk" data-mb="${p.id}" ${MB_SEL.has(p.id)?'checked':''}
+             aria-label="${esc(p.name||'이름 없음')} 선택">`}</td>`;
+
   return pageHead('회원 · 권한 관리','권한을 바꾸면 그 사람 화면에 즉시 반영됩니다.'
     + (isAdmin()?'':' (변경은 운영 관리자만 가능합니다)'))
   + `<div class="stat-row">
@@ -992,8 +1025,10 @@ VIEWS.members = () => {
       <div class="stat"><b>${cnt('admin')}</b><span>운영 관리자</span></div></div>
     <div class="card"><h2>회원 목록 (${ps.length})</h2>
       <p class="sub">가입한 사람만 나옵니다. 로그인 없이 둘러본 익명 접속은 표시하지 않습니다.<br>
-        가입 직후에는 '일반 방문자'이니 확인 후 권한을 올려주세요.</p>
-      ${ps.length ? table(['이름','소속 팀','현재 권한','가입일', isAdmin()?'권한 변경':'', isAdmin()?'삭제':''])+ps.map(p=>`<tr>
+        가입 직후에는 '일반 방문자'이니 확인 후 권한을 올려주세요.${
+        can ? '<br><b>여러 명을 한꺼번에 바꾸려면</b> 왼쪽 칸에 체크하세요. 화면 아래에 바꿀 권한을 고르는 칸이 나옵니다.' : ''}</p>
+      ${ps.length ? table([...(can?[chkTh]:[]),'이름','소속 팀','현재 권한','가입일', can?'권한 변경':'', can?'삭제':''])+ps.map(p=>`<tr>
+        ${chkTd(p)}
         <td>${esc(p.name||'(이름 없음)')}${p.id===S.user.id?' <span class="tag brand">나</span>':''}</td>
         <td>${isAdmin() ? `<select data-team-for="${p.id}" style="margin:0;min-width:130px">
               <option value="">미지정</option>
@@ -1002,12 +1037,19 @@ VIEWS.members = () => {
         <td>${esc(ROLE_LABEL[p.role])}</td>
         <td class="hint">${fmtDay(p.created_at)}</td>
         <td>${isAdmin()&&p.id!==S.user.id ? `<select data-role-for="${p.id}">
-          ${['visitor','member','officer','admin'].map(r=>
+          ${ROLES.map(r=>
             `<option value="${r}" ${r===p.role?'selected':''}>${ROLE_LABEL[r]}</option>`).join('')}</select>`
           : (p.id===S.user.id?'<span class="hint">본인</span>':'')}</td>
         <td>${isAdmin() && p.id!==S.user.id
           ? `<button class="btn sm danger" data-delmember="${p.id}">삭제</button>` : ''}</td></tr>`).join('')+tableEnd
-        : `<div class="empty">회원이 없습니다.</div>`}</div>`;
+        : `<div class="empty">회원이 없습니다.</div>`}</div>
+    ${can ? `<div class="bulkbar" id="mbBar" hidden>
+      <b><span id="mbCount">0</span>명 선택</b>
+      <select id="mbRole" aria-label="바꿀 권한">${ROLES.map(r=>
+        `<option value="${r}" ${r==='member'?'selected':''}>${ROLE_LABEL[r]}</option>`).join('')}</select>
+      <button class="btn primary sm" id="mbApply">권한 한꺼번에 바꾸기</button>
+      <button class="btn sm ghost" id="mbClear">선택 해제</button>
+    </div>` : ''}`;
 };
 BIND.members = () => {
   $$('#main [data-team-for]').forEach(sel => sel.addEventListener('change', async ()=>{
@@ -1027,6 +1069,50 @@ BIND.members = () => {
     if(error) return failed('권한 변경', error);
     await refresh(); toast(`${who} 님의 권한을 변경했습니다`); go('members');
   }));
+
+  /* ── 권한 한꺼번에 바꾸기 ──
+     왼쪽 칸에 체크하면 화면 아래 막대가 나오고, 거기서 고른 권한으로 한 번에 바꿉니다.
+     본인 계정은 체크할 수 없습니다(실수로 자기 권한을 내려 관리자에서 빠지는 것을 막습니다). */
+  const boxes = () => $$('#main .mb-chk');
+  const paintBar = () => {
+    const bar = $('#mbBar');
+    document.body.classList.toggle('with-bulk', !!bar && MB_SEL.size > 0);
+    if(!bar) return;
+    bar.hidden = MB_SEL.size === 0;
+    $('#mbCount').textContent = MB_SEL.size;
+    const all = $('#mbAll'), bs = boxes();
+    if(all){
+      all.checked = bs.length > 0 && bs.every(b => b.checked);
+      all.indeterminate = !all.checked && bs.some(b => b.checked);
+    }
+  };
+  boxes().forEach(b => b.addEventListener('change', ()=>{
+    b.checked ? MB_SEL.add(b.dataset.mb) : MB_SEL.delete(b.dataset.mb);
+    paintBar();
+  }));
+  $('#mbAll')?.addEventListener('change', ()=>{
+    const on = $('#mbAll').checked;
+    boxes().forEach(b => { b.checked = on; on ? MB_SEL.add(b.dataset.mb) : MB_SEL.delete(b.dataset.mb); });
+    paintBar();
+  });
+  $('#mbClear')?.addEventListener('click', ()=>{
+    MB_SEL.clear(); boxes().forEach(b => b.checked = false); paintBar();
+  });
+  $('#mbApply')?.addEventListener('click', async ()=>{
+    const ids = [...MB_SEL];
+    if(!ids.length) return;
+    const r = $('#mbRole').value;
+    const names = ids.map(id => S.profiles.find(p => p.id === id)?.name || '(이름 없음)');
+    const preview = names.slice(0, 6).join(', ') + (names.length > 6 ? ` 외 ${names.length - 6}명` : '');
+    if(!confirm(`선택한 ${ids.length}명의 권한을 "${ROLE_LABEL[r]}"(으)로 바꿀까요?\n\n${preview}`)) return;
+    busy(true);
+    const { error } = await sb.from('profiles').update({ role: r }).in('id', ids);
+    busy(false);
+    if(error) return failed('권한 일괄 변경', error);
+    MB_SEL.clear();
+    await refresh(); toast(`${ids.length}명의 권한을 "${ROLE_LABEL[r]}"(으)로 바꿨습니다`); go('members');
+  });
+  paintBar();
 
   /* 회원 삭제 — 운영 관리자만. 계정만 지우고 그 사람이 남긴 기록은 보존합니다.
      실제 삭제와 '부른 사람이 운영 관리자인지' 확인은 데이터베이스 함수가 합니다
