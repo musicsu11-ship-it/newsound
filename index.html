@@ -97,10 +97,14 @@
   .btn.ghost{background:transparent;box-shadow:none}
   .btn.sm{padding:6px 13px;font-size:12.5px}
   .btn.danger{color:var(--danger);border-color:var(--danger-weak);background:var(--danger-weak)}
-  /* 공감해요 — 누르기 전은 흰 버튼, 누른 뒤에는 분홍으로 채웁니다 */
+  /* 공감해요 — 하트 이모지 + 큰 숫자. 누른 뒤에는 분홍 바탕으로 표시합니다 */
   .btn.like{gap:6px}
-  .btn.like b{font-weight:900}
-  .btn.like.on{color:#fff;background:var(--brand);border-color:var(--brand)}
+  .btn.like b{font-weight:900;font-size:15px}
+  .btn.like .ico{font-size:16px;line-height:1}
+  .btn.like.on{color:#c2185b;background:#ffe1ec;border-color:var(--brand)}
+  .btn.like.big{padding:10px 18px;font-size:15px}
+  .btn.like.big b{font-size:18px}
+  .btn.like.big .ico{font-size:19px}
   /* hidden 을 단 요소는 무조건 숨깁니다 — label.field{display:block} 같은 규칙이
      브라우저 기본 [hidden] 을 덮어써서 숨겨야 할 칸이 보이는 일을 막습니다 */
   [hidden]{display:none !important}
@@ -802,7 +806,51 @@
      keep-all  : 한글 단어가 중간에서 쪼개지지 않게 합니다
      word-break: 띄어쓰기 없는 긴 글자·주소가 표를 밀어내지 않게 잘라 줍니다 */
   .op-table .op-body{white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;line-height:1.7}
-  .op-table .subj span{font-size:13px;color:var(--muted)}
+  .op-table .subj .op-meta{display:block;font-size:13px;color:var(--muted)}
+  .op-table .subj .op-meta .mine{color:var(--brand);font-weight:800}
+
+  /* 공감·댓글·조회 — 아이콘과 숫자를 크게 묶어 한눈에 보이게 */
+  .op-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  .op-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;line-height:1.2;
+    white-space:nowrap;background:var(--surface-2);border:1px solid var(--border)}
+  .op-chip .ico{font-size:17px;line-height:1}
+  /* 의견함 표 안에서는 .op-table .subj b 규칙이 먼저 걸리므로 두 가지로 적어 둡니다 */
+  .op-chip b,.op-stats .op-chip b{display:inline;margin:0;font-size:16px;font-weight:900;
+    color:var(--text);letter-spacing:-.01em}
+  .op-chip.like.on{background:#ffe1ec;border-color:#ffc0d5}
+  .op-chip.like.on b{color:#c2185b}
+  .op-chip.views b{color:#3a4478}
+  /* 눈으로는 안 보이고 화면 읽기 프로그램에만 읽히는 글자 */
+  .sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;white-space:nowrap;
+    clip:rect(0 0 0 0);border:0}
+
+  /* 가장 공감한 의견 — 1~3위 시상대 */
+  .awd{background:linear-gradient(140deg,#fff6fa,#f3f2fd);border:1px solid rgba(22,34,92,.07);
+    border-radius:24px;padding:20px 20px 22px;margin:0 0 20px;box-shadow:var(--shadow)}
+  .awd-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .awd-cup{font-size:30px;line-height:1;flex:none}
+  .awd-top h2{margin:0;font-size:18.5px;font-weight:900;letter-spacing:-.02em}
+  .awd-top p{margin:3px 0 0;font-size:13px;color:var(--muted);word-break:keep-all}
+  .awd-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .awd-card{display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--surface);
+    border:1.5px solid transparent;border-radius:18px;padding:15px 16px 14px;cursor:pointer;
+    transition:transform .12s,box-shadow .12s}
+  .awd-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(22,34,92,.13)}
+  .awd-card:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+  .awd-card.r1{border-color:#f0c44a}
+  .awd-card.r2{border-color:#c3c8d6}
+  .awd-card.r3{border-color:#deab7d}
+  .awd-rank{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .awd-rank .medal{font-size:23px;line-height:1}
+  .awd-rank b{font-size:14px;font-weight:900}
+  .awd-body{margin:0;font-size:15px;font-weight:700;line-height:1.6;word-break:keep-all;overflow-wrap:anywhere;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .awd-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+  .awd-like{display:inline-flex;align-items:baseline;gap:5px}
+  .awd-like .ico{font-size:18px}
+  .awd-like b{font-size:21px;font-weight:900;color:#c2185b;letter-spacing:-.02em}
+  .awd-like em{font-style:normal;font-size:12.5px;font-weight:800;color:var(--muted)}
+  .awd-alias{font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap}
   .op-table .c-cat,.op-table .c-alias{font-size:14px}
   .op-table .c-alias{color:var(--muted);font-weight:700;white-space:nowrap}
   /* 분류를 소식 카드와 같은 태그 알약 모양으로 — 표가 카드와 따로 노는 느낌을 줄입니다 */
@@ -956,7 +1004,16 @@
     .op-table .no{width:44px}
     /* 좁은 화면에서는 글씨를 조금만 줄입니다(데스크톱 17px → 16px) */
     .op-table .subj b{font-size:16px}
-    .op-table .subj span{font-size:12.5px;line-height:1.7}
+    .op-table .subj .op-meta{font-size:12.5px;line-height:1.7}
+    .op-stats{gap:6px;margin-top:9px}
+    .op-chip{padding:4px 11px;gap:5px}
+    .op-chip .ico{font-size:16px}
+    .op-chip b,.op-stats .op-chip b{font-size:15px}
+    /* 시상대 — 휴대폰에서는 1~3위를 위아래로 */
+    .awd{padding:16px 15px 18px;border-radius:20px}
+    .awd-grid{grid-template-columns:minmax(0,1fr)}
+    .awd-cup{font-size:26px}
+    .awd-top h2{font-size:17px}
   }
 
   @media (max-width:1200px){
@@ -2495,6 +2552,14 @@ const OP_CAT_COLORS = {
 const catTag = (cat) => { const [bg,fg] = OP_CAT_COLORS[cat] || OP_CAT_COLORS['기타'];
   return `<span class="tag" style="background:${bg};color:${fg}">${esc(cat)}</span>`; };
 
+/* 공감·댓글·조회수를 아이콘 한 덩어리로 — 숫자를 크게 해서 한눈에 보이게 합니다.
+   조회수 칸(schema.sql 26절)이 아직 없으면 조회 아이콘만 빠지고 나머지는 그대로 나옵니다. */
+const opStats = (o, cmts) => `<span class="op-stats">
+  <span class="op-chip like${(o.likes||0) ? ' on' : ''}" title="공감"><span class="ico" aria-hidden="true">💗</span><b>${o.likes||0}</b><em class="sr">공감</em></span>
+  ${cmts ? `<span class="op-chip" title="댓글"><span class="ico" aria-hidden="true">💬</span><b>${cmts}</b><em class="sr">댓글</em></span>` : ''}
+  ${typeof o.views === 'number' ? `<span class="op-chip views" title="조회" data-opviews="${o.id}"><span class="ico" aria-hidden="true">👀</span><b>${o.views}</b><em class="sr">조회</em></span>` : ''}
+</span>`;
+
 VIEWS.opinion = () => {
   const q = (Q.opinion||'').toLowerCase();
   const cmtsOf = id => S.comments.filter(c => c.opinion_id===id);
@@ -2502,12 +2567,31 @@ VIEWS.opinion = () => {
   if(q) list = list.filter(o =>
     (o.body+' '+o.cat+' '+o.alias+' '+cmtsOf(o.id).map(c=>c.body).join(' ')).toLowerCase().includes(q));
 
+  /* 가장 공감한 의견 1~3위 — 공감이 하나라도 있을 때만, 검색 중에는 숨깁니다 */
+  const top = S.opinions.filter(o => (o.likes||0) > 0)
+    .sort((a,b) => (b.likes - a.likes) || b.created_at.localeCompare(a.created_at)).slice(0,3);
+  const MEDAL = ['🥇','🥈','🥉'];
+
   return `<div class="crumb">홈 · 의견함</div>
   <div class="pg-head">
     <div><h1 class="pg-title">의견함</h1>
-      <p class="pg-sub">이름을 밝히지 않아도 괜찮습니다 · 별칭은 자동 부여됩니다</p></div>
+      <p class="pg-sub">말하고 싶었던 이야기, 스쳐간 생각까지 편하게 들려주세요. 한 줄이어도 충분해요.</p></div>
     <button class="btn primary" id="opNew">의견 남기기</button>
   </div>
+
+  ${(!q && top.length) ? `<section class="awd">
+    <div class="awd-top"><span class="awd-cup" aria-hidden="true">🏆</span>
+      <div><h2>가장 공감한 의견</h2>
+        <p>지금까지 공감을 가장 많이 받은 의견 ${top.length}개입니다. 눌러서 바로 볼 수 있어요.</p></div></div>
+    <div class="awd-grid">
+      ${top.map((o,i)=>`<article class="awd-card r${i+1}" data-opopen="${o.id}" tabindex="0" role="button">
+        <div class="awd-rank"><span class="medal" aria-hidden="true">${MEDAL[i]}</span><b>${i+1}위</b>${catTag(o.cat)}</div>
+        <p class="awd-body">${esc(excerpt(o.body, 90))}</p>
+        <div class="awd-foot"><span class="awd-like"><span class="ico" aria-hidden="true">💗</span><b>${o.likes}</b><em>공감</em></span>
+          <span class="awd-alias">${esc(o.alias||'익명')}</span></div>
+      </article>`).join('')}
+    </div>
+  </section>` : ''}
 
   ${searchBar('opinion','의견 내용·별칭·댓글로 검색')}
   ${q?`<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>`:''}
@@ -2515,17 +2599,32 @@ VIEWS.opinion = () => {
   ${list.length ? `<div class="op-table">${table(['번호','내용','분류','작성자'])}
     ${list.map((o,i)=>{
       const mine = o.author_id===S.user?.id;
-      const n    = o.likes || 0;
       return `<tr data-opopen="${o.id}">
         <td class="no">${list.length - i}</td>
         <td class="subj"><b class="op-body">${highlight(o.body, Q.opinion)}</b>
-          <span><i class="m-only">${esc(o.cat)} · ${esc(o.alias||'익명')} · </i>${fmtDay(o.created_at)} 접수${cmtsOf(o.id).length?` · 댓글 ${cmtsOf(o.id).length}`:''}${n?` · 공감 ${n}`:''}${mine?' · 내 글':''}</span></td>
+          <span class="op-meta"><i class="m-only">${esc(o.cat)} · ${esc(o.alias||'익명')} · </i>${fmtDay(o.created_at)} 접수${
+            mine?' · <span class="mine">내 글</span>':''}</span>
+          ${opStats(o, cmtsOf(o.id).length)}</td>
         <td class="c-cat">${catTag(o.cat)}</td>
         <td class="c-alias">${esc(o.alias||'익명')}</td>
       </tr>`;
     }).join('')}${tableEnd}</div>`
     : `<div class="card"><div class="empty">${q?'검색 결과가 없습니다.':'아직 접수된 의견이 없습니다.'}</div></div>`}`;
 };
+
+/* 조회수 — 의견을 열면 1 올라갑니다. 같은 사람이 여러 번 열어도 한 번만 셉니다
+   (누가 봤는지는 아무에게도 보이지 않고 숫자만 쌓입니다 — schema.sql 26절).
+   26절을 아직 실행하지 않았으면 아무 일도 하지 않고 조용히 넘어갑니다. */
+const VIEWED = new Set();
+async function bumpOpinionView(o){
+  if(!S.user || typeof o.views !== 'number' || VIEWED.has(o.id)) return;
+  VIEWED.add(o.id);
+  const { error } = await sb.from('opinion_views').insert({ opinion_id: o.id, user_id: S.user.id });
+  if(error) return;                       // 이미 본 의견이거나 표가 아직 없는 경우
+  o.views = (o.views || 0) + 1;
+  const inModal = $('#opViews b'); if(inModal) inModal.textContent = o.views;
+  const inList  = $(`[data-opviews="${o.id}"] b`); if(inList) inList.textContent = o.views;
+}
 
 /* 의견 상세 — 본문·댓글·삭제 */
 function openOpinion(id){
@@ -2549,8 +2648,8 @@ function openOpinion(id){
       </div>
       <div class="cm-body">${esc(c.body)}</div>
       <div class="cm-acts">
-        ${S.cLikesReady ? `<button class="btn sm like${cl?' on':''}" style="padding:3px 11px;font-size:12px"
-          data-clike="${c.id}">${cl?'♥':'♡'} 공감 <b>${c.likes||0}</b></button>` : ''}
+        ${S.cLikesReady ? `<button class="btn sm like${cl?' on':''}" data-clike="${c.id}">
+          <span class="ico" aria-hidden="true">💗</span> 공감 <b>${c.likes||0}</b></button>` : ''}
         ${S.repliesReady ? `<button class="btn sm ghost" style="padding:3px 11px;font-size:12px"
           data-creply="${isReply ? c.parent_id : c.id}">답글</button>` : ''}
       </div>
@@ -2559,9 +2658,11 @@ function openOpinion(id){
   openModal(`${o.cat} · ${o.alias||'익명'}`, `
     <div class="hint" style="margin-bottom:12px">${fmt(o.created_at)} 접수</div>
     <div style="white-space:pre-wrap;font-size:15px;font-weight:600">${esc(o.body)}</div>
-    <div class="row-actions" style="margin-top:16px">
-      ${S.likesReady ? `<button class="btn sm like${liked?' on':''}" id="opLike">
-        ${liked?'♥':'♡'} 공감해요 <b>${o.likes||0}</b></button>` : ''}
+    <div class="row-actions" style="margin-top:16px;align-items:center">
+      ${S.likesReady ? `<button class="btn like big${liked?' on':''}" id="opLike">
+        <span class="ico" aria-hidden="true">💗</span> 공감해요 <b>${o.likes||0}</b></button>` : ''}
+      ${typeof o.views === 'number' ? `<span class="op-chip views" id="opViews" title="조회">
+        <span class="ico" aria-hidden="true">👀</span><b>${o.views}</b><em class="sr">조회</em></span>` : ''}
       ${(mine||isAdmin()) ? `<button class="btn sm danger" id="opDel">${mine?'내 글 삭제':'관리자 삭제'}</button>`:''}
     </div>
     <div class="cmt-list" style="margin-top:18px">
@@ -2570,6 +2671,8 @@ function openOpinion(id){
       <div class="cmt-form"><input id="opCmt" placeholder="익명으로 댓글 남기기">
         <button class="btn sm" id="opCmtAdd">등록</button></div>
     </div>`);
+
+  bumpOpinionView(o);        // 열어 본 사람 수 — 같은 사람은 한 번만 셉니다
 
   /* 공감해요 — 한 계정이 한 의견에 한 번만. 다시 누르면 취소됩니다.
      같은 사람이 두 번 저장되는 것은 데이터베이스에서도 막아 두었습니다. */
@@ -2688,7 +2791,13 @@ function openOpinionForm(){
 BIND.opinion = () => {
   bindSearch('opinion');
   $('#opNew').addEventListener('click', openOpinionForm);
-  $$('#main [data-opopen]').forEach(tr => tr.addEventListener('click', ()=> openOpinion(tr.dataset.opopen)));
+  $$('#main [data-opopen]').forEach(el => {
+    el.addEventListener('click', ()=> openOpinion(el.dataset.opopen));
+    /* 시상대 카드는 표가 아니라 카드라서 키보드(엔터·스페이스)로도 열 수 있게 합니다 */
+    if(el.tagName !== 'TR') el.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openOpinion(el.dataset.opopen); }
+    });
+  });
 };
 
 

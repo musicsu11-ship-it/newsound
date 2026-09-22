@@ -98,9 +98,14 @@
   .btn.sm{padding:6px 10px;font-size:12.5px}
   .btn.danger{color:var(--danger);border-color:var(--danger-weak)}
   /* 공감해요 — 누르기 전은 흰 버튼, 누른 뒤에는 분홍으로 채웁니다 */
+  /* 공감해요 — 하트 이모지 + 큰 숫자. 누른 뒤에는 분홍 바탕으로 표시합니다 */
   .btn.like{gap:6px}
-  .btn.like b{font-weight:900}
-  .btn.like.on{color:#fff;background:var(--brand);border-color:var(--brand)}
+  .btn.like b{font-weight:900;font-size:15px}
+  .btn.like .ico{font-size:16px;line-height:1}
+  .btn.like.on{color:#c2185b;background:#ffe1ec;border-color:var(--brand)}
+  .btn.like.big{padding:10px 18px;font-size:15px}
+  .btn.like.big b{font-size:18px}
+  .btn.like.big .ico{font-size:19px}
   /* hidden 을 단 요소는 무조건 숨깁니다(label.field{display:block} 이 덮어쓰지 못하게) */
   [hidden]{display:none !important}
   label.field{display:block;margin-bottom:12px;font-size:13px;font-weight:600}
@@ -784,6 +789,47 @@
   .op-table .no{color:var(--muted);font-weight:800;width:56px}
   .op-table .subj b{display:block;font-size:15px;font-weight:800;margin-bottom:4px}
   .op-table .subj span{font-size:12px;color:var(--muted)}
+  /* 공감·댓글 — 아이콘과 숫자를 크게 (index.html 과 같은 모양) */
+  .op-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;line-height:1.2;
+    white-space:nowrap;background:var(--surface-2);border:1px solid var(--border)}
+  .op-chip .ico{font-size:17px;line-height:1}
+  .op-chip b{font-size:16px;font-weight:900;color:var(--text);letter-spacing:-.01em}
+  /* 시상대에서 내려왔을 때 잠깐 표시 */
+  .op-flash{outline:3px solid var(--brand);outline-offset:3px;border-radius:18px;transition:outline-color .4s}
+
+  /* 가장 공감한 의견 — 1~3위 시상대 */
+  .awd{background:linear-gradient(140deg,#fff6fa,#f3f2fd);border:1px solid rgba(22,34,92,.07);
+    border-radius:24px;padding:20px 20px 22px;margin:0 0 20px;box-shadow:var(--shadow)}
+  .awd-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .awd-cup{font-size:30px;line-height:1;flex:none}
+  .awd-top h2{margin:0;font-size:18.5px;font-weight:900;letter-spacing:-.02em}
+  .awd-top p{margin:3px 0 0;font-size:13px;color:var(--muted);word-break:keep-all}
+  .awd-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .awd-card{display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--surface);
+    border:1.5px solid transparent;border-radius:18px;padding:15px 16px 14px;cursor:pointer;
+    transition:transform .12s,box-shadow .12s}
+  .awd-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(22,34,92,.13)}
+  .awd-card:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+  .awd-card.r1{border-color:#f0c44a}
+  .awd-card.r2{border-color:#c3c8d6}
+  .awd-card.r3{border-color:#deab7d}
+  .awd-rank{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .awd-rank .medal{font-size:23px;line-height:1}
+  .awd-rank b{font-size:14px;font-weight:900}
+  .awd-body{margin:0;font-size:15px;font-weight:700;line-height:1.6;word-break:keep-all;overflow-wrap:anywhere;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .awd-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+  .awd-like{display:inline-flex;align-items:baseline;gap:5px}
+  .awd-like .ico{font-size:18px}
+  .awd-like b{font-size:21px;font-weight:900;color:#c2185b;letter-spacing:-.02em}
+  .awd-like em{font-style:normal;font-size:12.5px;font-weight:800;color:var(--muted)}
+  .awd-alias{font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+  @media (max-width:700px){
+    .awd{padding:16px 15px 18px;border-radius:20px}
+    .awd-grid{grid-template-columns:minmax(0,1fr)}
+    .awd-cup{font-size:26px}
+    .awd-top h2{font-size:17px}
+  }
 
   /* 일정 — 캘린더 + 사이드 */
   .cal-panel{background:var(--surface);border:1px solid rgba(22,34,92,.06);border-radius:24px;
@@ -2024,7 +2070,25 @@ VIEWS.opinion = () => {
     (o.body + ' ' + o.cat + ' ' + o.alias + ' ' + (o.comments||[]).map(c=>c.body).join(' ')).toLowerCase().includes(q));
   const isAdmin = SESSION.role==='admin';
 
-  return pageHead('의견함', '누구나 익명으로 의견을 남기고 댓글을 달 수 있습니다. 작성한 글은 방문자 모두에게 공개됩니다.')
+  /* 가장 공감한 의견 1~3위 — 공감이 하나라도 있을 때만, 검색 중에는 숨깁니다 */
+  const top = DB.opinions().filter(o => (o.likes||0) > 0)
+    .sort((a,b) => (b.likes - a.likes) || b.at.localeCompare(a.at)).slice(0,3);
+  const MEDAL = ['🥇','🥈','🥉'];
+
+  return pageHead('의견함', '말하고 싶었던 이야기, 스쳐간 생각까지 편하게 들려주세요. 한 줄이어도 충분해요.')
+  + ((!q && top.length) ? `<section class="awd">
+      <div class="awd-top"><span class="awd-cup" aria-hidden="true">🏆</span>
+        <div><h2>가장 공감한 의견</h2>
+          <p>지금까지 공감을 가장 많이 받은 의견 ${top.length}개입니다. 눌러서 바로 볼 수 있어요.</p></div></div>
+      <div class="awd-grid">
+        ${top.map((o,i)=>`<article class="awd-card r${i+1}" data-opjump="${o.id}" tabindex="0" role="button">
+          <div class="awd-rank"><span class="medal" aria-hidden="true">${MEDAL[i]}</span><b>${i+1}위</b>${catTag(o.cat)}</div>
+          <p class="awd-body">${esc(excerpt(o.body, 90))}</p>
+          <div class="awd-foot"><span class="awd-like"><span class="ico" aria-hidden="true">💗</span><b>${o.likes}</b><em>공감</em></span>
+            <span class="awd-alias">${esc(o.alias||'익명')}</span></div>
+        </article>`).join('')}
+      </div>
+    </section>` : '')
   + `<div class="notice">현재 내 별칭은 <b>${esc(myAlias())}</b> 입니다.
       이름·소속·연락처는 저장하지 않으며, 같은 기기에서는 항상 같은 별칭이 표시됩니다.</div>
     <div class="card">
@@ -2051,7 +2115,7 @@ VIEWS.opinion = () => {
         else if(o.pin) btns += `<button class="btn sm danger" data-del="${o.id}">비밀번호로 삭제</button>`;
         if(isAdmin)    btns += `<button class="btn sm danger" data-admindel="${o.id}">관리자 삭제</button>`;
         const cmts = o.comments || [];
-        return `<div class="op-item">
+        return `<div class="op-item" id="op-${o.id}">
           <div class="op-head">
             <div>${catTag(o.cat)}
               <b style="margin-left:8px;font-size:13.5px">${esc(o.alias||'익명')}</b>
@@ -2060,8 +2124,9 @@ VIEWS.opinion = () => {
           </div>
           <div class="op-body">${highlight(o.body, Q.opinion)}</div>
           <div class="row-actions">
-            <button class="btn sm like${likedOp(o.id)?' on':''}" data-like="${o.id}">
-              ${likedOp(o.id)?'♥':'♡'} 공감해요 <b>${o.likes||0}</b></button>
+            <button class="btn like big${likedOp(o.id)?' on':''}" data-like="${o.id}">
+              <span class="ico" aria-hidden="true">💗</span> 공감해요 <b>${o.likes||0}</b></button>
+            ${cmts.length ? `<span class="op-chip" title="댓글"><span class="ico" aria-hidden="true">💬</span><b>${cmts.length}</b></span>` : ''}
             ${btns}
           </div>
           <div class="cmt-list">
@@ -2077,8 +2142,8 @@ VIEWS.opinion = () => {
                         data-cdel="${o.id}:${c.id}">삭제</button>`:''}</div>
                   <div class="cm-body">${highlight(c.body, Q.opinion)}</div>
                   <div class="cm-acts">
-                    <button class="btn sm like${cl?' on':''}" style="padding:3px 11px;font-size:12px"
-                      data-clike="${o.id}:${c.id}">${cl?'♥':'♡'} 공감 <b>${c.likes||0}</b></button>
+                    <button class="btn sm like${cl?' on':''}" data-clike="${o.id}:${c.id}">
+                      <span class="ico" aria-hidden="true">💗</span> 공감 <b>${c.likes||0}</b></button>
                     <button class="btn sm ghost" style="padding:3px 11px;font-size:12px"
                       data-creply="${o.id}:${isReply ? c.parentId : c.id}">답글</button>
                   </div></div>`;
@@ -2096,6 +2161,18 @@ VIEWS.opinion = () => {
 };
 BIND.opinion = () => {
   bindSearch('opinion');
+
+  /* 시상대 카드 — 누르면 그 의견 자리로 내려가 잠깐 표시해 줍니다 */
+  const jump = (id) => {
+    const el = $(`#op-${id}`); if(!el) return;
+    el.scrollIntoView({ behavior:'smooth', block:'center' });
+    el.classList.add('op-flash');
+    setTimeout(()=> el.classList.remove('op-flash'), 1600);
+  };
+  $$('#main [data-opjump]').forEach(el => {
+    el.addEventListener('click', ()=> jump(el.dataset.opjump));
+    el.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); jump(el.dataset.opjump); } });
+  });
 
   /* 공감해요 — 한 번만 누를 수 있고, 다시 누르면 취소됩니다 */
   $$('#main [data-like]').forEach(b => b.addEventListener('click', ()=>{

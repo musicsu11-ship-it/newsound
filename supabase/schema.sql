@@ -1347,3 +1347,48 @@ begin
   end if;
   return new;
 end $$;
+
+-- ============================================================================
+--  26. 의견함 조회수
+--
+--  의견을 열어 본 사람 수입니다. 같은 사람이 여러 번 열어도 1로 셉니다.
+--  16절 '공감해요' 와 똑같은 방식이라, 누가 봤는지는 남에게 보이지 않습니다.
+--  익명 의견함이라 '누가 어떤 의견을 봤는지' 가 보이면 익명이 아니게 되기 때문입니다.
+--    · 본 기록은 '내가 본 것' 만 읽을 수 있고
+--    · 전체 개수는 opinions.views 칸에 숫자로만 쌓아 그것만 보여 줍니다
+-- ============================================================================
+
+alter table public.opinions add column if not exists views int not null default 0;
+
+create table if not exists public.opinion_views (
+  opinion_id uuid not null references public.opinions on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (opinion_id, user_id)          -- 한 사람은 한 의견에 한 번만 셉니다
+);
+alter table public.opinion_views enable row level security;
+
+drop policy if exists opview_select on public.opinion_views;
+create policy opview_select on public.opinion_views for select
+  using ( user_id = auth.uid() );            -- 내가 본 것만 보입니다
+
+drop policy if exists opview_insert on public.opinion_views;
+create policy opview_insert on public.opinion_views for insert
+  with check ( user_id = auth.uid() );
+
+-- 조회 개수를 opinions.views 에 반영합니다(공감과 같은 방식).
+create or replace function public.bump_view()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  update public.opinions set views = views + 1 where id = new.opinion_id;
+  return new;
+end $$;
+
+drop trigger if exists opinion_views_bump on public.opinion_views;
+create trigger opinion_views_bump
+  after insert on public.opinion_views
+  for each row execute function public.bump_view();
+
+-- 이미 쌓인 기록이 있다면 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
+update public.opinions o
+   set views = (select count(*) from public.opinion_views v where v.opinion_id = o.id);

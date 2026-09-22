@@ -1,5 +1,5 @@
 -- ============================================================================
---  새소리단 — 지금 실행해야 하는 SQL  (2026-09-18, 밸런스 게임)
+--  새소리단 — 지금 실행해야 하는 SQL  (2026-09-22, 의견함 조회수)
 --
 --  ▷ 하는 법
 --     1. 이 파일 안을 아무 데나 클릭
@@ -9,60 +9,68 @@
 --     5. 'Success' 라고 나오면 끝입니다.
 --
 --  ▷ 이번에도 짧습니다
---     지난번 SQL(24절, 투표 사진)까지 실행되어 있는 것을 확인했습니다.
---     이번에 새로 생긴 25절만 들어 있습니다.
+--     지난번 SQL(25절, 밸런스 게임)까지 실행되어 있는 것을 확인했습니다.
+--     이번에 새로 생긴 26절만 들어 있습니다.
 --
 --  ▷ 안전한가요?
---     네. 글·사진·투표·가입한 회원은 지우지 않습니다.
+--     네. 글·사진·의견·투표·가입한 회원은 지우지 않습니다.
 --     여러 번 실행해도 같은 결과가 나오게 만들어 두었습니다.
 --
 --  ▷ 무엇이 바뀌나요?
---     1) 투표 게시판에 '밸런스 게임(A vs B)' 을 올릴 수 있게 합니다.
---        지금 있는 투표는 모두 '일반 투표' 로 그대로 남습니다.
---     2) 밸런스 게임은 선택지가 꼭 두 개이고, 하나만 고르게 합니다.
---     3) 올린 뒤에는 투표 ↔ 밸런스 게임 종류를 바꿀 수 없게 합니다.
+--     1) 의견함에 '조회수' 를 만듭니다. 의견을 열어 보면 1씩 올라갑니다.
+--     2) 같은 사람이 여러 번 열어도 1로 셉니다.
+--     3) 누가 봤는지는 아무에게도 보이지 않습니다(숫자만 공개).
+--        의견함이 익명이라, '누가 어떤 의견을 봤는지' 가 보이면 안 되기 때문입니다.
 --
---     ※ 실행하기 전에는 '밸런스 게임 만들기' 를 누르면 안내만 나오고,
---       일반 투표는 지금처럼 그대로 쓸 수 있습니다.
---     ※ 게시판 첨부파일 개선(어떤 파일이든 열기)은 SQL 없이 바로 적용됩니다.
+--     ※ 실행하기 전에는 조회수 칸만 안 보일 뿐, 의견함은 지금처럼 그대로 쓸 수 있습니다.
+--     ※ 공감 아이콘 키우기, '가장 공감한 의견' 시상대, 안내 문구 변경은
+--       SQL 없이 바로 적용됩니다.
 --
---  ▷ 이 내용은 supabase/schema.sql 25절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 26절과 같습니다.
 --     schema.sql 이 원본이고, 이 파일은 복사하기 편하라고 뽑아 둔 것입니다.
 -- ============================================================================
 
 -- ============================================================================
---  25. 밸런스 게임 (투표 게시판 안의 'A vs B' 코너)
+--  26. 의견함 조회수
 --
---  · 투표와 같은 표·같은 규칙(한 사람 한 표, 익명/실명, 마감)을 그대로 씁니다.
---    다른 점은 종류(kind)가 'balance' 이고, 선택지가 딱 두 개(A·B)라는 것뿐입니다.
---  · 올린 뒤에는 종류도 바꿀 수 없습니다(23·24절 규칙에 더함).
+--  의견을 열어 본 사람 수입니다. 같은 사람이 여러 번 열어도 1로 셉니다.
+--  16절 '공감해요' 와 똑같은 방식이라, 누가 봤는지는 남에게 보이지 않습니다.
+--  익명 의견함이라 '누가 어떤 의견을 봤는지' 가 보이면 익명이 아니게 되기 때문입니다.
+--    · 본 기록은 '내가 본 것' 만 읽을 수 있고
+--    · 전체 개수는 opinions.views 칸에 숫자로만 쌓아 그것만 보여 줍니다
 -- ============================================================================
 
-alter table public.polls add column if not exists kind text not null default 'poll';
+alter table public.opinions add column if not exists views int not null default 0;
 
-do $$
-begin
-  -- 종류는 '투표(poll)' 아니면 '밸런스 게임(balance)'
-  if not exists (select 1 from pg_constraint where conname = 'polls_kind_check') then
-    alter table public.polls add constraint polls_kind_check check (kind in ('poll', 'balance'));
-  end if;
-  -- 밸런스 게임은 선택지 두 개, 하나만 고르기
-  if not exists (select 1 from pg_constraint where conname = 'polls_balance_shape') then
-    alter table public.polls add constraint polls_balance_shape
-      check (kind <> 'balance' or (cardinality(options) = 2 and not multi));
-  end if;
-end $$;
+create table if not exists public.opinion_views (
+  opinion_id uuid not null references public.opinions on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (opinion_id, user_id)          -- 한 사람은 한 의견에 한 번만 셉니다
+);
+alter table public.opinion_views enable row level security;
 
-create or replace function public.guard_poll_update()
-returns trigger language plpgsql as $$
+drop policy if exists opview_select on public.opinion_views;
+create policy opview_select on public.opinion_views for select
+  using ( user_id = auth.uid() );            -- 내가 본 것만 보입니다
+
+drop policy if exists opview_insert on public.opinion_views;
+create policy opview_insert on public.opinion_views for insert
+  with check ( user_id = auth.uid() );
+
+-- 조회 개수를 opinions.views 에 반영합니다(공감과 같은 방식).
+create or replace function public.bump_view()
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  if new.anonymous is distinct from old.anonymous
-     or new.options       is distinct from old.options
-     or new.option_images is distinct from old.option_images
-     or new.kind          is distinct from old.kind
-     or new.multi         is distinct from old.multi
-     or (new.author_id is distinct from old.author_id and new.author_id is not null) then
-    raise exception '투표를 올린 뒤에는 항목과 익명 여부를 바꿀 수 없습니다';
-  end if;
+  update public.opinions set views = views + 1 where id = new.opinion_id;
   return new;
 end $$;
+
+drop trigger if exists opinion_views_bump on public.opinion_views;
+create trigger opinion_views_bump
+  after insert on public.opinion_views
+  for each row execute function public.bump_view();
+
+-- 이미 쌓인 기록이 있다면 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
+update public.opinions o
+   set views = (select count(*) from public.opinion_views v where v.opinion_id = o.id);
