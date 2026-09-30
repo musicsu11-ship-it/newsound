@@ -230,6 +230,50 @@
   .act-list .post-row .excerpt{font-size:14.5px;line-height:1.65;-webkit-line-clamp:2;margin-top:6px;word-break:keep-all}
   .act-meta{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
   .act-chip{background:var(--tint);color:#16225c;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 10px}
+  /* ── 협업 게시판 (단원 전용) — index.html 과 같은 화면 ── */
+  .cb-sum{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
+  .cb-state{font-size:12.5px;font-weight:900;border-radius:999px;padding:4px 12px;white-space:nowrap}
+  .cb-state b{margin-left:5px;font-weight:900}
+  .cb-state.open{background:#d9f5ef;color:#0b6b52}
+  .cb-state.full{background:#fff2d9;color:#7a4f00}
+  .cb-state.doing{background:#ffe1ec;color:#c2185b}
+  .cb-state.done{background:var(--surface-2);color:var(--muted)}
+  .cb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+  .cb-card{background:var(--surface);border:1px solid rgba(22,34,92,.08);border-radius:22px;
+    box-shadow:var(--shadow);padding:20px 20px 16px;cursor:pointer;min-width:0;
+    transition:transform .12s,box-shadow .12s}
+  .cb-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(22,34,92,.14)}
+  .cb-card.done{opacity:.85}
+  .cb-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .cb-need{font-size:12.5px;font-weight:800;color:var(--brand)}
+  .cb-top .hint{margin-left:auto}
+  .cb-card h3{margin:0 0 8px;font-size:17.5px;font-weight:900;line-height:1.45;letter-spacing:-.02em;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .cb-body{margin:0;font-size:14.5px;line-height:1.65;color:var(--muted);word-break:keep-all;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .cb-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)}
+  .cb-who{display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0}
+  .cb-who .ico{font-size:15px;margin-right:2px}
+  .cb-who span{font-size:12.5px;font-weight:800;background:var(--surface-2);border-radius:999px;padding:3px 10px}
+  .cb-who .more{background:var(--lav);color:#3a3380}
+  .cb-by{font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .cb-by b{color:var(--brand)}
+  .cb-detail{margin-top:18px;padding:16px;border-radius:18px;background:var(--surface-2);border:1px solid var(--border)}
+  .cb-dhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .cb-names{display:flex;gap:7px;flex-wrap:wrap}
+  .cb-name{display:inline-flex;align-items:baseline;gap:6px;font-size:13.5px;font-weight:800;
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:5px 12px}
+  .cb-name.me{border-color:var(--brand);color:var(--brand)}
+  .cb-name em{font-style:normal;font-size:12px;font-weight:600;color:var(--muted)}
+  .cb-admin{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+  @media (max-width:860px){ .cb-grid{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:700px){
+    .cb-card{padding:17px 16px 14px;border-radius:18px}
+    .cb-card h3{font-size:16.5px}
+    .cb-admin{margin-left:0;width:100%}
+  }
+
   /* ── 투표 (카카오톡 투표처럼) ────────────────────────────────────────── */
   .pv-tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
   .pv-tabs button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
@@ -1269,6 +1313,10 @@ const BOARDS = {
   activity: { label:'활동', icon:'📋', layout:'list',
             desc:'새소리단의 활동을 기록하는 게시판입니다. 누구나 볼 수 있습니다.',
             read:ALL,   write:INNER },
+  /* 협업 — 단원 전용. 글 하나가 '협업 제안' 이고 다른 단원이 '참여하기' 를 누릅니다 */
+  collab: { label:'협업', icon:'🤝', layout:'collab',
+            desc:'팀을 넘어 함께할 일을 제안하고 같이 할 사람을 모으는 공간입니다.',
+            read:INNER, write:INNER },
 };
 
 /* ---------- 메뉴 (권한별) ---------- */
@@ -1282,6 +1330,7 @@ const MENUS = [
   { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
   { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
 
+  { id:'collab',   icon:'🤝', label:'협업',          roles:INNER, group:'새소리단 공간' },
   { id:'notice',   icon:'📢', label:'공지방',        roles:INNER, group:'새소리단 공간' },
   { id:'free',     icon:'💭', label:'자유방',        roles:INNER, group:'새소리단 공간' },
   { id:'share',    icon:'📸', label:'새소리단 공간',  roles:INNER, group:'새소리단 공간' },
@@ -1815,6 +1864,19 @@ const actTeams = () => (DB.intro().teams || []).map((t, i) => {
 const actTeam = (no) => actTeams().find(t => t.no === Number(no)) || null;
 let ACT_TEAM = 0;                  // 활동 게시판에서 보고 있는 팀 (0 = 전체)
 
+/* ── 협업 게시판 도우미 (index.html 과 같은 규칙) ─────────────────────────
+   연습용 파일은 서버가 없어서 참여자 명단을 글 안(joins)에 같이 저장하고,
+   '이 기기 = 한 사람' 으로 한 번만 참여하게 합니다. */
+const joinsOf     = (p) => p.joins || [];
+const myJoin      = (p) => joinsOf(p).find(j => j.who === myVoterId());
+const collabState = (p) => ['open','doing','done'].includes(p.collabStatus) ? p.collabStatus : 'open';
+const collabFull  = (p) => !!p.collabNeed && joinsOf(p).length >= p.collabNeed;
+const COLLAB_LABEL = { open:'모집 중', doing:'진행 중', done:'마무리' };
+const collabTag = (p) => {
+  const st = collabState(p), full = st === 'open' && collabFull(p);
+  return `<span class="cb-state ${full ? 'full' : st}">${full ? '모집 완료' : COLLAB_LABEL[st]}</span>`;
+};
+
 function boardView(key){
   const b = BOARDS[key];
   const q = (Q[key]||'').toLowerCase();
@@ -1867,6 +1929,43 @@ function boardView(key){
 
   const writeBtn = canWrite(key) ? `<button class="btn primary" id="bdWrite">✏️ 글쓰기</button>` : '';
   let body = '';
+
+  /* ── 협업: 제안 카드 + 참여자 (index.html 과 같은 화면) ── */
+  if(key === 'collab'){
+    const rank = { open:0, doing:1, done:2 };
+    const shown = list.slice().sort((a,c) =>
+      (rank[collabState(a)] ?? 0) - (rank[collabState(c)] ?? 0) || c.at.localeCompare(a.at));
+    const cnt = (st) => list.filter(p => collabState(p) === st).length;
+    return pageHead('협업', b.desc + ' 단원끼리만 보이는 공간입니다.',
+        canWrite(key) ? '<button class="btn primary" id="bdWrite">＋ 협업 제안하기</button>' : '')
+      + `<div class="cb-sum">
+          <span class="cb-state open">모집 중 <b>${cnt('open')}</b></span>
+          <span class="cb-state doing">진행 중 <b>${cnt('doing')}</b></span>
+          <span class="cb-state done">마무리 <b>${cnt('done')}</b></span>
+        </div>`
+      + searchBar(key, '제목·내용·작성자로 검색')
+      + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
+      + (shown.length ? `<div class="cb-grid">${shown.map(p => {
+          const who = joinsOf(p), mine = !!myJoin(p);
+          return `<article class="cb-card ${collabState(p)}" data-open-post="${p.id}">
+            <div class="cb-top">${collabTag(p)}
+              ${p.collabNeed ? `<span class="cb-need">${who.length}/${p.collabNeed}명</span>`
+                             : `<span class="cb-need">${who.length}명 참여</span>`}
+              <span class="hint">${fmtDay(p.at)}</span></div>
+            <h3>${p.pinned ? '<span class="tag brand">공지</span> ' : ''}${highlight(p.title, Q[key])}${
+              (p.atts||[]).length ? ` <span class="hint">📎${p.atts.length}</span>` : ''}</h3>
+            <p class="cb-body">${highlight(excerpt(p.body, 120), Q[key])}</p>
+            <div class="cb-foot">
+              <span class="cb-who">${who.length
+                ? `<span class="ico" aria-hidden="true">👥</span>${who.slice(0,4).map(j => `<span>${esc(j.name)}</span>`).join('')}${
+                    who.length > 4 ? `<span class="more">+${who.length - 4}</span>` : ''}`
+                : '<span class="hint">아직 참여자가 없습니다</span>'}</span>
+              <span class="cb-by">${esc(p.author)}${mine ? ' · <b>참여 중</b>' : ''}</span>
+            </div>
+          </article>`; }).join('')}</div>`
+        : `<div class="empty">${q ? '검색 결과가 없습니다.'
+            : `아직 올라온 협업 제안이 없습니다.${canWrite(key) ? '<br>‘＋ 협업 제안하기’로 첫 제안을 올려 보세요.' : ''}`}</div>`);
+  }
 
   if(!list.length){
     body = `<div class="empty">${q ? `“${esc(Q[key])}” 검색 결과가 없습니다.` : '아직 등록된 글이 없습니다.'}</div>`;
@@ -1927,16 +2026,22 @@ function openPostForm(key, edit){
   const e0 = edit || null;
   /* 활동 게시판은 어느 팀 게시판에 올릴지 고릅니다(수정이면 원래 팀, 새 글이면 보고 있는 팀) */
   const isAct   = key === 'activity';
+  const isCollab = key === 'collab';
   const defTeam = isAct ? (Number(e0?.teamNo) || ACT_TEAM) : 0;
-  openModal(`${b.icon} ${b.label} · ${e0?'글 수정':'글쓰기'}`, `
+  openModal(`${b.icon} ${b.label} · ${e0 ? '글 수정' : (isCollab ? '협업 제안하기' : '글쓰기')}`, `
     ${isAct ? `<label class="field">팀 게시판 <span class="req">*</span>
       <select id="pfActTeam"><option value="">어느 팀 게시판에 올릴지 고르세요</option>
         ${actTeams().map(t => `<option value="${t.no}" ${t.no===defTeam?'selected':''}>${t.no}팀 · ${esc(t.name)}</option>`).join('')}
       </select></label>` : ''}
     <label class="field">제목 <span class="req">*</span>
-      <input id="pfTitle" placeholder="제목을 입력하세요" value="${e0?esc(e0.title):''}"></label>
+      <input id="pfTitle" placeholder="${isCollab ? '예) 팀 경계 없이 조직문화 카드뉴스 같이 만들 분 찾아요' : '제목을 입력하세요'}" value="${e0?esc(e0.title):''}"></label>
     <label class="field">내용 <span class="req">*</span>
-      <textarea id="pfBody" style="min-height:150px">${e0?esc(e0.body):''}</textarea></label>
+      <textarea id="pfBody" style="min-height:150px" ${
+        isCollab ? 'placeholder="무엇을 함께하고 싶은지, 어떤 도움이 필요한지, 언제쯤 하면 좋을지 적어 주세요."' : ''
+        }>${e0?esc(e0.body):''}</textarea></label>
+    ${isCollab ? `<label class="field">모집 인원 <span class="hint" style="display:inline">선택 — 비워 두면 제한 없이 받습니다</span>
+      <input id="pfNeed" type="number" min="1" max="99" placeholder="예) 5" value="${e0?.collabNeed ?? ''}">
+      <span class="hint">정해 두면 그 인원이 찼을 때 참여 버튼이 닫힙니다. 모집·진행·마무리 상태는 올린 뒤 글에서 바꿀 수 있습니다.</span></label>` : ''}
     <div class="grid c2">
       <label class="field">작성자 소속<select id="pfTeam">${authorTeamOptions(e0?.authorTeam)}</select></label>
       <label class="field">소속청 · 부서 <span class="hint" style="display:inline">선택</span>
@@ -1967,8 +2072,11 @@ function openPostForm(key, edit){
     if(!title || !body){ toast('제목과 내용을 입력하세요'); return; }
     if(photo && !e0 && !atts.some(isShowableImg)){ toast('사진을 1장 이상 첨부하세요'); return; }
     const arr = DB.posts();
+    /* 협업 — 모집 인원(비우면 제한 없음) */
+    const need = isCollab ? Number($('#pfNeed').value) : 0;
     const common = { title, body, authorTeam:$('#pfTeam').value, authorDept:$('#pfDept').value.trim(),
-                     pinned: !!$('#pfPin')?.checked, ...(isAct ? { teamNo } : {}) };
+                     pinned: !!$('#pfPin')?.checked, ...(isAct ? { teamNo } : {}),
+                     ...(isCollab ? { collabNeed: need > 0 ? Math.min(Math.round(need), 99) : null } : {}) };
     if(isAct) ACT_TEAM = teamNo;       // 올린 뒤에는 그 팀 게시판이 열리게
     if(e0){
       const i = arr.findIndex(x=>x.id===e0.id);
@@ -1977,7 +2085,7 @@ function openPostForm(key, edit){
       if(DB.savePosts(arr)){ closeModal(); toast('수정되었습니다'); go(CURRENT); }
     }else{
       arr.push({ id:uid(), board:key, atts, author:SESSION.name, authorRole:SESSION.role,
-                 at:nowISO(), ...common });
+                 at:nowISO(), ...(isCollab ? { collabStatus:'open', joins:[] } : {}), ...common });
       if(DB.savePosts(arr)){ closeModal(); toast('등록되었습니다'); go(key); }
     }
   });
@@ -1991,6 +2099,30 @@ function openPost(id){
   const mine = p.author===SESSION.name || SESSION.role==='admin';
   const who = [p.author, p.authorTeam, p.authorDept].filter(Boolean).map(esc).join(' · ');
   const at  = p.board === 'activity' ? actTeam(p.teamNo) : null;
+
+  /* ── 협업 글이면 참여자 명단과 '참여하기' 를 함께 보여 줍니다 ── */
+  const isCollab = p.board === 'collab';
+  const st = collabState(p), joined = isCollab && myJoin(p), who2 = isCollab ? joinsOf(p) : [];
+  const full = isCollab && collabFull(p) && !joined;
+  const collabBlock = !isCollab ? '' : `
+    <div class="cb-detail">
+      <div class="cb-dhead">${collabTag(p)}
+        <span class="cb-need">${p.collabNeed ? `모집 ${p.collabNeed}명 중 ${who2.length}명 참여` : `${who2.length}명 참여`}</span></div>
+      <div class="cb-names">${who2.length
+        ? who2.map(j => `<span class="cb-name${j.who === myVoterId() ? ' me' : ''}">${esc(j.name)}${
+            j.note ? `<em>${esc(j.note)}</em>` : ''}</span>`).join('')
+        : '<span class="hint">아직 참여한 사람이 없습니다. 첫 번째로 함께해 보세요.</span>'}</div>
+      <div class="row-actions" style="margin-top:14px">
+        ${st === 'done' ? '<span class="hint">마무리된 협업입니다</span>'
+          : joined ? '<button class="btn sm" id="cbLeave">참여 취소</button>'
+          : full   ? '<button class="btn sm" disabled>모집 인원이 찼습니다</button>'
+                   : '<button class="btn primary" id="cbJoin">🤝 참여하기</button>'}
+        ${mine ? `<span class="cb-admin">${st !== 'open'  ? '<button class="btn sm ghost" data-cbst="open">다시 모집</button>' : ''}
+          ${st !== 'doing' ? '<button class="btn sm ghost" data-cbst="doing">진행 중으로</button>' : ''}
+          ${st !== 'done'  ? '<button class="btn sm ghost" data-cbst="done">마무리</button>' : ''}</span>` : ''}
+      </div>
+    </div>`;
+
   openModal(p.title, `
     <div class="hint" style="margin-bottom:14px">
       ${who} · ${fmt(p.at)} · ${esc(BOARDS[p.board]?.label||'')}${at ? ` · ${at.no}팀 ${esc(at.name)}` : ''}
@@ -1998,11 +2130,35 @@ function openPost(id){
     ${imgs.length ? `<div class="big-imgs">${imgs.map(a=>`<img src="${a.data}" alt="${esc(a.name)}" data-zoom="${a.data}">`).join('')}</div>` : ''}
     <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
     ${docs.length ? `<div class="att-list">${docs.map(fileRow).join('')}</div>` : ''}
+    ${collabBlock}
     ${mine ? `<div class="row-actions" style="margin-top:18px">
       <button class="btn sm" id="ppEdit">글 수정</button>
       <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
   $$('#modalBody [data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
   bindFileRows('#modalBody');
+
+  /* 협업 — 참여하기 / 참여 취소 / 상태 바꾸기 (글 안에 같이 저장합니다) */
+  const saveCollab = (fn) => {
+    const arr = DB.posts(), t = arr.find(x => x.id === p.id); if(!t) return;
+    t.joins = t.joins || []; fn(t);
+    if(DB.savePosts(arr)){ closeModal(); go(CURRENT); openPost(p.id); }
+  };
+  $('#cbJoin')?.addEventListener('click', ()=>{
+    const note = (prompt('어떤 부분을 함께할 수 있는지 한 줄로 적어 주세요. (건너뛰려면 비워 두고 확인)') ?? '').trim();
+    saveCollab(t => t.joins.push({ who: myVoterId(), name: SESSION.name, note: note.slice(0, 60), at: nowISO() }));
+    toast('참여자 명단에 올렸습니다');
+  });
+  $('#cbLeave')?.addEventListener('click', ()=>{
+    if(!confirm('참여를 취소할까요? 명단에서 이름이 빠집니다.')) return;
+    saveCollab(t => { t.joins = t.joins.filter(j => j.who !== myVoterId()); });
+    toast('참여를 취소했습니다');
+  });
+  $$('#modalBody [data-cbst]').forEach(b2 => b2.addEventListener('click', ()=>{
+    const next = b2.dataset.cbst;
+    saveCollab(t => { t.collabStatus = next; });
+    toast(`‘${COLLAB_LABEL[next]}’(으)로 바꿨습니다`);
+  }));
+
   $('#ppEdit')?.addEventListener('click', ()=>{ closeModal(); openPostForm(p.board, p); });
   $('#ppDel')?.addEventListener('click', ()=>{
     if(!confirm('이 글을 삭제할까요? 되돌릴 수 없습니다.')) return;

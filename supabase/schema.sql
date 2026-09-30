@@ -1392,3 +1392,97 @@ create trigger opinion_views_bump
 -- 이미 쌓인 기록이 있다면 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
 update public.opinions o
    set views = (select count(*) from public.opinion_views v where v.opinion_id = o.id);
+
+-- ============================================================================
+--  27. 협업 게시판 (새소리단 단원 전용)
+--
+--  "한 팀에서 하기엔 큰 아이디어를 여러 팀이 같이 해보자" 는 의견함 제안에서 나온
+--  게시판입니다. 글 하나가 '협업 제안' 이고, 다른 단원이 '참여하기' 를 누르면
+--  참여자 명단에 이름이 올라갑니다.
+--
+--  · 읽기·쓰기 모두 단원 이상입니다. 'collab' 은 누구나 읽는 목록(news·activity)에
+--    넣지 않았으므로 기존 규칙 그대로 단원 전용이 됩니다.
+--  · 참여자 이름은 서버가 계정에서 붙입니다(꾸며 넣을 수 없습니다).
+--  · 모집 인원을 정해 두면 인원이 찼을 때 서버가 더 받지 않습니다.
+-- ============================================================================
+
+-- ① 게시판 이름 목록에 'collab' 추가 (20절과 같은 방식 — 다시 실행해도 안전)
+do $$
+declare c text;
+begin
+  for c in
+    select conname from pg_constraint
+     where conrelid = 'public.posts'::regclass
+       and contype  = 'c'
+       and pg_get_constraintdef(oid) ilike '%board%'
+  loop
+    execute format('alter table public.posts drop constraint %I', c);
+  end loop;
+end $$;
+
+alter table public.posts add constraint posts_board_check
+  check (board in ('news','notice','free','share','activity','collab'));
+
+-- ② 모집 인원과 진행 상태 (협업 글에만 씁니다)
+alter table public.posts add column if not exists collab_need   int;
+alter table public.posts add column if not exists collab_status text not null default 'open';
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'posts_collab_status_check') then
+    alter table public.posts add constraint posts_collab_status_check
+      check (collab_status in ('open','doing','done'));   -- 모집 중 · 진행 중 · 마무리
+  end if;
+end $$;
+
+-- ③ 참여 신청
+create table if not exists public.post_joins (
+  post_id    uuid not null references public.posts on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  name       text not null default '',                    -- 서버가 계정 이름으로 채웁니다
+  note       text not null default '',                    -- "디자인 쪽 도울 수 있어요" 같은 한 줄 (선택)
+  created_at timestamptz not null default now(),
+  primary key (post_id, user_id)                          -- 한 사람이 한 협업에 한 번만
+);
+alter table public.post_joins enable row level security;
+
+drop policy if exists join_select on public.post_joins;
+create policy join_select on public.post_joins for select
+  using ( public.is_inner() );                            -- 협업 게시판이 단원 전용이라 명단도 단원만
+
+drop policy if exists join_insert on public.post_joins;
+create policy join_insert on public.post_joins for insert
+  with check ( user_id = auth.uid() and public.is_inner() );
+
+drop policy if exists join_update on public.post_joins;
+create policy join_update on public.post_joins for update
+  using ( user_id = auth.uid() );                         -- 한 줄 메모 고치기
+
+drop policy if exists join_delete on public.post_joins;
+create policy join_delete on public.post_joins for delete
+  using ( user_id = auth.uid() or public.is_admin() );     -- 참여 취소는 본인(또는 관리자)
+
+-- 서버에서 한 번 더 확인합니다 (화면을 거치지 않고 보내도 똑같이 막힙니다)
+create or replace function public.check_join()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare b text; st text; nd int; nm text; cnt int;
+begin
+  select board, collab_status, collab_need into b, st, nd from public.posts where id = new.post_id;
+  if not found              then raise exception '없는 글입니다'; end if;
+  if b is distinct from 'collab' then raise exception '협업 게시판 글에만 참여할 수 있습니다'; end if;
+  if st = 'done'            then raise exception '이미 마무리된 협업입니다'; end if;
+
+  if tg_op = 'INSERT' and nd is not null then
+    select count(*) into cnt from public.post_joins j where j.post_id = new.post_id;
+    if cnt >= nd then raise exception '모집 인원이 찼습니다'; end if;
+  end if;
+
+  select name into nm from public.profiles where id = auth.uid();
+  new.user_id := auth.uid();
+  new.name    := coalesce(nullif(trim(nm), ''), '이름 없음');   -- 이름은 서버가 붙입니다
+  return new;
+end $$;
+
+drop trigger if exists post_joins_check on public.post_joins;
+create trigger post_joins_check before insert or update on public.post_joins
+  for each row execute function public.check_join();

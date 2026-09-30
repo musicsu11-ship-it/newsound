@@ -248,6 +248,53 @@
   .act-meta{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
   .act-chip{background:var(--tint);color:#16225c;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 10px}
 
+  /* ── 협업 게시판 (단원 전용) ──────────────────────────────────────────
+     제안 한 건이 카드 하나입니다. 상태 배지(모집 중·모집 완료·진행 중·마무리)와
+     참여 인원, 참여자 이름을 카드에서 바로 보여 줍니다. */
+  .cb-sum{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
+  .cb-state{font-size:12.5px;font-weight:900;border-radius:999px;padding:4px 12px;white-space:nowrap}
+  .cb-state b{margin-left:5px;font-weight:900}
+  .cb-state.open{background:#d9f5ef;color:#0b6b52}
+  .cb-state.full{background:#fff2d9;color:#7a4f00}
+  .cb-state.doing{background:#ffe1ec;color:#c2185b}
+  .cb-state.done{background:var(--surface-2);color:var(--muted)}
+  .cb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+  .cb-card{background:var(--surface);border:1px solid rgba(22,34,92,.08);border-radius:22px;
+    box-shadow:var(--shadow);padding:20px 20px 16px;cursor:pointer;min-width:0;
+    transition:transform .12s,box-shadow .12s}
+  .cb-card:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(22,34,92,.14)}
+  .cb-card.done{opacity:.85}
+  .cb-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .cb-need{font-size:12.5px;font-weight:800;color:var(--brand)}
+  .cb-top .hint{margin-left:auto}
+  .cb-card h3{margin:0 0 8px;font-size:17.5px;font-weight:900;line-height:1.45;letter-spacing:-.02em;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .cb-body{margin:0;font-size:14.5px;line-height:1.65;color:var(--muted);word-break:keep-all;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .cb-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)}
+  .cb-who{display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0}
+  .cb-who .ico{font-size:15px;margin-right:2px}
+  .cb-who span{font-size:12.5px;font-weight:800;background:var(--surface-2);border-radius:999px;padding:3px 10px}
+  .cb-who .more{background:var(--lav);color:#3a3380}
+  .cb-by{font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .cb-by b{color:var(--brand)}
+  /* 글 상세 안의 참여자 상자 */
+  .cb-detail{margin-top:18px;padding:16px;border-radius:18px;background:var(--surface-2);border:1px solid var(--border)}
+  .cb-dhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .cb-names{display:flex;gap:7px;flex-wrap:wrap}
+  .cb-name{display:inline-flex;align-items:baseline;gap:6px;font-size:13.5px;font-weight:800;
+    background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:5px 12px}
+  .cb-name.me{border-color:var(--brand);color:var(--brand)}
+  .cb-name em{font-style:normal;font-size:12px;font-weight:600;color:var(--muted)}
+  .cb-admin{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+  @media (max-width:860px){ .cb-grid{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:700px){
+    .cb-card{padding:17px 16px 14px;border-radius:18px}
+    .cb-card h3{font-size:16.5px}
+    .cb-admin{margin-left:0;width:100%}
+  }
+
   /* ── 투표 (카카오톡 투표처럼) ────────────────────────────────────────── */
   .pv-tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
   .pv-tabs button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
@@ -1278,6 +1325,7 @@ function failed(where, error){
   else if(/posts_board_check|'team_no' column/i.test(m)) toast(`${where}: 이 게시판은 아직 데이터베이스에 등록되지 않았습니다. 관리자가 SQL을 실행하면 쓸 수 있습니다.`);
   else if(/option_images/i.test(m)) toast(`${where}: 투표 사진 기능이 아직 데이터베이스에 등록되지 않았습니다. 관리자가 SQL(24절)을 실행하면 쓸 수 있습니다.`);
   else if(/'kind' column|polls_kind_check|polls_balance_shape/i.test(m)) toast(`${where}: 밸런스 게임 기능이 아직 데이터베이스에 등록되지 않았습니다. 관리자가 SQL(25절)을 실행하면 쓸 수 있습니다.`);
+  else if(/collab_need|collab_status|post_joins/i.test(m)) toast(`${where}: 협업 게시판이 아직 데이터베이스에 등록되지 않았습니다. 관리자가 SQL(27절)을 실행하면 쓸 수 있습니다.`);
   /* 첨부파일 올리기 */
   else if(/maximum allowed size|payload too large|entity too large|\b413\b/i.test(m)) toast(`${where}: 파일이 너무 큽니다. 파일 하나에 ${MAX_FILE_MB}MB까지 올릴 수 있습니다.`);
   else if(/mime type|invalid_mime/i.test(m)) toast(`${where}: 저장소 설정에서 이 형식의 파일을 받지 않도록 되어 있습니다.`);
@@ -1302,7 +1350,10 @@ const S = {
   /* 투표 */
   polls:[], ballots:[],            // ballots: 내 표 + 실명 투표의 모든 표(권한이 그렇게 걸려 있음)
   pollResults:{},                  // { 투표id: { tally:[항목별 표 수], voters:참여 인원 } }
-  votesReady:false                 // 투표 표가 준비됐는지(schema.sql 23절)
+  votesReady:false,                // 투표 표가 준비됐는지(schema.sql 23절)
+  /* 협업 게시판 */
+  joins:[],                        // 협업 참여자 (단원 이상만 읽힘)
+  joinsReady:false                 // 참여 표가 준비됐는지(schema.sql 27절)
 };
 const SIGNED = {};                 // docs 버킷 파일의 임시 열람 URL 캐시
 const role = () => S.profile?.role || 'visitor';
@@ -1380,6 +1431,10 @@ const BOARDS = {
      같이 풀려 있어야 합니다. */
   activity: { label:'활동', icon:'📋', layout:'list',
             desc:'새소리단의 활동을 기록하는 게시판입니다. 누구나 볼 수 있습니다.', write:INNER },
+  /* 협업 — 단원 전용. 글 하나가 '협업 제안' 이고, 다른 단원이 '참여하기' 를 눌러 함께합니다
+     (모집 인원·진행 상태·참여자 명단은 schema.sql 27절) */
+  collab: { label:'협업', icon:'🤝', layout:'collab',
+            desc:'팀을 넘어 함께할 일을 제안하고 같이 할 사람을 모으는 공간입니다.', write:INNER },
 };
 const ALL = ['visitor', ...INNER];
 const MENUS = [
@@ -1392,6 +1447,7 @@ const MENUS = [
   { id:'calendar', icon:'📅', label:'일정',     roles:ALL,   group:'일정' },
   { id:'game',     icon:'🎮', label:'게임',         roles:ALL,   group:'일정' },
 
+  { id:'collab',   icon:'🤝', label:'협업',         roles:INNER, group:'새소리단 공간' },
   { id:'notice',   icon:'📢', label:'공지방',       roles:INNER, group:'새소리단 공간' },
   { id:'free',     icon:'💭', label:'자유방',       roles:INNER, group:'새소리단 공간' },
   { id:'share',    icon:'📸', label:'새소리단 공간', roles:INNER, group:'새소리단 공간' },
@@ -1501,6 +1557,16 @@ async function refresh(){
     }catch(e){
       S.votesReady = false; S.polls = []; S.ballots = []; S.pollResults = {};
     }
+
+    /* 협업 게시판 참여자 — 단원 이상만 읽을 수 있습니다(schema.sql 27절).
+       표가 아직 없으면 참여 기능만 쉬고 게시판과 나머지 화면은 그대로 나옵니다. */
+    if(isInner()){
+      try{
+        const jn = await sb.from('post_joins').select('*');
+        S.joinsReady = !jn.error;
+        S.joins      = jn.data || [];
+      }catch(e){ S.joinsReady = false; S.joins = []; }
+    }else{ S.joinsReady = false; S.joins = []; }
 
     await signDocs();
 
@@ -1759,6 +1825,8 @@ function subscribeRealtime(){
     .on('postgres_changes', { event:'*', schema:'public', table:'opinions' }, queueRefresh)
     .on('postgres_changes', { event:'*', schema:'public', table:'opinion_comments' }, queueRefresh)
     .on('postgres_changes', { event:'*', schema:'public', table:'events' }, queueRefresh)
+    // 협업 게시판 참여자 — 다른 단원이 참여하면 명단이 바로 늘어납니다
+    .on('postgres_changes', { event:'*', schema:'public', table:'post_joins' }, queueRefresh)
     // 관리자가 내 권한을 바꾸면 이 자리에서 바로 알림이 옵니다
     .on('postgres_changes', { event:'UPDATE', schema:'public', table:'profiles' }, queueRefresh)
     // 관리자 콘솔(admin.html)에서 소개·게임을 바꿔도 즉시 반영됩니다
@@ -2243,7 +2311,7 @@ BIND['intro-edit'] = () => {
 /* ============================================================================
    게시판
    ============================================================================ */
-const CRUMB = { news:'소식', notice:'공지방', free:'자유방', share:'새소리단 공간', activity:'활동' };
+const CRUMB = { news:'소식', notice:'공지방', free:'자유방', share:'새소리단 공간', activity:'활동', collab:'협업' };
 
 /* ── 활동 게시판의 팀 ──────────────────────────────────────────────────────
    소개 페이지에 등록된 팀 순서가 곧 1팀·2팀… 입니다. 팀을 늘리면 탭도 따라 늘어납니다.
@@ -2259,6 +2327,21 @@ const actTeam = (no) => actTeams().find(t => t.no === Number(no)) || null;
 /* 내 프로필의 소속 팀이 활동 팀 중 하나면 그 번호 — 글쓰기 때 미리 골라 둡니다 */
 const myTeamNo = () => actTeams().find(t => t.name === S.profile?.team)?.no || 0;
 let ACT_TEAM = 0;                  // 활동 게시판에서 보고 있는 팀 (0 = 전체)
+
+/* ── 협업 게시판 도우미 ────────────────────────────────────────────────────
+   글 하나가 '협업 제안' 입니다. 상태는 모집 중(open) · 진행 중(doing) · 마무리(done)
+   세 가지이고, 모집 인원을 정해 두고 인원이 차면 화면에도 '모집 완료' 로 보입니다.
+   참여자 명단(post_joins)은 단원만 읽을 수 있습니다(schema.sql 27절). */
+const joinsOf = (pid) => S.joins.filter(j => j.post_id === pid);
+const myJoin  = (pid) => S.joins.find(j => j.post_id === pid && j.user_id === S.user?.id);
+const collabState = (p) => ['open','doing','done'].includes(p.collab_status) ? p.collab_status : 'open';
+const collabFull  = (p) => !!p.collab_need && joinsOf(p.id).length >= p.collab_need;
+const COLLAB_LABEL = { open:'모집 중', doing:'진행 중', done:'마무리' };
+const collabTag = (p) => {
+  const st = collabState(p);
+  const full = st === 'open' && collabFull(p);
+  return `<span class="cb-state ${full ? 'full' : st}">${full ? '모집 완료' : COLLAB_LABEL[st]}</span>`;
+};
 
 function boardView(key){
   const b = BOARDS[key];
@@ -2375,6 +2458,49 @@ function boardView(key){
                   : '아직 등록된 글이 없습니다.'}</div></div>`}`;
   }
 
+  /* ── 협업: 제안 카드 + 참여자 ── */
+  if(key === 'collab'){
+    const rank = { open:0, doing:1, done:2 };
+    const shown = list.slice().sort((a,c) =>
+      (rank[collabState(a)] ?? 0) - (rank[collabState(c)] ?? 0) || c.created_at.localeCompare(a.created_at));
+    const cnt = (st) => list.filter(p => collabState(p) === st).length;
+    return `<div class="crumb">홈 · 새소리단 단원 전용 공간 · 협업</div>
+    <div class="pg-head">
+      <div><h1 class="pg-title">협업</h1>
+        <p class="pg-sub">${esc(b.desc)} 단원끼리만 보이는 공간입니다.</p></div>
+      ${writeBtn ? `<button class="btn primary" id="bdWrite">＋ 협업 제안하기</button>` : ''}
+    </div>
+    <div class="cb-sum">
+      <span class="cb-state open">모집 중 <b>${cnt('open')}</b></span>
+      <span class="cb-state doing">진행 중 <b>${cnt('doing')}</b></span>
+      <span class="cb-state done">마무리 <b>${cnt('done')}</b></span>
+      ${S.joinsReady ? '' : '<span class="hint">참여 기능은 준비 중입니다' +
+        (isAdmin() ? ' (관리자: SQL 27절을 실행하면 열립니다)' : '') + '</span>'}
+    </div>
+    ${searchBar(key, '제목·내용·작성자로 검색')}
+    ${q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : ''}
+    ${shown.length ? `<div class="cb-grid">${shown.map(p => {
+      const st = collabState(p), who = joinsOf(p.id), mine = !!myJoin(p.id);
+      return `<article class="cb-card ${st}" data-open-post="${p.id}">
+        <div class="cb-top">${collabTag(p)}
+          ${p.collab_need ? `<span class="cb-need">${who.length}/${p.collab_need}명</span>`
+                          : `<span class="cb-need">${who.length}명 참여</span>`}
+          <span class="hint">${fmtDay(p.created_at)}</span></div>
+        <h3>${p.pinned ? '<span class="tag brand">공지</span> ' : ''}${highlight(p.title, Q[key])}${
+          (p.images||[]).length ? ` <span class="hint">📎${p.images.length}</span>` : ''}</h3>
+        <p class="cb-body">${highlight(excerpt(p.body, 120), Q[key])}</p>
+        <div class="cb-foot">
+          <span class="cb-who">${who.length
+            ? `<span class="ico" aria-hidden="true">👥</span>${who.slice(0,4).map(j => `<span>${esc(j.name)}</span>`).join('')}${
+                who.length > 4 ? `<span class="more">+${who.length - 4}</span>` : ''}`
+            : '<span class="hint">아직 참여자가 없습니다</span>'}</span>
+          <span class="cb-by">${esc(p.author_name)}${mine ? ' · <b>참여 중</b>' : ''}</span>
+        </div>
+      </article>`; }).join('')}</div>`
+      : `<div class="card"><div class="empty">${q ? '검색 결과가 없습니다.'
+          : `아직 올라온 협업 제안이 없습니다.${canWrite(key) ? '<br>‘＋ 협업 제안하기’로 첫 제안을 올려 보세요.' : ''}`}</div></div>`}`;
+  }
+
   /* ── 공지방 / 자유방: 목록형 ── */
   return `<div class="crumb">홈 · ${esc(CRUMB[key]||b.label)}</div>
   <div class="pg-head">
@@ -2424,14 +2550,21 @@ function openPostForm(key, edit){
   /* 활동 게시판은 어느 팀 게시판에 올릴지 고릅니다.
      수정이면 원래 팀, 새 글이면 지금 보고 있는 팀 탭, 그것도 없으면 내 소속 팀을 미리 골라 둡니다. */
   const isAct   = key === 'activity';
+  const isCollab = key === 'collab';
   const defTeam = isAct ? (Number(e0?.team_no) || ACT_TEAM || myTeamNo()) : 0;
-  openModal(`${b.icon} ${b.label} · ${e0?'글 수정':'글쓰기'}`, `
+  openModal(`${b.icon} ${b.label} · ${e0 ? '글 수정' : (isCollab ? '협업 제안하기' : '글쓰기')}`, `
     ${isAct ? `<label class="field">팀 게시판 <span class="req">*</span>
       <select id="pfActTeam"><option value="">어느 팀 게시판에 올릴지 고르세요</option>
         ${actTeams().map(t => `<option value="${t.no}" ${t.no===defTeam?'selected':''}>${t.no}팀 · ${esc(t.name)}</option>`).join('')}
       </select></label>` : ''}
-    <label class="field">제목 <span class="req">*</span><input id="pfTitle" value="${e0?esc(e0.title):''}"></label>
-    <label class="field">내용 <span class="req">*</span><textarea id="pfBody" style="min-height:150px">${e0?esc(e0.body):''}</textarea></label>
+    <label class="field">제목 <span class="req">*</span><input id="pfTitle" ${
+      isCollab ? 'placeholder="예) 팀 경계 없이 조직문화 카드뉴스 같이 만들 분 찾아요"' : ''} value="${e0?esc(e0.title):''}"></label>
+    <label class="field">내용 <span class="req">*</span><textarea id="pfBody" style="min-height:150px" ${
+      isCollab ? 'placeholder="무엇을 함께하고 싶은지, 어떤 도움이 필요한지, 언제쯤 하면 좋을지 적어 주세요."' : ''
+      }>${e0?esc(e0.body):''}</textarea></label>
+    ${isCollab ? `<label class="field">모집 인원 <span class="hint" style="display:inline">선택 — 비워 두면 제한 없이 받습니다</span>
+      <input id="pfNeed" type="number" min="1" max="99" placeholder="예) 5" value="${e0?.collab_need ?? ''}">
+      <span class="hint">정해 두면 그 인원이 찼을 때 참여 버튼이 닫힙니다. 모집·진행·마무리 상태는 올린 뒤 글에서 바꿀 수 있습니다.</span></label>` : ''}
     <div class="grid c2">
       <label class="field">작성자 소속<select id="pfTeam">${authorTeamOptions(e0?.author_team)}</select></label>
       <label class="field">소속청 · 부서 <span class="hint" style="display:inline">선택</span>
@@ -2473,6 +2606,11 @@ function openPostForm(key, edit){
         pinned: !!$('#pfPin')?.checked
       };
       if(isAct) fields.team_no = teamNo;
+      /* 협업 — 모집 인원(비우면 제한 없음) */
+      if(isCollab){
+        const n = Number($('#pfNeed').value);
+        fields.collab_need = n > 0 ? Math.min(Math.round(n), 99) : null;
+      }
       /* 글을 올린 뒤에는 그 팀 게시판이 열리게 합니다 */
       if(isAct) ACT_TEAM = teamNo;
       if(e0){
@@ -2507,6 +2645,34 @@ function openPost(id){
   /* 활동 글은 어느 팀 게시판 글인지까지 적어 줍니다 — 예) "활동 · 3팀 세대공감 시너지" */
   const at  = p.board === 'activity' ? actTeam(p.team_no) : null;
   const where = esc(BOARDS[p.board]?.label || '') + (at ? ` · ${at.no}팀 ${esc(at.name)}` : '');
+
+  /* ── 협업 글이면 참여자 명단과 '참여하기' 를 함께 보여 줍니다 ── */
+  const isCollab = p.board === 'collab';
+  const st = collabState(p), joined = isCollab && myJoin(p.id), who2 = isCollab ? joinsOf(p.id) : [];
+  const full = isCollab && collabFull(p) && !joined;
+  const canJoin = isCollab && S.joinsReady && isInner() && st !== 'done';
+  const collabBlock = !isCollab ? '' : `
+    <div class="cb-detail">
+      <div class="cb-dhead">${collabTag(p)}
+        <span class="cb-need">${p.collab_need ? `모집 ${p.collab_need}명 중 ${who2.length}명 참여` : `${who2.length}명 참여`}</span></div>
+      <div class="cb-names">${who2.length
+        ? who2.map(j => `<span class="cb-name${j.user_id === S.user?.id ? ' me' : ''}">${esc(j.name)}${
+            j.note ? `<em>${esc(j.note)}</em>` : ''}</span>`).join('')
+        : '<span class="hint">아직 참여한 사람이 없습니다. 첫 번째로 함께해 보세요.</span>'}</div>
+      <div class="row-actions" style="margin-top:14px">
+        ${canJoin
+          ? (joined
+              ? '<button class="btn sm" id="cbLeave">참여 취소</button>'
+              : (full ? '<button class="btn sm" disabled>모집 인원이 찼습니다</button>'
+                      : '<button class="btn primary" id="cbJoin">🤝 참여하기</button>'))
+          : (st === 'done' ? '<span class="hint">마무리된 협업입니다</span>'
+                           : '<span class="hint">참여 기능은 준비 중입니다</span>')}
+        ${mine ? `<span class="cb-admin">${st !== 'open'  ? '<button class="btn sm ghost" data-cbst="open">다시 모집</button>' : ''}
+          ${st !== 'doing' ? '<button class="btn sm ghost" data-cbst="doing">진행 중으로</button>' : ''}
+          ${st !== 'done'  ? '<button class="btn sm ghost" data-cbst="done">마무리</button>' : ''}</span>` : ''}
+      </div>
+    </div>`;
+
   openModal(p.title, `
     <div class="hint" style="margin-bottom:14px">${who} · ${fmt(p.created_at)} · ${where}</div>
     ${imgs.length ? `<div class="big-imgs">${imgs.map(a=>{
@@ -2514,10 +2680,38 @@ function openPost(id){
       return `<img src="${esc(u)}" alt="${esc(a.name||'')}" data-zoom="${esc(u)}">`; }).join('')}</div>` : ''}
     <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
     ${docs.length ? `<div class="att-list">${docs.map(a => fileRow(a, mediaUrl(a.path))).join('')}</div>` : ''}
+    ${collabBlock}
     ${mine ? `<div class="row-actions" style="margin-top:18px">
       <button class="btn sm" id="ppEdit">글 수정</button>
       <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
   bindZoom();
+
+  /* 참여하기 / 참여 취소 — 이름은 서버가 계정에서 붙입니다(꾸며 넣을 수 없음) */
+  $('#cbJoin')?.addEventListener('click', async ()=>{
+    const note = (prompt('어떤 부분을 함께할 수 있는지 한 줄로 적어 주세요. (건너뛰려면 비워 두고 확인)') ?? '').trim();
+    const btn = $('#cbJoin'); btn.disabled = true; busy(true);
+    const { error } = await sb.from('post_joins').insert({ post_id: p.id, user_id: S.user?.id, note: note.slice(0, 60) });
+    busy(false); btn.disabled = false;
+    if(error) return failed('참여 신청', error);
+    await refresh(); go(CURRENT); openPost(p.id); toast('참여자 명단에 올렸습니다');
+  });
+  $('#cbLeave')?.addEventListener('click', async ()=>{
+    if(!confirm('참여를 취소할까요? 명단에서 이름이 빠집니다.')) return;
+    busy(true);
+    const { error } = await sb.from('post_joins').delete().eq('post_id', p.id).eq('user_id', S.user?.id);
+    busy(false);
+    if(error) return failed('참여 취소', error);
+    await refresh(); go(CURRENT); openPost(p.id); toast('참여를 취소했습니다');
+  });
+  /* 진행 상태 바꾸기 — 글쓴이와 관리자만 */
+  $$('#modalBody [data-cbst]').forEach(b2 => b2.addEventListener('click', async ()=>{
+    const next = b2.dataset.cbst;
+    busy(true);
+    const { error } = await sb.from('posts').update({ collab_status: next }).eq('id', p.id);
+    busy(false);
+    if(error) return failed('상태 변경', error);
+    await refresh(); go(CURRENT); openPost(p.id); toast(`‘${COLLAB_LABEL[next]}’(으)로 바꿨습니다`);
+  }));
   $('#ppEdit')?.addEventListener('click', ()=>{ closeModal(); openPostForm(p.board, p); });
   $('#ppDel')?.addEventListener('click', async ()=>{
     if(!confirm('이 글을 삭제할까요? 되돌릴 수 없습니다.')) return;
