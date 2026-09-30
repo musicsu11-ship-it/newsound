@@ -337,20 +337,50 @@
   /* 실명 투표 — 항목마다 고른 사람 이름. 8명이 넘으면 '더 보기' */
   .pv-hint{margin:8px 2px 0;font-size:12.5px;font-weight:600;color:var(--muted);word-break:keep-all}
   /* 항목 사진 — 사진이 하나라도 있는 투표는 모든 항목 왼쪽에 사진 칸. 누르면 크게 보기 */
-  .pv-card{--th:64px}
   .pv-row{display:flex;gap:10px;align-items:center}
   .pv-row > .pv-opt{flex:1;min-width:0}
-  .pv-row.pic > .pv-opt{min-height:var(--th)}
-  .pv-res.pic{display:flex;gap:10px;align-items:center}
-  .pv-res.pic .bar{flex:1;min-width:0;min-height:var(--th)}
-  .pv-thumb{flex:none;position:relative;width:var(--th);height:var(--th);padding:0;border-radius:12px;overflow:hidden;
-    border:1px solid rgba(22,34,92,.1);background:var(--surface-2);cursor:zoom-in}
-  .pv-thumb img{display:block;width:100%;height:100%;object-fit:cover}
-  .pv-thumb i{position:absolute;right:4px;bottom:4px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;
-    background:rgba(255,255,255,.94);color:#16225c;font-style:normal;font-size:12px;font-weight:900;line-height:1;
-    box-shadow:0 1px 3px rgba(22,34,92,.25)}
-  .pv-thumb.none{cursor:default;border-style:dashed}
-  .pv-thumb:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+
+  /* ── 사진이 있는 투표 — 사진을 크게, 사진을 눌러 고르기, 결과는 막대그래프 ── */
+  .pv-grid .pv-card.pics{grid-column:1 / -1}
+  .pv-photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px}
+  .pv-pwrap{position:relative;min-width:0}
+  .pv-pcard{display:flex;flex-direction:column;gap:10px;width:100%;height:100%;padding:10px 10px 13px;
+    border:2px solid var(--border);border-radius:18px;background:var(--surface);font:inherit;color:var(--text);
+    text-align:left;transition:border-color .12s,box-shadow .12s,transform .12s}
+  button.pv-pcard{cursor:pointer}
+  button.pv-pcard:hover:not(:disabled){border-color:var(--text);transform:translateY(-2px);
+    box-shadow:0 12px 24px rgba(22,34,92,.14)}
+  button.pv-pcard:disabled{cursor:not-allowed;opacity:.6}
+  .pv-pcard.on{border-color:var(--brand);background:var(--brand-weak)}
+  .pv-pcard .ph{position:relative;display:block;width:100%;aspect-ratio:4/3;border-radius:12px;overflow:hidden;
+    background:var(--surface-2)}
+  .pv-pcard .ph img{display:block;width:100%;height:100%;object-fit:cover}
+  .pv-pcard .ph .none{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;
+    font-size:13px;font-weight:700;color:var(--muted)}
+  .pv-pcard .mk{position:absolute;left:10px;top:10px;display:grid;place-items:center;width:28px;height:28px;
+    border:2px solid #fff;background:rgba(255,255,255,.9);box-shadow:0 2px 6px rgba(22,34,92,.28)}
+  .pv-pcard .mk.ci{border-radius:50%}
+  .pv-pcard .mk.sq{border-radius:8px}
+  .pv-pcard.on .mk{background:var(--brand)}
+  .pv-pcard.on .mk::after{content:'✓';color:#fff;font-size:16px;font-weight:900;line-height:1}
+  .pv-pcard .tx{font-size:16.5px;font-weight:800;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}
+  .pv-pcard.res.lead{border-color:var(--brand)}
+  .pv-pcard.res.mine{border-color:#16225c}
+  .pv-pcard .crown,.pv-pcard .mychk{position:absolute;bottom:10px;font-size:12px;font-weight:900;
+    border-radius:999px;padding:4px 10px;line-height:1.3}
+  .pv-pcard .crown{left:10px;background:var(--brand);color:#fff}
+  .pv-pcard .mychk{right:10px;background:#16225c;color:#fff}
+  .pv-pcard .gbar{display:block;height:16px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+  .pv-pcard .gbar i{display:block;height:100%;background:#cfc9f2;transition:width .6s ease}
+  .pv-pcard.lead .gbar i{background:#ffa1c1}
+  .pv-pcard .gnum{display:flex;align-items:baseline;gap:7px}
+  .pv-pcard .gnum b{font-size:23px;font-weight:900;letter-spacing:-.02em;color:#16225c}
+  .pv-pcard.lead .gnum b{color:#c2185b}
+  .pv-pcard .gnum em{font-style:normal;font-size:13px;font-weight:800;color:#4a5382}
+  .pv-pzoom{position:absolute;top:20px;right:20px;z-index:1;display:grid;place-items:center;width:30px;height:30px;
+    padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:#16225c;font-size:16px;font-weight:900;
+    box-shadow:0 1px 4px rgba(22,34,92,.3);cursor:zoom-in}
+  .pv-pzoom:hover{background:#fff}
   .pv-sum{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .pv-whobtn{border:1.5px solid #f0d9a8;background:#fff8ea;color:#7a4f00;font:inherit;font-size:13px;font-weight:800;
     border-radius:999px;padding:5px 12px;cursor:pointer;white-space:nowrap}
@@ -467,9 +497,10 @@
 
   @media (max-width:860px){ .pv-grid{grid-template-columns:minmax(0,1fr)} }
   @media (max-width:700px){
-    .pv-card{padding:18px 16px 14px;--th:56px}
-    .pv-res.pic .bar{gap:8px;padding:10px 12px}
-    .pv-res.pic .num{flex-direction:column;align-items:flex-end;gap:0;line-height:1.2}
+    .pv-card{padding:18px 16px 14px}
+    .pv-photos{gap:12px}
+    .pv-pcard .tx{font-size:15.5px}
+    .pv-pcard .gnum b{font-size:21px}
     .pv-tabs{gap:6px}
     .pv-tabs button{padding:8px 12px;font-size:14px}
     .bg-duel{gap:10px}
@@ -2460,12 +2491,6 @@ const isBalance = (p) => p.kind === 'balance';
 /* 항목 사진 — 연습용 파일은 서버가 없어서 줄인 사진을 글자(data URL)로 투표에 같이 저장합니다 */
 const pollPic     = (p, i) => (p.option_images || [])[i] || '';
 const pollHasPics = (p) => (p.option_images || []).some(Boolean);
-function pollThumb(p, i){
-  const u = pollPic(p, i);
-  return u ? `<button type="button" class="pv-thumb" data-zoom="${u}" aria-label="${esc(p.options[i])} 사진 크게 보기">
-      <img src="${u}" alt="" loading="lazy"><i aria-hidden="true">＋</i></button>`
-    : '<span class="pv-thumb none" aria-hidden="true"></span>';
-}
 
 /* 참여자 보기 (실명 투표) — 항목별로 누가 골랐는지 / 전체 명단(가나다순) */
 function openVoters(p){
@@ -2538,8 +2563,7 @@ function pollCard(p){
       const pct = res.voters ? Math.round(v * 100 / res.voters) : 0;
       const lead = v > 0 && v === max;
       const picked = !!mine?.choices?.includes(i);
-      return `<div class="pv-res${lead ? ' lead' : ''}${picked ? ' mine' : ''}${pics ? ' pic' : ''}">
-        ${pics ? pollThumb(p, i) : ''}
+      return `<div class="pv-res${lead ? ' lead' : ''}${picked ? ' mine' : ''}">
         <div class="bar"><i style="width:${pct}%"></i>
           <span class="lbl">${picked ? '<b class="ck" aria-label="내가 고른 항목">✓</b>' : ''}${esc(o)}${lead ? '<span class="top">최다</span>' : ''}</span>
           <span class="num"><b>${pct}%</b><em>${v}표</em></span></div>
@@ -2549,12 +2573,44 @@ function pollCard(p){
   const draft = VOTE_DRAFT[p.id] || (editing && mine ? mine.choices.slice() : []);
   VOTE_DRAFT[p.id] = draft;
   const picker = () => `<div class="pv-opts">${p.options.map((o, i) =>
-      `<div class="pv-row${pics ? ' pic' : ''}">${pics ? pollThumb(p, i) : ''}
+      `<div class="pv-row">
         <button type="button" class="pv-opt${draft.includes(i) ? ' on' : ''}" data-pv-pick="${i}"
          aria-pressed="${draft.includes(i)}" ${block ? 'disabled' : ''}>
         <span class="mk ${p.multi ? 'sq' : 'ci'}"></span><span class="tx">${esc(o)}</span></button></div>`).join('')}</div>`;
 
-  return `<article class="pv-card${closed ? ' done' : ''}" data-pv="${p.id}">
+  /* ── 사진이 있는 투표 (index.html 과 같은 화면) ──
+     사진을 크게 보여 주고 사진을 눌러 고릅니다. 고른 뒤에는 사진 아래 막대그래프로 결과를 봅니다 */
+  const photoPh = (o, i, extra = '') => { const u = pollPic(p, i);
+    return `<span class="ph">${u ? `<img src="${u}" alt="" loading="lazy">` : '<i class="none">사진 없음</i>'}${extra}</span>`; };
+  const photoZoom = (o, i) => { const u = pollPic(p, i);
+    return u ? `<button type="button" class="pv-pzoom" data-zoom="${u}" aria-label="${esc(o)} 사진 크게 보기">＋</button>` : ''; };
+
+  const photoPicker = () => `<div class="pv-photos">${p.options.map((o, i) => {
+      const on = draft.includes(i);
+      return `<div class="pv-pwrap">
+        <button type="button" class="pv-pcard${on ? ' on' : ''}" data-pv-pick="${i}"
+          aria-pressed="${on}" ${block ? 'disabled' : ''}>
+          ${photoPh(o, i, `<b class="mk ${p.multi ? 'sq' : 'ci'}"></b>`)}
+          <span class="tx">${esc(o)}</span>
+        </button>${photoZoom(o, i)}
+      </div>`; }).join('')}</div>
+    ${block ? '' : `<p class="pv-hint">${p.multi ? '사진을 눌러 고르세요. 여러 개 고를 수 있어요.' : '사진을 눌러 하나를 고르세요.'}</p>`}`;
+
+  const photoResults = () => `<div class="pv-photos">${p.options.map((o, i) => {
+      const v = res.tally[i] || 0;
+      const pct = res.voters ? Math.round(v * 100 / res.voters) : 0;
+      const lead = v > 0 && v === max, picked = !!mine?.choices?.includes(i);
+      return `<div class="pv-pwrap">
+        <div class="pv-pcard res${lead ? ' lead' : ''}${picked ? ' mine' : ''}">
+          ${photoPh(o, i, `${lead ? '<b class="crown">👑 최다</b>' : ''}${picked ? '<b class="mychk">✓ 내 선택</b>' : ''}`)}
+          <span class="tx">${esc(o)}</span>
+          <span class="gbar"><i style="width:${pct}%"></i></span>
+          <span class="gnum"><b>${pct}%</b><em>${v}표</em></span>
+        </div>${photoZoom(o, i)}
+      </div>`; }).join('')}</div>
+    ${p.multi && res.voters ? '<p class="pv-hint">복수 선택이라 합계가 100%를 넘을 수 있어요</p>' : ''}`;
+
+  return `<article class="pv-card${closed ? ' done' : ''}${pics ? ' pics' : ''}" data-pv="${p.id}">
     <div class="pv-top">
       <span class="pv-state ${closed ? 'off' : 'on'}">${closed ? '종료' : '진행 중'}</span>
       <span class="pv-tag${p.anonymous ? '' : ' named'}">${p.anonymous ? '익명' : '실명'}</span>
@@ -2565,7 +2621,8 @@ function pollCard(p){
     <div class="pv-meta">${esc(p.author_name || '')} · ${fmtDay(p.created_at)}${p.closes_at ? ` · ${shortWhen(p.closes_at)} 마감` : ''}</div>
     ${!showRes && !p.anonymous && !block ? '<div class="pv-note named">실명 투표예요. 누가 어떤 항목을 골랐는지 모두에게 보입니다.</div>' : ''}
     ${!showRes && block && !closed ? `<div class="pv-note">${esc(block)}</div>` : ''}
-    ${showRes ? results() : picker()}
+    ${showRes ? (pics ? photoResults() : results())
+              : (pics ? photoPicker()  : picker())}
     <div class="pv-foot">
       <div class="pv-sum"><span class="cnt">👥 ${res.voters}명 참여</span>${
         showRes && !p.anonymous && res.voters ? '<button type="button" class="pv-whobtn" data-pv-who>참여자 보기 ›</button>' : ''}</div>
