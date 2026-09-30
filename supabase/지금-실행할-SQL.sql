@@ -1,5 +1,5 @@
 -- ============================================================================
---  새소리단 — 지금 실행해야 하는 SQL  (2026-09-30, 의견함 조회수 + 협업 게시판)
+--  새소리단 — 지금 실행해야 하는 SQL  (2026-10-01)
 --
 --  ▷ 하는 법
 --     1. 이 파일 안을 아무 데나 클릭
@@ -8,25 +8,23 @@
 --     4. 빈 칸에 Ctrl + V  (붙여넣기)   →   오른쪽 아래 'Run' 버튼
 --     5. 'Success' 라고 나오면 끝입니다.
 --
---  ▷ 두 가지가 들어 있습니다
---     지난번에 보내 드린 26절(의견함 조회수)이 아직 실행되지 않아 함께 넣었습니다.
---     26절과 27절을 한 번에 실행하시면 됩니다.
---
---  ▷ 안전한가요?
---     네. 글·사진·의견·투표·가입한 회원은 지우지 않습니다.
---     여러 번 실행해도 같은 결과가 나오게 만들어 두었습니다.
---
---  ▷ 무엇이 바뀌나요?
+--  ▷ 세 가지가 들어 있습니다 (26·27절은 아직 실행 전이라 함께 넣었습니다)
 --     26절 — 의견함 조회수
 --        · 의견을 열어 보면 조회수가 1 올라갑니다(같은 사람은 한 번만).
 --        · 누가 봤는지는 아무에게도 보이지 않습니다(숫자만 공개).
 --     27절 — 협업 게시판 (새소리단 단원 전용)
---        · '협업' 게시판을 새로 만듭니다. 단원 이상만 보고 쓸 수 있습니다.
---        · 글마다 모집 인원과 진행 상태(모집 중 · 진행 중 · 마무리)를 둡니다.
---        · 다른 단원이 '참여하기' 를 누르면 참여자 명단에 이름이 올라갑니다.
---          이름은 서버가 계정에서 붙이고, 모집 인원이 차면 더 받지 않습니다.
+--        · '협업' 게시판과 참여자 모집 기능을 만듭니다.
+--        · 모집 인원이 차면 서버가 더 받지 않습니다.
+--     28절 — 결과보고서를 올린 사람이 고치고 지울 수 있게
+--        · 올린 사람: '접수·검토중' 일 때만 수정·삭제 (승인·반려 뒤에는 잠깁니다)
+--        · 관리자: 어떤 보고서든 삭제
+--        · 올린 사람이 상태·담당관 코멘트를 바꾸지 못하도록 서버가 막습니다.
 --
---  ▷ 이 내용은 supabase/schema.sql 26~27절과 같습니다.
+--  ▷ 안전한가요?
+--     네. 글·사진·의견·투표·보고서·가입한 회원은 지우지 않습니다.
+--     여러 번 실행해도 같은 결과가 나오게 만들어 두었습니다.
+--
+--  ▷ 이 내용은 supabase/schema.sql 26~28절과 같습니다.
 --     schema.sql 이 원본이고, 이 파일은 복사하기 편하라고 뽑아 둔 것입니다.
 -- ============================================================================
 
@@ -168,3 +166,54 @@ end $$;
 drop trigger if exists post_joins_check on public.post_joins;
 create trigger post_joins_check before insert or update on public.post_joins
   for each row execute function public.check_join();
+
+-- ============================================================================
+--  28. 결과보고서 — 올린 사람이 고치고 지울 수 있게
+--
+--  지금까지는 담당관만 보고서를 고칠 수 있었고, 지우는 것은 관리자만 됐습니다.
+--  올린 사람이 잘못 낸 파일을 바꾸거나 내릴 수 없어서 다음처럼 엽니다.
+--
+--    · 올린 사람 : '접수' 또는 '검토중' 일 때만 고치고 지울 수 있습니다.
+--                  담당관이 승인·반려한 뒤에는 손댈 수 없습니다(처리 결과 보존).
+--    · 담당관    : 지금처럼 상태·코멘트를 바꿉니다.
+--    · 관리자    : 어떤 보고서든 지울 수 있습니다.
+--
+--  올린 사람이 상태나 담당관 코멘트를 몰래 바꾸지 못하도록, 담당관이 아니면
+--  그 칸들은 예전 값 그대로 두도록 서버에서 되돌립니다.
+-- ============================================================================
+
+drop policy if exists reports_update on public.reports;
+create policy reports_update on public.reports for update
+  using (
+    public.is_officer()
+    or (author_id = auth.uid() and status in ('접수','검토중'))
+  )
+  with check (
+    public.is_officer()
+    or (author_id = auth.uid() and status in ('접수','검토중'))
+  );
+
+drop policy if exists reports_delete on public.reports;
+create policy reports_delete on public.reports for delete
+  using (
+    public.is_admin()
+    or (author_id = auth.uid() and status in ('접수','검토중'))
+  );
+
+-- 담당관이 아니면 상태·코멘트·작성자는 바꿀 수 없습니다(화면을 거치지 않고 보내도 막힙니다)
+create or replace function public.guard_report_update()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_officer() then
+    new.status          := old.status;
+    new.officer_comment := old.officer_comment;
+    new.author_id       := old.author_id;
+    new.author_name     := old.author_name;
+    new.created_at      := old.created_at;
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists reports_guard on public.reports;
+create trigger reports_guard before update on public.reports
+  for each row execute function public.guard_report_update();

@@ -1486,3 +1486,54 @@ end $$;
 drop trigger if exists post_joins_check on public.post_joins;
 create trigger post_joins_check before insert or update on public.post_joins
   for each row execute function public.check_join();
+
+-- ============================================================================
+--  28. 결과보고서 — 올린 사람이 고치고 지울 수 있게
+--
+--  지금까지는 담당관만 보고서를 고칠 수 있었고, 지우는 것은 관리자만 됐습니다.
+--  올린 사람이 잘못 낸 파일을 바꾸거나 내릴 수 없어서 다음처럼 엽니다.
+--
+--    · 올린 사람 : '접수' 또는 '검토중' 일 때만 고치고 지울 수 있습니다.
+--                  담당관이 승인·반려한 뒤에는 손댈 수 없습니다(처리 결과 보존).
+--    · 담당관    : 지금처럼 상태·코멘트를 바꿉니다.
+--    · 관리자    : 어떤 보고서든 지울 수 있습니다.
+--
+--  올린 사람이 상태나 담당관 코멘트를 몰래 바꾸지 못하도록, 담당관이 아니면
+--  그 칸들은 예전 값 그대로 두도록 서버에서 되돌립니다.
+-- ============================================================================
+
+drop policy if exists reports_update on public.reports;
+create policy reports_update on public.reports for update
+  using (
+    public.is_officer()
+    or (author_id = auth.uid() and status in ('접수','검토중'))
+  )
+  with check (
+    public.is_officer()
+    or (author_id = auth.uid() and status in ('접수','검토중'))
+  );
+
+drop policy if exists reports_delete on public.reports;
+create policy reports_delete on public.reports for delete
+  using (
+    public.is_admin()
+    or (author_id = auth.uid() and status in ('접수','검토중'))
+  );
+
+-- 담당관이 아니면 상태·코멘트·작성자는 바꿀 수 없습니다(화면을 거치지 않고 보내도 막힙니다)
+create or replace function public.guard_report_update()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_officer() then
+    new.status          := old.status;
+    new.officer_comment := old.officer_comment;
+    new.author_id       := old.author_id;
+    new.author_name     := old.author_name;
+    new.created_at      := old.created_at;
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists reports_guard on public.reports;
+create trigger reports_guard before update on public.reports
+  for each row execute function public.guard_report_update();

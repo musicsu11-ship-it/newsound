@@ -901,13 +901,30 @@ VIEWS.reports = () => {
     <div class="card">${list.length ? table(['제목','작성자','팀','활동일','상태',''])+list.map(r=>`<tr>
       <td>${esc(r.title)}</td><td>${esc(r.author_name)}</td><td>${esc(r.team||'-')}</td>
       <td>${esc(r.act_date)}</td><td>${statusTag(r.status)}</td>
-      <td><button class="btn sm primary" data-rep="${r.id}">열람·처리</button></td></tr>`).join('')+tableEnd
+      <td><div class="row-actions" style="margin:0">
+        <button class="btn sm primary" data-rep="${r.id}">열람·처리</button>
+        ${isAdmin() ? `<button class="btn sm danger" data-repdel="${r.id}">삭제</button>` : ''}
+      </div></td></tr>`).join('')+tableEnd
       : `<div class="empty">해당하는 보고서가 없습니다.</div>`}</div>`;
 };
 BIND.reports = () => {
   $$('#main [data-rf]').forEach(b=>b.addEventListener('click',()=>{ Q.rf=b.dataset.rf; go('reports'); }));
   $$('#main [data-rep]').forEach(b=>b.addEventListener('click',()=>showReport(b.dataset.rep)));
+  $$('#main [data-repdel]').forEach(b=>b.addEventListener('click',()=>deleteReport(b.dataset.repdel)));
 };
+
+/* 보고서 삭제 — 운영 관리자만. 첨부 파일도 저장소에서 함께 지웁니다 */
+async function deleteReport(id){
+  const r = S.reports.find(x => x.id === id); if(!r) return;
+  if(!confirm(`${r.author_name} 님의 결과보고서를 삭제할까요?\n\n· 첨부한 파일도 함께 지워집니다.\n· 되돌릴 수 없습니다.`)) return;
+  busy(true);
+  const { error } = await sb.from('reports').delete().eq('id', id);
+  const paths = (r.files||[]).map(f => f.path).filter(Boolean);
+  if(!error && paths.length) await sb.storage.from('docs').remove(paths);
+  busy(false);
+  if(error) return failed('보고서 삭제', error);
+  await refresh(); closeModal(); toast('삭제되었습니다'); go(CURRENT);
+}
 
 /* ---------- 정산 ---------- */
 VIEWS.exps = () => {
@@ -1171,8 +1188,12 @@ function showReport(id){
     <dt>작성자 / 팀</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}</dd>
     <dt>활동일자</dt><dd>${esc(r.act_date)}</dd>
     <dt>결과보고서 파일</dt><dd>${attHTML(r.files)}</dd>
-    <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd></dl>` + processBlock(r.status, r.officer_comment));
+    <dt>제출일시</dt><dd>${fmt(r.created_at)} <span class="tag approve">✅ 제출 완료</span></dd></dl>`
+    + (isAdmin() ? `<div class="row-actions" style="margin:0 0 12px">
+        <button class="btn sm danger" id="mDel">이 보고서 삭제</button></div>` : '')
+    + processBlock(r.status, r.officer_comment));
   bindZoom();
+  $('#mDel')?.addEventListener('click', ()=> deleteReport(id));
   $('#mSave').addEventListener('click', async ()=>{
     busy(true);
     const { error } = await sb.from('reports')

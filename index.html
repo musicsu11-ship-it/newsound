@@ -141,6 +141,8 @@
   .tag.approve{background:var(--ok-weak);color:var(--ok)}
   .tag.reject{background:var(--danger-weak);color:var(--danger)}
   .tag.brand{background:var(--brand-weak);color:var(--brand)}
+  /* 제출이 잘 들어갔다는 표시 — 담당관 처리 상태(접수·승인 등)와는 별개입니다 */
+  .tag.ok-sub{background:var(--ok-weak);color:var(--ok);white-space:nowrap}
   .tag.hol{background:var(--hol-weak);color:var(--hol)}
   table{width:100%;border-collapse:collapse;font-size:13.5px}
   th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
@@ -156,6 +158,7 @@
   .notice{background:var(--brand-weak);border:1px solid var(--brand);border-radius:16px;padding:13px 16px;
     font-size:13px;margin-bottom:16px;font-weight:600}
   .notice.amber{background:var(--warn-weak);border-color:var(--warn)}
+  .notice.ok{background:var(--ok-weak);border-color:var(--ok)}
   .notice.red{background:var(--danger-weak);border-color:var(--danger)}
   .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .thumbs img{width:82px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer}
@@ -3850,7 +3853,14 @@ BIND.settings = () => {
 /* ============================================================================
    결과보고서 제출
    ============================================================================ */
-VIEWS.report = () => pageHead('결과보고서 제출','작성한 결과보고서 파일을 올리면 혁신행정담당관이 검토합니다.')
+VIEWS.report = () => {
+  /* 내가 낸 보고서 — 제출이 잘 들어갔는지 이 화면에서 바로 확인할 수 있게 */
+  const my = S.reports.filter(r => r.author_id === S.user?.id)
+    .slice().sort((a, b) => b.created_at.localeCompare(a.created_at));
+  return pageHead('결과보고서 제출','작성한 결과보고서 파일을 올리면 혁신행정담당관이 검토합니다.')
+  + (my.length ? `<div class="notice ok">
+      <b>✅ 제출 완료 ${my.length}건</b> — 가장 최근 제출 ${fmt(my[0].created_at)} · 상태 ${statusTag(my[0].status)}
+      <button class="btn sm" id="rpMine" style="margin-left:6px">내 제출 내역에서 수정·삭제</button></div>` : '')
   + `<div class="card"><h2>결과보고서 제출</h2>
     <div class="grid c2">
       <label class="field">작성자<input id="rpAuthor" value="${esc(myName())}"></label>
@@ -3865,7 +3875,9 @@ VIEWS.report = () => pageHead('결과보고서 제출','작성한 결과보고�
     <div class="thumbs" id="rpThumbs"></div>
     <div class="row-actions"><button class="btn primary" id="rpSubmit">보고서 제출</button></div>
   </div>`;
+};
 BIND.report = () => {
+  $('#rpMine')?.addEventListener('click', ()=> go('mine'));
   let picked = [];
   $('#rpFiles').addEventListener('change', e=>{
     picked = prepDocs(e.target.files); previewDocsLocal('#rpThumbs', picked); });
@@ -3956,10 +3968,17 @@ VIEWS.mine = () => {
   const ex = S.expenses.filter(x=>x.author_id===S.user?.id);
   return pageHead('내 제출 내역','내가 낸 보고서와 정산 신청의 처리 상태입니다.')
   + `<div class="card"><h2>결과보고서 (${rp.length})</h2>
-      ${rp.length ? table(['제목','활동일','상태','제출일시','']) + rp.map(r=>`<tr>
-        <td>${esc(r.title)}</td><td>${esc(r.act_date)}</td><td>${statusTag(r.status)}</td>
+      ${rp.length ? `<p class="sub">제출한 보고서는 담당관이 승인·반려하기 전까지 수정하거나 내릴 수 있습니다.</p>`
+        + table(['제목','활동일','제출','상태','제출일시','']) + rp.map(r=>`<tr>
+        <td>${esc(r.title)}</td><td>${esc(r.act_date)}</td>
+        <td><span class="tag ok-sub">✅ 제출 완료</span></td>
+        <td>${statusTag(r.status)}</td>
         <td class="hint">${fmt(r.created_at)}</td>
-        <td><button class="btn sm" data-view-report="${r.id}">보기</button></td></tr>`).join('') + tableEnd
+        <td><div class="row-actions" style="margin:0">
+          <button class="btn sm" data-view-report="${r.id}">보기</button>
+          ${canEditRep(r) ? `<button class="btn sm" data-edit-report="${r.id}">수정</button>
+            <button class="btn sm danger" data-del-report="${r.id}">삭제</button>` : ''}
+        </div></td></tr>`).join('') + tableEnd
         : `<div class="empty">제출한 보고서가 없습니다.</div>`}</div>
     <div class="card"><h2>활동비 정산 (${ex.length})</h2>
       ${ex.length ? table(['활동명','항목','금액','상태','']) + ex.map(r=>`<tr>
@@ -3970,6 +3989,10 @@ VIEWS.mine = () => {
 BIND.mine = () => {
   $$('#main [data-view-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.viewReport,false)));
   $$('#main [data-view-expense]').forEach(b => b.addEventListener('click', ()=> showExpense(b.dataset.viewExpense,false)));
+  $$('#main [data-edit-report]').forEach(b => b.addEventListener('click', ()=>{
+    const r = S.reports.find(x => x.id === b.dataset.editReport); if(r) openReportForm(r); }));
+  $$('#main [data-del-report]').forEach(b => b.addEventListener('click', ()=>{
+    const r = S.reports.find(x => x.id === b.dataset.delReport); if(r) deleteReport(r); }));
 };
 
 /* ============================================================================
@@ -3980,10 +4003,18 @@ VIEWS['review-report'] = () => pageHead('결과보고서 검토','제출된 모�
     ${S.reports.length ? table(['제목','작성자','팀','활동일','상태','']) + S.reports.map(r=>`<tr>
       <td>${esc(r.title)}</td><td>${esc(r.author_name)}</td><td>${esc(r.team||'-')}</td>
       <td>${esc(r.act_date)}</td><td>${statusTag(r.status)}</td>
-      <td><button class="btn sm primary" data-review-report="${r.id}">열람·처리</button></td></tr>`).join('') + tableEnd
+      <td><div class="row-actions" style="margin:0">
+        <button class="btn sm primary" data-review-report="${r.id}">열람·처리</button>
+        ${isAdmin() ? `<button class="btn sm danger" data-del-report="${r.id}">삭제</button>` : ''}
+      </div></td></tr>`).join('') + tableEnd
       : `<div class="empty">제출된 보고서가 없습니다.</div>`}</div>`;
-BIND['review-report'] = () => $$('#main [data-review-report]').forEach(b =>
-  b.addEventListener('click', ()=> showReport(b.dataset.reviewReport, true)));
+BIND['review-report'] = () => {
+  $$('#main [data-review-report]').forEach(b =>
+    b.addEventListener('click', ()=> showReport(b.dataset.reviewReport, true)));
+  /* 관리자는 목록에서 바로 지울 수 있습니다 */
+  $$('#main [data-del-report]').forEach(b => b.addEventListener('click', ()=>{
+    const r = S.reports.find(x => x.id === b.dataset.delReport); if(r) deleteReport(r); }));
+};
 
 VIEWS['review-expense'] = () => {
   const ex = S.expenses;
@@ -4086,17 +4117,35 @@ function processBlock(cur, comment){
     <label class="field">코멘트 (반려 사유 등)<textarea id="mdComment">${esc(comment||'')}</textarea></label>
     <button class="btn primary" id="mdSave">저장</button>`;
 }
+/* 결과보고서 — 올린 사람은 '접수·검토중' 일 때만 고치고 지울 수 있습니다.
+   담당관이 승인·반려한 뒤에는 처리 결과를 지키려고 잠급니다(관리자는 언제든 삭제).
+   같은 규칙을 데이터베이스에도 걸어 두었습니다(schema.sql 28절). */
+const reportOpen  = (r) => ['접수','검토중'].includes(r.status);
+const myReport    = (r) => r.author_id === S.user?.id;
+const canEditRep  = (r) => myReport(r) && reportOpen(r);
+const canDelRep   = (r) => isAdmin() || canEditRep(r);
+
 function showReport(id, canProcess){
   const r = S.reports.find(x=>x.id===id); if(!r) return;
+  const acts = [
+    canEditRep(r) ? '<button class="btn sm" id="rpEdit">보고서 수정</button>' : '',
+    canDelRep(r)  ? `<button class="btn sm danger" id="rpDel">${isAdmin() && !myReport(r) ? '관리자 삭제' : '제출 취소(삭제)'}</button>` : '',
+  ].filter(Boolean).join('');
   openModal(r.title, `<dl>
     <dt>작성자 / 팀</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}</dd>
     <dt>활동일자</dt><dd>${esc(r.act_date)}</dd>
-    <dt>상태</dt><dd>${statusTag(r.status)}</dd>
+    <dt>상태</dt><dd>${statusTag(r.status)} <span class="tag ok-sub">✅ 제출 완료</span></dd>
     ${r.officer_comment?`<dt>담당관 코멘트</dt><dd>${esc(r.officer_comment)}</dd>`:''}
     <dt>결과보고서 파일</dt><dd>${attHTML(r.files)}</dd>
     <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd>
-  </dl>` + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
+  </dl>`
+    + (acts ? `<div class="row-actions" style="margin-top:6px">${acts}</div>` : '')
+    + (myReport(r) && !reportOpen(r)
+        ? '<p class="hint" style="margin:8px 0 0">담당관이 처리(승인·반려)한 보고서는 수정·삭제할 수 없습니다. 고칠 일이 있으면 혁신행정담당관에게 알려 주세요.</p>' : '')
+    + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
   bindZoom();
+  $('#rpEdit')?.addEventListener('click', ()=>{ closeModal(); openReportForm(r); });
+  $('#rpDel')?.addEventListener('click', ()=> deleteReport(r));
   $('#mdSave')?.addEventListener('click', async ()=>{
     busy(true);
     const { error } = await sb.from('reports')
@@ -4105,6 +4154,54 @@ function showReport(id, canProcess){
     if(error) return failed('보고서 처리', error);
     await refresh(); closeModal(); toast('저장되었습니다'); go(CURRENT);
   });
+}
+
+/* 보고서 수정 — 작성자·팀을 고치고, 파일을 새로 고르면 예전 파일과 바꿉니다 */
+function openReportForm(r){
+  openModal('결과보고서 수정', `
+    <div class="grid c2">
+      <label class="field">작성자<input id="reAuthor" value="${esc(r.author_name||'')}"></label>
+      <label class="field">소속 팀<select id="reTeam"><option value="">선택 안 함</option>
+        ${(intro().teams||[]).map(t=>`<option ${t.name===r.team?'selected':''}>${esc(t.name)}</option>`).join('')}</select></label>
+    </div>
+    <label class="field">지금 올라가 있는 파일</label>
+    <div style="margin:-6px 0 14px">${attHTML(r.files)}</div>
+    <label class="field">파일 바꾸기 <span class="hint" style="display:inline">선택</span>
+      <input id="reFiles" type="file" multiple accept=".pdf,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx">
+      <span class="hint">새로 고르면 <b>기존 파일은 모두 교체</b>됩니다. 그대로 두려면 건드리지 마세요.</span></label>
+    <div class="thumbs" id="reThumbs"></div>
+    <div class="row-actions"><button class="btn primary" id="reSave">수정 저장</button></div>`);
+  let picked = [];
+  $('#reFiles').addEventListener('change', e => { picked = prepDocs(e.target.files); previewDocsLocal('#reThumbs', picked); });
+  $('#reSave').addEventListener('click', async ()=>{
+    const btn = $('#reSave'); btn.disabled = true; busy(true);
+    let files = [];
+    try{
+      const fields = { author_name: $('#reAuthor').value.trim() || r.author_name, team: $('#reTeam').value };
+      if(picked.length){ files = await uploadDocs('docs', picked, 'reports'); fields.files = files; }
+      const { error } = await sb.from('reports').update(fields).eq('id', r.id);
+      if(error) throw error;
+      /* 파일을 바꿨으면 예전 파일은 저장소에서 지웁니다 */
+      const old = picked.length ? (r.files||[]).map(f => f.path).filter(Boolean) : [];
+      if(old.length) await sb.storage.from('docs').remove(old);
+      await refresh(); closeModal(); toast('수정되었습니다'); go(CURRENT);
+    }catch(e){
+      if(files.length) await sb.storage.from('docs').remove(files.map(f => f.path));
+      failed('보고서 수정', e); btn.disabled = false;
+    }finally{ busy(false); }
+  });
+}
+
+async function deleteReport(r){
+  const who = isAdmin() && !myReport(r) ? `${r.author_name} 님의 ` : '';
+  if(!confirm(`${who}결과보고서를 삭제할까요?\n\n· 첨부한 파일도 함께 지워집니다.\n· 되돌릴 수 없습니다.`)) return;
+  busy(true);
+  const { error } = await sb.from('reports').delete().eq('id', r.id);
+  const paths = (r.files||[]).map(f => f.path).filter(Boolean);
+  if(!error && paths.length) await sb.storage.from('docs').remove(paths);
+  busy(false);
+  if(error) return failed('보고서 삭제', error);
+  await refresh(); closeModal(); toast('삭제되었습니다'); go(CURRENT);
 }
 function showExpense(id, canProcess){
   const r = S.expenses.find(x=>x.id===id); if(!r) return;
