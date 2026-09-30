@@ -314,8 +314,12 @@
   .pv-tag.named{background:#fff2d9;color:#7a4f00}
   .pv-left{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--brand)}
   .pv-card.done .pv-left{color:var(--muted)}
-  .pv-title{margin:0 0 6px;font-size:19px;font-weight:900;line-height:1.4;letter-spacing:-.02em;
-    word-break:keep-all;overflow-wrap:anywhere}
+  /* 제목 — 한글 단어가 쪼개지지 않게 하고 줄 간격을 넉넉히 둡니다 */
+  .pv-title{margin:0 0 6px;font-size:19px;font-weight:900;line-height:1.5;letter-spacing:-.01em;
+    word-break:keep-all;overflow-wrap:anywhere;text-wrap:pretty}
+  /* 제목 속 'vs' — 앞뒤 글자에 붙어 있어도 떨어져 보이게, 줄도 여기서 바뀝니다 */
+  .vs-in{display:inline-block;margin:0 5px;padding:1px 9px;border-radius:999px;background:#16225c;color:#fff;
+    font-size:.74em;font-weight:900;letter-spacing:.06em;vertical-align:.1em}
   .pv-meta{font-size:13px;color:var(--muted);margin-bottom:14px}
   .pv-note{font-size:13px;font-weight:700;border-radius:12px;padding:9px 12px;margin:0 0 12px;
     background:var(--surface-2);color:var(--muted);word-break:keep-all}
@@ -3052,6 +3056,10 @@ const myBallot   = (pid) => S.ballots.find(b => b.poll_id === pid && b.user_id =
 const resultOf   = (pid) => S.pollResults[pid] || { tally: [], voters: 0 };
 const canManagePoll = (p) => (!!S.user && p.author_id === S.user.id) || isAdmin();
 
+/* 제목 속 'vs' 를 읽기 좋게 — "팀vs성격" 처럼 붙여 써도 VS 표로 띄워서 보여 주고,
+   그 자리에서 줄이 바뀔 수 있게 합니다(제목이 어중간하게 잘리지 않도록). */
+const vsTitle = (t) => esc(t).replace(/\s*\bvs\b\s*/gi, '<wbr><span class="vs-in">VS</span><wbr>');
+
 /* 투표 표에 나중에 붙인 칸이 준비됐는지 — true/false (없으면 아직 모름)
    option_images: 항목 사진(schema.sql 24절) · kind: 밸런스 게임(25절) */
 const POLL_COLS = {};
@@ -3088,7 +3096,7 @@ function openVoters(p){
       <span>${(b.choices || []).slice().sort((x, y) => x - y).map(i => esc(p.options[i] ?? '')).join(', ')}</span></li>`).join('');
 
   openModal('참여자 보기', `
-    <div class="vw-top"><h3>${esc(p.title)}</h3>
+    <div class="vw-top"><h3>${vsTitle(p.title)}</h3>
       <p>실명 투표 · ${bs.length}명 참여${p.multi ? ' · 복수 선택' : ''}</p></div>
     <div class="vw-tabs">
       <button type="button" class="on" data-vw="opt">항목별</button>
@@ -3205,7 +3213,7 @@ function pollCard(p){
       ${p.multi ? '<span class="pv-tag">복수 선택</span>' : ''}
       <span class="pv-left">${leftText(p)}</span>
     </div>
-    <h3 class="pv-title">${esc(p.title)}</h3>
+    <h3 class="pv-title">${vsTitle(p.title)}</h3>
     <div class="pv-meta">${esc(p.author_name || '')} · ${fmtDay(p.created_at)}${
       p.closes_at ? ` · ${shortWhen(p.closes_at)} 마감` : ''}</div>
 
@@ -3277,7 +3285,7 @@ function balanceCard(p){
       <span class="pv-tag${p.anonymous ? '' : ' named'}">${p.anonymous ? '익명' : '실명'}</span>
       <span class="pv-left">${leftText(p)}</span>
     </div>
-    <h3 class="pv-title">${esc(p.title)}</h3>
+    <h3 class="pv-title">${vsTitle(p.title)}</h3>
     <div class="pv-meta">${esc(p.author_name || '')} · ${fmtDay(p.created_at)}${
       p.closes_at ? ` · ${shortWhen(p.closes_at)} 마감` : ''}</div>
 

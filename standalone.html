@@ -293,8 +293,12 @@
   .pv-tag.named{background:#fff2d9;color:#7a4f00}
   .pv-left{margin-left:auto;font-size:12.5px;font-weight:800;color:var(--brand)}
   .pv-card.done .pv-left{color:var(--muted)}
-  .pv-title{margin:0 0 6px;font-size:19px;font-weight:900;line-height:1.4;letter-spacing:-.02em;
-    word-break:keep-all;overflow-wrap:anywhere}
+  /* 제목 — 한글 단어가 쪼개지지 않게 하고 줄 간격을 넉넉히 둡니다 */
+  .pv-title{margin:0 0 6px;font-size:19px;font-weight:900;line-height:1.5;letter-spacing:-.01em;
+    word-break:keep-all;overflow-wrap:anywhere;text-wrap:pretty}
+  /* 제목 속 'vs' — 앞뒤 글자에 붙어 있어도 떨어져 보이게, 줄도 여기서 바뀝니다 */
+  .vs-in{display:inline-block;margin:0 5px;padding:1px 9px;border-radius:999px;background:#16225c;color:#fff;
+    font-size:.74em;font-weight:900;letter-spacing:.06em;vertical-align:.1em}
   .pv-meta{font-size:13px;color:var(--muted);margin-bottom:14px}
   .pv-note{font-size:13px;font-weight:700;border-radius:12px;padding:9px 12px;margin:0 0 12px;
     background:var(--surface-2);color:var(--muted);word-break:keep-all}
@@ -2487,6 +2491,8 @@ const resultOf   = (p) => {
 };
 const canManagePoll = (p) => (signedIn() && p.author_name === SESSION.name) || SESSION?.role === 'admin';
 const isBalance = (p) => p.kind === 'balance';
+/* 제목 속 'vs' 를 읽기 좋게 — "팀vs성격" 처럼 붙여 써도 VS 표로 띄워서 보여 줍니다 */
+const vsTitle = (t) => esc(t).replace(/\s*\bvs\b\s*/gi, '<wbr><span class="vs-in">VS</span><wbr>');
 
 /* 항목 사진 — 연습용 파일은 서버가 없어서 줄인 사진을 글자(data URL)로 투표에 같이 저장합니다 */
 const pollPic     = (p, i) => (p.option_images || [])[i] || '';
@@ -2512,7 +2518,7 @@ function openVoters(p){
       <span>${(b.choices || []).slice().sort((x, y) => x - y).map(i => esc(p.options[i] ?? '')).join(', ')}</span></li>`).join('');
 
   openModal('참여자 보기', `
-    <div class="vw-top"><h3>${esc(p.title)}</h3>
+    <div class="vw-top"><h3>${vsTitle(p.title)}</h3>
       <p>실명 투표 · ${bs.length}명 참여${p.multi ? ' · 복수 선택' : ''}</p></div>
     <div class="vw-tabs">
       <button type="button" class="on" data-vw="opt">항목별</button>
@@ -2617,7 +2623,7 @@ function pollCard(p){
       ${p.multi ? '<span class="pv-tag">복수 선택</span>' : ''}
       <span class="pv-left">${leftText(p)}</span>
     </div>
-    <h3 class="pv-title">${esc(p.title)}</h3>
+    <h3 class="pv-title">${vsTitle(p.title)}</h3>
     <div class="pv-meta">${esc(p.author_name || '')} · ${fmtDay(p.created_at)}${p.closes_at ? ` · ${shortWhen(p.closes_at)} 마감` : ''}</div>
     ${!showRes && !p.anonymous && !block ? '<div class="pv-note named">실명 투표예요. 누가 어떤 항목을 골랐는지 모두에게 보입니다.</div>' : ''}
     ${!showRes && block && !closed ? `<div class="pv-note">${esc(block)}</div>` : ''}
@@ -2681,7 +2687,7 @@ function balanceCard(p){
       <span class="pv-tag${p.anonymous ? '' : ' named'}">${p.anonymous ? '익명' : '실명'}</span>
       <span class="pv-left">${leftText(p)}</span>
     </div>
-    <h3 class="pv-title">${esc(p.title)}</h3>
+    <h3 class="pv-title">${vsTitle(p.title)}</h3>
     <div class="pv-meta">${esc(p.author_name || '')} · ${fmtDay(p.created_at)}${p.closes_at ? ` · ${shortWhen(p.closes_at)} 마감` : ''}</div>
     ${!showRes && !p.anonymous && !block ? '<div class="pv-note named">실명 투표예요. 누가 어느 쪽을 골랐는지 모두에게 보입니다.</div>' : ''}
     ${!showRes && block && !closed ? `<div class="pv-note">${esc(block)}</div>` : ''}
