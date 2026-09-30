@@ -3326,17 +3326,17 @@ VIEWS.vote = () => {
       isAdmin() ? '<br><span class="hint">관리자: Supabase 에서 SQL(23절)을 실행하면 열립니다.</span>' : ''}</div></div>`;
   }
 
-  /* 진행 중·종료 탭은 일반 투표, 밸런스 게임 탭은 게임만(진행 중인 것 먼저) */
-  const polls = S.polls.filter(p => !isBalance(p));
+  /* 진행 중·종료 탭에는 일반 투표와 밸런스 게임이 함께 나옵니다.
+     밸런스 게임 탭은 게임만 모아 보는 자리입니다(진행 중인 것 먼저). */
   const games = S.polls.filter(isBalance)
     .sort((a, b) => (pollClosed(a) - pollClosed(b)) || b.created_at.localeCompare(a.created_at));
-  const open = polls.filter(p => !pollClosed(p));
-  const done = polls.filter(p =>  pollClosed(p));
+  const open = S.polls.filter(p => !pollClosed(p));
+  const done = S.polls.filter(p =>  pollClosed(p));
   const list = bal ? games : VOTE_TAB === 'done' ? done : open;
   const empty = bal
     ? `아직 밸런스 게임이 없습니다.${isSignedIn() ? '<br>위의 ‘밸런스 게임 만들기’로 첫 게임을 올려 보세요.' : ''}`
     : VOTE_TAB === 'done' ? '종료된 투표가 없습니다.'
-    : `진행 중인 투표가 없습니다.${isSignedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`;
+    : `진행 중인 투표·밸런스 게임이 없습니다.${isSignedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`;
   return head + `
   ${!isSignedIn() ? `<p class="hint" style="margin:-8px 0 16px">${bal ? '밸런스 게임을' : '투표를'} 만들려면 로그인하세요. 익명 ${
     bal ? '게임' : '투표'}에는 로그인 없이도 참여할 수 있습니다.</p>` : ''}

@@ -2710,16 +2710,15 @@ function balanceCard(p){
 VIEWS.vote = () => {
   const bal = VOTE_TAB === 'balance';
   const all = DB.polls().slice().sort((a, b) => b.created_at.localeCompare(a.created_at));
-  /* 진행 중·종료 탭은 일반 투표, 밸런스 게임 탭은 게임만(진행 중인 것 먼저) */
-  const polls = all.filter(p => !isBalance(p));
+  /* 진행 중·종료 탭에는 일반 투표와 밸런스 게임이 함께 나옵니다(밸런스 게임 탭은 게임만) */
   const games = all.filter(isBalance).sort((a, b) => (pollClosed(a) - pollClosed(b)) || b.created_at.localeCompare(a.created_at));
-  const open = polls.filter(p => !pollClosed(p));
-  const done = polls.filter(p =>  pollClosed(p));
+  const open = all.filter(p => !pollClosed(p));
+  const done = all.filter(p =>  pollClosed(p));
   const list = bal ? games : VOTE_TAB === 'done' ? done : open;
   const empty = bal
     ? `아직 밸런스 게임이 없습니다.${signedIn() ? '<br>위의 ‘밸런스 게임 만들기’로 첫 게임을 올려 보세요.' : ''}`
     : VOTE_TAB === 'done' ? '종료된 투표가 없습니다.'
-    : `진행 중인 투표가 없습니다.${signedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`;
+    : `진행 중인 투표·밸런스 게임이 없습니다.${signedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`;
   return pageHead('투표', bal
         ? '둘 중 하나만 고른다면? 가볍게 골라 보는 밸런스 게임입니다. 한쪽을 누르면 바로 투표돼요.'
         : '익명 또는 실명으로 의견을 모읍니다. 한 사람 한 표이고, 마감 전에는 다시 고를 수 있습니다.',
