@@ -222,7 +222,16 @@
   .photo-card h3{margin:0 0 6px;font-size:16.5px;line-height:1.32;font-weight:900}
   .photo-card .excerpt{color:var(--muted);font-size:13px;margin:0 0 10px;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .photo-card .meta{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:8px}
+  .photo-card .meta{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;
+    gap:8px;align-items:center}
+  .photo-card .hero-wrap,.photo-card h3,.photo-card .excerpt{cursor:pointer}
+  .photo-card .meta .btn.like{padding:4px 10px}
+  /* 무기명 안내 — 이름이 안 남는다는 걸 글 올리기 전에 알려 줍니다 */
+  .anon-note{display:flex;gap:11px;align-items:flex-start;background:var(--surface-2);
+    border:1px solid var(--border);border-radius:16px;padding:13px 15px;margin:0 0 16px}
+  .anon-note .ico{font-size:20px;line-height:1.2}
+  .anon-note b{display:block;font-size:14px;font-weight:900}
+  .anon-note span{display:block;font-size:12.5px;color:var(--muted);line-height:1.6;word-break:keep-all}
 
   .post-row{border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer}
   .post-row:hover{background:var(--surface-2)}
@@ -1478,6 +1487,8 @@ const S = {
   loading:true,                    // 첫 자료를 아직 받는 중인지 (화면에 '불러오는 중' 표시)
   myLikes:new Set(),               // 내가 공감을 누른 의견 id (하트 색칠용)
   myCLikes:new Set(),              // 내가 공감을 누른 댓글 id
+  pLikesReady:false,               // schema.sql 32절을 실행해 글 좋아요 표가 준비됐는지
+  myPLikes:new Set(),              // 내가 좋아요를 누른 글 (하트 색칠용)
   likesReady:false,                // schema.sql 을 실행해 의견 공감 표가 준비됐는지
   cLikesReady:false,               // 댓글 공감 표가 준비됐는지
   repliesReady:false,              // 대댓글 칸이 준비됐는지
@@ -1571,8 +1582,10 @@ const BOARDS = {
             desc:'팀을 넘어 함께할 일을 제안하고 같이 할 사람을 모으는 공간입니다.', write:INNER },
 
   /* ── 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 (schema.sql 30절) ── */
-  mascot: { label:'고드래곤.새초롱이.zip', icon:'🐉', layout:'photo',
-            desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다.', write:INNER },
+  /* 'gallery' 는 사진이 있으면 크게 보여 주되 사진이 없어도 됩니다(zip·hwp 만 올려도 OK).
+     anon:true 면 이름 없이 올립니다 — schema.sql 32절에서 서버도 이름을 지웁니다. */
+  mascot: { label:'고드래곤.새초롱이.zip', icon:'🐉', layout:'gallery', anon:true,
+            desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다. 이름 없이 올라갑니다.', write:INNER },
   ai:     { label:'AI.zip', icon:'🤖', layout:'list',
             desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.', write:INNER },
   relief: { label:'멘탈관리.zip', icon:'💛', layout:'list',
@@ -1669,6 +1682,8 @@ async function refresh(opt = {}){
       sb.from('comment_likes').select('comment_id'),
       /* 대댓글 칸이 있는지 한 줄만 찔러 봅니다 */
       sb.from('opinion_comments').select('parent_id').limit(1),
+      /* 글 좋아요 — 32절을 아직 실행하지 않았으면 조용히 쉽니다 */
+      sb.from('post_likes').select('post_id'),
     ]).catch(e => e);
     const pPolls = Promise.all([
       sb.from('polls').select('*').order('created_at', { ascending:false }),
@@ -1726,15 +1741,17 @@ async function refresh(opt = {}){
        (권한을 그렇게 걸어 두어서 '내가 누른 것' 만 돌아옵니다. 하트 색칠용이고
         전체 개수는 opinions.likes 숫자를 씁니다.) */
     try{
-      const [a, b, c] = await pExtras;
+      const [a, b, c, d] = await pExtras;
       S.likesReady   = !a.error;
       S.myLikes      = new Set((a.data || []).map(r => r.opinion_id));
       S.cLikesReady  = !b.error;
       S.myCLikes     = new Set((b.data || []).map(r => r.comment_id));
       S.repliesReady = !c.error;
+      S.pLikesReady  = !d.error;
+      S.myPLikes     = new Set((d.data || []).map(r => r.post_id));
     }catch(e){
-      S.likesReady = S.cLikesReady = S.repliesReady = false;
-      S.myLikes = new Set(); S.myCLikes = new Set();
+      S.likesReady = S.cLikesReady = S.repliesReady = S.pLikesReady = false;
+      S.myLikes = new Set(); S.myCLikes = new Set(); S.myPLikes = new Set();
     }
 
     /* 투표 — 따로 읽습니다. SQL 실행 전이라 표가 없으면 투표 게시판만 '준비 중' 이 되고
@@ -2711,6 +2728,39 @@ function boardView(key){
   }
 
   /* ── 협업: 제안 카드 + 참여자 ── */
+  /* ── 고드래곤.새초롱이.zip: 사진 격자 + 좋아요. 이름은 어디에도 나오지 않습니다.
+        사진이 없는 글(zip·hwp 만 올린 글)도 아이콘 칸으로 그대로 보입니다. ── */
+  if(key === 'mascot'){
+    return `<div class="crumb">홈 · ${esc(CRUMB[key])}</div>
+    <div class="pg-head">
+      <div><h1 class="pg-title">${b.icon} ${esc(b.label)}</h1><p class="pg-sub">${esc(b.desc)}</p></div>
+      ${writeBtn ? `<button class="btn primary" id="bdWrite">＋ 자료 올리기</button>` : ''}
+    </div>
+    <div class="anon-note"><span class="ico" aria-hidden="true">🙈</span>
+      <div><b>이름 없이 올라가는 방입니다</b>
+        <span>누가 올렸는지 다른 사람에게 보이지 않습니다. 사진·그림·zip·한글 파일 무엇이든 올릴 수 있어요.</span></div></div>
+    ${searchBar(key, '제목·내용으로 검색')}
+    ${q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>` : ''}
+    ${list.length ? `<div class="photo-grid">${list.map(p => {
+      const ph = photoOf(p), n = (p.images||[]).length;
+      return `<article class="photo-card">
+        <div class="hero-wrap" data-open-post="${p.id}">
+          ${ph ? `<img class="hero" src="${esc(ph)}" alt="" loading="lazy" decoding="async">`
+               : `<div class="hero none">${fileIcon((p.images||[])[0]?.name || '')}</div>`}
+        </div>
+        <div class="pc-body">
+          <h3 data-open-post="${p.id}">${p.pinned ? '<span class="tag brand">공지</span> ' : ''}${highlight(p.title, Q[key])}</h3>
+          <p class="excerpt" data-open-post="${p.id}">${highlight(excerpt(p.body, 80), Q[key])}</p>
+          <div class="meta">
+            <span>${fmtDay(p.created_at)}${n ? ` · 📎${n}` : ''}</span>
+            ${likeChip(p)}
+          </div>
+        </div>
+      </article>`; }).join('')}</div>`
+      : loadBox(q ? '검색 결과가 없습니다.'
+          : `아직 올라온 자료가 없습니다.${canWrite(key) ? '<br>고드래곤·새초롱이 그림이나 자료를 처음으로 나눠 주세요.' : ''}`)}`;
+  }
+
   /* ── AI.zip: 큰 분야(고용·노동·산안·기타) 탭 + 담당 업무 탭 + 목록 ── */
   if(key === 'ai'){
     const all = S.posts.filter(p => p.board === 'ai');
@@ -2813,12 +2863,42 @@ function boardView(key){
 /* 목록 카드 썸네일 — 문서 첨부는 건너뛰고 사진만 씁니다 */
 const photoOf = (p) => { const im=(p.images||[]).find(a=>a.kind!=='doc'); return im ? mediaUrl(im.path) : ''; };
 
+/* ── 글 좋아요 ─────────────────────────────────────────────────────────────
+   한 계정이 한 글에 한 번만, 다시 누르면 취소됩니다(schema.sql 32절).
+   누가 눌렀는지는 아무에게도 보이지 않고, 숫자만 posts.likes 에 쌓입니다.
+   32절을 아직 실행하지 않았으면 버튼 자체를 내보내지 않습니다. */
+const likedPost = (p) => S.myPLikes.has(p.id);
+const likeChip  = (p) => !S.pLikesReady ? ''
+  : `<button class="btn sm like${likedPost(p) ? ' on' : ''}" data-plike="${p.id}" title="좋아요">
+      <span class="ico" aria-hidden="true">💗</span><b>${p.likes || 0}</b></button>`;
+
+async function togglePostLike(id, after){
+  if(!S.user){ toast('잠시 후 다시 시도해 주세요'); return; }
+  busy(true);
+  const on = S.myPLikes.has(id);
+  const { error } = on
+    ? await sb.from('post_likes').delete().eq('post_id', id).eq('user_id', S.user.id)
+    : await sb.from('post_likes').insert({ post_id: id, user_id: S.user.id });
+  busy(false);
+  /* 두 번 눌렸을 때 나는 중복 오류는 이미 누른 것이므로 조용히 넘어갑니다 */
+  if(error && !/duplicate key|already exists/i.test(error.message || '')) return failed('좋아요', error);
+  await refresh();
+  after ? after() : go(CURRENT);
+}
+/* 목록·상세 어디서든 같은 버튼이 동작하게 묶어 줍니다 */
+const bindPostLikes = (root, after) =>
+  $$(`${root} [data-plike]`).forEach(el => el.addEventListener('click', ev => {
+    ev.stopPropagation();                      // 카드 전체를 누른 것으로 보지 않게
+    togglePostLike(el.dataset.plike, after);
+  }));
+
 Object.keys(BOARDS).forEach(key=>{
   VIEWS[key] = () => boardView(key);
   BIND[key]  = () => {
     $('#needLogin')?.addEventListener('click', ()=> toast('단원 권한이 필요합니다. 관리자에게 요청하세요.'));
     bindSearch(key);
     $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
+    bindPostLikes('#main');
     $('#bdWrite')?.addEventListener('click', ()=> openPostForm(key));
     /* 활동 게시판 팀 탭 */
     $$('#main [data-act-team]').forEach(el => el.addEventListener('click', ()=>{
@@ -2844,7 +2924,8 @@ const authorTeamOptions = (selected) => {
 
 function openPostForm(key, edit){
   const b = BOARDS[key];
-  const photo = b.layout==='photo';
+  const photo = b.layout==='photo';   // 사진을 꼭 1장 넣어야 하는 게시판
+  const anon  = !!b.anon;             // 이름 없이 올리는 게시판(고드래곤.새초롱이.zip)
   const e0 = edit || null;
   /* 활동 게시판은 어느 팀 게시판에 올릴지 고릅니다.
      수정이면 원래 팀, 새 글이면 지금 보고 있는 팀 탭, 그것도 없으면 내 소속 팀을 미리 골라 둡니다. */
@@ -2868,16 +2949,21 @@ function openPostForm(key, edit){
     ${isCollab ? `<label class="field">모집 인원 <span class="hint" style="display:inline">선택 — 비워 두면 제한 없이 받습니다</span>
       <input id="pfNeed" type="number" min="1" max="99" placeholder="예) 5" value="${e0?.collab_need ?? ''}">
       <span class="hint">정해 두면 그 인원이 찼을 때 참여 버튼이 닫힙니다. 모집·진행·마무리 상태는 올린 뒤 글에서 바꿀 수 있습니다.</span></label>` : ''}
-    <div class="grid c2">
+    ${anon ? `<div class="anon-note"><span class="ico" aria-hidden="true">🙈</span>
+      <div><b>이름 없이 올라갑니다</b>
+        <span>이 게시판은 무기명이라 작성자 이름과 소속을 적지 않습니다.
+          올린 뒤에도 나만 내 글을 고치고 지울 수 있어요.</span></div></div>`
+    : `<div class="grid c2">
       <label class="field">작성자 소속<select id="pfTeam">${authorTeamOptions(e0?.author_team)}</select></label>
       <label class="field">소속청 · 부서 <span class="hint" style="display:inline">선택</span>
         <input id="pfDept" placeholder="예) 서울지방고용노동청 근로개선지도과" value="${e0?esc(e0.author_dept||''):''}"></label>
-    </div>
+    </div>`}
     <label class="field">첨부파일${photo && !e0?' <span class="req">*</span>':' <span class="hint" style="display:inline">선택</span>'}
       <input id="pfFiles" type="file" multiple>
       <span class="hint">사진·문서·한글(hwp)·엑셀·압축파일·영상 등 <b>어떤 파일이든</b> 올릴 수 있습니다
         (파일 하나에 ${MAX_FILE_MB}MB까지, 실행 파일 제외). 사진은 자동으로 줄여서 올라가고,
-        다른 파일은 원본 그대로 올라가 누르면 열리거나 원래 이름으로 내려받아집니다.${photo?' 첫 번째 사진이 목록에서 크게 표시됩니다.':''}
+        다른 파일은 원본 그대로 올라가 누르면 열리거나 원래 이름으로 내려받아집니다.${
+          photo || b.layout === 'gallery' ? ' 첫 번째 사진이 목록에서 크게 표시됩니다(사진이 없어도 괜찮아요).' : ''}
         ${e0?'<br><b>파일을 새로 고르면 기존 첨부는 교체됩니다.</b> 그대로 두려면 건드리지 마세요.':''}</span>
     </label>
     <div class="thumbs" id="pfThumbs"></div>
@@ -2902,12 +2988,15 @@ function openPostForm(key, edit){
     const btn = $('#pfSave'); btn.disabled = true; busy(true);
     let uploaded = [];            // 글 저장이 실패하면 방금 올린 파일을 도로 지웁니다
     try{
+      /* 무기명 게시판은 이름·소속을 빈칸으로 보냅니다.
+         서버에서도 한 번 더 지웁니다(schema.sql 32절) — 화면을 고쳐도 이름이 남지 않게. */
       const fields = {
         title, body,
-        author_team: $('#pfTeam').value,
-        author_dept: $('#pfDept').value.trim(),
+        author_team: anon ? '' : $('#pfTeam').value,
+        author_dept: anon ? '' : $('#pfDept').value.trim(),
         pinned: !!$('#pfPin')?.checked
       };
+      if(anon) fields.author_name = '';
       if(isAct) fields.team_no = teamNo;
       if(isAi){ fields.topic = $('#pfTopic').value; AI_TAB = ''; AI_SUB = ''; }
       /* 협업 — 모집 인원(비우면 제한 없음) */
@@ -2945,7 +3034,9 @@ function openPost(id){
   const p = S.posts.find(x=>x.id===id); if(!p) return;
   const imgs = imagesOf(p), docs = docsOf(p);
   const mine = p.author_id===S.user?.id || isAdmin();
-  const who = [p.author_name, p.author_team, p.author_dept].filter(Boolean).map(esc).join(' · ');
+  /* 무기명 게시판은 이름 자리에 '무기명' 만 적습니다(이름 칸은 애초에 비어 있습니다) */
+  const who = BOARDS[p.board]?.anon ? '🙈 무기명'
+    : ([p.author_name, p.author_team, p.author_dept].filter(Boolean).map(esc).join(' · ') || '이름 없음');
   /* 활동 글은 어느 팀 게시판 글인지까지 적어 줍니다 — 예) "활동 · 3팀 세대공감 시너지" */
   const at  = p.board === 'activity' ? actTeam(p.team_no) : null;
   const where = esc(BOARDS[p.board]?.label || '') + (at ? ` · ${at.no}팀 ${esc(at.name)}` : '')
@@ -2986,10 +3077,15 @@ function openPost(id){
     <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
     ${docs.length ? `<div class="att-list">${docs.map(a => fileRow(a, mediaUrl(a.path))).join('')}</div>` : ''}
     ${collabBlock}
-    ${mine ? `<div class="row-actions" style="margin-top:18px">
+    ${S.pLikesReady ? `<div class="row-actions" style="margin-top:18px">
+      <button class="btn like big${likedPost(p) ? ' on' : ''}" data-plike="${p.id}">
+        <span class="ico" aria-hidden="true">💗</span> 좋아요 <b>${p.likes || 0}</b></button></div>` : ''}
+    ${mine ? `<div class="row-actions" style="margin-top:${S.pLikesReady ? '10' : '18'}px">
       <button class="btn sm" id="ppEdit">글 수정</button>
       <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
   bindZoom();
+  /* 좋아요 — 누르면 목록과 이 창을 함께 새로 그립니다 */
+  bindPostLikes('#modalBody', ()=>{ go(CURRENT); openPost(p.id); });
 
   /* 참여하기 / 참여 취소 — 이름은 서버가 계정에서 붙입니다(꾸며 넣을 수 없음) */
   $('#cbJoin')?.addEventListener('click', async ()=>{

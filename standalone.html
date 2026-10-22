@@ -203,7 +203,15 @@
   .photo-card h3{margin:0 0 6px;font-size:15.5px;line-height:1.35}
   .photo-card .excerpt{color:var(--muted);font-size:13px;margin:0 0 10px;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .photo-card .meta{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:8px}
+  .photo-card .meta{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .photo-card .hero-wrap,.photo-card h3,.photo-card .excerpt{cursor:pointer}
+  .photo-card .meta .btn.like{padding:4px 10px}
+  /* 무기명 안내 */
+  .anon-note{display:flex;gap:11px;align-items:flex-start;background:var(--surface-2);
+    border:1px solid var(--border);border-radius:16px;padding:13px 15px;margin:0 0 16px}
+  .anon-note .ico{font-size:20px;line-height:1.2}
+  .anon-note b{display:block;font-size:14px;font-weight:900}
+  .anon-note span{display:block;font-size:12.5px;color:var(--muted);line-height:1.6;word-break:keep-all}
 
   /* ---------- List board ---------- */
   .post-row{border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer}
@@ -1421,8 +1429,9 @@ const BOARDS = {
             desc:'팀을 넘어 함께할 일을 제안하고 같이 할 사람을 모으는 공간입니다.',
             read:INNER, write:INNER },
   /* ── 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 ── */
-  mascot: { label:'고드래곤.새초롱이.zip', icon:'🐉', layout:'photo',
-            desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다.',
+  /* gallery = 사진이 있으면 크게, 없어도 OK. anon = 이름 없이 올립니다 */
+  mascot: { label:'고드래곤.새초롱이.zip', icon:'🐉', layout:'gallery', anon:true,
+            desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다. 이름 없이 올라갑니다.',
             read:ALL,   write:INNER },
   ai:     { label:'AI.zip', icon:'🤖', layout:'list',
             desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.',
@@ -1890,6 +1899,7 @@ BIND.home = () => {
   });
 
   $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
+  bindPostLikes('#main');
   $$('#main [data-go-to]').forEach(el => el.addEventListener('click', ()=> go(el.dataset.goTo)));
 };
 
@@ -2180,16 +2190,22 @@ function boardView(key){
 
   if(!list.length){
     body = `<div class="empty">${q ? `“${esc(Q[key])}” 검색 결과가 없습니다.` : '아직 등록된 글이 없습니다.'}</div>`;
-  } else if(b.layout==='photo'){
+  } else if(b.layout==='photo' || b.layout==='gallery'){
+    /* gallery 는 사진이 없어도 되는 사진방입니다(zip·hwp 만 올려도 그대로 보입니다) */
     body = `<div class="photo-grid">${list.map(p=>{
       const img = firstImg(p.atts);
-      return `<article class="photo-card" data-open-post="${p.id}">
-        ${img ? `<img class="hero" src="${img.data}" alt="">`
-              : `<div class="hero none">${b.icon}</div>`}
+      return `<article class="photo-card">
+        <div class="hero-wrap" data-open-post="${p.id}">
+          ${img ? `<img class="hero" src="${img.data}" alt="">`
+                : `<div class="hero none">${b.layout==='gallery' ? fileIcon((p.atts||[])[0]?.name||'') : b.icon}</div>`}
+        </div>
         <div class="pc-body">
-          <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}</h3>
-          <p class="excerpt">${highlight(excerpt(p.body,90),Q[key])}</p>
-          <div class="meta"><span>${esc(p.author)}</span><span>${fmtDay(p.at)}${(p.atts||[]).length?' · 📎'+p.atts.length:''}</span></div>
+          <h3 data-open-post="${p.id}">${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}</h3>
+          <p class="excerpt" data-open-post="${p.id}">${highlight(excerpt(p.body,90),Q[key])}</p>
+          <div class="meta">
+            <span>${b.anon ? '🙈 무기명' : esc(p.author)} · ${fmtDay(p.at)}${(p.atts||[]).length?' · 📎'+p.atts.length:''}</span>
+            ${likeChip(p)}
+          </div>
         </div></article>`;
     }).join('')}</div>`;
   } else {
@@ -2204,6 +2220,10 @@ function boardView(key){
   }
 
   return pageHead(b.label, b.desc, writeBtn)
+    + (b.anon ? `<div class="anon-note"><span class="ico" aria-hidden="true">🙈</span>
+        <div><b>이름 없이 올라가는 방입니다</b>
+          <span>누가 올렸는지 다른 사람에게 보이지 않습니다. 사진·그림·zip·한글 파일 무엇이든 올릴 수 있어요.</span></div>
+      </div>` : '')
     + searchBar(key, '제목·내용·작성자로 검색')
     + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>` : '')
     + body;
@@ -2211,6 +2231,7 @@ function boardView(key){
 function bindBoard(key){
   bindSearch(key);
   $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
+  bindPostLikes('#main');
   $('#bdWrite')?.addEventListener('click', ()=> openPostForm(key));
   /* 활동 게시판 팀 고르기 */
   $$('#main [data-act-team]').forEach(el => el.addEventListener('click', ()=>{
@@ -2240,7 +2261,8 @@ const authorTeamOptions = (selected) => {
 
 function openPostForm(key, edit){
   const b = BOARDS[key];
-  const photo = b.layout==='photo';
+  const photo = b.layout==='photo';   // 사진을 꼭 1장 넣어야 하는 게시판
+  const anon  = !!b.anon;             // 이름 없이 올리는 게시판
   const e0 = edit || null;
   /* 활동 게시판은 어느 팀 게시판에 올릴지 고릅니다(수정이면 원래 팀, 새 글이면 보고 있는 팀) */
   const isAct   = key === 'activity';
@@ -2264,15 +2286,19 @@ function openPostForm(key, edit){
     ${isCollab ? `<label class="field">모집 인원 <span class="hint" style="display:inline">선택 — 비워 두면 제한 없이 받습니다</span>
       <input id="pfNeed" type="number" min="1" max="99" placeholder="예) 5" value="${e0?.collabNeed ?? ''}">
       <span class="hint">정해 두면 그 인원이 찼을 때 참여 버튼이 닫힙니다. 모집·진행·마무리 상태는 올린 뒤 글에서 바꿀 수 있습니다.</span></label>` : ''}
-    <div class="grid c2">
+    ${anon ? `<div class="anon-note"><span class="ico" aria-hidden="true">🙈</span>
+      <div><b>이름 없이 올라갑니다</b>
+        <span>이 게시판은 무기명이라 작성자 이름과 소속을 적지 않습니다.
+          올린 뒤에도 나만 내 글을 고치고 지울 수 있어요.</span></div></div>`
+    : `<div class="grid c2">
       <label class="field">작성자 소속<select id="pfTeam">${authorTeamOptions(e0?.authorTeam)}</select></label>
       <label class="field">소속청 · 부서 <span class="hint" style="display:inline">선택</span>
         <input id="pfDept" placeholder="예) 서울지방고용노동청 근로개선지도과" value="${e0?esc(e0.authorDept||''):''}"></label>
-    </div>
+    </div>`}
     <label class="field">첨부파일${photo && !e0?' <span class="req">*</span>':' <span class="hint" style="display:inline">선택</span>'}
       <input id="pfFiles" type="file" multiple>
       <span class="hint">사진·문서·한글(hwp)·압축파일·영상 등 어떤 파일이든 올릴 수 있습니다(실행 파일 제외).
-        사진은 자동 축소되고, 연습용이라 5MB 넘는 파일은 이름만 기록됩니다.${photo?' 첫 번째 사진이 목록에서 크게 표시됩니다.':''}
+        사진은 자동 축소되고, 연습용이라 5MB 넘는 파일은 이름만 기록됩니다.${photo||b.layout==='gallery' ? ' 첫 번째 사진이 목록에서 크게 표시됩니다(사진이 없어도 괜찮아요).' : ''}
         ${e0?'<br><b>파일을 새로 고르면 기존 첨부는 교체됩니다.</b>':''}</span>
     </label>
     <div class="thumbs" id="pfThumbs"></div>
@@ -2296,7 +2322,7 @@ function openPostForm(key, edit){
     const arr = DB.posts();
     /* 협업 — 모집 인원(비우면 제한 없음) */
     const need = isCollab ? Number($('#pfNeed').value) : 0;
-    const common = { title, body, authorTeam:$('#pfTeam').value, authorDept:$('#pfDept').value.trim(),
+    const common = { title, body, authorTeam: anon ? '' : $('#pfTeam').value, authorDept: anon ? '' : $('#pfDept').value.trim(),
                      pinned: !!$('#pfPin')?.checked, ...(isAct ? { teamNo } : {}),
                      ...(isAi ? { topic: $('#pfTopic').value } : {}),  /* AI.zip 은 담당 업무를 함께 저장합니다 */
                      ...(isCollab ? { collabNeed: need > 0 ? Math.min(Math.round(need), 99) : null } : {}) };
@@ -2308,7 +2334,10 @@ function openPostForm(key, edit){
       arr[i] = { ...arr[i], ...common, ...(touched ? { atts } : {}) };
       if(DB.savePosts(arr)){ closeModal(); toast('수정되었습니다'); go(CURRENT); }
     }else{
-      arr.push({ id:uid(), board:key, atts, author:SESSION.name, authorRole:SESSION.role,
+      /* 무기명 게시판은 보이는 이름(author)을 비우고, 누구 글인지는 realAuthor 에만 둡니다.
+         본 사이트에서 author_id 가 하는 일을 연습용에서는 이 칸이 대신합니다. */
+      arr.push({ id:uid(), board:key, atts, author: anon ? '' : SESSION.name, realAuthor: SESSION.name,
+                 authorRole:SESSION.role,
                  at:nowISO(), ...(isCollab ? { collabStatus:'open', joins:[] } : {}), ...common });
       if(DB.savePosts(arr)){ closeModal(); toast('등록되었습니다'); go(key); }
     }
@@ -2320,8 +2349,10 @@ function openPost(id){
   const p = DB.posts().find(x=>x.id===id); if(!p) return;
   const imgs = (p.atts||[]).filter(isShowableImg);
   const docs = (p.atts||[]).filter(a => !isShowableImg(a));
-  const mine = p.author===SESSION.name || SESSION.role==='admin';
-  const who = [p.author, p.authorTeam, p.authorDept].filter(Boolean).map(esc).join(' · ');
+  /* 무기명 글은 이름이 비어 있으니 realAuthor 로 '내 글인지' 를 봅니다 */
+  const mine = (p.realAuthor || p.author) === SESSION.name || SESSION.role==='admin';
+  const who = BOARDS[p.board]?.anon ? '🙈 무기명'
+    : ([p.author, p.authorTeam, p.authorDept].filter(Boolean).map(esc).join(' · ') || '이름 없음');
   const at  = p.board === 'activity' ? actTeam(p.teamNo) : null;
 
   /* ── 협업 글이면 참여자 명단과 '참여하기' 를 함께 보여 줍니다 ── */
@@ -2355,9 +2386,13 @@ function openPost(id){
     <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
     ${docs.length ? `<div class="att-list">${docs.map(fileRow).join('')}</div>` : ''}
     ${collabBlock}
-    ${mine ? `<div class="row-actions" style="margin-top:18px">
+    <div class="row-actions" style="margin-top:18px">
+      <button class="btn like big${likedPost(p) ? ' on' : ''}" data-plike="${p.id}">
+        <span class="ico" aria-hidden="true">💗</span> 좋아요 <b>${likeCount(p)}</b></button></div>
+    ${mine ? `<div class="row-actions" style="margin-top:10px">
       <button class="btn sm" id="ppEdit">글 수정</button>
       <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
+  bindPostLikes('#modalBody', ()=>{ go(CURRENT); openPost(p.id); });
   $$('#modalBody [data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
   bindFileRows('#modalBody');
 
@@ -2689,6 +2724,29 @@ const VOTE_EDIT  = new Set();
 const VOTE_PEEK  = new Set();
 
 const myVoterId  = () => { let k = LS.get('sm_visitor', null); if(!k){ k = uid(); LS.set('sm_visitor', k); } return k; };
+
+/* ── 글 좋아요 ─────────────────────────────────────────────────────────────
+   본 사이트는 post_likes 표(schema.sql 32절)에 한 줄씩 쌓고 개수만 보여 줍니다.
+   연습용은 글 안에 누른 사람 목록(likedBy)을 넣어 같은 동작을 흉내 냅니다.
+   한 사람이 한 글에 한 번, 다시 누르면 취소입니다. */
+const likeCount = (p) => (p.likedBy || []).length;
+const likedPost = (p) => (p.likedBy || []).includes(myVoterId());
+const likeChip  = (p) =>
+  `<button class="btn sm like${likedPost(p) ? ' on' : ''}" data-plike="${p.id}" title="좋아요">
+     <span class="ico" aria-hidden="true">💗</span><b>${likeCount(p)}</b></button>`;
+function togglePostLike(id, after){
+  const arr = DB.posts(), t = arr.find(x => x.id === id); if(!t) return;
+  const me = myVoterId();
+  t.likedBy = (t.likedBy || []).includes(me)
+    ? t.likedBy.filter(v => v !== me)
+    : [...(t.likedBy || []), me];
+  if(DB.savePosts(arr)) after ? after() : go(CURRENT);
+}
+const bindPostLikes = (root, after) =>
+  $$(`${root} [data-plike]`).forEach(el => el.addEventListener('click', ev => {
+    ev.stopPropagation();                      // 카드 전체를 누른 것으로 보지 않게
+    togglePostLike(el.dataset.plike, after);
+  }));
 const signedIn   = () => !!SESSION && SESSION.role !== 'anon';
 const pollClosed = (p) => !!p.closed || (!!p.closes_at && new Date(p.closes_at) <= new Date());
 const myBallot   = (pid) => DB.ballots().find(b => b.poll_id === pid && b.voter === myVoterId());
@@ -2873,7 +2931,6 @@ function openPollEdit(p){
       ? '<div class="notice" style="margin:0 0 14px">이 투표는 <b>익명</b>입니다. 익명은 실명으로 되돌릴 수 없습니다.</div>'
       : `<label class="pv-sw" style="margin:0 0 14px"><input type="checkbox" id="peAnon">
           <span><b>무기명(익명)으로 바꾸기</b><em>바꾸면 누가 무엇을 골랐는지 아무에게도 보이지 않고 '참여자 보기' 도 닫힙니다. 되돌릴 수 없습니다.</em></span></label>`}
-    <div class="grid c2">
       <label class="field">마감<select id="peClose">
         <option value="keep" selected>그대로 두기${p.closes_at ? ` (${shortWhen(p.closes_at)})` : ' (마감 없음)'}</option>
         <option value="">마감 없음 (직접 마감)</option>
@@ -3106,7 +3163,6 @@ function openPollForm(kind = 'poll'){
       <label class="pv-sw multi"><input type="checkbox" id="pvMulti">
         <span><b>복수 선택</b><em>한 사람이 여러 항목을 고를 수 있습니다</em></span></label>
     </div>
-    <div class="grid c2">
       <label class="field">마감<select id="pvClose">
         <option value="">마감 없음 (직접 마감)</option>
         <option value="1">1일 뒤</option><option value="3">3일 뒤</option>
@@ -3312,7 +3368,6 @@ BIND.calendar = () => {
 function openEventForm(date, edit){
   const e0 = edit || null;
   openModal(e0 ? '일정 수정' : '일정 등록', `
-    <div class="grid c2">
       <label class="field">날짜 <span class="req">*</span>
         <input id="evDate" type="date" value="${esc(e0?e0.date:date)}"></label>
       <label class="field">시간 <span class="hint" style="display:inline">선택</span>
@@ -3383,7 +3438,6 @@ VIEWS.report = () => {
       <button class="btn sm" id="rpMine" style="margin-left:6px">내 제출 내역에서 수정·삭제</button></div>` : '')
   + `<div class="card">
     <h2>결과보고서 제출</h2>
-    <div class="grid c2">
       <label class="field">작성자<input id="rpAuthor" value="${esc(SESSION.name)}"></label>
       <label class="field">소속 팀
         <select id="rpTeam"><option value="">선택 안 함</option>${DB.intro().teams.map(t=>`<option>${esc(t.name)}</option>`).join('')}</select>
@@ -3455,7 +3509,6 @@ VIEWS.expense = () => pageHead('활동비 정산 신청','활동비 사용 내�
   + `<div class="notice">첨부한 영수증 사진은 <b>본인과 혁신행정담당관·운영 관리자</b>만 열람할 수 있습니다. 다른 단원에게는 보이지 않습니다.</div>
   <div class="card">
     <h2>정산 신청서</h2>
-    <div class="grid c2">
       <label class="field">신청자 <span class="req">*</span><input id="exName" value="${esc(SESSION.name)}"></label>
       <label class="field">연락처 <span class="hint" style="display:inline">선택</span><input id="exContact"></label>
       <label class="field">소속 팀
@@ -3621,7 +3674,6 @@ function showReport(id){
 /* 보고서 수정 — 작성자·팀을 고치고, 파일을 새로 고르면 예전 파일과 바꿉니다 */
 function openReportForm(r){
   openModal('결과보고서 수정', `
-    <div class="grid c2">
       <label class="field">작성자<input id="reAuthor" value="${esc(r.author||'')}"></label>
       <label class="field">소속 팀<select id="reTeam"><option value="">선택 안 함</option>
         ${DB.intro().teams.map(t=>`<option ${t.name===r.team?'selected':''}>${esc(t.name)}</option>`).join('')}</select></label>

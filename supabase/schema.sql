@@ -1646,3 +1646,88 @@ create policy docs_read on storage.objects for select
       or ((storage.foldername(name))[1] = 'reports' and public.is_inner())
     )
   );
+
+-- ============================================================================
+--  32. 글에 '좋아요' + 고드래곤.새초롱이.zip 무기명
+--
+--  (1) 좋아요 — 소식·활동·라운지 등 게시판 글 전부에 붙습니다.
+--      · 한 계정이 한 글에 한 번만. 다시 누르면 취소됩니다.
+--      · 누가 눌렀는지는 남에게 보이지 않습니다(16절 의견 공감과 같은 방식).
+--        '내가 눌렀는지' 만 내가 읽을 수 있고, 전체 개수는 posts.likes 숫자를 씁니다.
+--
+--  (2) 고드래곤.새초롱이.zip(mascot)은 무기명입니다.
+--      화면에서 이름을 비워 보내고, 서버에서도 그 게시판 글이면 이름·소속을 지웁니다.
+--      ★ author_id(누가 올렸는지 가리키는 번호)는 남습니다. 본인이 자기 글을
+--        고치고 지울 수 있어야 하고, 데이터베이스 권한 규칙도 그 번호로 판단하기
+--        때문입니다. 화면에는 어디에도 나오지 않지만, 데이터베이스를 직접 열 수 있는
+--        관리자라면 번호를 회원 명단과 맞춰 볼 수는 있습니다. 완전한 익명이 필요하면
+--        말씀해 주세요(그 경우 본인 수정·삭제를 포기해야 합니다).
+--
+--  이미 올라와 있는 mascot 글의 이름도 함께 지웁니다 — 되돌릴 수 없습니다.
+-- ============================================================================
+
+alter table public.posts add column if not exists likes int not null default 0;
+
+create table if not exists public.post_likes (
+  post_id    uuid not null references public.posts on delete cascade,
+  user_id    uuid not null default auth.uid() references auth.users on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (post_id, user_id)             -- 한 사람이 한 글에 한 번만
+);
+alter table public.post_likes enable row level security;
+
+drop policy if exists postlike_select on public.post_likes;
+create policy postlike_select on public.post_likes for select
+  using ( user_id = auth.uid() );            -- 내가 누른 것만 보입니다
+
+drop policy if exists postlike_insert on public.post_likes;
+create policy postlike_insert on public.post_likes for insert
+  with check ( user_id = auth.uid() );
+
+drop policy if exists postlike_delete on public.post_likes;
+create policy postlike_delete on public.post_likes for delete
+  using ( user_id = auth.uid() );            -- 자기가 누른 것만 취소
+
+-- 좋아요 개수를 posts.likes 에 반영합니다(공감 표를 못 읽는 사람도 개수는 정확하게).
+create or replace function public.bump_post_like()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    update public.posts set likes = likes + 1 where id = new.post_id;
+    return new;
+  else
+    update public.posts set likes = greatest(likes - 1, 0) where id = old.post_id;
+    return old;
+  end if;
+end $$;
+
+drop trigger if exists post_likes_bump on public.post_likes;
+create trigger post_likes_bump
+  after insert or delete on public.post_likes
+  for each row execute function public.bump_post_like();
+
+-- 이미 눌린 좋아요가 있다면 개수를 다시 세어 맞춥니다(다시 실행해도 안전).
+update public.posts p
+   set likes = (select count(*) from public.post_likes l where l.post_id = p.id);
+
+-- 고드래곤.새초롱이.zip 무기명 — 이름이 들어와도 서버에서 지웁니다
+create or replace function public.anon_mascot_post()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if new.board = 'mascot' then
+    new.author_name := '';
+    new.author_team := '';
+    new.author_dept := '';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists posts_anon_mascot on public.posts;
+create trigger posts_anon_mascot
+  before insert or update on public.posts
+  for each row execute function public.anon_mascot_post();
+
+-- 이미 올라와 있는 글의 이름도 지웁니다
+update public.posts
+   set author_name = '', author_team = '', author_dept = ''
+ where board = 'mascot';
