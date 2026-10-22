@@ -145,7 +145,7 @@
   .tag.approve{background:var(--ok-weak);color:var(--ok)}
   .tag.reject{background:var(--danger-weak);color:var(--danger)}
   .tag.brand{background:var(--brand-weak);color:var(--brand)}
-  /* 제출이 잘 들어갔다는 표시 — 담당관 처리 상태(접수·승인 등)와는 별개입니다 */
+  /* 결과보고서 '제출 완료' 표시 — 보고서는 승인 절차가 없어 이 표시 하나로 끝입니다 */
   .tag.ok-sub{background:var(--ok-weak);color:var(--ok);white-space:nowrap}
   .tag.hol{background:var(--hol-weak);color:var(--hol)}
   table{width:100%;border-collapse:collapse;font-size:13.5px}
@@ -1637,7 +1637,7 @@ const MENUS = [
   { id:'expense',  icon:'🧾', label:'활동비 정산',   roles:INNER, group:'새소리단 공간' },
   { id:'mine',     icon:'📁', label:'내 제출 내역',  roles:INNER, group:'새소리단 공간' },
 
-  { id:'review-report',  icon:'✅', label:'결과보고서 검토', roles:OFFICER, group:'혁신행정담당관' },
+  { id:'review-report',  icon:'✅', label:'결과보고서 모아보기', roles:OFFICER, group:'혁신행정담당관' },
   { id:'review-expense', icon:'💳', label:'활동비 정산 처리', roles:OFFICER, group:'혁신행정담당관' },
   { id:'members',        icon:'👥', label:'회원 · 권한 관리', roles:OFFICER, group:'혁신행정담당관' },
 
@@ -2143,10 +2143,9 @@ const Q = {};
 
 const pageHead = (t,d,right='') =>
   `<div class="page-head"><div><h1>${esc(t)}</h1><p>${esc(d)}</p></div><div class="row-actions">${right}</div></div>`;
-const statusTag = (s) => {
-  const map = { '접수':'recv','검토중':'review','승인':'approve','반려':'reject' };
-  return `<span class="tag ${map[s]||'recv'}">${esc(s||'접수')}</span>`;
-};
+/* 결과보고서는 승인 절차가 없습니다 — 내기만 하면 '제출 완료' 하나로 끝입니다.
+   데이터베이스의 status 칸은 그대로 두되(기본값 '접수') 화면에서는 쓰지 않습니다. */
+const repTag = () => `<span class="tag ok-sub">✅ 제출 완료</span>`;
 /* 활동비 정산은 같은 상태를 쉬운 말로 보여 줍니다.
    단원이 신청하면 '접수완료', 담당관이 비용 처리를 끝내면 '처리완료' 입니다.
    (데이터베이스에 저장되는 값은 그대로라 예전 자료도 그대로 보입니다) */
@@ -2259,20 +2258,16 @@ VIEWS.home = () => {
   /* 관리자·담당관용 알림은 히어로 위에 얇게 */
   let ops = '';
   if(isOfficer()){
-    const nr = S.reports.filter(x=>!['승인','반려'].includes(x.status)).length;
+    /* 결과보고서는 승인 절차가 없어서 처리할 일이 생기지 않습니다 — 정산만 챙기면 됩니다 */
     const ne = S.expenses.filter(x=>!['승인','반려'].includes(x.status)).length;
-    /* 보고서와 정산은 처리하는 화면이 다릅니다.
-       예전에는 버튼이 하나라서 둘 다 밀려 있으면 정산으로는 갈 수 없었습니다. */
-    if(nr || ne) ops = `<div class="wrap-1180" style="padding-top:16px">
+    if(ne) ops = `<div class="wrap-1180" style="padding-top:16px">
       <div class="todo">
         <div class="todo-head"><span class="ico" aria-hidden="true">🔔</span>
-          <div><b>처리할 일이 ${nr + ne}건 있습니다</b>
+          <div><b>처리할 정산이 ${ne}건 있습니다</b>
             <span>혁신행정담당관에게만 보이는 안내입니다.</span></div></div>
         <div class="todo-acts">
-          ${nr ? `<button class="todo-btn" data-go-to="review-report">
-            <span class="n">${nr}</span><span class="t">검토 대기 보고서</span><span class="go">처리하러 가기 ›</span></button>` : ''}
-          ${ne ? `<button class="todo-btn exp" data-go-to="review-expense">
-            <span class="n">${ne}</span><span class="t">처리 대기 정산</span><span class="go">처리하러 가기 ›</span></button>` : ''}
+          <button class="todo-btn exp" data-go-to="review-expense">
+            <span class="n">${ne}</span><span class="t">처리 대기 정산</span><span class="go">처리하러 가기 ›</span></button>
         </div>
       </div></div>`;
   }
@@ -4223,9 +4218,9 @@ VIEWS.report = () => {
   /* 내가 낸 보고서 — 제출이 잘 들어갔는지 이 화면에서 바로 확인할 수 있게 */
   const my = S.reports.filter(r => r.author_id === S.user?.id)
     .slice().sort((a, b) => b.created_at.localeCompare(a.created_at));
-  return pageHead('결과보고서 제출','작성한 결과보고서 파일을 올리면 혁신행정담당관이 검토합니다.')
+  return pageHead('결과보고서 제출','작성한 결과보고서 파일을 올리면 바로 제출 완료입니다. 따로 승인을 기다리지 않아도 됩니다.')
   + (my.length ? `<div class="notice ok">
-      <b>✅ 제출 완료 ${my.length}건</b> — 가장 최근 제출 ${fmt(my[0].created_at)} · 상태 ${statusTag(my[0].status)}
+      <b>✅ 제출 완료 ${my.length}건</b> — 가장 최근 제출 ${fmt(my[0].created_at)}
       <button class="btn sm" id="rpMine" style="margin-left:6px">내 제출 내역에서 수정·삭제</button></div>` : '')
   + `<div class="card"><h2>결과보고서 제출</h2>
     <div class="grid c2">
@@ -4282,7 +4277,7 @@ function reportRooms(){
         <td>${esc(r.author_name)}</td>
         <td>${teamNoOf(r) ? `${teamNoOf(r)}조 · ${esc(r.team)}` : '<span class="hint">미지정</span>'}</td>
         <td>${esc(r.act_date)}</td>
-        <td>${statusTag(r.status)}</td>
+        <td>${repTag()}</td>
         <td class="hint">${fmtDay(r.created_at)}</td>
         <td><button class="btn sm" data-view-report="${r.id}">보기</button></td>
       </tr>`).join('')}${tableEnd}</div>`
@@ -4296,7 +4291,7 @@ BIND.report = () => {
     REP_TEAM = Number(el.dataset.repTeam) || 0;
     const y = window.scrollY; go('report'); window.scrollTo(0, y);
   }));
-  $$('#main [data-view-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.viewReport, false)));
+  $$('#main [data-view-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.viewReport)));
   let picked = [];
   $('#rpFiles').addEventListener('change', e=>{
     picked = prepDocs(e.target.files); previewDocsLocal('#rpThumbs', picked); });
@@ -4387,11 +4382,10 @@ VIEWS.mine = () => {
   const ex = S.expenses.filter(x=>x.author_id===S.user?.id);
   return pageHead('내 제출 내역','내가 낸 보고서와 정산 신청의 처리 상태입니다.')
   + `<div class="card"><h2>결과보고서 (${rp.length})</h2>
-      ${rp.length ? `<p class="sub">제출한 보고서는 담당관이 승인·반려하기 전까지 수정하거나 내릴 수 있습니다.</p>`
-        + table(['제목','활동일','제출','상태','제출일시','']) + rp.map(r=>`<tr>
+      ${rp.length ? `<p class="sub">낸 보고서는 그대로 제출 완료입니다. 필요하면 언제든 고치거나 내릴 수 있습니다.</p>`
+        + table(['제목','활동일','상태','제출일시','']) + rp.map(r=>`<tr>
         <td>${esc(r.title)}</td><td>${esc(r.act_date)}</td>
-        <td><span class="tag ok-sub">✅ 제출 완료</span></td>
-        <td>${statusTag(r.status)}</td>
+        <td>${repTag()}</td>
         <td class="hint">${fmt(r.created_at)}</td>
         <td><div class="row-actions" style="margin:0">
           <button class="btn sm" data-view-report="${r.id}">보기</button>
@@ -4406,7 +4400,7 @@ VIEWS.mine = () => {
         : `<div class="empty">정산 신청 내역이 없습니다.</div>`}</div>`;
 };
 BIND.mine = () => {
-  $$('#main [data-view-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.viewReport,false)));
+  $$('#main [data-view-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.viewReport)));
   $$('#main [data-view-expense]').forEach(b => b.addEventListener('click', ()=> showExpense(b.dataset.viewExpense,false)));
   $$('#main [data-edit-report]').forEach(b => b.addEventListener('click', ()=>{
     const r = S.reports.find(x => x.id === b.dataset.editReport); if(r) openReportForm(r); }));
@@ -4417,19 +4411,19 @@ BIND.mine = () => {
 /* ============================================================================
    혁신행정담당관 — 검토 / 처리 / 회원 관리
    ============================================================================ */
-VIEWS['review-report'] = () => pageHead('결과보고서 검토','제출된 모든 결과보고서입니다. 승인/반려 및 코멘트를 남길 수 있습니다.')
+VIEWS['review-report'] = () => pageHead('결과보고서 모아보기','단원들이 낸 결과보고서 전체입니다. 승인 절차는 없고, 내면 그대로 제출 완료입니다.')
   + `<div class="card"><h2>전체 보고서 (${S.reports.length})</h2>
     ${S.reports.length ? table(['제목','작성자','팀','활동일','상태','']) + S.reports.map(r=>`<tr>
       <td>${esc(r.title)}</td><td>${esc(r.author_name)}</td><td>${esc(r.team||'-')}</td>
-      <td>${esc(r.act_date)}</td><td>${statusTag(r.status)}</td>
+      <td>${esc(r.act_date)}</td><td>${repTag()}</td>
       <td><div class="row-actions" style="margin:0">
-        <button class="btn sm primary" data-review-report="${r.id}">열람·처리</button>
+        <button class="btn sm primary" data-review-report="${r.id}">열람</button>
         ${isAdmin() ? `<button class="btn sm danger" data-del-report="${r.id}">삭제</button>` : ''}
       </div></td></tr>`).join('') + tableEnd
       : `<div class="empty">제출된 보고서가 없습니다.</div>`}</div>`;
 BIND['review-report'] = () => {
   $$('#main [data-review-report]').forEach(b =>
-    b.addEventListener('click', ()=> showReport(b.dataset.reviewReport, true)));
+    b.addEventListener('click', ()=> showReport(b.dataset.reviewReport)));
   /* 관리자는 목록에서 바로 지울 수 있습니다 */
   $$('#main [data-del-report]').forEach(b => b.addEventListener('click', ()=>{
     const r = S.reports.find(x => x.id === b.dataset.delReport); if(r) deleteReport(r); }));
@@ -4529,24 +4523,24 @@ async function deleteMember(id){
 }
 
 /* ---------- 상세 모달 ---------- */
-function processBlock(cur, comment, kind){
-  const exp = kind === 'expense';
+/* 처리 칸 — 지금은 활동비 정산에서만 씁니다(결과보고서는 승인 절차가 없습니다) */
+function processBlock(cur, comment){
   return `<hr style="border:0;border-top:1px solid var(--border);margin:18px 0">
     <label class="field">처리 상태<select id="mdStatus">
-      ${['접수','검토중','승인','반려'].map(s=>`<option value="${s}" ${s===cur?'selected':''}>${exp ? EXP_LABEL[s] : s}</option>`).join('')}</select>
-      ${exp ? '<span class="hint">비용 처리를 끝냈으면 <b>처리완료</b> 로 바꿔 주세요.</span>' : ''}</label>
+      ${['접수','검토중','승인','반려'].map(s=>`<option value="${s}" ${s===cur?'selected':''}>${EXP_LABEL[s]}</option>`).join('')}</select>
+      <span class="hint">비용 처리를 끝냈으면 <b>처리완료</b> 로 바꿔 주세요.</span></label>
     <label class="field">코멘트 (반려 사유 등)<textarea id="mdComment">${esc(comment||'')}</textarea></label>
     <button class="btn primary" id="mdSave">저장</button>`;
 }
-/* 결과보고서 — 올린 사람은 '접수·검토중' 일 때만 고치고 지울 수 있습니다.
-   담당관이 승인·반려한 뒤에는 처리 결과를 지키려고 잠급니다(관리자는 언제든 삭제).
+/* 결과보고서 — 승인 절차가 없으므로 올린 사람은 언제든 고치고 지울 수 있습니다.
+   (예전에 담당관이 승인·반려해 둔 보고서만 잠겨 있습니다. 관리자는 언제든 삭제)
    같은 규칙을 데이터베이스에도 걸어 두었습니다(schema.sql 28절). */
-const reportOpen  = (r) => ['접수','검토중'].includes(r.status);
+const reportOpen  = (r) => !['승인','반려'].includes(r.status);
 const myReport    = (r) => r.author_id === S.user?.id;
 const canEditRep  = (r) => myReport(r) && reportOpen(r);
 const canDelRep   = (r) => isAdmin() || canEditRep(r);
 
-function showReport(id, canProcess){
+function showReport(id){
   const r = S.reports.find(x=>x.id===id); if(!r) return;
   const acts = [
     canEditRep(r) ? '<button class="btn sm" id="rpEdit">보고서 수정</button>' : '',
@@ -4555,26 +4549,17 @@ function showReport(id, canProcess){
   openModal(r.title, `<dl>
     <dt>작성자 / 팀</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}</dd>
     <dt>활동일자</dt><dd>${esc(r.act_date)}</dd>
-    <dt>상태</dt><dd>${statusTag(r.status)} <span class="tag ok-sub">✅ 제출 완료</span></dd>
+    <dt>상태</dt><dd>${repTag()}</dd>
     ${r.officer_comment?`<dt>담당관 코멘트</dt><dd>${esc(r.officer_comment)}</dd>`:''}
     <dt>결과보고서 파일</dt><dd>${attHTML(r.files)}</dd>
     <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd>
   </dl>`
     + (acts ? `<div class="row-actions" style="margin-top:6px">${acts}</div>` : '')
     + (myReport(r) && !reportOpen(r)
-        ? '<p class="hint" style="margin:8px 0 0">담당관이 처리(승인·반려)한 보고서는 수정·삭제할 수 없습니다. 고칠 일이 있으면 혁신행정담당관에게 알려 주세요.</p>' : '')
-    + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
+        ? '<p class="hint" style="margin:8px 0 0">예전에 담당관이 처리해 둔 보고서라 수정·삭제할 수 없습니다. 고칠 일이 있으면 혁신행정담당관에게 알려 주세요.</p>' : ''));
   bindZoom();
   $('#rpEdit')?.addEventListener('click', ()=>{ closeModal(); openReportForm(r); });
   $('#rpDel')?.addEventListener('click', ()=> deleteReport(r));
-  $('#mdSave')?.addEventListener('click', async ()=>{
-    busy(true);
-    const { error } = await sb.from('reports')
-      .update({ status:$('#mdStatus').value, officer_comment:$('#mdComment').value.trim() }).eq('id', id);
-    busy(false);
-    if(error) return failed('보고서 처리', error);
-    await refresh(); closeModal(); toast('저장되었습니다'); go(CURRENT);
-  });
 }
 
 /* 보고서 수정 — 작성자·팀을 고치고, 파일을 새로 고르면 예전 파일과 바꿉니다 */
@@ -4637,7 +4622,7 @@ function showExpense(id, canProcess){
     ${r.officer_comment?`<dt>담당관 코멘트</dt><dd>${esc(r.officer_comment)}</dd>`:''}
     <dt>영수증 (${(r.receipts||[]).length}장)</dt><dd>${attHTML(r.receipts)}</dd>
     <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd>
-  </dl>` + (canProcess ? processBlock(r.status, r.officer_comment, 'expense') : ''));
+  </dl>` + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
   bindZoom();
   $('#mdSave')?.addEventListener('click', async ()=>{
     busy(true);
