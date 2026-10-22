@@ -880,6 +880,11 @@
   .op-table .subj b{display:block;font-size:15px;font-weight:800;margin-bottom:4px}
   .op-table .subj span{font-size:12px;color:var(--muted)}
   /* 공감·댓글 — 아이콘과 숫자를 크게 (index.html 과 같은 모양) */
+  .page-head p.op-lead,.op-lead{display:inline-block;font-size:16.5px;font-weight:800;color:var(--text);line-height:1.6;word-break:keep-all}
+  .op-added{margin-top:11px;border-left:3px solid var(--brand-weak);padding-left:11px;display:flex;flex-direction:column;gap:6px}
+  .op-add{font-size:13.5px;line-height:1.6;color:#3a4478;word-break:keep-all;overflow-wrap:anywhere}
+  .op-add b{font-weight:800;color:var(--brand);margin-right:6px}
+  .op-add.more{font-size:12.5px;font-weight:700;color:var(--muted)}
   .op-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;line-height:1.2;
     white-space:nowrap;background:var(--surface-2);border:1px solid var(--border)}
   .op-chip .ico{font-size:17px;line-height:1}
@@ -1595,8 +1600,14 @@ window.addEventListener('hashchange', ()=>{
 const VIEWS = {}, BIND = {};
 const Q = {};   // 게시판별 검색어
 
-const pageHead = (t, d, right='') =>
-  `<div class="page-head"><div><h1>${esc(t)}</h1><p>${esc(d)}</p></div><div class="row-actions">${right}</div></div>`;
+const pageHead = (t, d, right='', subClass='') =>
+  `<div class="page-head"><div><h1>${esc(t)}</h1><p class="${subClass}">${esc(d)}</p></div><div class="row-actions">${right}</div></div>`;
+/* 활동비 정산은 같은 상태를 쉬운 말로 보여 줍니다(접수완료 · 확인 중 · 처리완료) */
+const EXP_LABEL = { '접수':'접수완료','검토중':'확인 중','승인':'처리완료','반려':'반려' };
+const expStatusTag = (s) => {
+  const map = { '접수':'recv','검토중':'review','승인':'approve','반려':'reject' };
+  return `<span class="tag ${map[s]||'recv'}">${esc(EXP_LABEL[s] || s || '접수완료')}</span>`;
+};
 const statusTag = (s) => {
   const map = { '접수':'recv','검토중':'review','승인':'approve','반려':'reject' };
   return `<span class="tag ${map[s]||'recv'}">${esc(s||'접수')}</span>`;
@@ -1702,7 +1713,8 @@ VIEWS.home = () => {
     if(nr || ne) ops = `<div class="wrap-1180" style="padding-top:16px">
       <div class="notice">처리할 일이 있습니다 —
         ${nr?`검토 대기 보고서 <b>${nr}</b>건`:''}${nr&&ne?' · ':''}${ne?`처리 대기 정산 <b>${ne}</b>건`:''}
-        <button class="btn sm" style="margin-left:10px" data-go-to="${nr?'review-report':'review-expense'}">처리하러 가기</button>
+        ${nr ? '<button class="btn sm" style="margin-left:10px" data-go-to="review-report">보고서 처리하러 가기 ›</button>' : ''}
+        ${ne ? '<button class="btn sm" style="margin-left:6px" data-go-to="review-expense">정산 처리하러 가기 ›</button>' : ''}
       </div></div>`;
   }
 
@@ -2391,11 +2403,11 @@ VIEWS.opinion = () => {
   const MEDAL = ['🥇','🥈','🥉'];
   const CUT   = [120, 80, 60];
 
-  return pageHead('의견함', '말하고 싶었던 이야기, 스쳐간 생각까지 편하게 들려주세요. 한 줄이어도 충분해요.')
+  return pageHead('의견함', '말하고 싶었던 이야기, 스쳐간 생각까지 편하게 들려주세요. 한 줄이어도 충분해요.', '', 'op-lead')
   + ((!q && top.length) ? `<section class="awd">
       <div class="awd-top"><span class="awd-cup" aria-hidden="true">🏆</span>
         <div><h2>가장 공감한 의견</h2>
-          <p>지금까지 공감을 가장 많이 받은 의견 ${top.length}개입니다. 눌러서 바로 볼 수 있어요.</p></div></div>
+          <p>우리 부 직원들이 가장 공감하고 있는 의견 1~${top.length}위입니다.</p></div></div>
       <div class="awd-grid n${top.length}">
         ${top.map((o,i)=>`<article class="awd-card r${i+1}" data-opjump="${o.id}" tabindex="0" role="button">
           <div class="awd-rank"><span class="medal" aria-hidden="true">${MEDAL[i]}</span><b>${i+1}위</b>${catTag(o.cat)}</div>
@@ -2778,6 +2790,7 @@ function pollCard(p){
 const pollManage = (p, closed, mine, peek) => canManagePoll(p) ? `<div class="pv-manage">
     ${!closed && !mine ? `<button class="btn sm ghost" data-pv-peek>${peek ? '결과 닫기' : '결과 미리 보기'}</button>` : ''}
     <button class="btn sm" data-pv-edit>수정</button>
+    ${p.anonymous ? '' : '<button class="btn sm" data-pv-anon>무기명으로 바꾸기</button>'}
     ${!closed ? '<button class="btn sm" data-pv-close>마감하기</button>' : ''}
     <button class="btn sm danger" data-pv-del>삭제</button>
   </div>` : '';
@@ -2976,6 +2989,12 @@ BIND.vote = () => {
       VOTE_PEEK.has(pid) ? VOTE_PEEK.delete(pid) : VOTE_PEEK.add(pid); redrawVote();
     });
     card.querySelector('[data-pv-edit]')?.addEventListener('click', ()=> openPollEdit(p));
+    card.querySelector('[data-pv-anon]')?.addEventListener('click', ()=>{
+      if(!confirm('무기명(익명)으로 바꿀까요?\n\n· 누가 무엇을 골랐는지 아무에게도 보이지 않게 됩니다.\n· 다시 실명으로 되돌릴 수 없습니다.')) return;
+      DB.savePolls(DB.polls().map(x => x.id === pid ? { ...x, anonymous: true } : x));
+      DB.saveBallots(DB.ballots().map(b => b.poll_id === pid ? { ...b, voter_name: '' } : b));
+      toast('무기명으로 바꿨습니다'); redrawVote();
+    });
     card.querySelector('[data-pv-who]')?.addEventListener('click', ()=> openVoters(p));
     card.querySelectorAll('[data-zoom]').forEach(b => b.addEventListener('click', ()=> lightbox(b.dataset.zoom)));
     /* 밸런스 게임 — 한쪽을 누르면 바로 투표 */
@@ -3315,10 +3334,45 @@ VIEWS.report = () => {
     </label>
     <div class="thumbs" id="rpThumbs"></div>
     <div class="row-actions"><button class="btn primary" id="rpSubmit">보고서 제출</button></div>
-  </div>`;
+  </div>`
+  + reportRooms();
 };
+
+/* 조별 결과보고서 방 — 소개 페이지 팀 순서가 곧 1조·2조… 입니다 */
+let REP_TEAM = 0;
+function reportRooms(){
+  const teams = actTeams();
+  const all   = DB.reports().slice().sort((a,b) => b.at.localeCompare(a.at));
+  const teamNoOf = (r) => teams.find(t => t.name === r.team)?.no || 0;
+  const cnt = (no) => all.filter(r => teamNoOf(r) === no).length;
+  const cur = teams.find(t => t.no === REP_TEAM) || null;
+  const shown = cur ? all.filter(r => teamNoOf(r) === cur.no) : all;
+  return `<div style="margin-top:26px">
+    <h2 style="margin:0 0 4px;font-size:20px;font-weight:900">조별 결과보고서 방</h2>
+    <p class="sub" style="margin:0 0 14px">단원들이 올린 결과보고서를 조별로 모아 둔 곳입니다.</p>
+    <div class="act-bar"><b>조별 방</b>
+      <button class="act-all${cur ? '' : ' on'}" data-rep-team="0">전체 보기 <span>${all.length}</span></button></div>
+    <div class="act-teams">
+      ${teams.map(t => `<button class="act-team${cur?.no === t.no ? ' on' : ''}" data-rep-team="${t.no}" style="--tint:${t.tint}">
+          ${t.img ? `<span class="art"><img src="${t.img}" alt="" loading="lazy"></span>` : ''}
+          <span class="no">${t.no}조</span><span class="nm">${esc(t.name)}</span>
+          <span class="ct">보고서 ${cnt(t.no)}건</span></button>`).join('')}
+    </div>
+    ${shown.length ? `<div class="card">${table(['작성자','조','활동일','상태','제출일시',''])}
+      ${shown.map(r => `<tr><td>${esc(r.author)}</td>
+        <td>${teamNoOf(r) ? `${teamNoOf(r)}조 · ${esc(r.team)}` : '<span class="hint">미지정</span>'}</td>
+        <td>${esc(r.date)}</td><td>${statusTag(r.status)}</td><td class="hint">${fmtDay(r.at)}</td>
+        <td><button class="btn sm" data-view-report="${r.id}">보기</button></td></tr>`).join('')}${tableEnd}</div>`
+      : `<div class="empty">${cur ? `${cur.no}조에서 올린 보고서가 아직 없습니다.` : '아직 올라온 보고서가 없습니다.'}</div>`}
+  </div>`;
+}
 BIND.report = () => {
   $("#rpMine")?.addEventListener("click", ()=> go("mine"));
+  $$('#main [data-rep-team]').forEach(el => el.addEventListener('click', ()=>{
+    REP_TEAM = Number(el.dataset.repTeam) || 0;
+    const y = window.scrollY; go('report'); window.scrollTo(0, y);
+  }));
+  $$('#main [data-view-report]').forEach(b => b.addEventListener('click', ()=> showReport(b.dataset.viewReport, false)));
   let atts = [];
   $('#rpFiles').addEventListener('change', async e=>{ atts = await collectFiles(e.target.files); renderThumbs('#rpThumbs', atts); });
   $('#rpSubmit').addEventListener('click', ()=>{
@@ -3406,7 +3460,7 @@ VIEWS.mine = () => {
     </div>
     <div class="card"><h2>활동비 정산 (${ex.length})</h2>
       ${ex.length ? table(['활동명','항목','금액','상태','']) + ex.map(r=>`<tr>
-        <td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td><td>${statusTag(r.status)}</td>
+        <td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td><td>${expStatusTag(r.status)}</td>
         <td><button class="btn sm" data-view-expense="${r.id}">보기</button></td>
       </tr>`).join('') + tableEnd : `<div class="empty">정산 신청 내역이 없습니다.</div>`}
     </div>`;
@@ -3451,7 +3505,7 @@ VIEWS['review-expense'] = () => {
     ${ex.length ? table(['신청자','활동명','항목','금액','영수증','상태','']) + ex.map(r=>`<tr>
       <td>${esc(r.submitter)}</td><td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td>
       <td>${r.receipts?.length ? '📎 '+r.receipts.length+'장' : '<span class="hint">없음</span>'}</td>
-      <td>${statusTag(r.status)}</td>
+      <td>${expStatusTag(r.status)}</td>
       <td><button class="btn sm primary" data-review-expense="${r.id}">열람·처리</button></td>
     </tr>`).join('') + tableEnd : `<div class="empty">정산 신청이 없습니다.</div>`}
   </div>`;
@@ -3461,10 +3515,12 @@ BIND['review-expense'] = () => {
 };
 
 /* ---------- 상세 모달 ---------- */
-function processBlock(cur, comment){
+function processBlock(cur, comment, kind){
+  const exp = kind === 'expense';
   return `<hr style="border:0;border-top:1px solid var(--border);margin:18px 0">
     <label class="field">처리 상태
-      <select id="mdStatus">${['접수','검토중','승인','반려'].map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('')}</select>
+      <select id="mdStatus">${['접수','검토중','승인','반려'].map(s=>`<option value="${s}" ${s===cur?'selected':''}>${exp ? EXP_LABEL[s] : s}</option>`).join('')}</select>
+      ${exp ? '<span class="hint">비용 처리를 끝냈으면 <b>처리완료</b> 로 바꿔 주세요.</span>' : ''}
     </label>
     <label class="field">코멘트 (반려 사유 등)<textarea id="mdComment">${esc(comment)}</textarea></label>
     <button class="btn primary" id="mdSave">저장</button>`;
@@ -3548,12 +3604,12 @@ function showExpense(id, canProcess){
     <dt>금액</dt><dd>${won(r.amount)}</dd>
     ${acctText(r)?`<dt>입금 계좌</dt><dd>${esc(acctText(r))}</dd>`:''}
     <dt>상세 / 비고</dt><dd>${esc(r.note)||'-'}</dd>
-    <dt>상태</dt><dd>${statusTag(r.status)}</dd>
+    <dt>상태</dt><dd>${expStatusTag(r.status)}</dd>
     ${r.comment?`<dt>담당관 코멘트</dt><dd>${esc(r.comment)}</dd>`:''}
     <dt>영수증 (${r.receipts?.length||0}장)</dt>
     <dd>${canSee ? attHTML(r.receipts) : '<span class="hint">열람 권한이 없습니다 (혁신행정담당관 전용)</span>'}</dd>
     <dt>제출일시</dt><dd>${fmt(r.at)}</dd>
-  </dl>` + (canProcess ? processBlock(r.status, r.comment) : '');
+  </dl>` + (canProcess ? processBlock(r.status, r.comment, 'expense') : '');
   openModal('정산 신청 · ' + r.activity, body);
   bindZoom();
   $('#mdSave')?.addEventListener('click', ()=>{

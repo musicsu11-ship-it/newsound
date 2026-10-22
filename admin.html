@@ -515,6 +515,10 @@ const pageHead=(t,d,right='')=>`<div class="page-head"><div><h1>${esc(t)}</h1><p
   <div class="row-actions">${right}</div></div>`;
 const statusTag=s=>{ const m={'접수':'recv','검토중':'review','승인':'approve','반려':'reject'};
   return `<span class="tag ${m[s]||'recv'}">${esc(s||'접수')}</span>`; };
+/* 활동비 정산은 쉬운 말로 — 접수완료 · 확인 중 · 처리완료 */
+const EXP_LABEL = { '접수':'접수완료','검토중':'확인 중','승인':'처리완료','반려':'반려' };
+const expStatusTag = s => { const m={'접수':'recv','검토중':'review','승인':'approve','반려':'reject'};
+  return `<span class="tag ${m[s]||'recv'}">${esc(EXP_LABEL[s] || s || '접수완료')}</span>`; };
 const table=cols=>`<div class="table-wrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
 const tableEnd=`</tbody></table></div>`;
 
@@ -947,7 +951,7 @@ VIEWS.exps = () => {
     <div class="card">${list.length ? table(['신청자','활동명','항목','금액','영수증','상태',''])+list.map(r=>`<tr>
       <td>${esc(r.author_name)}</td><td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td>
       <td>${(r.receipts||[]).length?'📎 '+r.receipts.length+'장':'<span class="hint">없음</span>'}</td>
-      <td>${statusTag(r.status)}</td>
+      <td>${expStatusTag(r.status)}</td>
       <td><button class="btn sm primary" data-exp="${r.id}">열람·처리</button></td></tr>`).join('')+tableEnd
       : `<div class="empty">해당하는 정산 신청이 없습니다.</div>`}</div>`;
 };
@@ -1177,10 +1181,12 @@ async function deleteMember(id){
 }
 
 /* ---------- 심사 모달 ---------- */
-function processBlock(cur, comment){
+function processBlock(cur, comment, kind){
+  const exp = kind === 'expense';
   return `<hr style="border:0;border-top:1px solid var(--border);margin:16px 0">
     <label class="field">처리 상태<select id="mStatus">
-      ${['접수','검토중','승인','반려'].map(s=>`<option ${s===cur?'selected':''}>${s}</option>`).join('')}</select></label>
+      ${['접수','검토중','승인','반려'].map(s=>`<option value="${s}" ${s===cur?'selected':''}>${exp ? EXP_LABEL[s] : s}</option>`).join('')}</select>
+      ${exp ? '<span class="hint">비용 처리를 끝냈으면 <b>처리완료</b> 로 바꿔 주세요.</span>' : ''}</label>
     <label class="field">코멘트 (반려 사유 등)<textarea id="mComment">${esc(comment||'')}</textarea></label>
     <button class="btn primary" id="mSave">저장</button>`;
 }
@@ -1215,7 +1221,7 @@ function showExpense(id){
     ${acctText(r)?`<dt>입금 계좌</dt><dd>${esc(acctText(r))}</dd>`:''}
     <dt>상세 / 비고</dt><dd>${esc(r.note)||'-'}</dd>
     <dt>영수증 (${(r.receipts||[]).length}장)</dt><dd>${attHTML(r.receipts)}</dd>
-    <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd></dl>` + processBlock(r.status, r.officer_comment));
+    <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd></dl>` + processBlock(r.status, r.officer_comment, 'expense'));
   bindZoom();
   $('#mSave').addEventListener('click', async ()=>{
     busy(true);

@@ -1610,3 +1610,31 @@ alter table public.posts add constraint posts_board_check
 drop policy if exists posts_select on public.posts;
 create policy posts_select on public.posts for select
   using ( board in ('news','activity','mascot','ai','relief') or public.is_inner() );
+
+-- ============================================================================
+--  31. 결과보고서를 단원끼리 서로 볼 수 있게
+--
+--  지금까지는 '올린 본인과 혁신행정담당관' 만 볼 수 있었습니다.
+--  조별 활동 결과를 서로 참고할 수 있도록 단원 이상이면 모두 볼 수 있게 엽니다.
+--
+--  · 목록·내용 : 단원 이상 모두 열람
+--  · 첨부 파일 : 단원 이상 모두 열람 (docs 저장소의 reports/ 폴더만)
+--  · 활동비 정산 영수증(docs 의 expenses/ 폴더)은 그대로 본인과 담당관만 봅니다. ★중요
+--  · 수정·삭제 권한은 그대로입니다(올린 본인은 접수·검토중일 때만, 관리자는 언제든).
+-- ============================================================================
+
+drop policy if exists reports_select on public.reports;
+create policy reports_select on public.reports for select
+  using ( author_id = auth.uid() or public.is_inner() );
+
+-- 첨부 파일 읽기 — reports/ 폴더는 단원 이상, 그 밖(영수증 등)은 본인과 담당관만
+drop policy if exists docs_read on storage.objects;
+create policy docs_read on storage.objects for select
+  using (
+    bucket_id = 'docs'
+    and (
+      public.storage_owner(name) = auth.uid()
+      or public.is_officer()
+      or ((storage.foldername(name))[1] = 'reports' and public.is_inner())
+    )
+  );
