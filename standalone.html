@@ -233,6 +233,13 @@
   .act-list .post-row .excerpt{font-size:14.5px;line-height:1.65;-webkit-line-clamp:2;margin-top:6px;word-break:keep-all}
   .act-meta{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
   .act-chip{background:var(--tint);color:#16225c;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 10px}
+  /* AI관 분야 탭 */
+  .ai-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
+  .ai-tabs button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
+    font-size:14.5px;font-weight:800;padding:9px 16px;border-radius:999px;cursor:pointer}
+  .ai-tabs button b{margin-left:6px;color:var(--muted);font-weight:900}
+  .ai-tabs button.on{background:var(--text);border-color:var(--text);color:#fff}
+  .ai-tabs button.on b{color:rgba(255,255,255,.8)}
   /* ── 협업 게시판 (단원 전용) — index.html 과 같은 화면 ── */
   .cb-sum{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
   .cb-state{font-size:12.5px;font-weight:900;border-radius:999px;padding:4px 12px;white-space:nowrap}
@@ -1386,7 +1393,26 @@ const BOARDS = {
   collab: { label:'협업', icon:'🤝', layout:'collab',
             desc:'팀을 넘어 함께할 일을 제안하고 같이 할 사람을 모으는 공간입니다.',
             read:INNER, write:INNER },
+  /* ── 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 ── */
+  mascot: { label:'고드래곤·새초롱이관', icon:'🐉', layout:'photo',
+            desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다.',
+            read:ALL,   write:INNER },
+  ai:     { label:'AI관', icon:'🤖', layout:'list',
+            desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 나누는 공간입니다.',
+            read:ALL,   write:INNER },
+  relief: { label:'힘들땐 여기', icon:'💛', layout:'list',
+            desc:'지칠 때 힘이 된 것들을 나누는 공간입니다. 사진·영상·파일 모두 올릴 수 있어요.',
+            read:ALL,   write:INNER },
 };
+/* AI관 분야 */
+const AI_TOPICS = [
+  { key:'고용', label:'고용 (실업급여·직업능력 등)', short:'고용', tint:'#dfeaff' },
+  { key:'노동', label:'노동 (근로기준·노사 등)',     short:'노동', tint:'#ffe1ec' },
+  { key:'산안', label:'산업안전',                    short:'산안', tint:'#d9f5ef' },
+  { key:'기타', label:'그 밖의 업무·공통',           short:'기타', tint:'#f3f2fd' },
+];
+const aiTopic = (k) => AI_TOPICS.find(t => t.key === k) || AI_TOPICS[3];
+let AI_TAB = '';
 
 /* ---------- 메뉴 (권한별) ---------- */
 const MENUS = [
@@ -1397,6 +1423,11 @@ const MENUS = [
   { id:'opinion',  icon:'💬', label:'의견함',        roles:ALL,   group:'의견함' },
   { id:'vote',     icon:'🗳️', label:'투표',           roles:ALL,   group:'투표' },
   { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
+
+  /* 라운지 — 누구나 볼 수 있는 공간 세 곳 */
+  { id:'mascot',   icon:'🐉', label:'고드래곤·새초롱이관', roles:ALL, group:'라운지' },
+  { id:'ai',       icon:'🤖', label:'AI관',           roles:ALL,   group:'라운지' },
+  { id:'relief',   icon:'💛', label:'힘들땐 여기',     roles:ALL,   group:'라운지' },
   { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
 
   { id:'collab',   icon:'🤝', label:'협업',          roles:INNER, group:'새소리단 공간' },
@@ -1488,15 +1519,28 @@ function openLogin(){
    ============================================================ */
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
 const PUBLIC_NAV = ['intro','news','activity','opinion','vote','calendar'];
+/* 누구나 볼 수 있는 '라운지' 세 곳 — 상단에 따로 묶음 메뉴로 */
+const LOUNGE_NAV = ['mascot','ai','relief'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
   const top  = PUBLIC_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
   /* game: 첫 화면 배너를 눌러서만 들어갈 수 있게 어느 메뉴에도 넣지 않습니다.
      share: 드롭다운 이름과 겹쳐 헷갈려서 메뉴에서 뺐습니다(화면 자체는 남아있음). */
-  const rest = mine.filter(m => !PUBLIC_NAV.includes(m.id) && m.id!=='home' && m.id!=='game' && m.id!=='share');
+  const rest = mine.filter(m => !PUBLIC_NAV.includes(m.id) && !LOUNGE_NAV.includes(m.id)
+    && m.id!=='home' && m.id!=='game' && m.id!=='share');
+  const lounge = LOUNGE_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
 
   let html = top.map(m => `<button class="nav-btn" data-go="${m.id}">${esc(m.label)}</button>`).join('');
+
+  if(lounge.length){
+    html += `<div class="navdrop" id="loungeDrop">
+      <button class="nav-btn" id="loungeBtn">🎪 라운지 ▾</button>
+      <div class="navdrop-panel">
+        <div class="grp">함께 즐기는 공간</div>
+        ${lounge.map(m=>`<button class="nav-btn" data-go="${m.id}">${m.icon} ${esc(m.label)}</button>`).join('')}
+      </div></div>`;
+  }
 
   if(rest.length){
     const groups = {};
@@ -1515,9 +1559,14 @@ function renderNav(){
   $$('#navArea .nav-btn[data-go]').forEach(b =>
     b.addEventListener('click', ()=>{ go(b.dataset.go); closeSide(); }));
   $('#navDropBtn')?.addEventListener('click', e=>{
-    e.stopPropagation(); $('#navDrop').classList.toggle('open'); });
+    e.stopPropagation(); $('#loungeDrop')?.classList.remove('open'); $('#navDrop').classList.toggle('open'); });
+  $('#loungeBtn')?.addEventListener('click', e=>{
+    e.stopPropagation(); $('#navDrop')?.classList.remove('open'); $('#loungeDrop').classList.toggle('open'); });
 }
-document.addEventListener('click', ()=> $('#navDrop')?.classList.remove('open'));
+document.addEventListener('click', ()=>{
+  $('#navDrop')?.classList.remove('open');
+  $('#loungeDrop')?.classList.remove('open');
+});
 
 function setActive(id){
   $$('#navArea .nav-btn[data-go]').forEach(b => b.classList.toggle('active', b.dataset.go===id));
@@ -2000,6 +2049,30 @@ function boardView(key){
   let body = '';
 
   /* ── 협업: 제안 카드 + 참여자 (index.html 과 같은 화면) ── */
+  /* ── AI관: 분야 탭 + 목록 ── */
+  if(key === 'ai'){
+    const all = DB.posts().filter(p => p.board === 'ai');
+    const cnt = (k) => all.filter(p => (p.topic || '기타') === k).length;
+    const shown = AI_TAB ? list.filter(p => (p.topic || '기타') === AI_TAB) : list;
+    return pageHead('🤖 AI관', b.desc, canWrite(key) ? '<button class="btn primary" id="bdWrite">＋ 꿀팁 올리기</button>' : '')
+      + `<div class="ai-tabs">
+          <button class="${AI_TAB ? '' : 'on'}" data-ai-tab="">전체<b>${all.length}</b></button>
+          ${AI_TOPICS.map(t => `<button class="${AI_TAB === t.key ? 'on' : ''}" data-ai-tab="${t.key}">${esc(t.short)}<b>${cnt(t.key)}</b></button>`).join('')}
+        </div>`
+      + searchBar(key, '제목·내용·작성자로 검색')
+      + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
+      + (shown.length ? `<div class="card">${shown.map(p => `
+          <div class="post-row" data-open-post="${p.id}">
+            <div class="pr-top">
+              <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}${(p.atts||[]).length?' <span class="hint">📎'+p.atts.length+'</span>':''}</h3>
+              <span class="hint">${fmtDay(p.at)}</span></div>
+            <p class="excerpt">${highlight(excerpt(p.body,120),Q[key])}</p>
+            <div class="act-meta"><span class="act-chip" style="--tint:${aiTopic(p.topic).tint}">${esc(aiTopic(p.topic).short)}</span>
+              <span>${esc(p.author)}</span></div>
+          </div>`).join('')}</div>`
+        : `<div class="empty">${q ? '검색 결과가 없습니다.' : '아직 올라온 꿀팁이 없습니다.'}</div>`);
+  }
+
   if(key === 'collab'){
     const rank = { open:0, doing:1, done:2 };
     const shown = list.slice().sort((a,c) =>
@@ -2075,6 +2148,10 @@ function bindBoard(key){
     ACT_TEAM = Number(el.dataset.actTeam) || 0;
     go('activity');
   }));
+  /* AI관 분야 탭 */
+  $$('#main [data-ai-tab]').forEach(el => el.addEventListener('click', ()=>{
+    AI_TAB = el.dataset.aiTab || ''; go('ai');
+  }));
 }
 Object.keys(BOARDS).forEach(key=>{
   VIEWS[key] = () => boardView(key);
@@ -2096,8 +2173,11 @@ function openPostForm(key, edit){
   /* 활동 게시판은 어느 팀 게시판에 올릴지 고릅니다(수정이면 원래 팀, 새 글이면 보고 있는 팀) */
   const isAct   = key === 'activity';
   const isCollab = key === 'collab';
+  const isAi     = key === 'ai';
   const defTeam = isAct ? (Number(e0?.teamNo) || ACT_TEAM) : 0;
   openModal(`${b.icon} ${b.label} · ${e0 ? '글 수정' : (isCollab ? '협업 제안하기' : '글쓰기')}`, `
+    ${isAi ? `<label class="field">분야 <span class="req">*</span>
+      <select id="pfTopic">${AI_TOPICS.map(t => `<option value="${t.key}" ${(e0?.topic || AI_TAB) === t.key ? 'selected' : ''}>${esc(t.label)}</option>`).join('')}</select></label>` : ''}
     ${isAct ? `<label class="field">팀 게시판 <span class="req">*</span>
       <select id="pfActTeam"><option value="">어느 팀 게시판에 올릴지 고르세요</option>
         ${actTeams().map(t => `<option value="${t.no}" ${t.no===defTeam?'selected':''}>${t.no}팀 · ${esc(t.name)}</option>`).join('')}
@@ -2145,6 +2225,7 @@ function openPostForm(key, edit){
     const need = isCollab ? Number($('#pfNeed').value) : 0;
     const common = { title, body, authorTeam:$('#pfTeam').value, authorDept:$('#pfDept').value.trim(),
                      pinned: !!$('#pfPin')?.checked, ...(isAct ? { teamNo } : {}),
+                     ...(isAi ? { topic: $('#pfTopic').value } : {}),
                      ...(isCollab ? { collabNeed: need > 0 ? Math.min(Math.round(need), 99) : null } : {}) };
     if(isAct) ACT_TEAM = teamNo;       // 올린 뒤에는 그 팀 게시판이 열리게
     if(e0){
@@ -2696,9 +2777,72 @@ function pollCard(p){
 /* 만든 사람·관리자용 — 결과 미리 보기 · 마감하기 · 삭제 */
 const pollManage = (p, closed, mine, peek) => canManagePoll(p) ? `<div class="pv-manage">
     ${!closed && !mine ? `<button class="btn sm ghost" data-pv-peek>${peek ? '결과 닫기' : '결과 미리 보기'}</button>` : ''}
+    <button class="btn sm" data-pv-edit>수정</button>
     ${!closed ? '<button class="btn sm" data-pv-close>마감하기</button>' : ''}
     <button class="btn sm danger" data-pv-del>삭제</button>
   </div>` : '';
+
+/* 투표 수정 — 제목·마감은 언제든, 실명은 무기명(익명)으로. 항목은 아무도 투표하지 않았을 때만.
+   익명 → 실명은 막습니다(익명인 줄 알고 참여한 사람이 드러나므로). */
+function openPollEdit(p){
+  const votes = resultOf(p).voters || 0;
+  const bal   = isBalance(p);
+  openModal(bal ? '밸런스 게임 수정' : '투표 수정', `
+    <label class="field">${bal ? '질문' : '투표 제목'} <span class="req">*</span>
+      <input id="peTitle" maxlength="120" value="${esc(p.title)}"></label>
+    ${votes === 0 ? `<div class="field" style="margin-bottom:6px">${bal ? '두 가지 선택지' : '항목'}
+        <span class="hint" style="display:inline">아직 아무도 투표하지 않아 지금은 고칠 수 있어요</span></div>
+      <div id="peOpts">${p.options.map(o => `<div class="pv-optin"><input class="pv-optxt" maxlength="60" value="${esc(o)}"></div>`).join('')}</div>`
+      : `<p class="hint" style="margin:0 0 14px">이미 ${votes}명이 참여해서 항목은 고칠 수 없습니다. 제목과 마감만 바꿀 수 있어요.</p>`}
+    ${p.anonymous
+      ? '<div class="notice" style="margin:0 0 14px">이 투표는 <b>익명</b>입니다. 익명은 실명으로 되돌릴 수 없습니다.</div>'
+      : `<label class="pv-sw" style="margin:0 0 14px"><input type="checkbox" id="peAnon">
+          <span><b>무기명(익명)으로 바꾸기</b><em>바꾸면 누가 무엇을 골랐는지 아무에게도 보이지 않고 '참여자 보기' 도 닫힙니다. 되돌릴 수 없습니다.</em></span></label>`}
+    <div class="grid c2">
+      <label class="field">마감<select id="peClose">
+        <option value="keep" selected>그대로 두기${p.closes_at ? ` (${shortWhen(p.closes_at)})` : ' (마감 없음)'}</option>
+        <option value="">마감 없음 (직접 마감)</option>
+        <option value="1">오늘부터 1일 뒤</option><option value="3">3일 뒤</option>
+        <option value="7">7일 뒤</option><option value="14">14일 뒤</option>
+        <option value="date">날짜 직접 고르기</option></select></label>
+      <label class="field" id="peDateWrap" hidden>마감 날짜<input type="date" id="peDate"></label>
+    </div>
+    <div class="row-actions"><button class="btn primary" id="peSave">수정 저장</button></div>`);
+
+  $('#peClose').addEventListener('change', ()=>{ $('#peDateWrap').hidden = $('#peClose').value !== 'date'; });
+  $('#peSave').addEventListener('click', ()=>{
+    const title = $('#peTitle').value.trim();
+    if(!title){ toast(bal ? '질문을 입력하세요' : '투표 제목을 입력하세요'); return; }
+    const arr = DB.polls(), t = arr.find(x => x.id === p.id); if(!t) return;
+    t.title = title;
+    if(votes === 0){
+      const opts = $$('#peOpts .pv-optxt').map(i => i.value.trim()).filter(Boolean);
+      if(opts.length !== p.options.length){ toast('항목을 모두 입력하세요'); return; }
+      if(new Set(opts).size !== opts.length){ toast('같은 항목이 두 번 들어 있습니다'); return; }
+      t.options = opts;
+    }
+    if(!p.anonymous && $('#peAnon')?.checked){
+      if(!confirm('무기명(익명)으로 바꿀까요?\n\n· 누가 무엇을 골랐는지 아무에게도 보이지 않게 됩니다.\n· 되돌릴 수 없습니다.')) return;
+      t.anonymous = true;
+      /* 이미 들어온 표에서 이름을 지웁니다(익명이 된 뒤에는 이름을 보관하지 않습니다) */
+      DB.saveBallots(DB.ballots().map(b => b.poll_id === p.id ? { ...b, voter_name: '' } : b));
+    }
+    const c = $('#peClose').value;
+    if(c !== 'keep'){
+      if(c === 'date'){
+        const v = $('#peDate').value;
+        if(!v){ toast('마감 날짜를 고르세요'); return; }
+        const d = new Date(v + 'T23:59:59');
+        if(d <= new Date()){ toast('마감 날짜는 오늘 이후로 골라 주세요'); return; }
+        t.closes_at = d.toISOString();
+      }else{
+        t.closes_at = c ? new Date(Date.now() + Number(c) * 86400000).toISOString() : null;
+      }
+      if(t.closes_at) t.closed = false;
+    }
+    if(DB.savePolls(arr)){ closeModal(); toast('수정했습니다'); redrawVote(); }
+  });
+}
 
 /* ── 밸런스 게임 카드 (index.html 과 같은 화면) ──
    A(분홍) VS B(파랑) 두 칸. 한쪽을 누르면 바로 투표되고, 고른 뒤에는 퍼센트와 두 색 막대로 비율을 보여 줍니다 */
@@ -2831,6 +2975,7 @@ BIND.vote = () => {
     card.querySelector('[data-pv-peek]')?.addEventListener('click', ()=>{
       VOTE_PEEK.has(pid) ? VOTE_PEEK.delete(pid) : VOTE_PEEK.add(pid); redrawVote();
     });
+    card.querySelector('[data-pv-edit]')?.addEventListener('click', ()=> openPollEdit(p));
     card.querySelector('[data-pv-who]')?.addEventListener('click', ()=> openVoters(p));
     card.querySelectorAll('[data-zoom]').forEach(b => b.addEventListener('click', ()=> lightbox(b.dataset.zoom)));
     /* 밸런스 게임 — 한쪽을 누르면 바로 투표 */
