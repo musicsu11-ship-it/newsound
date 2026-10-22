@@ -9,28 +9,26 @@
 --     5. 'Success' 라고 나오면 끝입니다.
 --
 --  ▷ 이번에 새로 들어간 것
---     33절 — 글에 댓글 + 공지방 '제출기한'
---        · 소식·공지방 등 게시판 글에 댓글을 달 수 있습니다.
---        · 공지방 글은 댓글로 파일까지 낼 수 있는 '제출' 칸이 됩니다.
---        · 공지 글에 제출기한(날짜)을 걸 수 있고, 남은 날짜가 함께 보입니다.
---          기한이 지나도 낼 수는 있고 '마감 후 제출' 로 표시됩니다.
---        · ★ 낸 파일은 낸 본인과 혁신행정담당관만 열 수 있습니다.
---             다른 단원에게는 누가 냈는지와 파일 이름만 보이고 🔒 로 잠깁니다.
+--     34절 — 협업 게시판을 칸반 보드로
+--        · '할 일 · 진행 중 · 완료' 세 칸에 카드를 두고 옮기는 방식입니다.
+--        · 인원 모집은 없앴습니다. 참여한 사람은 '담당자' 로 카드에 붙습니다.
+--        · 담당자도 카드를 옮길 수 있게 권한을 엽니다. 대신 담당자는
+--          진행 상태 말고는 아무것도 못 바꿉니다(제목·내용·마감일은 서버가 지킵니다).
 --
---  ▷ 아직 안 하셨다면 29~32절도 함께 들어 있습니다.
+--  ▷ 아직 안 하셨다면 29~33절도 함께 들어 있습니다.
 --     이미 실행하셨다면 그냥 다시 지나갑니다(여러 번 해도 안전합니다).
 --        29절 — 투표를 올린 뒤에도 고칠 수 있게(실명 → 무기명)
---        30절 — 라운지 게시판 셋 (고드래곤.새초롱이.zip / AI.zip / 멘탈관리.zip)
+--        30절 — 라운지 게시판 셋
 --        31절 — 결과보고서를 단원끼리 서로 볼 수 있게
 --        32절 — 글에 '좋아요' + 고드래곤.새초롱이.zip 무기명
---                ★ 32절은 이미 올라와 있는 그 게시판 글의 '작성자 이름' 을 지웁니다.
---                   무기명으로 만드는 것이라 되돌릴 수 없습니다.
+--                ★ 이미 올라와 있는 그 게시판 글의 '작성자 이름' 을 지웁니다(되돌릴 수 없음)
+--        33절 — 글에 댓글 + 공지사항 '제출기한'
 --
 --  ▷ 안전한가요?
 --     네. 글·사진·의견·투표·보고서·가입한 회원은 지우지 않습니다.
---     활동비 정산 영수증도 그대로 본인과 담당관만 봅니다. ★그대로 보호
+--     활동비 정산 영수증과 공지사항 제출 파일도 그대로 본인과 담당관만 봅니다. ★보호
 --
---  ▷ 이 내용은 supabase/schema.sql 29~33절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 29~34절과 같습니다.
 -- ============================================================================
 
 --  29. 투표 수정 — 실명 투표를 무기명(익명)으로 바꿀 수 있게
@@ -217,7 +215,7 @@ update public.posts
  where board = 'mascot';
 
 -- ============================================================================
---  33. 글에 댓글 + 공지방 '제출기한'
+--  33. 글에 댓글 + 공지사항 '제출기한'
 --
 --  (1) post_comments — 게시판 글에 다는 댓글
 --      · 읽기 : 그 글을 볼 수 있는 사람이면 누구나(소식·활동·라운지는 전 직원)
@@ -225,12 +223,12 @@ update public.posts
 --      · 이름 : 서버가 회원 명단에서 가져와 붙입니다(꾸며 넣을 수 없음).
 --               고드래곤.새초롱이.zip 은 무기명이라 댓글에도 이름을 붙이지 않습니다.
 --
---  (2) files — 댓글에 올린 파일. 공지방(notice) 제출용입니다.
+--  (2) files — 댓글에 올린 파일. 공지사항(notice) 제출용입니다.
 --      ★ 파일은 비공개 저장소 docs 의 submits/ 폴더에 둡니다.
 --        올린 본인과 혁신행정담당관만 열 수 있습니다(31절 docs_read 규칙 그대로).
 --        글·사진 첨부가 쓰는 media 저장소와 달리 주소만 알면 열리지 않습니다.
 --
---  (3) posts.due_at — 공지방 글의 제출기한(날짜). 비워 두면 기한 없는 보통 공지입니다.
+--  (3) posts.due_at — 공지사항 글의 제출기한(날짜). 비워 두면 기한 없는 보통 공지입니다.
 --      · 기한이 지나도 낼 수는 있고, 대신 '마감 후 제출' 로 표시됩니다.
 --        (못 내게 막는 것보다 늦게라도 받는 편이 낫다고 보고 이렇게 했습니다.
 --         아예 막아야 하면 말씀해 주세요.)
@@ -291,3 +289,76 @@ create policy pc_delete on public.post_comments for delete
 --            제출 파일 경로가 submits/<내 계정번호>/... 라서 그대로 통과합니다.
 --   읽기   : 31절 docs_read — 올린 본인과 혁신행정담당관만. ★제출물 보호
 --   지우기 : 9절 docs_delete — 올린 본인과 관리자만.
+
+-- ============================================================================
+--  34. 협업 게시판을 칸반 보드로 — 인원 모집 대신 '할 일 · 진행 중 · 완료'
+--
+--  · 모집 인원(collab_need)은 더 쓰지 않습니다. 칸은 그대로 두되 화면에서는
+--    쓰지 않습니다(예전 글에 적힌 값도 그냥 남아 있기만 합니다).
+--  · post_joins 는 '모집한 참여자' 가 아니라 '담당자' 가 됩니다. 쓰는 방법은 같습니다.
+--  · 마감일은 33절에서 만든 posts.due_at 을 함께 씁니다.
+--
+--  ★ 바뀌는 권한 : 담당자로 참여한 사람도 카드를 옮길 수 있게 합니다.
+--    칸반 보드는 맡은 사람이 직접 '진행 중 → 완료' 로 옮길 수 있어야 쓸모가 있습니다.
+--    담당자는 진행 상태(collab_status) 말고는 아무것도 바꾸지 못합니다.
+--    제목·내용·첨부·마감일·글쓴이는 서버에서 예전 값으로 되돌립니다.
+--    글을 고치고 지우는 것은 지금처럼 글쓴이와 관리자만 할 수 있습니다.
+-- ============================================================================
+
+drop policy if exists posts_update on public.posts;
+create policy posts_update on public.posts for update
+  using (
+    author_id = auth.uid()
+    or public.is_admin()
+    -- 협업 카드는 담당자도 손댈 수 있습니다(아래 트리거가 '상태만' 으로 좁힙니다)
+    or (board = 'collab' and exists (
+          select 1 from public.post_joins j
+           where j.post_id = posts.id and j.user_id = auth.uid()))
+  );
+
+-- 좋아요 개수를 올리고 내리는 중이라는 표시를 켜 둡니다.
+-- 아래 guard_collab_update 가 이 표시를 보고 그냥 지나갑니다
+-- (안 그러면 담당자가 좋아요를 누를 때 개수가 도로 되돌려집니다).
+create or replace function public.bump_post_like()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  perform set_config('app.like_bump', '1', true);     -- true = 이 트랜잭션 안에서만
+  if tg_op = 'INSERT' then
+    update public.posts set likes = likes + 1 where id = new.post_id;
+    perform set_config('app.like_bump', '', true);
+    return new;
+  else
+    update public.posts set likes = greatest(likes - 1, 0) where id = old.post_id;
+    perform set_config('app.like_bump', '', true);
+    return old;
+  end if;
+end $$;
+
+create or replace function public.guard_collab_update()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if coalesce(current_setting('app.like_bump', true), '') = '1' then return new; end if;
+  -- 글쓴이·관리자는 지금처럼 전부 바꿀 수 있습니다
+  if old.author_id = auth.uid() or public.is_admin() then return new; end if;
+  -- 그 밖의 사람(담당자)은 진행 상태만 — 나머지는 예전 값으로 되돌립니다
+  new.title        := old.title;
+  new.body         := old.body;
+  new.board        := old.board;
+  new.images       := old.images;
+  new.pinned       := old.pinned;
+  new.author_id    := old.author_id;
+  new.author_name  := old.author_name;
+  new.author_team  := old.author_team;
+  new.author_dept  := old.author_dept;
+  new.topic        := old.topic;
+  new.team_no      := old.team_no;
+  new.due_at       := old.due_at;
+  new.collab_need  := old.collab_need;
+  new.likes        := old.likes;
+  return new;
+end $$;
+
+drop trigger if exists posts_guard_collab on public.posts;
+create trigger posts_guard_collab
+  before update on public.posts
+  for each row execute function public.guard_collab_update();
