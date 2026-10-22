@@ -552,6 +552,7 @@
   .cmt .cm-meta{color:var(--muted);font-size:12.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .cmt-form{display:flex;gap:8px;margin-top:10px}
   .cmt-form input{margin-top:0}
+  .cmt-form button{flex:none;white-space:nowrap}
 
   /* ---------- Calendar ---------- */
   .cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
@@ -875,6 +876,7 @@
   .op-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:999px;line-height:1.2;
     white-space:nowrap;background:var(--surface-2);border:1px solid var(--border)}
   .op-chip .ico{font-size:17px;line-height:1}
+  .op-chip .lbl{font-size:13.5px;font-weight:800;color:var(--text)}
   .op-chip b{font-size:16px;font-weight:900;color:var(--text);letter-spacing:-.01em}
   /* 시상대에서 내려왔을 때 잠깐 표시 */
   .op-flash{outline:3px solid var(--brand);outline-offset:3px;border-radius:18px;transition:outline-color .4s}
@@ -886,29 +888,58 @@
   .awd-cup{font-size:30px;line-height:1;flex:none}
   .awd-top h2{margin:0;font-size:18.5px;font-weight:900;letter-spacing:-.02em}
   .awd-top p{margin:3px 0 0;font-size:13px;color:var(--muted);word-break:keep-all}
-  .awd-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  /* 1위가 가장 넓고 크게, 2·3위로 갈수록 작아집니다(칸 너비·글자·메달 모두) */
+  .awd-grid{display:grid;grid-template-columns:1.5fr 1.1fr 0.9fr;gap:12px;align-items:stretch}
+  .awd-grid.n1{grid-template-columns:minmax(0,1fr)}
+  .awd-grid.n2{grid-template-columns:1.4fr 1fr}
   .awd-card{display:flex;flex-direction:column;gap:10px;min-width:0;background:var(--surface);
     border:1.5px solid transparent;border-radius:18px;padding:15px 16px 14px;cursor:pointer;
     transition:transform .12s,box-shadow .12s}
   .awd-card:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(22,34,92,.13)}
   .awd-card:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
-  .awd-card.r1{border-color:#f0c44a}
-  .awd-card.r2{border-color:#c3c8d6}
-  .awd-card.r3{border-color:#deab7d}
+  .awd-card.r1{border-color:#f0c44a;border-width:2.5px;background:linear-gradient(160deg,#fffaec,#fff);
+    padding:20px 20px 18px;box-shadow:0 10px 24px rgba(214,160,30,.18)}
+  .awd-card.r2{border-color:#c3c8d6;border-width:2px;padding:16px 16px 14px}
+  .awd-card.r3{border-color:#deab7d;padding:14px 14px 13px}
   .awd-rank{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-  .awd-rank .medal{font-size:23px;line-height:1}
-  .awd-rank b{font-size:14px;font-weight:900}
-  .awd-body{margin:0;font-size:15px;font-weight:700;line-height:1.6;word-break:keep-all;overflow-wrap:anywhere;
-    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .awd-rank .medal{line-height:1}
+  .awd-rank b{font-weight:900}
+  .awd-card.r1 .medal{font-size:34px}
+  .awd-card.r2 .medal{font-size:25px}
+  .awd-card.r3 .medal{font-size:20px}
+  .awd-card.r1 .awd-rank b{font-size:17px;color:#b8860b}
+  .awd-card.r2 .awd-rank b{font-size:14.5px}
+  .awd-card.r3 .awd-rank b{font-size:13px}
+  .awd-body{margin:0;font-weight:700;word-break:keep-all;overflow-wrap:anywhere;
+    display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+  .awd-card.r1 .awd-body{font-size:17.5px;line-height:1.55;-webkit-line-clamp:4}
+  .awd-card.r2 .awd-body{font-size:14.5px;line-height:1.6;-webkit-line-clamp:3}
+  .awd-card.r3 .awd-body{font-size:13.5px;line-height:1.6;-webkit-line-clamp:3;color:#3a4478}
   .awd-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
   .awd-like{display:inline-flex;align-items:baseline;gap:5px}
   .awd-like .ico{font-size:18px}
-  .awd-like b{font-size:21px;font-weight:900;color:#c2185b;letter-spacing:-.02em}
+  .awd-like b{font-weight:900;color:#c2185b;letter-spacing:-.02em}
   .awd-like em{font-style:normal;font-size:12.5px;font-weight:800;color:var(--muted)}
+  .awd-card.r1 .awd-like .ico{font-size:24px}
+  .awd-card.r1 .awd-like b{font-size:30px}
+  .awd-card.r2 .awd-like b{font-size:21px}
+  .awd-card.r3 .awd-like b{font-size:18px}
   .awd-alias{font-size:12.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+  .awd-card.r3 .awd-alias{font-size:12px}
+
+  /* 목록 정렬 — 최신순 · 공감순 · 오래된순 */
+  .op-sort{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+  .op-sort b{font-size:13px;font-weight:800;color:var(--muted);margin-right:2px}
+  .op-sortbtn{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
+    font-size:13.5px;font-weight:800;padding:7px 14px;border-radius:999px;cursor:pointer}
+  .op-sortbtn:hover{border-color:var(--text)}
+  .op-sortbtn.on{background:var(--text);border-color:var(--text);color:#fff}
   @media (max-width:700px){
     .awd{padding:16px 15px 18px;border-radius:20px}
-    .awd-grid{grid-template-columns:minmax(0,1fr)}
+    .awd-grid,.awd-grid.n2{grid-template-columns:minmax(0,1fr)}
+    .awd-card.r1 .awd-body{font-size:16.5px}
+    .awd-card.r1 .awd-like b{font-size:27px}
+    .op-sortbtn{padding:6px 12px;font-size:13px}
     .awd-cup{font-size:26px}
     .awd-top h2{font-size:17px}
   }
@@ -2257,27 +2288,37 @@ const OP_CAT_COLORS = {
 const catTag = (cat) => { const [bg,fg] = OP_CAT_COLORS[cat] || OP_CAT_COLORS['기타'];
   return `<span class="tag" style="background:${bg};color:${fg}">${esc(cat)}</span>`; };
 
+/* 목록 정렬 — 최신순 · 공감순 · 오래된순 (index.html 과 같은 규칙) */
+let OP_SORT = 'new';
+const OP_SORTS = [['new','🆕 최신순'], ['likes','💗 공감순'], ['old','🕗 오래된순']];
+const opSorted = (list) => list.slice().sort((a, b) =>
+  OP_SORT === 'likes' ? ((b.likes||0) - (a.likes||0)) || b.at.localeCompare(a.at)
+  : OP_SORT === 'old' ? a.at.localeCompare(b.at)
+  : b.at.localeCompare(a.at));
+
 VIEWS.opinion = () => {
   const q = (Q.opinion||'').toLowerCase();
-  let list = DB.opinions().slice().sort((a,b)=>b.at.localeCompare(a.at));
+  let list = DB.opinions().slice();
   if(q) list = list.filter(o =>
     (o.body + ' ' + o.cat + ' ' + o.alias + ' ' + (o.comments||[]).map(c=>c.body).join(' ')).toLowerCase().includes(q));
+  list = opSorted(list);
   const isAdmin = SESSION.role==='admin';
 
-  /* 가장 공감한 의견 1~3위 — 공감이 하나라도 있을 때만, 검색 중에는 숨깁니다 */
+  /* 가장 공감한 의견 1~3위 — 1위가 가장 크고 2·3위로 갈수록 작아집니다 */
   const top = DB.opinions().filter(o => (o.likes||0) > 0)
     .sort((a,b) => (b.likes - a.likes) || b.at.localeCompare(a.at)).slice(0,3);
   const MEDAL = ['🥇','🥈','🥉'];
+  const CUT   = [120, 80, 60];
 
   return pageHead('의견함', '말하고 싶었던 이야기, 스쳐간 생각까지 편하게 들려주세요. 한 줄이어도 충분해요.')
   + ((!q && top.length) ? `<section class="awd">
       <div class="awd-top"><span class="awd-cup" aria-hidden="true">🏆</span>
         <div><h2>가장 공감한 의견</h2>
           <p>지금까지 공감을 가장 많이 받은 의견 ${top.length}개입니다. 눌러서 바로 볼 수 있어요.</p></div></div>
-      <div class="awd-grid">
+      <div class="awd-grid n${top.length}">
         ${top.map((o,i)=>`<article class="awd-card r${i+1}" data-opjump="${o.id}" tabindex="0" role="button">
           <div class="awd-rank"><span class="medal" aria-hidden="true">${MEDAL[i]}</span><b>${i+1}위</b>${catTag(o.cat)}</div>
-          <p class="awd-body">${esc(excerpt(o.body, 90))}</p>
+          <p class="awd-body">${esc(excerpt(o.body, CUT[i]))}</p>
           <div class="awd-foot"><span class="awd-like"><span class="ico" aria-hidden="true">💗</span><b>${o.likes}</b><em>공감</em></span>
             <span class="awd-alias">${esc(o.alias||'익명')}</span></div>
         </article>`).join('')}
@@ -2298,7 +2339,10 @@ VIEWS.opinion = () => {
       </label>
       <div class="row-actions"><button class="btn primary" id="opSubmit">익명으로 제출</button></div>
     </div>`
-  + searchBar('opinion','의견 내용·별칭·댓글로 검색')
+  + searchBar('opinion','의견 내용·별칭·더한 의견으로 검색')
+  + `<div class="op-sort"><b>정렬</b>
+      ${OP_SORTS.map(([k, label]) => `<button class="op-sortbtn${OP_SORT === k ? ' on' : ''}" data-opsort="${k}">${label}</button>`).join('')}
+    </div>`
   + (q ? `<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>` : '')
   + `<div class="card" style="background:transparent;border:0;box-shadow:none;padding:0">
       <h2 style="margin-bottom:12px">접수된 의견 (${list.length})</h2>
@@ -2320,7 +2364,7 @@ VIEWS.opinion = () => {
           <div class="row-actions">
             <button class="btn like big${likedOp(o.id)?' on':''}" data-like="${o.id}">
               <span class="ico" aria-hidden="true">💗</span> 공감해요 <b>${o.likes||0}</b></button>
-            ${cmts.length ? `<span class="op-chip" title="댓글"><span class="ico" aria-hidden="true">💬</span><b>${cmts.length}</b></span>` : ''}
+            ${cmts.length ? `<span class="op-chip" title="의견 더하기"><span class="ico" aria-hidden="true">💬</span><span class="lbl">의견 더하기</span><b>${cmts.length}</b></span>` : ''}
             ${btns}
           </div>
           <div class="cmt-list">
@@ -2343,9 +2387,9 @@ VIEWS.opinion = () => {
                   </div></div>`;
               };
               return tops.map(c => one(c) + cmts.filter(r => r.parentId===c.id).map(r => one(r, true)).join('')).join('');
-            })() : `<div class="hint" style="margin:0">아직 댓글이 없습니다.</div>`}
+            })() : `<div class="hint" style="margin:0">아직 더해진 의견이 없습니다. 생각을 보태 주세요.</div>`}
             <div class="cmt-form">
-              <input data-cinput="${o.id}" placeholder="${esc(myAlias())}(으)로 댓글 남기기">
+              <input data-cinput="${o.id}" placeholder="${esc(myAlias())}(으)로 의견 더하기">
               <button class="btn sm" data-cadd="${o.id}">등록</button>
             </div>
           </div>
@@ -2355,6 +2399,11 @@ VIEWS.opinion = () => {
 };
 BIND.opinion = () => {
   bindSearch('opinion');
+  /* 정렬 바꾸기 — 보던 위치는 그대로 둡니다 */
+  $$('#main [data-opsort]').forEach(b => b.addEventListener('click', ()=>{
+    OP_SORT = b.dataset.opsort;
+    const y = window.scrollY; go('opinion'); window.scrollTo(0, y);
+  }));
 
   /* 시상대 카드 — 누르면 그 의견 자리로 내려가 잠깐 표시해 줍니다 */
   const jump = (id) => {
@@ -2399,7 +2448,7 @@ BIND.opinion = () => {
       if(pin===null) return;
       if(!o.pin || hashPin(pin)!==o.pin){ toast('비밀번호가 일치하지 않습니다'); return; }
     }
-    if(!confirm('이 의견을 삭제할까요? 댓글도 함께 삭제됩니다.')) return;
+    if(!confirm('이 의견을 삭제할까요? 더해진 의견도 함께 삭제됩니다.')) return;
     DB.saveOpinions(DB.opinions().filter(x=>x.id!==id));
     dropMyOp(id); toast('삭제되었습니다'); go('opinion');
   }));
@@ -2416,12 +2465,12 @@ BIND.opinion = () => {
   const addComment = (opId) => {
     const inp = $(`[data-cinput="${opId}"]`);
     const text = inp.value.trim();
-    if(!text){ toast('댓글 내용을 입력하세요'); return; }
+    if(!text){ toast('더할 의견을 입력하세요'); return; }
     const arr = DB.opinions();
     const o = arr.find(x=>x.id===opId); if(!o) return;
     const cid = uid();
     (o.comments = o.comments || []).push({ id:cid, body:text, alias:myAlias(), at:nowISO() });
-    if(DB.saveOpinions(arr)){ addMyOp(cid); toast('댓글을 등록했습니다'); go('opinion'); }
+    if(DB.saveOpinions(arr)){ addMyOp(cid); toast('의견을 더했습니다'); go('opinion'); }
   };
   $$('#main [data-cadd]').forEach(b => b.addEventListener('click', ()=> addComment(b.dataset.cadd)));
   $$('#main [data-cinput]').forEach(i => i.addEventListener('keydown', e=>{
@@ -2465,10 +2514,10 @@ BIND.opinion = () => {
     const o = arr.find(x=>x.id===opId); if(!o) return;
     /* 원래 댓글을 지우면 거기 달린 답글도 같이 지웁니다(온라인판 DB 동작과 맞춤) */
     const replies = (o.comments||[]).filter(c=>c.parentId===cId);
-    if(!confirm(replies.length ? `이 댓글을 삭제할까요? 달린 답글 ${replies.length}개도 함께 지워집니다.`
-                               : '이 댓글을 삭제할까요?')) return;
+    if(!confirm(replies.length ? `더한 의견을 삭제할까요? 달린 답글 ${replies.length}개도 함께 지워집니다.`
+                               : '더한 의견을 삭제할까요?')) return;
     o.comments = (o.comments||[]).filter(c => c.id!==cId && c.parentId!==cId);
-    if(DB.saveOpinions(arr)){ dropMyOp(cId); toast('댓글을 삭제했습니다'); go('opinion'); }
+    if(DB.saveOpinions(arr)){ dropMyOp(cId); toast('삭제했습니다'); go('opinion'); }
   }));
 };
 
