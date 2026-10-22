@@ -205,6 +205,26 @@
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .photo-card .meta{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:8px;align-items:center}
   .photo-card .hero-wrap,.photo-card h3,.photo-card .excerpt{cursor:pointer}
+  /* 글 댓글 — 공지방에서는 '제출' 칸 */
+  .pc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+  .pc-head h3{margin:0;font-size:16px;font-weight:900}
+  .pc-head h3 b{color:var(--brand);margin-left:4px}
+  .pc-list{display:grid;gap:10px;margin:0 0 14px}
+  .pc-item{background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+  .pc-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+  .pc-top b{font-weight:900}
+  .pc-top .btn{margin-left:auto}
+  .pc-item p{margin:7px 0 0;font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:keep-all}
+  .pc-item .att-list{margin-top:9px}
+  .pc-form textarea{min-height:76px}
+  /* 제출기한 배지 */
+  .due{font-size:12.5px;font-weight:900;border-radius:999px;padding:4px 12px;white-space:nowrap;
+    background:var(--surface-2);color:var(--muted);border:1px solid var(--border)}
+  .due.soon{background:var(--warn-weak);color:#7a4f00;border-color:var(--warn)}
+  .due.over{background:var(--danger-weak);color:var(--danger);border-color:var(--danger)}
+  .pr-foot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:9px}
+  .nc-acts{display:flex;align-items:center;gap:7px}
+  .nc-cmt{font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer}
   .photo-card .meta .btn.like{padding:4px 10px}
   /* 무기명 안내 */
   .anon-note{display:flex;gap:11px;align-items:flex-start;background:var(--surface-2);
@@ -2204,7 +2224,7 @@ function boardView(key){
           <p class="excerpt" data-open-post="${p.id}">${highlight(excerpt(p.body,90),Q[key])}</p>
           <div class="meta">
             <span>${b.anon ? '🙈 무기명' : esc(p.author)} · ${fmtDay(p.at)}${(p.atts||[]).length?' · 📎'+p.atts.length:''}</span>
-            ${likeChip(p)}
+            <span class="nc-acts"><span class="nc-cmt" data-open-post="${p.id}">💬 ${cmtsOf(p).length}</span>${likeChip(p)}</span>
           </div>
         </div></article>`;
     }).join('')}</div>`;
@@ -2216,6 +2236,7 @@ function boardView(key){
           <span class="hint">${fmtDay(p.at)}</span>
         </div>
         <p class="excerpt">${highlight(excerpt(p.body,110),Q[key])} <span class="hint">· ${esc(p.author)}</span></p>
+        <div class="pr-foot">${dueTag(p)}<span class="hint">${isSubmit(p) ? '제출' : '댓글'} ${cmtsOf(p).length}건</span></div>
       </div>`).join('')}</div>`;
   }
 
@@ -2268,6 +2289,7 @@ function openPostForm(key, edit){
   const isAct   = key === 'activity';
   const isCollab = key === 'collab';
   const isAi     = key === 'ai';
+  const isNotice = key === 'notice';   // 제출기한을 걸 수 있는 게시판
   const defTeam = isAct ? (Number(e0?.teamNo) || ACT_TEAM) : 0;
   openModal(`${b.icon} ${b.label} · ${e0 ? '글 수정' : (isCollab ? '협업 제안하기' : '글쓰기')}`, `
     ${isAi ? `<label class="field">분야 <span class="req">*</span>
@@ -2286,6 +2308,10 @@ function openPostForm(key, edit){
     ${isCollab ? `<label class="field">모집 인원 <span class="hint" style="display:inline">선택 — 비워 두면 제한 없이 받습니다</span>
       <input id="pfNeed" type="number" min="1" max="99" placeholder="예) 5" value="${e0?.collabNeed ?? ''}">
       <span class="hint">정해 두면 그 인원이 찼을 때 참여 버튼이 닫힙니다. 모집·진행·마무리 상태는 올린 뒤 글에서 바꿀 수 있습니다.</span></label>` : ''}
+    ${isNotice ? `<label class="field">제출기한 <span class="hint" style="display:inline">선택 — 비워 두면 그냥 공지입니다</span>
+      <input id="pfDue" type="date" value="${e0?.dueAt || ''}">
+      <span class="hint">날짜를 넣으면 글 아래가 '제출' 칸이 되어 단원이 파일을 낼 수 있습니다.
+        기한이 지나 낸 것은 <b>마감 후 제출</b> 로 표시됩니다.</span></label>` : ''}
     ${anon ? `<div class="anon-note"><span class="ico" aria-hidden="true">🙈</span>
       <div><b>이름 없이 올라갑니다</b>
         <span>이 게시판은 무기명이라 작성자 이름과 소속을 적지 않습니다.
@@ -2328,6 +2354,7 @@ function openPostForm(key, edit){
                      ...(isCollab ? { collabNeed: need > 0 ? Math.min(Math.round(need), 99) : null } : {}) };
     if(isAct) ACT_TEAM = teamNo;       // 올린 뒤에는 그 팀 게시판이 열리게
     if(isAi) { AI_TAB = ''; AI_SUB = ''; } // 올린 글이 바로 보이게 '전체' 로 돌려 둡니다
+    if(isNotice) common.dueAt = $('#pfDue').value || null;   // 비우면 기한 없는 공지
     if(e0){
       const i = arr.findIndex(x=>x.id===e0.id);
       if(i<0){ toast('글을 찾을 수 없습니다'); return; }
@@ -2391,8 +2418,11 @@ function openPost(id){
         <span class="ico" aria-hidden="true">💗</span> 좋아요 <b>${likeCount(p)}</b></button></div>
     ${mine ? `<div class="row-actions" style="margin-top:10px">
       <button class="btn sm" id="ppEdit">글 수정</button>
-      <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
-  bindPostLikes('#modalBody', ()=>{ go(CURRENT); openPost(p.id); });
+      <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}
+    ${commentBlock(p)}`);
+  const again = ()=>{ closeModal(); go(CURRENT); openPost(p.id); };
+  bindPostLikes('#modalBody', again);
+  bindComments(p, again);
   $$('#modalBody [data-zoom]').forEach(im => im.addEventListener('click', ()=> lightbox(im.dataset.zoom)));
   bindFileRows('#modalBody');
 
@@ -2747,6 +2777,78 @@ const bindPostLikes = (root, after) =>
     ev.stopPropagation();                      // 카드 전체를 누른 것으로 보지 않게
     togglePostLike(el.dataset.plike, after);
   }));
+
+/* ── 글 댓글 ───────────────────────────────────────────────────────────────
+   본 사이트는 post_comments 표(schema.sql 33절)를 씁니다.
+   연습용은 글 안의 cmts 목록에 넣어 같은 동작을 흉내 냅니다.
+   공지방(notice)에서는 파일까지 올리는 '제출' 칸이 됩니다. */
+const cmtsOf   = (p) => (p.cmts || []);
+const isSubmit = (p) => p.board === 'notice';
+const myCmt    = (c) => c.author === SESSION.name;
+
+/* 제출기한 — 그날 밤 12시까지. 지나도 낼 수는 있고 '마감 후 제출' 로 적힙니다 */
+const dueOver  = (p) => !!p.dueAt && ymd(new Date()) > p.dueAt;
+const dueLeft  = (p) => Math.round((new Date(p.dueAt + 'T23:59:59') - new Date()) / 86400000);
+const lateCmt  = (p, c) => !!p.dueAt && ymd(new Date(c.at)) > p.dueAt;
+function dueTag(p){
+  if(!p.dueAt) return '';
+  const d = dueLeft(p);
+  return dueOver(p)
+    ? `<span class="due over">⏰ 제출기한 ${esc(p.dueAt)} · 마감</span>`
+    : `<span class="due${d <= 3 ? ' soon' : ''}">⏰ 제출기한 ${esc(p.dueAt)} · ${
+        d <= 0 ? '오늘까지' : `${d}일 남음`}</span>`;
+}
+
+function commentBlock(p){
+  const sub = isSubmit(p), cs = cmtsOf(p), done = sub && cs.some(myCmt);
+  const row = (c) => `<div class="pc-item">
+      <div class="pc-top">
+        <b>${esc(c.author || '이름 없음')}</b>
+        <span class="hint">${fmt(c.at)}</span>
+        ${lateCmt(p, c) ? '<span class="tag reject">마감 후 제출</span>' : ''}
+        ${myCmt(c) || SESSION.role === 'admin' ? `<button class="btn sm ghost" data-cdel="${c.id}">삭제</button>` : ''}
+      </div>
+      ${c.body ? `<p>${esc(c.body)}</p>` : ''}
+      ${(c.atts||[]).length ? `<div class="att-list">${c.atts.map(fileRow).join('')}</div>` : ''}
+    </div>`;
+  const canWriteCmt = ['member','officer','admin'].includes(SESSION.role);
+  return `<hr style="border:0;border-top:1px solid var(--border);margin:20px 0 14px">
+    <div class="pc-head"><h3>${sub ? '제출 내역' : '댓글'} <b>${cs.length}</b></h3>${sub ? dueTag(p) : ''}</div>
+    ${sub ? `<p class="hint" style="margin:0 0 12px">본 사이트에서는 올린 파일을 <b>낸 본인과 혁신행정담당관만</b> 열 수 있습니다.
+      (연습용은 혼자 쓰는 것이라 그대로 열립니다.)</p>` : ''}
+    ${done ? '<div class="notice ok" style="margin-bottom:12px"><b>✅ 제출했습니다</b> — 다시 내려면 아래에 한 번 더 올리면 됩니다.</div>' : ''}
+    ${cs.length ? `<div class="pc-list">${cs.map(row).join('')}</div>`
+      : `<div class="empty" style="margin-bottom:12px">${sub ? '아직 아무도 내지 않았습니다.' : '아직 댓글이 없습니다.'}</div>`}
+    ${canWriteCmt ? `<div class="pc-form">
+      <textarea id="pcBody" placeholder="${sub ? '한 줄 남겨 주세요. (선택)' : '댓글을 남겨 주세요.'}"></textarea>
+      ${sub ? `<label class="field" style="margin:10px 0 0">제출 파일
+        <input id="pcFiles" type="file" multiple></label>
+        <div class="thumbs" id="pcThumbs"></div>` : ''}
+      <div class="row-actions"><button class="btn primary" id="pcSave">${sub ? '제출하기' : '댓글 남기기'}</button></div>
+    </div>` : `<p class="hint">${sub ? '제출은 단원만 할 수 있습니다.' : '댓글은 단원만 남길 수 있습니다.'}</p>`}`;
+}
+
+function bindComments(p, after){
+  const sub = isSubmit(p);
+  let picked = [];
+  $('#pcFiles')?.addEventListener('change', async e => {
+    picked = await collectFiles(e.target.files);
+    renderThumbs('#pcThumbs', picked);
+  });
+  $('#pcSave')?.addEventListener('click', ()=>{
+    const body = $('#pcBody').value.trim();
+    if(!body && !picked.length){ toast(sub ? '파일을 고르거나 한 줄 적어 주세요' : '내용을 입력하세요'); return; }
+    const arr = DB.posts(), t = arr.find(x => x.id === p.id); if(!t) return;
+    t.cmts = [...(t.cmts || []), { id:uid(), body, atts:picked, author:SESSION.name, at:nowISO() }];
+    if(DB.savePosts(arr)){ after(); toast(sub ? '제출했습니다' : '댓글을 남겼습니다'); }
+  });
+  $$('#modalBody [data-cdel]').forEach(b => b.addEventListener('click', ()=>{
+    if(!confirm(sub ? '낸 것을 지울까요? 올린 파일도 함께 지워집니다.' : '이 댓글을 지울까요?')) return;
+    const arr = DB.posts(), t = arr.find(x => x.id === p.id); if(!t) return;
+    t.cmts = (t.cmts || []).filter(c => c.id !== b.dataset.cdel);
+    if(DB.savePosts(arr)){ after(); toast('지웠습니다'); }
+  }));
+}
 const signedIn   = () => !!SESSION && SESSION.role !== 'anon';
 const pollClosed = (p) => !!p.closed || (!!p.closes_at && new Date(p.closes_at) <= new Date());
 const myBallot   = (pid) => DB.ballots().find(b => b.poll_id === pid && b.voter === myVoterId());

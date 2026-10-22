@@ -8,24 +8,29 @@
 --     4. 빈 칸에 Ctrl + V  (붙여넣기)   →   오른쪽 아래 'Run' 버튼
 --     5. 'Success' 라고 나오면 끝입니다.
 --
---  ▷ 이번에 꼭 필요한 것은 32절입니다.
---     32절 — 글에 '좋아요' + 고드래곤.새초롱이.zip 무기명
---        · 모든 게시판 글에 좋아요 버튼이 생깁니다(누가 눌렀는지는 안 보입니다).
---        · 고드래곤.새초롱이.zip 은 이름 없이 올라갑니다.
---        · ★ 이미 올라와 있는 그 게시판 글의 이름도 지웁니다 — 되돌릴 수 없습니다.
+--  ▷ 이번에 새로 들어간 것
+--     33절 — 글에 댓글 + 공지방 '제출기한'
+--        · 소식·공지방 등 게시판 글에 댓글을 달 수 있습니다.
+--        · 공지방 글은 댓글로 파일까지 낼 수 있는 '제출' 칸이 됩니다.
+--        · 공지 글에 제출기한(날짜)을 걸 수 있고, 남은 날짜가 함께 보입니다.
+--          기한이 지나도 낼 수는 있고 '마감 후 제출' 로 표시됩니다.
+--        · ★ 낸 파일은 낸 본인과 혁신행정담당관만 열 수 있습니다.
+--             다른 단원에게는 누가 냈는지와 파일 이름만 보이고 🔒 로 잠깁니다.
 --
---  ▷ 29~31절은 혹시 아직 안 하셨을까 봐 같이 넣어 두었습니다.
+--  ▷ 아직 안 하셨다면 29~32절도 함께 들어 있습니다.
 --     이미 실행하셨다면 그냥 다시 지나갑니다(여러 번 해도 안전합니다).
 --        29절 — 투표를 올린 뒤에도 고칠 수 있게(실명 → 무기명)
 --        30절 — 라운지 게시판 셋 (고드래곤.새초롱이.zip / AI.zip / 멘탈관리.zip)
 --        31절 — 결과보고서를 단원끼리 서로 볼 수 있게
---                활동비 정산 영수증은 그대로 본인과 담당관만 봅니다. ★그대로 보호
+--        32절 — 글에 '좋아요' + 고드래곤.새초롱이.zip 무기명
+--                ★ 32절은 이미 올라와 있는 그 게시판 글의 '작성자 이름' 을 지웁니다.
+--                   무기명으로 만드는 것이라 되돌릴 수 없습니다.
 --
 --  ▷ 안전한가요?
 --     네. 글·사진·의견·투표·보고서·가입한 회원은 지우지 않습니다.
---     다만 32절은 고드래곤.새초롱이.zip 글의 '작성자 이름' 만 지웁니다(무기명이라서).
+--     활동비 정산 영수증도 그대로 본인과 담당관만 봅니다. ★그대로 보호
 --
---  ▷ 이 내용은 supabase/schema.sql 29~32절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 29~33절과 같습니다.
 -- ============================================================================
 
 --  29. 투표 수정 — 실명 투표를 무기명(익명)으로 바꿀 수 있게
@@ -210,3 +215,79 @@ create trigger posts_anon_mascot
 update public.posts
    set author_name = '', author_team = '', author_dept = ''
  where board = 'mascot';
+
+-- ============================================================================
+--  33. 글에 댓글 + 공지방 '제출기한'
+--
+--  (1) post_comments — 게시판 글에 다는 댓글
+--      · 읽기 : 그 글을 볼 수 있는 사람이면 누구나(소식·활동·라운지는 전 직원)
+--      · 쓰기 : 단원 이상. 지우기·고치기는 쓴 본인과 관리자만.
+--      · 이름 : 서버가 회원 명단에서 가져와 붙입니다(꾸며 넣을 수 없음).
+--               고드래곤.새초롱이.zip 은 무기명이라 댓글에도 이름을 붙이지 않습니다.
+--
+--  (2) files — 댓글에 올린 파일. 공지방(notice) 제출용입니다.
+--      ★ 파일은 비공개 저장소 docs 의 submits/ 폴더에 둡니다.
+--        올린 본인과 혁신행정담당관만 열 수 있습니다(31절 docs_read 규칙 그대로).
+--        글·사진 첨부가 쓰는 media 저장소와 달리 주소만 알면 열리지 않습니다.
+--
+--  (3) posts.due_at — 공지방 글의 제출기한(날짜). 비워 두면 기한 없는 보통 공지입니다.
+--      · 기한이 지나도 낼 수는 있고, 대신 '마감 후 제출' 로 표시됩니다.
+--        (못 내게 막는 것보다 늦게라도 받는 편이 낫다고 보고 이렇게 했습니다.
+--         아예 막아야 하면 말씀해 주세요.)
+-- ============================================================================
+
+alter table public.posts add column if not exists due_at date;
+
+create table if not exists public.post_comments (
+  id          uuid primary key default gen_random_uuid(),
+  post_id     uuid not null references public.posts on delete cascade,
+  body        text not null default '',
+  files       jsonb not null default '[]'::jsonb,   -- docs 버킷 submits/ 경로
+  author_id   uuid not null default auth.uid() references auth.users on delete cascade,
+  author_name text not null default '',
+  created_at  timestamptz not null default now()
+);
+create index if not exists post_comments_post_idx on public.post_comments (post_id, created_at);
+
+alter table public.post_comments enable row level security;
+
+-- 댓글 이름은 서버가 붙입니다. 무기명 게시판(mascot)이면 비워 둡니다.
+create or replace function public.set_comment_author()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare bd text;
+begin
+  select p.board into bd from public.posts p where p.id = new.post_id;
+  if bd = 'mascot' then
+    new.author_name := '';
+  else
+    new.author_name := coalesce((select name from public.profiles where id = auth.uid()), '단원');
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists post_comments_set_author on public.post_comments;
+create trigger post_comments_set_author before insert on public.post_comments
+  for each row execute function public.set_comment_author();
+
+-- 읽기 — 그 글을 볼 수 있으면 댓글도 봅니다(posts 의 읽기 규칙을 그대로 따라갑니다)
+drop policy if exists pc_select on public.post_comments;
+create policy pc_select on public.post_comments for select
+  using ( exists (select 1 from public.posts p where p.id = post_id) );
+
+drop policy if exists pc_insert on public.post_comments;
+create policy pc_insert on public.post_comments for insert
+  with check ( author_id = auth.uid() and public.is_inner() );
+
+drop policy if exists pc_update on public.post_comments;
+create policy pc_update on public.post_comments for update
+  using ( author_id = auth.uid() or public.is_admin() );
+
+drop policy if exists pc_delete on public.post_comments;
+create policy pc_delete on public.post_comments for delete
+  using ( author_id = auth.uid() or public.is_admin() );
+
+-- 제출 파일 저장소는 새로 만들 것이 없습니다.
+--   올리기 : 9절 docs_write — 단원 이상이 '자기 폴더' 에만 올릴 수 있습니다.
+--            제출 파일 경로가 submits/<내 계정번호>/... 라서 그대로 통과합니다.
+--   읽기   : 31절 docs_read — 올린 본인과 혁신행정담당관만. ★제출물 보호
+--   지우기 : 9절 docs_delete — 올린 본인과 관리자만.

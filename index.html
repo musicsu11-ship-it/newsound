@@ -226,6 +226,29 @@
     gap:8px;align-items:center}
   .photo-card .hero-wrap,.photo-card h3,.photo-card .excerpt{cursor:pointer}
   .photo-card .meta .btn.like{padding:4px 10px}
+  /* 글 댓글 — 공지방에서는 '제출' 칸이 됩니다 */
+  .pc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px}
+  .pc-head h3{margin:0;font-size:16px;font-weight:900}
+  .pc-head h3 b{color:var(--brand);margin-left:4px}
+  .pc-list{display:grid;gap:10px;margin:0 0 14px}
+  .pc-item{background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:12px 14px}
+  .pc-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+  .pc-top b{font-weight:900}
+  .pc-top .btn{margin-left:auto}
+  .pc-item p{margin:7px 0 0;font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:keep-all}
+  .pc-item .att-list{margin-top:9px}
+  .pc-form textarea{min-height:76px}
+  /* 제출기한 배지 — 남으면 기본색, 3일 이하면 노랑, 지나면 빨강 */
+  .due{font-size:12.5px;font-weight:900;border-radius:999px;padding:4px 12px;white-space:nowrap;
+    background:var(--surface-2);color:var(--muted);border:1px solid var(--border)}
+  .due.soon{background:var(--warn-weak);color:#7a4f00;border-color:var(--warn)}
+  .due.over{background:var(--danger-weak);color:var(--danger);border-color:var(--danger)}
+  .pr-foot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:9px}
+  /* 소식 카드 아래 댓글 수 · 좋아요 */
+  .news-card .dt{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .nc-acts{display:flex;align-items:center;gap:7px}
+  .nc-cmt{font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer}
+  .news-card .btn.like{padding:4px 10px}
   /* 무기명 안내 — 이름이 안 남는다는 걸 글 올리기 전에 알려 줍니다 */
   .anon-note{display:flex;gap:11px;align-items:flex-start;background:var(--surface-2);
     border:1px solid var(--border);border-radius:16px;padding:13px 15px;margin:0 0 16px}
@@ -1489,6 +1512,8 @@ const S = {
   myCLikes:new Set(),              // 내가 공감을 누른 댓글 id
   pLikesReady:false,               // schema.sql 32절을 실행해 글 좋아요 표가 준비됐는지
   myPLikes:new Set(),              // 내가 좋아요를 누른 글 (하트 색칠용)
+  pCmtReady:false,                 // schema.sql 33절을 실행해 글 댓글 표가 준비됐는지
+  pComments:[],                    // 게시판 글에 달린 댓글 전체
   likesReady:false,                // schema.sql 을 실행해 의견 공감 표가 준비됐는지
   cLikesReady:false,               // 댓글 공감 표가 준비됐는지
   repliesReady:false,              // 대댓글 칸이 준비됐는지
@@ -1684,6 +1709,8 @@ async function refresh(opt = {}){
       sb.from('opinion_comments').select('parent_id').limit(1),
       /* 글 좋아요 — 32절을 아직 실행하지 않았으면 조용히 쉽니다 */
       sb.from('post_likes').select('post_id'),
+      /* 글 댓글 — 33절을 아직 실행하지 않았으면 조용히 쉽니다 */
+      sb.from('post_comments').select('*').order('created_at'),
     ]).catch(e => e);
     const pPolls = Promise.all([
       sb.from('polls').select('*').order('created_at', { ascending:false }),
@@ -1741,7 +1768,7 @@ async function refresh(opt = {}){
        (권한을 그렇게 걸어 두어서 '내가 누른 것' 만 돌아옵니다. 하트 색칠용이고
         전체 개수는 opinions.likes 숫자를 씁니다.) */
     try{
-      const [a, b, c, d] = await pExtras;
+      const [a, b, c, d, e2] = await pExtras;
       S.likesReady   = !a.error;
       S.myLikes      = new Set((a.data || []).map(r => r.opinion_id));
       S.cLikesReady  = !b.error;
@@ -1749,9 +1776,12 @@ async function refresh(opt = {}){
       S.repliesReady = !c.error;
       S.pLikesReady  = !d.error;
       S.myPLikes     = new Set((d.data || []).map(r => r.post_id));
+      S.pCmtReady    = !e2.error;
+      S.pComments    = e2.data || [];
     }catch(e){
-      S.likesReady = S.cLikesReady = S.repliesReady = S.pLikesReady = false;
+      S.likesReady = S.cLikesReady = S.repliesReady = S.pLikesReady = S.pCmtReady = false;
       S.myLikes = new Set(); S.myCLikes = new Set(); S.myPLikes = new Set();
+      S.pComments = [];
     }
 
     /* 투표 — 따로 읽습니다. SQL 실행 전이라 표가 없으면 투표 게시판만 '준비 중' 이 되고
@@ -1779,7 +1809,7 @@ async function refresh(opt = {}){
     }else{ S.joinsReady = false; S.joins = []; }
 
     /* 영수증·보고서 첨부의 임시 열람 주소 — 첫 화면을 막지 않도록 기다리지 않습니다 */
-    signDocs().then(() => { if(['mine','review-report','review-expense'].includes(CURRENT)) go(CURRENT); });
+    signDocs().then(() => { if(['mine','review-report','review-expense','notice'].includes(CURRENT)) go(CURRENT); });
 
     // 권한이 바뀌었으면 메뉴와 화면을 즉시 새로 그립니다 (로그아웃 불필요)
     if(roleChanged && $('#appView').style.display !== 'none'){
@@ -1799,6 +1829,12 @@ async function signDocs(){
   const paths = [];
   S.expenses.forEach(e => (e.receipts||[]).forEach(f => f.path && paths.push(f.path)));
   S.reports.forEach(r => (r.files||[]).forEach(f => f.path && paths.push(f.path)));
+  /* 공지방 제출 파일도 비공개라 서명된 주소가 있어야 열립니다.
+     어차피 열 수 없는 남의 제출물은 아예 요청하지 않습니다(담당관은 전부 볼 수 있습니다). */
+  S.pComments.forEach(c => {
+    if(!isOfficer() && c.author_id !== S.user?.id) return;
+    (c.files||[]).forEach(f => f.path && paths.push(f.path));
+  });
   const need = [...new Set(paths)].filter(p => !SIGNED[p]);
   if(!need.length) return;
   const { data, error } = await sb.storage.from('docs').createSignedUrls(need, 3600);
@@ -2637,12 +2673,14 @@ function boardView(key){
     ${!list.length
       ? loadBox(q ? '검색 결과가 없습니다.' : '아직 등록된 소식이 없습니다.')
       : `<div class="news-grid">
-          ${list.map(p=>`<article class="news-card" data-open-post="${p.id}">
-            <div class="ph">${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="" loading="lazy">`:'📰'}</div>
+          ${list.map(p=>`<article class="news-card">
+            <div class="ph" data-open-post="${p.id}">${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="" loading="lazy">`:'📰'}</div>
             <div class="bd"><span class="tag brand">활동 소식</span>
-              <h3>${esc(p.title)}</h3>
-              <p>${esc(excerpt(p.body,70))}</p>
-              <div class="dt">${fmtDay(p.created_at)}</div></div>
+              <h3 data-open-post="${p.id}">${esc(p.title)}</h3>
+              <p data-open-post="${p.id}">${esc(excerpt(p.body,70))}</p>
+              <div class="dt">${fmtDay(p.created_at)}
+                <span class="nc-acts">${S.pCmtReady ? `<span class="nc-cmt" data-open-post="${p.id}"
+                  >💬 ${cmtsOf(p.id).length}</span>` : ''}${likeChip(p)}</span></div></div>
           </article>`).join('')}
         </div>`}`;
   }
@@ -2857,6 +2895,8 @@ function boardView(key){
         <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}${(p.images||[]).length?' <span class="hint">📎'+p.images.length+'</span>':''}</h3>
         <span class="hint">${fmtDay(p.created_at)}</span></div>
       <p class="excerpt">${highlight(excerpt(p.body,110),Q[key])} <span class="hint">· ${esc(p.author_name)}</span></p>
+      ${p.due_at || S.pCmtReady ? `<div class="pr-foot">${dueTag(p)}${
+        S.pCmtReady ? `<span class="hint">${isSubmit(p) ? '제출' : '댓글'} ${cmtsOf(p.id).length}건</span>` : ''}</div>` : ''}
     </div>`).join('')}</div>`
     : loadBox(q ? '검색 결과가 없습니다.' : '아직 등록된 글이 없습니다.')}`;
 }
@@ -2891,6 +2931,110 @@ const bindPostLikes = (root, after) =>
     ev.stopPropagation();                      // 카드 전체를 누른 것으로 보지 않게
     togglePostLike(el.dataset.plike, after);
   }));
+
+/* ── 글 댓글 ───────────────────────────────────────────────────────────────
+   공지방(notice)에서는 파일까지 올릴 수 있는 '제출' 칸이 됩니다(schema.sql 33절).
+   제출 파일은 비공개 저장소에 들어가 올린 본인과 혁신행정담당관만 볼 수 있습니다. */
+const cmtsOf   = (pid) => S.pComments.filter(c => c.post_id === pid);
+const isSubmit = (p) => p.board === 'notice';          // 파일을 받는 게시판
+const myCmt    = (c) => c.author_id === S.user?.id;
+
+/* 제출기한 — 그날 밤 12시까지로 봅니다. 지나도 낼 수는 있고 '마감 후 제출' 로 적힙니다 */
+const dueOver  = (p) => !!p.due_at && ymd(new Date()) > p.due_at;
+const dueLeft  = (p) => Math.round((new Date(p.due_at + 'T23:59:59') - new Date()) / 86400000);
+const lateCmt  = (p, c) => !!p.due_at && ymd(new Date(c.created_at)) > p.due_at;
+function dueTag(p){
+  if(!p.due_at) return '';
+  const d = dueLeft(p);
+  return dueOver(p)
+    ? `<span class="due over">⏰ 제출기한 ${esc(p.due_at)} · 마감</span>`
+    : `<span class="due${d <= 3 ? ' soon' : ''}">⏰ 제출기한 ${esc(p.due_at)} · ${
+        d <= 0 ? '오늘까지' : `${d}일 남음`}</span>`;
+}
+
+/* 글 아래 댓글(공지방은 '제출') 칸 전체 */
+function commentBlock(p){
+  if(!S.pCmtReady) return isAdmin()
+    ? '<p class="hint" style="margin-top:20px">댓글 기능은 준비 중입니다 (관리자: SQL 33절을 실행하면 열립니다)</p>' : '';
+  const sub  = isSubmit(p);
+  const cs   = cmtsOf(p.id);
+  const done = sub && cs.some(myCmt);
+  const title = sub ? '제출 내역' : '댓글';
+
+  const row = (c) => {
+    const files = (c.files || []);
+    return `<div class="pc-item">
+      <div class="pc-top">
+        <b>${esc(c.author_name || '이름 없음')}</b>
+        <span class="hint">${fmt(c.created_at)}</span>
+        ${lateCmt(p, c) ? '<span class="tag reject">마감 후 제출</span>' : ''}
+        ${myCmt(c) || isAdmin() ? `<button class="btn sm ghost" data-cdel="${c.id}">삭제</button>` : ''}
+      </div>
+      ${c.body ? `<p>${esc(c.body)}</p>` : ''}
+      ${files.length ? `<div class="att-list">${files.map(f => fileRow(f, fileUrl(f))).join('')}</div>` : ''}
+    </div>`;
+  };
+
+  const canWriteCmt = isInner();
+  return `<hr style="border:0;border-top:1px solid var(--border);margin:20px 0 14px">
+    <div class="pc-head">
+      <h3>${title} <b>${cs.length}</b></h3>
+      ${sub ? dueTag(p) : ''}
+    </div>
+    ${sub ? `<p class="hint" style="margin:0 0 12px">올린 파일은 <b>낸 본인과 혁신행정담당관만</b> 열 수 있습니다.
+      다른 단원에게는 누가 냈는지와 파일 이름만 보이고 🔒 로 잠겨 있습니다.</p>` : ''}
+    ${done ? '<div class="notice ok" style="margin-bottom:12px"><b>✅ 제출했습니다</b> — 다시 내려면 아래에 한 번 더 올리면 됩니다.</div>' : ''}
+    ${cs.length ? `<div class="pc-list">${cs.map(row).join('')}</div>`
+      : `<div class="empty" style="margin-bottom:12px">${sub ? '아직 아무도 내지 않았습니다.' : '아직 댓글이 없습니다.'}</div>`}
+    ${canWriteCmt ? `<div class="pc-form">
+      <textarea id="pcBody" placeholder="${sub
+        ? (dueOver(p) ? '기한이 지났지만 낼 수 있습니다. 한 줄 남겨 주세요.' : '한 줄 남겨 주세요. (선택)')
+        : '댓글을 남겨 주세요.'}"></textarea>
+      ${sub ? `<label class="field" style="margin:10px 0 0">제출 파일
+        <input id="pcFiles" type="file" multiple>
+        <span class="hint">어떤 파일이든 올릴 수 있습니다(파일 하나에 ${MAX_FILE_MB}MB까지, 실행 파일 제외).</span></label>
+        <div class="thumbs" id="pcThumbs"></div>` : ''}
+      <div class="row-actions"><button class="btn primary" id="pcSave">${sub ? '제출하기' : '댓글 남기기'}</button></div>
+    </div>` : `<p class="hint">${sub ? '제출은 단원만 할 수 있습니다.' : '댓글은 단원만 남길 수 있습니다.'}</p>`}`;
+}
+
+function bindComments(p, after){
+  if(!S.pCmtReady) return;
+  const sub = isSubmit(p);
+  let picked = [];
+  $('#pcFiles')?.addEventListener('change', e => {
+    picked = prepDocs(e.target.files, true);
+    previewDocsLocal('#pcThumbs', picked);
+  });
+  $('#pcSave')?.addEventListener('click', async ()=>{
+    const body = $('#pcBody').value.trim();
+    if(!body && !picked.length){ toast(sub ? '파일을 고르거나 한 줄 적어 주세요' : '내용을 입력하세요'); return; }
+    const btn = $('#pcSave'); btn.disabled = true; busy(true);
+    let files = [];
+    try{
+      /* 제출 파일은 비공개 저장소(docs)의 submits 폴더로 갑니다 — 본인과 담당관만 열람 */
+      if(picked.length) files = await uploadDocs('docs', picked, 'submits');
+      const { error } = await sb.from('post_comments')
+        .insert({ post_id: p.id, body, files, author_id: S.user?.id });
+      if(error) throw error;
+      await refresh(); after(); toast(sub ? '제출했습니다' : '댓글을 남겼습니다');
+    }catch(err){
+      if(files.length) await sb.storage.from('docs').remove(files.map(f => f.path));
+      failed(sub ? '제출' : '댓글', err); btn.disabled = false;
+    }finally{ busy(false); }
+  });
+  $$('#modalBody [data-cdel]').forEach(b => b.addEventListener('click', async ()=>{
+    const c = S.pComments.find(x => x.id === b.dataset.cdel); if(!c) return;
+    if(!confirm(sub ? '낸 것을 지울까요? 올린 파일도 함께 지워집니다.' : '이 댓글을 지울까요?')) return;
+    busy(true);
+    const { error } = await sb.from('post_comments').delete().eq('id', c.id);
+    const paths = (c.files||[]).map(f => f.path).filter(Boolean);
+    if(!error && paths.length) await sb.storage.from('docs').remove(paths);
+    busy(false);
+    if(error) return failed('삭제', error);
+    await refresh(); after(); toast('지웠습니다');
+  }));
+}
 
 Object.keys(BOARDS).forEach(key=>{
   VIEWS[key] = () => boardView(key);
@@ -2932,6 +3076,7 @@ function openPostForm(key, edit){
   const isAct   = key === 'activity';
   const isCollab = key === 'collab';
   const isAi     = key === 'ai';
+  const isNotice = key === 'notice';   // 제출기한을 걸 수 있는 게시판
   const defTeam = isAct ? (Number(e0?.team_no) || ACT_TEAM || myTeamNo()) : 0;
   openModal(`${b.icon} ${b.label} · ${e0 ? '글 수정' : (isCollab ? '협업 제안하기' : '글쓰기')}`, `
     ${isAi ? `<label class="field">분야 <span class="req">*</span>
@@ -2949,6 +3094,11 @@ function openPostForm(key, edit){
     ${isCollab ? `<label class="field">모집 인원 <span class="hint" style="display:inline">선택 — 비워 두면 제한 없이 받습니다</span>
       <input id="pfNeed" type="number" min="1" max="99" placeholder="예) 5" value="${e0?.collab_need ?? ''}">
       <span class="hint">정해 두면 그 인원이 찼을 때 참여 버튼이 닫힙니다. 모집·진행·마무리 상태는 올린 뒤 글에서 바꿀 수 있습니다.</span></label>` : ''}
+    ${isNotice ? `<label class="field">제출기한 <span class="hint" style="display:inline">선택 — 비워 두면 그냥 공지입니다</span>
+      <input id="pfDue" type="date" value="${e0?.due_at || ''}">
+      <span class="hint">날짜를 넣으면 글 아래가 '제출' 칸이 되어 단원이 파일을 낼 수 있습니다.
+        남은 날짜가 함께 보이고, 기한이 지나 낸 것은 <b>마감 후 제출</b> 로 표시됩니다.
+        낸 파일은 <b>낸 본인과 혁신행정담당관만</b> 열 수 있습니다.</span></label>` : ''}
     ${anon ? `<div class="anon-note"><span class="ico" aria-hidden="true">🙈</span>
       <div><b>이름 없이 올라갑니다</b>
         <span>이 게시판은 무기명이라 작성자 이름과 소속을 적지 않습니다.
@@ -2999,6 +3149,7 @@ function openPostForm(key, edit){
       if(anon) fields.author_name = '';
       if(isAct) fields.team_no = teamNo;
       if(isAi){ fields.topic = $('#pfTopic').value; AI_TAB = ''; AI_SUB = ''; }
+      if(isNotice) fields.due_at = $('#pfDue').value || null;   // 비우면 기한 없는 공지
       /* 협업 — 모집 인원(비우면 제한 없음) */
       if(isCollab){
         const n = Number($('#pfNeed').value);
@@ -3082,10 +3233,13 @@ function openPost(id){
         <span class="ico" aria-hidden="true">💗</span> 좋아요 <b>${p.likes || 0}</b></button></div>` : ''}
     ${mine ? `<div class="row-actions" style="margin-top:${S.pLikesReady ? '10' : '18'}px">
       <button class="btn sm" id="ppEdit">글 수정</button>
-      <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}`);
+      <button class="btn sm danger" id="ppDel">글 삭제</button></div>` : ''}
+    ${commentBlock(p)}`);
   bindZoom();
   /* 좋아요 — 누르면 목록과 이 창을 함께 새로 그립니다 */
-  bindPostLikes('#modalBody', ()=>{ go(CURRENT); openPost(p.id); });
+  const again = ()=>{ go(CURRENT); openPost(p.id); };
+  bindPostLikes('#modalBody', again);
+  bindComments(p, again);
 
   /* 참여하기 / 참여 취소 — 이름은 서버가 계정에서 붙입니다(꾸며 넣을 수 없음) */
   $('#cbJoin')?.addEventListener('click', async ()=>{
