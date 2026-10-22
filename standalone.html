@@ -233,13 +233,17 @@
   .act-list .post-row .excerpt{font-size:14.5px;line-height:1.65;-webkit-line-clamp:2;margin-top:6px;word-break:keep-all}
   .act-meta{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
   .act-chip{background:var(--tint);color:#16225c;font-weight:800;font-size:12.5px;border-radius:999px;padding:3px 10px}
-  /* AI관 분야 탭 */
+  /* AI.zip 분야 탭 · 담당 업무 탭 */
   .ai-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}
   .ai-tabs button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
     font-size:14.5px;font-weight:800;padding:9px 16px;border-radius:999px;cursor:pointer}
   .ai-tabs button b{margin-left:6px;color:var(--muted);font-weight:900}
   .ai-tabs button.on{background:var(--text);border-color:var(--text);color:#fff}
   .ai-tabs button.on b{color:rgba(255,255,255,.8)}
+  /* 두 번째 줄 — 고른 분야 안의 담당 업무. 색은 그대로 두고 한 단계 작게만 합니다 */
+  .ai-tabs.sub{gap:7px;margin:-8px 0 16px;padding-left:2px}
+  .ai-tabs.sub button{font-size:13.5px;font-weight:700;padding:7px 13px;background:var(--surface-2)}
+  .ai-tabs.sub button.on{background:var(--text);border-color:var(--text);color:#fff;font-weight:800}
   /* ── 협업 게시판 (단원 전용) — index.html 과 같은 화면 ── */
   .cb-sum{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
   .cb-state{font-size:12.5px;font-weight:900;border-radius:999px;padding:4px 12px;white-space:nowrap}
@@ -1399,25 +1403,50 @@ const BOARDS = {
             desc:'팀을 넘어 함께할 일을 제안하고 같이 할 사람을 모으는 공간입니다.',
             read:INNER, write:INNER },
   /* ── 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 ── */
-  mascot: { label:'고드래곤·새초롱이관', icon:'🐉', layout:'photo',
+  mascot: { label:'고드래곤.새초롱이.zip', icon:'🐉', layout:'photo',
             desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다.',
             read:ALL,   write:INNER },
-  ai:     { label:'AI관', icon:'🤖', layout:'list',
-            desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 나누는 공간입니다.',
+  ai:     { label:'AI.zip', icon:'🤖', layout:'list',
+            desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.',
             read:ALL,   write:INNER },
-  relief: { label:'힘들땐 여기', icon:'💛', layout:'list',
+  relief: { label:'멘탈관리.zip', icon:'💛', layout:'list',
             desc:'지칠 때 힘이 된 것들을 나누는 공간입니다. 사진·영상·파일 모두 올릴 수 있어요.',
             read:ALL,   write:INNER },
 };
-/* AI관 분야 */
-const AI_TOPICS = [
-  { key:'고용', label:'고용 (실업급여·직업능력 등)', short:'고용', tint:'#dfeaff' },
-  { key:'노동', label:'노동 (근로기준·노사 등)',     short:'노동', tint:'#ffe1ec' },
-  { key:'산안', label:'산업안전',                    short:'산안', tint:'#d9f5ef' },
-  { key:'기타', label:'그 밖의 업무·공통',           short:'기타', tint:'#f3f2fd' },
+/* AI.zip 분야 — 큰 분야(고용·노동·산안·기타) 안에 담당 업무가 들어 있습니다 (index.html 과 같음) */
+const AI_FIELDS = [
+  { key:'고용', tint:'#dfeaff',
+    items:['실업급여','국민취업지원','취업지원','기업지원','직업능력개발','지역협력','부정수급조사'] },
+  { key:'노동', tint:'#ffe1ec',
+    items:['노사상생지원','근로문화개선지원','노동기준조사','광역노동기준감독','노동위원회'] },
+  { key:'산안', tint:'#d9f5ef',
+    items:['중대재해수사','광역산재예방감독','건설산재예방감독','산재예방감독'] },
+  { key:'기타', tint:'#f3f2fd', items:[] },
 ];
-const aiTopic = (k) => AI_TOPICS.find(t => t.key === k) || AI_TOPICS[3];
-let AI_TAB = '';
+/* 저장된 값 하나로 '큰 분야 · 담당 업무 · 색' 을 찾아 줍니다 */
+const aiTopic = (v) => {
+  const t = (v || '').trim();
+  for(const f of AI_FIELDS){
+    if(t === f.key)         return { field:f.key, sub:'', short:f.key, chip:f.key, tint:f.tint };
+    if(f.items.includes(t)) return { field:f.key, sub:t,  short:t, chip:`${f.key} · ${t}`, tint:f.tint };
+  }
+  const o = AI_FIELDS[AI_FIELDS.length - 1];
+  return { field:o.key, sub:'', short:o.key, chip:o.key, tint:o.tint };
+};
+const aiField = (v) => aiTopic(v).field;
+/* 글을 올릴 때 쓰는 고르기 칸 — 큰 분야로 묶어서 보여 줍니다(기타는 맨 아래 한 줄) */
+const aiTopicOptions = (sel) => {
+  /* 고르기 칸에 실제로 들어 있는 값인지 봅니다. 예전 글처럼 큰 분야만 적혀 있으면
+     (예: '고용') 그 값을 맨 위에 그대로 한 줄 넣어, 수정만 해도 분야가 바뀌지 않게 합니다. */
+  const known = sel === '기타' || AI_FIELDS.some(f => f.items.includes(sel));
+  return (sel && !known ? `<option value="${esc(sel)}" selected>${esc(sel)} (지금 적혀 있는 분야)</option>` : '')
+    + AI_FIELDS.filter(f => f.items.length).map(f =>
+        `<optgroup label="${esc(f.key)}">${f.items.map(s =>
+          `<option value="${esc(s)}" ${sel === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</optgroup>`).join('')
+    + `<option value="기타" ${sel === '기타' ? 'selected' : ''}>기타 (그 밖의 업무·공통)</option>`;
+};
+let AI_TAB = '';   // 보고 있는 큰 분야 ('' = 전체)
+let AI_SUB = '';   // 그 안에서 보고 있는 담당 업무 ('' = 분야 전체)
 
 /* ---------- 메뉴 (권한별) ---------- */
 const MENUS = [
@@ -1430,9 +1459,9 @@ const MENUS = [
   { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
 
   /* 라운지 — 누구나 볼 수 있는 공간 세 곳 */
-  { id:'mascot',   icon:'🐉', label:'고드래곤·새초롱이관', roles:ALL, group:'라운지' },
-  { id:'ai',       icon:'🤖', label:'AI관',           roles:ALL,   group:'라운지' },
-  { id:'relief',   icon:'💛', label:'힘들땐 여기',     roles:ALL,   group:'라운지' },
+  { id:'mascot',   icon:'🐉', label:'고드래곤.새초롱이.zip', roles:ALL, group:'라운지' },
+  { id:'ai',       icon:'🤖', label:'AI.zip',        roles:ALL,   group:'라운지' },
+  { id:'relief',   icon:'💛', label:'멘탈관리.zip',   roles:ALL,   group:'라운지' },
   { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
 
   { id:'collab',   icon:'🤝', label:'협업',          roles:INNER, group:'새소리단 공간' },
@@ -2061,16 +2090,24 @@ function boardView(key){
   let body = '';
 
   /* ── 협업: 제안 카드 + 참여자 (index.html 과 같은 화면) ── */
-  /* ── AI관: 분야 탭 + 목록 ── */
+  /* ── AI.zip: 큰 분야 탭 + 담당 업무 탭 + 목록 ── */
   if(key === 'ai'){
     const all = DB.posts().filter(p => p.board === 'ai');
-    const cnt = (k) => all.filter(p => (p.topic || '기타') === k).length;
-    const shown = AI_TAB ? list.filter(p => (p.topic || '기타') === AI_TAB) : list;
-    return pageHead('🤖 AI관', b.desc, canWrite(key) ? '<button class="btn primary" id="bdWrite">＋ 꿀팁 올리기</button>' : '')
+    const fcnt = (k) => all.filter(p => aiField(p.topic) === k).length;
+    const scnt = (s) => all.filter(p => aiTopic(p.topic).sub === s).length;
+    const fld  = AI_FIELDS.find(f => f.key === AI_TAB);
+    let shown = list;
+    if(AI_TAB) shown = shown.filter(p => aiField(p.topic) === AI_TAB);
+    if(AI_SUB) shown = shown.filter(p => aiTopic(p.topic).sub === AI_SUB);
+    return pageHead(`${b.icon} ${b.label}`, b.desc, canWrite(key) ? '<button class="btn primary" id="bdWrite">＋ 꿀팁 올리기</button>' : '')
       + `<div class="ai-tabs">
           <button class="${AI_TAB ? '' : 'on'}" data-ai-tab="">전체<b>${all.length}</b></button>
-          ${AI_TOPICS.map(t => `<button class="${AI_TAB === t.key ? 'on' : ''}" data-ai-tab="${t.key}">${esc(t.short)}<b>${cnt(t.key)}</b></button>`).join('')}
+          ${AI_FIELDS.map(f => `<button class="${AI_TAB === f.key ? 'on' : ''}" data-ai-tab="${f.key}">${esc(f.key)}<b>${fcnt(f.key)}</b></button>`).join('')}
         </div>`
+      + (fld?.items.length ? `<div class="ai-tabs sub">
+          <button class="${AI_SUB ? '' : 'on'}" data-ai-sub="">${esc(fld.key)} 전체<b>${fcnt(fld.key)}</b></button>
+          ${fld.items.map(s => `<button class="${AI_SUB === s ? 'on' : ''}" data-ai-sub="${esc(s)}">${esc(s)}<b>${scnt(s)}</b></button>`).join('')}
+        </div>` : '')
       + searchBar(key, '제목·내용·작성자로 검색')
       + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
       + (shown.length ? `<div class="card">${shown.map(p => `
@@ -2079,7 +2116,7 @@ function boardView(key){
               <h3>${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}${(p.atts||[]).length?' <span class="hint">📎'+p.atts.length+'</span>':''}</h3>
               <span class="hint">${fmtDay(p.at)}</span></div>
             <p class="excerpt">${highlight(excerpt(p.body,120),Q[key])}</p>
-            <div class="act-meta"><span class="act-chip" style="--tint:${aiTopic(p.topic).tint}">${esc(aiTopic(p.topic).short)}</span>
+            <div class="act-meta"><span class="act-chip" style="--tint:${aiTopic(p.topic).tint}">${esc(aiTopic(p.topic).chip)}</span>
               <span>${esc(p.author)}</span></div>
           </div>`).join('')}</div>`
         : `<div class="empty">${q ? '검색 결과가 없습니다.' : '아직 올라온 꿀팁이 없습니다.'}</div>`);
@@ -2160,9 +2197,12 @@ function bindBoard(key){
     ACT_TEAM = Number(el.dataset.actTeam) || 0;
     go('activity');
   }));
-  /* AI관 분야 탭 */
+  /* AI.zip 분야 탭 · 담당 업무 탭 — 큰 분야를 바꾸면 담당 업무는 '전체' 로 돌아갑니다 */
   $$('#main [data-ai-tab]').forEach(el => el.addEventListener('click', ()=>{
-    AI_TAB = el.dataset.aiTab || ''; go('ai');
+    AI_TAB = el.dataset.aiTab || ''; AI_SUB = ''; go('ai');
+  }));
+  $$('#main [data-ai-sub]').forEach(el => el.addEventListener('click', ()=>{
+    AI_SUB = el.dataset.aiSub || ''; go('ai');
   }));
 }
 Object.keys(BOARDS).forEach(key=>{
@@ -2189,7 +2229,8 @@ function openPostForm(key, edit){
   const defTeam = isAct ? (Number(e0?.teamNo) || ACT_TEAM) : 0;
   openModal(`${b.icon} ${b.label} · ${e0 ? '글 수정' : (isCollab ? '협업 제안하기' : '글쓰기')}`, `
     ${isAi ? `<label class="field">분야 <span class="req">*</span>
-      <select id="pfTopic">${AI_TOPICS.map(t => `<option value="${t.key}" ${(e0?.topic || AI_TAB) === t.key ? 'selected' : ''}>${esc(t.label)}</option>`).join('')}</select></label>` : ''}
+      <select id="pfTopic">${aiTopicOptions(e0?.topic || AI_SUB || '')}</select>
+      <span class="hint">어느 업무에 쓰는 꿀팁인지 골라 주세요. 목록에서 업무별로 모아 볼 수 있습니다.</span></label>` : ''}
     ${isAct ? `<label class="field">팀 게시판 <span class="req">*</span>
       <select id="pfActTeam"><option value="">어느 팀 게시판에 올릴지 고르세요</option>
         ${actTeams().map(t => `<option value="${t.no}" ${t.no===defTeam?'selected':''}>${t.no}팀 · ${esc(t.name)}</option>`).join('')}
@@ -2237,9 +2278,10 @@ function openPostForm(key, edit){
     const need = isCollab ? Number($('#pfNeed').value) : 0;
     const common = { title, body, authorTeam:$('#pfTeam').value, authorDept:$('#pfDept').value.trim(),
                      pinned: !!$('#pfPin')?.checked, ...(isAct ? { teamNo } : {}),
-                     ...(isAi ? { topic: $('#pfTopic').value } : {}),
+                     ...(isAi ? { topic: $('#pfTopic').value } : {}),  /* AI.zip 은 담당 업무를 함께 저장합니다 */
                      ...(isCollab ? { collabNeed: need > 0 ? Math.min(Math.round(need), 99) : null } : {}) };
     if(isAct) ACT_TEAM = teamNo;       // 올린 뒤에는 그 팀 게시판이 열리게
+    if(isAi) { AI_TAB = ''; AI_SUB = ''; } // 올린 글이 바로 보이게 '전체' 로 돌려 둡니다
     if(e0){
       const i = arr.findIndex(x=>x.id===e0.id);
       if(i<0){ toast('글을 찾을 수 없습니다'); return; }
@@ -2287,7 +2329,7 @@ function openPost(id){
 
   openModal(p.title, `
     <div class="hint" style="margin-bottom:14px">
-      ${who} · ${fmt(p.at)} · ${esc(BOARDS[p.board]?.label||'')}${at ? ` · ${at.no}팀 ${esc(at.name)}` : ''}
+      ${who} · ${fmt(p.at)} · ${esc(BOARDS[p.board]?.label||'')}${at ? ` · ${at.no}팀 ${esc(at.name)}` : ''}${p.board === 'ai' ? ` · ${esc(aiTopic(p.topic).chip)}` : ''}
     </div>
     ${imgs.length ? `<div class="big-imgs">${imgs.map(a=>`<img src="${a.data}" alt="${esc(a.name)}" data-zoom="${a.data}">`).join('')}</div>` : ''}
     <div style="white-space:pre-wrap;font-size:14.5px;margin-top:6px">${esc(p.body)}</div>
