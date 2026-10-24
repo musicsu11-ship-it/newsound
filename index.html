@@ -1653,7 +1653,7 @@ const BOARDS = {
   /* ── 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 (schema.sql 30절) ── */
   /* 'gallery' 는 사진이 있으면 크게 보여 주되 사진이 없어도 됩니다(zip·hwp 만 올려도 OK).
      anon:true 면 이름 없이 올립니다 — schema.sql 32절에서 서버도 이름을 지웁니다. */
-  mascot: { label:'고드래곤.새초롱이.zip', icon:'🐉', layout:'gallery', anon:true,
+  mascot: { label:'고드래곤&새초롱이', icon:'🐉', layout:'gallery', anon:true,
             desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다. 이름 없이 올라갑니다.', write:INNER },
   ai:     { label:'AI.zip', icon:'🤖', layout:'list',
             desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.', write:INNER },
@@ -1706,7 +1706,7 @@ const MENUS = [
   { id:'calendar', icon:'📅', label:'일정',     roles:ALL,   group:'일정' },
 
   /* 라운지 — 누구나 읽는 공간 세 곳. 상단 '라운지' 묶음 메뉴에 들어갑니다 */
-  { id:'mascot',   icon:'🐉', label:'고드래곤.새초롱이.zip', roles:ALL, group:'라운지' },
+  { id:'mascot',   icon:'🐉', label:'고드래곤&새초롱이', roles:ALL, group:'라운지' },
   { id:'ai',       icon:'🤖', label:'AI.zip',       roles:ALL,   group:'라운지' },
   { id:'relief',   icon:'💛', label:'멘탈관리.zip',  roles:ALL,   group:'라운지' },
   { id:'game',     icon:'🎮', label:'게임',         roles:ALL,   group:'일정' },
@@ -2663,7 +2663,7 @@ BIND['intro-edit'] = () => {
    게시판
    ============================================================================ */
 const CRUMB = { news:'소식', notice:'공지사항', free:'자유방', share:'새소리단 공간', activity:'활동', collab:'협업',
-                mascot:'라운지 · 고드래곤.새초롱이.zip', ai:'라운지 · AI.zip', relief:'라운지 · 멘탈관리.zip' };
+                mascot:'라운지 · 고드래곤&새초롱이', ai:'라운지 · AI.zip', relief:'라운지 · 멘탈관리.zip' };
 let AI_TAB = '';                   // AI.zip 에서 보고 있는 큰 분야 ('' = 전체)
 let AI_SUB = '';                   // 그 안에서 보고 있는 담당 업무 ('' = 분야 전체)
 
@@ -2818,7 +2818,7 @@ function boardView(key){
   }
 
   /* ── 협업: 제안 카드 + 참여자 ── */
-  /* ── 고드래곤.새초롱이.zip: 사진 격자 + 좋아요. 이름은 어디에도 나오지 않습니다.
+  /* ── 고드래곤&새초롱이: 사진 격자 + 좋아요. 이름은 어디에도 나오지 않습니다.
         사진이 없는 글(zip·hwp 만 올린 글)도 아이콘 칸으로 그대로 보입니다. ── */
   if(key === 'mascot'){
     return `<div class="crumb">홈 · ${esc(CRUMB[key])}</div>
@@ -3156,7 +3156,7 @@ const authorTeamOptions = (selected) => {
 function openPostForm(key, edit){
   const b = BOARDS[key];
   const photo = b.layout==='photo';   // 사진을 꼭 1장 넣어야 하는 게시판
-  const anon  = !!b.anon;             // 이름 없이 올리는 게시판(고드래곤.새초롱이.zip)
+  const anon  = !!b.anon;             // 이름 없이 올리는 게시판(고드래곤&새초롱이)
   const e0 = edit || null;
   /* 활동 게시판은 어느 팀 게시판에 올릴지 고릅니다.
      수정이면 원래 팀, 새 글이면 지금 보고 있는 팀 탭, 그것도 없으면 내 소속 팀을 미리 골라 둡니다. */
