@@ -1880,3 +1880,21 @@ drop trigger if exists posts_guard_collab on public.posts;
 create trigger posts_guard_collab
   before update on public.posts
   for each row execute function public.guard_collab_update();
+
+-- ============================================================================
+--  35. 활동 게시판을 단원 전용으로
+--
+--  활동 게시판을 '새소리단 단원 전용 공간' 메뉴 안으로 옮겼습니다.
+--  메뉴만 옮기면 주소를 아는 일반 직원은 그대로 볼 수 있으므로,
+--  데이터베이스 규칙도 같이 단원 이상으로 좁힙니다.
+--
+--  · 누구나 읽는 게시판 : 소식 + 라운지 셋(고드래곤&새초롱이 / AI.zip / 멘탈관리.zip)
+--  · 단원 이상만 읽는 게시판 : 활동 · 공지사항 · 자유방 · 새소리단 공간 · 협업
+--
+--  ※ 다시 누구나 볼 수 있게 되돌리려면 아래 목록에 'activity' 를 넣고 다시 실행하면 됩니다.
+--      using ( board in ('news','activity','mascot','ai','relief') or public.is_inner() );
+-- ============================================================================
+
+drop policy if exists posts_select on public.posts;
+create policy posts_select on public.posts for select
+  using ( board in ('news','mascot','ai','relief') or public.is_inner() );

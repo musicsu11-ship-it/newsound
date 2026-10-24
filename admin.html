@@ -856,8 +856,9 @@ VIEWS.intro = () => {
       <label class="field"><textarea id="iRoles" style="min-height:110px">${esc((it.roles||[]).join('\n'))}</textarea></label></div>
     <div class="card"><h2>연혁</h2><p class="sub">한 줄에 하나씩 · <code>연도 | 내용</code></p>
       <label class="field"><textarea id="iHistory" style="min-height:120px">${esc((it.history||[]).map(h=>`${h.year} | ${h.text}`).join('\n'))}</textarea></label></div>
-    <div class="card"><h2>팀 소개</h2><p class="sub">한 줄에 하나씩 · <code>팀이름 | 팀장 | 설명</code></p>
-      <label class="field"><textarea id="iTeams" style="min-height:150px">${esc((it.teams||[]).map(t=>`${t.name} | ${t.lead} | ${t.desc}`).join('\n'))}</textarea></label></div>
+    <div class="card"><h2>팀 소개</h2><p class="sub">한 줄에 하나씩 · <code>팀이름 | 팀장 | 설명 | 팀원(쉼표로 여러 명)</code></p>
+      <label class="field"><textarea id="iTeams" style="min-height:150px">${esc((it.teams||[]).map(t =>
+        [t.name, t.lead, t.desc].concat(t.members ? [t.members] : []).join(' | ')).join('\n'))}</textarea></label></div>
     <div class="card"><div class="row-actions"><button class="btn primary" id="iSave">저장</button></div></div>`;
 };
 BIND.intro = () => {
@@ -869,7 +870,9 @@ BIND.intro = () => {
       history:lines($('#iHistory').value).map(l=>{ const [y,...r]=l.split('|');
         return { year:(y||'').trim(), text:r.join('|').trim() }; }),
       teams:lines($('#iTeams').value).map(l=>{ const p=l.split('|');
-        return { name:(p[0]||'').trim(), lead:(p[1]||'').trim(), desc:(p.slice(2).join('|')||'').trim() }; })
+        /* 팀이름 | 팀장 | 설명 | 팀원(쉼표로 여러 명) */
+        return { name:(p[0]||'').trim(), lead:(p[1]||'').trim(), desc:(p[2]||'').trim(),
+                 members:(p.slice(3).join(',')||'').trim() }; })
     };
     busy(true);
     const { error } = await sb.from('site').update({ intro:obj, updated_at:nowISO() }).eq('id',1);

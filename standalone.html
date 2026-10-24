@@ -300,6 +300,21 @@
   .act-head .act-no{display:inline-block;font-size:13px;font-weight:900;background:#fff;color:var(--text);border-radius:999px;padding:4px 11px;margin-bottom:7px}
   .act-head h2{margin:0 0 4px;font-size:21px;font-weight:900;letter-spacing:-.02em;color:#16225c}
   .act-head p{margin:0;color:#3a4478;font-size:14.5px;line-height:1.6;word-break:keep-all}
+  /* ── 팀원 명단 — 어느 팀에 누가 있는지 보여 줍니다 ── */
+  .tm-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .tm{font-size:12.5px;font-weight:800;background:#fff;color:#16225c;border-radius:999px;
+    padding:4px 11px;white-space:nowrap}
+  .tm.lead{background:var(--brand);color:#fff}
+  .tm-n{font-size:12px;font-weight:800;color:var(--muted);margin-left:2px}
+  .tm-card{margin-bottom:18px}
+  .tm-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:12px}
+  .tm-team{background:var(--tint);border-radius:16px;padding:13px 15px 15px;min-width:0}
+  .tm-head{display:flex;align-items:center;gap:8px}
+  .tm-head .no{font-size:12px;font-weight:900;background:#fff;color:var(--text);
+    border-radius:999px;padding:3px 10px}
+  .tm-head b{font-size:15px;font-weight:900;color:#16225c;word-break:keep-all}
+  .tm-team .tm-row{margin-top:9px}
+  .tm-team .hint{display:block;margin-top:9px;color:#3a4478}
   .act-list .post-row{padding:18px 8px}
   .act-list .post-row h3{font-size:17px;font-weight:800;line-height:1.45;word-break:keep-all}
   .act-list .post-row .excerpt{font-size:14.5px;line-height:1.65;-webkit-line-clamp:2;margin-top:6px;word-break:keep-all}
@@ -1572,10 +1587,10 @@ const BOARDS = {
   share:  { label:'새소리단 공간', icon:'📸', layout:'photo',
             desc:'활동 사진과 현장 기록을 공유하는 공간입니다.',
             read:INNER, write:INNER },
-  /* 활동 — 일반 직원(방문자)도 읽을 수 있는 게시판. 글은 단원 이상이 씁니다. */
+  /* 활동 — 팀별 활동 기록. 2026-10-24 부터 단원 전용 공간으로 옮겼습니다 */
   activity: { label:'활동', icon:'📋', layout:'list',
-            desc:'새소리단의 활동을 기록하는 게시판입니다. 누구나 볼 수 있습니다.',
-            read:ALL,   write:INNER },
+            desc:'팀별 활동을 기록하는 공간입니다. 단원끼리만 보입니다.',
+            read:INNER, write:INNER },
   /* 협업 — 단원 전용. 글 하나가 '협업 제안' 이고 다른 단원이 '참여하기' 를 누릅니다 */
   collab: { label:'협업', icon:'🤝', layout:'collab',
             desc:'팀을 넘어 함께할 일을 제안하고 같이 할 사람을 모으는 공간입니다.',
@@ -1632,7 +1647,7 @@ const MENUS = [
   { id:'home',     icon:'🏠', label:'홈',            roles:ALL,   group:'홈' },
   { id:'intro',    icon:'🐦', label:'소개',           roles:ALL,   group:'소개' },
   { id:'news',     icon:'📰', label:'소식',           roles:ALL,   group:'소식' },
-  { id:'activity', icon:'📋', label:'활동',           roles:ALL,   group:'활동' },
+
   { id:'opinion',  icon:'💬', label:'의견함',        roles:ALL,   group:'의견함' },
   { id:'vote',     icon:'🗳️', label:'투표',           roles:ALL,   group:'투표' },
   { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
@@ -1643,8 +1658,10 @@ const MENUS = [
   { id:'relief',   icon:'💛', label:'멘탈관리.zip',   roles:ALL,   group:'라운지' },
   { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
 
-  /* 공지사항을 이 묶음의 맨 위에 둡니다 — 단원이 가장 먼저 봐야 하는 곳입니다 */
+  /* 공지사항을 이 묶음의 맨 위에 둡니다 — 단원이 가장 먼저 봐야 하는 곳입니다.
+     활동은 2026-10-24 부터 단원 전용 공간으로 옮겼습니다(schema.sql 35절). */
   { id:'notice',   icon:'📢', label:'공지사항',        roles:INNER, group:'새소리단 공간' },
+  { id:'activity', icon:'📋', label:'활동',           roles:INNER, group:'새소리단 공간' },
   { id:'collab',   icon:'🤝', label:'협업',          roles:INNER, group:'새소리단 공간' },
   { id:'free',     icon:'💭', label:'자유방',        roles:INNER, group:'새소리단 공간' },
   { id:'share',    icon:'📸', label:'새소리단 공간',  roles:INNER, group:'새소리단 공간' },
@@ -1734,7 +1751,7 @@ function openLogin(){
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
 /* 공지사항은 단원 전용 묶음 메뉴 안에서 맨 위에 둡니다(DROP_FIRST) */
 const DROP_FIRST = ['notice'];
-const PUBLIC_NAV = ['intro','news','activity','opinion','vote','calendar'];
+const PUBLIC_NAV = ['intro','news','opinion','vote','calendar'];
 /* 누구나 볼 수 있는 '라운지' 세 곳 — 상단에 따로 묶음 메뉴로 */
 const LOUNGE_NAV = ['mascot','ai','relief'];
 
@@ -2161,8 +2178,9 @@ VIEWS['intro-edit'] = () => {
     <div class="card"><h2>연혁</h2><p class="sub">한 줄에 하나씩 <code>연도 | 내용</code> 형식으로 입력하세요.</p>
       <label class="field"><textarea id="ieHistory" style="min-height:130px">${esc(it.history.map(h=>`${h.year} | ${h.text}`).join('\n'))}</textarea></label>
     </div>
-    <div class="card"><h2>팀 소개</h2><p class="sub">한 줄에 하나씩 <code>팀이름 | 팀장 | 설명</code> 형식으로 입력하세요.</p>
-      <label class="field"><textarea id="ieTeams" style="min-height:160px">${esc(it.teams.map(t=>`${t.name} | ${t.lead} | ${t.desc}`).join('\n'))}</textarea></label>
+    <div class="card"><h2>팀 소개</h2><p class="sub">한 줄에 하나씩 <code>팀이름 | 팀장 | 설명 | 팀원</code> 형식으로 입력하세요. 팀원은 쉼표로 나눠 적습니다.</p>
+      <label class="field"><textarea id="ieTeams" style="min-height:160px">${esc(it.teams.map(t =>
+        [t.name, t.lead, t.desc].concat(t.members ? [t.members] : []).join(' | ')).join('\n'))}</textarea></label>
     </div>
     <div class="card">
       <div class="row-actions">
@@ -2183,7 +2201,9 @@ BIND['intro-edit'] = () => {
       }),
       teams: lines($('#ieTeams').value).map(l=>{
         const p = l.split('|');
-        return { name:(p[0]||'').trim(), lead:(p[1]||'').trim(), desc:(p.slice(2).join('|')||'').trim() };
+        /* 팀이름 | 팀장 | 설명 | 팀원(쉼표로 여러 명) — 네 번째 칸은 없어도 됩니다 */
+        return { name:(p[0]||'').trim(), lead:(p[1]||'').trim(), desc:(p[2]||'').trim(),
+                 members:(p.slice(3).join(',')||'').trim() };
       })
     });
     toast('소개 내용을 저장했습니다'); go('intro');
@@ -2202,12 +2222,40 @@ BIND['intro-edit'] = () => {
    소개 페이지에 등록된 팀 순서가 곧 1팀·2팀… 입니다.
    글에는 팀 이름 대신 번호(teamNo)를 저장해 팀 이름을 고쳐도 글이 떨어져 나가지 않습니다.
    tint·img 는 소개 페이지 팀 띠와 같은 색·그림입니다. */
+/* 팀원 이름은 '홍길동, 김철수' 처럼 쉼표로 적어 둡니다(소개 편집의 네 번째 칸) */
+const teamMembers = (t) => String(t?.members || '')
+  .split(/[,·/\n]/).map(s => s.trim()).filter(Boolean);
 const actTeams = () => (DB.intro().teams || []).map((t, i) => {
   const band = TEAM_BANDS[i % TEAM_BANDS.length] || {};
   return { no: i + 1, name: t.name || `${i+1}팀`, desc: t.desc || '',
+           lead: t.lead || '', members: teamMembers(t),
            tint: band.bg || '#f3f2fd', img: band.img || '' };
 });
 const actTeam = (no) => actTeams().find(t => t.no === Number(no)) || null;
+
+/* 팀원 이름표 한 줄 — 팀장은 왕관을 달아 앞에 둡니다 */
+const memberRow = (t) => {
+  const lead = (t.lead || '').trim();
+  const rest = t.members.filter(n => n !== lead);
+  if(!lead && !rest.length) return '';
+  return `<div class="tm-row">
+    ${lead ? `<span class="tm lead">👑 ${esc(lead)}</span>` : ''}
+    ${rest.map(n => `<span class="tm">${esc(n)}</span>`).join('')}
+    <span class="tm-n">${rest.length + (lead ? 1 : 0)}명</span>
+  </div>`;
+};
+/* '전체 보기' 일 때 — 어느 팀에 누가 있는지 한눈에 모아 봅니다 */
+const rosterBlock = (teams) => {
+  if(!teams.some(t => t.lead || t.members.length)) return '';
+  return `<div class="card tm-card">
+    <h2>팀원 명단</h2>
+    <p class="sub">어느 팀에 누가 있는지 한눈에 볼 수 있습니다. 👑 는 팀장입니다.</p>
+    <div class="tm-list">${teams.map(t => `<div class="tm-team" style="--tint:${t.tint}">
+      <div class="tm-head"><span class="no">${t.no}팀</span><b>${esc(t.name)}</b></div>
+      ${memberRow(t) || '<span class="hint">아직 적어 둔 팀원이 없습니다.</span>'}
+    </div>`).join('')}</div>
+  </div>`;
+};
 let ACT_TEAM = 0;                  // 활동 게시판에서 보고 있는 팀 (0 = 전체)
 
 /* ── 협업 게시판 도우미 (index.html 과 같은 규칙) ─────────────────────────
@@ -2246,7 +2294,7 @@ function boardView(key){
     const chip  = (p) => { const t = actTeam(p.teamNo);
       return t ? `<span class="act-chip" style="--tint:${t.tint}">${t.no}팀 ${esc(t.name)}</span>` : ''; };
 
-    return pageHead('활동', `새소리단 ${teams.length}개 팀의 활동 기록입니다. 누구나 볼 수 있습니다.`,
+    return pageHead('활동', `새소리단 ${teams.length}개 팀의 활동 기록입니다. 단원끼리만 보입니다.`,
         canWrite(key) ? `<button class="btn primary" id="bdWrite">${cur ? `${cur.no}팀에 글쓰기` : '✏️ 글쓰기'}</button>` : '')
       + `<div class="act-bar">
           <b>팀 게시판</b>
@@ -2257,12 +2305,13 @@ function boardView(key){
               ${t.img ? `<span class="art"><img src="${t.img}" alt="" loading="lazy" decoding="async"></span>` : ''}
               <span class="no">${t.no}팀</span>
               <span class="nm">${esc(t.name)}</span>
-              <span class="ct">글 ${cnt(t.no)}개</span></button>`).join('')}
+              <span class="ct">글 ${cnt(t.no)}개${t.members.length ? ` · 팀원 ${t.members.length}명` : ''}</span></button>`).join('')}
         </div>
         ${cur ? `<div class="act-head" style="--tint:${cur.tint}">
             ${cur.img ? `<span class="act-art"><img src="${cur.img}" alt="${esc(cur.name)} 팀 일러스트"></span>` : ''}
-            <div><span class="act-no">${cur.no}팀</span><h2>${esc(cur.name)} 게시판</h2>${cur.desc ? `<p>${esc(cur.desc)}</p>` : ''}</div>
-          </div>` : ''}`
+            <div><span class="act-no">${cur.no}팀</span><h2>${esc(cur.name)} 게시판</h2>${cur.desc ? `<p>${esc(cur.desc)}</p>` : ''}
+              ${memberRow(cur)}</div>
+          </div>` : rosterBlock(teams)}`
       + searchBar(key, cur ? `${cur.no}팀 글에서 제목·내용·작성자 검색` : '제목·내용·작성자로 검색')
       + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
       + (shown.length ? `<div class="card act-list">${shown.map(p => `
