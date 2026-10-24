@@ -48,9 +48,9 @@
     color:#3a4478;padding:8px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
   .nav-btn:hover{color:var(--accent);background:var(--brand-weak)}
   .nav-btn.active{color:var(--brand);background:var(--brand-weak);font-weight:900}
-  /* 공지사항 — 메뉴 맨 앞에서 한눈에 띄게 */
-  .nav-btn.first{font-weight:900;color:var(--brand);background:var(--brand-weak)}
-  .nav-btn.first:hover{background:#ffd2e0}
+  /* 공지사항 — 단원 전용 묶음 메뉴 맨 위에서 한눈에 띄게 */
+  .navdrop-panel .nav-btn.first{font-weight:900;color:var(--brand);background:var(--brand-weak)}
+  .navdrop-panel .nav-btn.first:hover{background:#ffd2e0}
   .nav-right{display:flex;align-items:center;gap:10px;flex:none}
   .whoami{font-size:13px;font-weight:800;color:var(--brand);white-space:nowrap}
   .whoami em{font-style:normal;color:var(--muted);font-weight:600;margin-left:5px}
@@ -1572,8 +1572,9 @@ const MENUS = [
   { id:'relief',   icon:'💛', label:'멘탈관리.zip',   roles:ALL,   group:'라운지' },
   { id:'game',     icon:'🎮', label:'게임',          roles:ALL,   group:'일정' },
 
-  { id:'collab',   icon:'🤝', label:'협업',          roles:INNER, group:'새소리단 공간' },
+  /* 공지사항을 이 묶음의 맨 위에 둡니다 — 단원이 가장 먼저 봐야 하는 곳입니다 */
   { id:'notice',   icon:'📢', label:'공지사항',        roles:INNER, group:'새소리단 공간' },
+  { id:'collab',   icon:'🤝', label:'협업',          roles:INNER, group:'새소리단 공간' },
   { id:'free',     icon:'💭', label:'자유방',        roles:INNER, group:'새소리단 공간' },
   { id:'share',    icon:'📸', label:'새소리단 공간',  roles:INNER, group:'새소리단 공간' },
   { id:'report',   icon:'📄', label:'결과보고서 제출', roles:INNER, group:'새소리단 공간' },
@@ -1660,23 +1661,23 @@ function openLogin(){
    NAV
    ============================================================ */
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
-/* 공지사항은 단원에게 가장 먼저 보여야 해서 메뉴 맨 앞에 따로 둡니다 */
-const FIRST_NAV  = ['notice'];
+/* 공지사항은 단원 전용 묶음 메뉴 안에서 맨 위에 둡니다(DROP_FIRST) */
+const DROP_FIRST = ['notice'];
 const PUBLIC_NAV = ['intro','news','activity','opinion','vote','calendar'];
 /* 누구나 볼 수 있는 '라운지' 세 곳 — 상단에 따로 묶음 메뉴로 */
 const LOUNGE_NAV = ['mascot','ai','relief'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
-  const top  = [...FIRST_NAV, ...PUBLIC_NAV].map(id => mine.find(m => m.id===id)).filter(Boolean);
+  const top  = PUBLIC_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
   /* game: 첫 화면 배너를 눌러서만 들어갈 수 있게 어느 메뉴에도 넣지 않습니다.
      share: 드롭다운 이름과 겹쳐 헷갈려서 메뉴에서 뺐습니다(화면 자체는 남아있음). */
-  const rest = mine.filter(m => !FIRST_NAV.includes(m.id) && !PUBLIC_NAV.includes(m.id) && !LOUNGE_NAV.includes(m.id)
+  const rest = mine.filter(m => !PUBLIC_NAV.includes(m.id) && !LOUNGE_NAV.includes(m.id)
     && m.id!=='home' && m.id!=='game' && m.id!=='share');
   const lounge = LOUNGE_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
 
-  let html = top.map(m => `<button class="nav-btn${FIRST_NAV.includes(m.id) ? ' first' : ''}" data-go="${m.id}">${
-    FIRST_NAV.includes(m.id) ? `${m.icon} ` : ''}${esc(m.label)}</button>`).join('');
+  let html = top.map(m => `<button class="nav-btn" data-go="${m.id}">${
+    esc(m.label)}</button>`).join('');
 
   if(lounge.length){
     html += `<div class="navdrop" id="loungeDrop">
@@ -1695,7 +1696,7 @@ function renderNav(){
       <div class="navdrop-panel">
         ${Object.entries(groups).map(([g,items]) =>
           `<div class="grp">${esc(g)}</div>` +
-          items.map(m=>`<button class="nav-btn" data-go="${m.id}">${m.icon} ${esc(m.label)}</button>`).join('')
+          items.map(m=>`<button class="nav-btn${DROP_FIRST.includes(m.id) ? ' first' : ''}" data-go="${m.id}">${m.icon} ${esc(m.label)}</button>`).join('')
         ).join('')}
       </div></div>`;
   }
