@@ -202,6 +202,14 @@
   .photo-card:hover{border-color:var(--brand)}
   .photo-card .hero{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--surface-2)}
   .photo-card .hero.none{display:grid;place-items:center;color:var(--muted);font-size:34px}
+  /* 영상은 첫 장면을 그대로. 누르는 건 카드 전체가 받게 손가락을 막아 둡니다 */
+  .photo-card .hero.doc{border:0;pointer-events:none;background:#111}
+  /* pdf — 첫 장을 그려 넣습니다. 다 그려질 때까지는 📕 아이콘이 보입니다 */
+  .photo-card .hero.pdf{position:relative;display:grid;place-items:center;overflow:hidden;
+    background:var(--surface-2);color:var(--muted);font-size:34px}
+  .photo-card .hero.pdf canvas{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;object-position:top center;background:#fff;opacity:0;transition:opacity .2s}
+  .photo-card .hero.pdf canvas.on{opacity:1}
   .photo-card .pc-body{padding:14px 16px 16px}
   .photo-card h3{margin:0 0 6px;font-size:15.5px;line-height:1.35}
   .photo-card .excerpt{color:var(--muted);font-size:13px;margin:0 0 10px;
@@ -1409,6 +1417,69 @@ const previewAll = (files) => {
   return html ? `<div class="pv-wrap">${html}</div>` : '';
 };
 
+/* ── pdf 첫 장을 그림으로 그리기 (index.html 과 같은 방식) ────────────────
+   pdf 를 <iframe> 으로 띄우면 브라우저 pdf 뷰어 테두리가 같이 나와 보기 나쁩니다.
+   pdf.js 는 pdf 가 있는 화면에서 한 번만 내려받습니다.
+   ※ 연습용 파일을 인터넷 없이 여시면 pdf.js 를 못 받아 📕 아이콘만 보입니다. */
+const PDFJS_VER = '3.11.174';
+let PDFJS_P = null;
+function loadPdfJs(){
+  if(PDFJS_P) return PDFJS_P;
+  PDFJS_P = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER}/pdf.min.js`;
+    s.onload = () => {
+      const lib = window.pdfjsLib;
+      if(!lib) return rej(new Error('pdfjs'));
+      lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER}/pdf.worker.min.js`;
+      res(lib);
+    };
+    s.onerror = () => rej(new Error('pdfjs load'));
+    document.head.appendChild(s);
+  });
+  return PDFJS_P;
+}
+const pdfSrc = (u) => u.startsWith('data:')
+  ? { data: Uint8Array.from(atob(u.split(',')[1]), c => c.charCodeAt(0)) }
+  : { url: u };
+async function paintPdfThumbs(root){
+  const els = $$(`${root} canvas[data-pdf]`);
+  if(!els.length) return;
+  let lib;
+  try{ lib = await loadPdfJs(); }catch(e){ return; }
+  for(const cv of els){
+    /* 'busy' = 그리는 중, 'done' = 다 그림. 실패하면 표시를 지워 다음에 다시 그립니다 */
+    if(cv.dataset.state) continue;
+    cv.dataset.state = 'busy';
+    try{
+      const doc  = await lib.getDocument(pdfSrc(cv.dataset.pdf)).promise;
+      const page = await doc.getPage(1);
+      const w    = Math.max(cv.clientWidth || 0, 300) * (window.devicePixelRatio || 1);
+      const base = page.getViewport({ scale: 1 });
+      const vp   = page.getViewport({ scale: w / base.width });
+      cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+      await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+      cv.classList.add('on');
+      cv.dataset.state = 'done';
+    }catch(e){ delete cv.dataset.state; }   /* 한 장 못 그려도 나머지는 계속합니다 */
+  }
+}
+
+/* 목록 카드의 큰 그림 — 사진이 없어도 파일 속 내용을 보여 줍니다
+     · pdf → 첫 장,  영상 → 첫 장면.  못 여는 파일만 종류 아이콘으로 남습니다. */
+function heroOf(p, fallbackIcon){
+  const all = p.atts || [];
+  const img = firstImg(all);
+  if(img) return `<img class="hero" src="${img.data}" alt="">`;
+  const f = all.find(canPreview);
+  if(f && PREV_PDF_RE.test(f.name || ''))
+    return `<div class="hero pdf">📕<canvas data-pdf="${esc(f.data)}" aria-hidden="true"></canvas></div>`;
+  if(f && PREV_VID_RE.test(f.name || ''))
+    return `<video class="hero doc" src="${f.data}#t=0.1" preload="metadata" muted playsinline tabindex="-1"></video>`;
+  return `<div class="hero none">${fallbackIcon}</div>`;
+}
+const heroShown = (p) => (firstImg(p.atts) || (p.atts||[]).some(canPreview)) ? 1 : 0;
+
 /* ---------- data ---------- */
 const DEFAULT_INTRO = {
   mission:'새소리단은 새내기의 시선으로 직원들의 다양한 목소리를 모아, 더 나은 고용노동부를 만들어갑니다.\n사소한 생각, 아이디어도 변화의 시작이 될 수 있습니다.\n여러분의 생각과 이야기를 들려주세요!',
@@ -1512,7 +1583,7 @@ const BOARDS = {
   /* ── 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 ── */
   /* gallery = 사진이 있으면 크게, 없어도 OK. anon = 이름 없이 올립니다 */
   mascot: { label:'고드래곤&새초롱이', icon:'🐉', layout:'gallery', anon:true,
-            desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다. 이름 없이 올라갑니다.',
+            desc:'고용노동부 마스코트 고드래곤과 새소리단 마스코트 새초롱이의 각종 자료를 공유하는 공간입니다.',
             read:ALL,   write:INNER },
   ai:     { label:'AI.zip', icon:'🤖', layout:'list',
             desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.',
@@ -1985,6 +2056,7 @@ BIND.home = () => {
 
   $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
   bindPostLikes('#main');
+  paintPdfThumbs('#main');     // pdf 첫 장 그리기(있을 때만 pdf.js 를 내려받습니다)
   $$('#main [data-go-to]').forEach(el => el.addEventListener('click', ()=> go(el.dataset.goTo)));
 };
 
@@ -2292,13 +2364,11 @@ function boardView(key){
   } else if(b.layout==='photo' || b.layout==='gallery'){
     /* gallery 는 사진이 없어도 되는 사진방입니다(zip·hwp 만 올려도 그대로 보입니다) */
     body = `<div class="photo-grid">${list.map(p=>{
-      const img = firstImg(p.atts);
       return `<article class="photo-card">
         <div class="hero-wrap" data-open-post="${p.id}">
-          ${img ? `<img class="hero" src="${img.data}" alt="">`
-                : `<div class="hero none">${b.layout==='gallery' ? fileIcon((p.atts||[])[0]?.name||'') : b.icon}</div>`}
-          ${(p.atts||[]).filter(canPreview).length > 1 ? `<span class="hero-more">+${(p.atts||[]).filter(canPreview).length - 1}</span>` : ''}
-          ${!img && (p.atts||[]).some(canPreview) ? '<span class="hero-more">미리보기 있음</span>' : ''}
+          ${heroOf(p, b.layout==='gallery' ? fileIcon((p.atts||[])[0]?.name||'') : b.icon)}
+          ${(p.atts||[]).filter(canPreview).length > heroShown(p)
+            ? `<span class="hero-more">+${(p.atts||[]).filter(canPreview).length - heroShown(p)}</span>` : ''}
         </div>
         <div class="pc-body">
           <h3 data-open-post="${p.id}">${p.pinned?'<span class="tag brand">공지</span> ':''}${highlight(p.title,Q[key])}</h3>
@@ -2334,6 +2404,7 @@ function bindBoard(key){
   bindSearch(key);
   $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
   bindPostLikes('#main');
+  paintPdfThumbs('#main');     // pdf 첫 장 그리기(있을 때만 pdf.js 를 내려받습니다)
   /* 칸반 — 카드 아래 ← → 로 바로 옮깁니다 */
   $$('#main [data-cbmove]').forEach(el => el.addEventListener('click', ev => {
     ev.stopPropagation();

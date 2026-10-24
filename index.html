@@ -221,6 +221,14 @@
   .photo-card:hover{border-color:var(--brand)}
   .photo-card .hero{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--surface-2)}
   .photo-card .hero.none{display:grid;place-items:center;color:var(--muted);font-size:34px}
+  /* 영상은 첫 장면을 그대로. 누르는 건 카드 전체가 받게 손가락을 막아 둡니다 */
+  .photo-card .hero.doc{border:0;pointer-events:none;background:#111}
+  /* pdf — 첫 장을 그려 넣습니다. 다 그려질 때까지는 📕 아이콘이 보입니다 */
+  .photo-card .hero.pdf{position:relative;display:grid;place-items:center;overflow:hidden;
+    background:var(--surface-2);color:var(--muted);font-size:34px}
+  .photo-card .hero.pdf canvas{position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;object-position:top center;background:#fff;opacity:0;transition:opacity .2s}
+  .photo-card .hero.pdf canvas.on{opacity:1}
   .photo-card .pc-body{padding:14px 16px 16px}
   .photo-card h3{margin:0 0 6px;font-size:16.5px;line-height:1.32;font-weight:900}
   .photo-card .excerpt{color:var(--muted);font-size:13px;margin:0 0 10px;
@@ -1654,7 +1662,7 @@ const BOARDS = {
   /* 'gallery' 는 사진이 있으면 크게 보여 주되 사진이 없어도 됩니다(zip·hwp 만 올려도 OK).
      anon:true 면 이름 없이 올립니다 — schema.sql 32절에서 서버도 이름을 지웁니다. */
   mascot: { label:'고드래곤&새초롱이', icon:'🐉', layout:'gallery', anon:true,
-            desc:'고드래곤과 새초롱이를 담은 자체 제작 이미지와 자료를 나누는 공간입니다. 이름 없이 올라갑니다.', write:INNER },
+            desc:'고용노동부 마스코트 고드래곤과 새소리단 마스코트 새초롱이의 각종 자료를 공유하는 공간입니다.', write:INNER },
   ai:     { label:'AI.zip', icon:'🤖', layout:'list',
             desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.', write:INNER },
   relief: { label:'멘탈관리.zip', icon:'💛', layout:'list',
@@ -2832,14 +2840,12 @@ function boardView(key){
     ${searchBar(key, '제목·내용으로 검색')}
     ${q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>` : ''}
     ${list.length ? `<div class="photo-grid">${list.map(p => {
-      const ph = photoOf(p), all = p.images || [], n = all.length;
+      const all = p.images || [], n = all.length;
       const prev = all.filter(canPreview).length;      // 글을 열면 바로 보이는 첨부 수
       return `<article class="photo-card">
         <div class="hero-wrap" data-open-post="${p.id}">
-          ${ph ? `<img class="hero" src="${esc(ph)}" alt="" loading="lazy" decoding="async">`
-               : `<div class="hero none">${fileIcon(all[0]?.name || '')}</div>`}
-          ${prev > 1 ? `<span class="hero-more">+${prev - 1}</span>` : ''}
-          ${!ph && prev ? '<span class="hero-more">미리보기 있음</span>' : ''}
+          ${heroOf(p, a => mediaUrl(a.path))}
+          ${prev > heroShown(p) ? `<span class="hero-more">+${prev - heroShown(p)}</span>` : ''}
         </div>
         <div class="pc-body">
           <h3 data-open-post="${p.id}">${p.pinned ? '<span class="tag brand">공지</span> ' : ''}${highlight(p.title, Q[key])}</h3>
@@ -3120,6 +3126,7 @@ Object.keys(BOARDS).forEach(key=>{
     bindSearch(key);
     $$('#main [data-open-post]').forEach(el => el.addEventListener('click', ()=> openPost(el.dataset.openPost)));
     bindPostLikes('#main');
+    paintPdfThumbs('#main');     // pdf 첫 장 그리기(있을 때만 pdf.js 를 내려받습니다)
     /* 칸반 — 카드 아래 ← → 로 바로 옮깁니다 */
     $$('#main [data-cbmove]').forEach(el => el.addEventListener('click', async ev => {
       ev.stopPropagation();
@@ -5186,6 +5193,78 @@ function previewOne(a, url){
 const previewAll = (files, urlOf) => {
   const html = files.filter(canPreview).map(a => previewOne(a, urlOf(a))).filter(Boolean).join('');
   return html ? `<div class="pv-wrap">${html}</div>` : '';
+};
+
+/* ── pdf 첫 장을 그림으로 그리기 ───────────────────────────────────────────
+   pdf 를 그냥 <iframe> 으로 띄우면 브라우저 pdf 뷰어 테두리(회색 바탕·스크롤바)가
+   같이 나와서 썸네일로는 보기 나쁩니다. 첫 장만 그림으로 그려 넣습니다.
+   그림을 그리는 pdf.js 는 pdf 가 실제로 있는 화면에서 한 번만 내려받습니다
+   (첫 화면 속도에 영향이 없게). 못 내려받으면 종류 아이콘이 그대로 남습니다. */
+const PDFJS_VER = '3.11.174';
+let PDFJS_P = null;
+function loadPdfJs(){
+  if(PDFJS_P) return PDFJS_P;
+  PDFJS_P = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER}/pdf.min.js`;
+    s.onload = () => {
+      const lib = window.pdfjsLib;
+      if(!lib) return rej(new Error('pdfjs'));
+      lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VER}/pdf.worker.min.js`;
+      res(lib);
+    };
+    s.onerror = () => rej(new Error('pdfjs load'));
+    document.head.appendChild(s);
+  });
+  return PDFJS_P;
+}
+/* data: 주소(연습용)와 https 주소(본 사이트) 둘 다 받습니다 */
+const pdfSrc = (u) => u.startsWith('data:')
+  ? { data: Uint8Array.from(atob(u.split(',')[1]), c => c.charCodeAt(0)) }
+  : { url: u };
+
+async function paintPdfThumbs(root){
+  const els = $$(`${root} canvas[data-pdf]`);
+  if(!els.length) return;
+  let lib;
+  try{ lib = await loadPdfJs(); }catch(e){ return; }   // 못 내려받으면 아이콘 그대로
+  for(const cv of els){
+    /* 'busy' = 그리는 중, 'done' = 다 그림. 실패하면 표시를 지워 다음에 다시 그립니다 */
+    if(cv.dataset.state) continue;
+    cv.dataset.state = 'busy';
+    try{
+      const doc  = await lib.getDocument(pdfSrc(cv.dataset.pdf)).promise;
+      const page = await doc.getPage(1);
+      const w    = Math.max(cv.clientWidth || 0, 300) * (window.devicePixelRatio || 1);
+      const base = page.getViewport({ scale: 1 });
+      const vp   = page.getViewport({ scale: w / base.width });
+      cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
+      await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+      cv.classList.add('on');
+      cv.dataset.state = 'done';
+    }catch(e){ delete cv.dataset.state; }   /* 한 장 못 그려도 나머지는 계속합니다 */
+  }
+}
+
+/* 목록 카드의 큰 그림 — 사진이 없어도 파일 속 내용을 보여 줍니다.
+     · pdf  → 첫 장을 그려서,  영상 → 첫 장면을
+   브라우저가 못 여는 한글·압축파일만 종류 아이콘으로 남습니다. */
+function heroOf(p, urlOf){
+  const all = p.images || p.atts || [];
+  const img = photoOf(p);
+  if(img) return `<img class="hero" src="${esc(img)}" alt="" loading="lazy" decoding="async">`;
+  const f = all.find(canPreview);
+  const u = f ? urlOf(f) : '';
+  if(f && u && PREV_PDF_RE.test(f.name || ''))
+    return `<div class="hero pdf">📕<canvas data-pdf="${esc(u)}" aria-hidden="true"></canvas></div>`;
+  if(f && u && PREV_VID_RE.test(f.name || ''))
+    return `<video class="hero doc" src="${esc(u)}#t=0.1" preload="metadata" muted playsinline tabindex="-1"></video>`;
+  return `<div class="hero none">${fileIcon(all[0]?.name || '')}</div>`;
+}
+/* 카드에서 큰 그림으로 이미 보여 준 첨부는 '+N' 에서 빼고 셉니다 */
+const heroShown = (p) => {
+  const all = p.images || p.atts || [];
+  return photoOf(p) || all.some(canPreview) ? 1 : 0;
 };
 function previewDocsLocal(sel, picked){
   const el = $(sel); if(!el) return;
