@@ -1,5 +1,5 @@
 -- ============================================================================
---  새소리단 — 지금 실행해야 하는 SQL  (2026-10-24)
+--  새소리단 — 지금 실행해야 하는 SQL  (2026-11-03)
 --
 --  ▷ 하는 법
 --     1. 이 파일 안을 아무 데나 클릭
@@ -9,15 +9,13 @@
 --     5. 'Success' 라고 나오면 끝입니다.
 --
 --  ▷ 이번에 새로 들어간 것
---     35절 — 활동 게시판을 단원 전용으로
---        · 활동 게시판을 '새소리단 단원 전용 공간' 메뉴 안으로 옮겼습니다.
---        · ★ 이제 일반 직원은 활동 게시판을 볼 수 없습니다.
---             메뉴만 옮기면 주소를 아는 사람은 그대로 보이기 때문에
---             데이터베이스 규칙도 같이 좁혔습니다.
---        · 그대로 공개로 두고 싶으시면 35절만 빼고 실행하시거나,
---          35절 안에 적어 둔 '되돌리는 방법' 한 줄을 쓰시면 됩니다.
+--     36절 — 활동비 정산을 신청한 사람이 고치고 내릴 수 있게
+--        · '접수완료 · 확인 중' 일 때만 됩니다. 담당관이 처리한 뒤에는 잠깁니다.
+--        · 금액·항목·계좌를 고치거나 영수증을 다시 올릴 수 있습니다.
+--        · 신청자가 처리 상태나 담당관 코멘트를 바꾸는 것은 서버가 막습니다.
+--        · 영수증 파일 권한은 그대로입니다 — 올린 본인과 담당관만. ★그대로 보호
 --
---  ▷ 아직 안 하셨다면 29~34절도 함께 들어 있습니다.
+--  ▷ 아직 안 하셨다면 29~35절도 함께 들어 있습니다.
 --     이미 실행하셨다면 그냥 다시 지나갑니다(여러 번 해도 안전합니다).
 --        29절 — 투표를 올린 뒤에도 고칠 수 있게(실명 → 무기명)
 --        30절 — 라운지 게시판 셋
@@ -26,12 +24,14 @@
 --                ★ 그 게시판 글의 '작성자 이름' 을 지웁니다(되돌릴 수 없음)
 --        33절 — 글에 댓글 + 공지사항 '제출기한'
 --        34절 — 협업 게시판을 칸반 보드로
+--        35절 — 활동 게시판을 단원 전용으로
+--                ★ 일반 직원은 활동 게시판을 볼 수 없게 됩니다
 --
 --  ▷ 안전한가요?
---     네. 글·사진·의견·투표·보고서·가입한 회원은 지우지 않습니다.
---     활동비 정산 영수증과 공지사항 제출 파일도 그대로 본인과 담당관만 봅니다. ★보호
+--     네. 글·사진·의견·투표·보고서·정산·가입한 회원은 지우지 않습니다.
+--     영수증과 공지사항 제출 파일은 그대로 본인과 담당관만 봅니다. ★보호
 --
---  ▷ 이 내용은 supabase/schema.sql 29~35절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 29~36절과 같습니다.
 -- ============================================================================
 
 --  29. 투표 수정 — 실명 투표를 무기명(익명)으로 바꿀 수 있게
@@ -383,3 +383,51 @@ create trigger posts_guard_collab
 drop policy if exists posts_select on public.posts;
 create policy posts_select on public.posts for select
   using ( board in ('news','mascot','ai','relief') or public.is_inner() );
+
+-- ============================================================================
+--  36. 활동비 정산 — 신청한 사람이 고치고 내릴 수 있게
+--
+--  지금까지는 담당관만 정산 내용을 고칠 수 있었습니다. 금액을 잘못 적거나
+--  영수증을 다시 찍어 올리려면 담당관에게 부탁해야 했습니다. 다음처럼 엽니다.
+--
+--    · 신청한 사람 : '접수완료' 또는 '확인 중' 일 때만 고치고 내릴 수 있습니다.
+--                    담당관이 처리완료·반려한 뒤에는 손댈 수 없습니다(처리 결과 보존).
+--    · 담당관      : 지금처럼 상태·코멘트를 바꿉니다.
+--    · 관리자      : 어떤 정산이든 지울 수 있습니다.
+--
+--  신청한 사람이 상태나 담당관 코멘트를 몰래 바꾸지 못하도록, 담당관이 아니면
+--  그 칸들은 예전 값 그대로 두도록 서버에서 되돌립니다(28절 보고서와 같은 방식).
+--
+--  영수증 파일 권한은 그대로입니다 — 올린 본인과 담당관만 봅니다. ★그대로 보호
+-- ============================================================================
+
+drop policy if exists expenses_update on public.expenses;
+create policy expenses_update on public.expenses for update
+  using (
+    public.is_officer()
+    or (author_id = auth.uid() and coalesce(status, '접수') in ('접수','검토중'))
+  )
+  with check ( public.is_officer() or author_id = auth.uid() );
+
+drop policy if exists expenses_delete on public.expenses;
+create policy expenses_delete on public.expenses for delete
+  using (
+    public.is_admin()
+    or (author_id = auth.uid() and coalesce(status, '접수') in ('접수','검토중'))
+  );
+
+-- 담당관이 아니면 상태·코멘트·신청자는 바꿀 수 없습니다
+create or replace function public.guard_expense_update()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if public.is_officer() then return new; end if;
+  new.status          := old.status;
+  new.officer_comment := old.officer_comment;
+  new.author_id       := old.author_id;
+  return new;
+end $$;
+
+drop trigger if exists expenses_guard on public.expenses;
+create trigger expenses_guard
+  before update on public.expenses
+  for each row execute function public.guard_expense_update();

@@ -4786,9 +4786,14 @@ VIEWS.mine = () => {
         </div></td></tr>`).join('') + tableEnd
         : `<div class="empty">제출한 보고서가 없습니다.</div>`}</div>
     <div class="card"><h2>활동비 정산 (${ex.length})</h2>
-      ${ex.length ? table(['활동명','항목','금액','상태','']) + ex.map(r=>`<tr>
+      ${ex.length ? `<p class="sub">담당관이 처리하기 전(접수완료·확인 중)까지는 내용을 고치거나 신청을 내릴 수 있습니다.</p>`
+        + table(['활동명','항목','금액','상태','']) + ex.map(r=>`<tr>
         <td>${esc(r.activity)}</td><td>${esc(r.item)}</td><td>${won(r.amount)}</td><td>${expStatusTag(r.status)}</td>
-        <td><button class="btn sm" data-view-expense="${r.id}">보기</button></td></tr>`).join('') + tableEnd
+        <td><div class="row-actions" style="margin:0">
+          <button class="btn sm" data-view-expense="${r.id}">보기</button>
+          ${canEditExp(r) ? `<button class="btn sm" data-edit-expense="${r.id}">수정</button>
+            <button class="btn sm danger" data-del-expense="${r.id}">삭제</button>` : ''}
+        </div></td></tr>`).join('') + tableEnd
         : `<div class="empty">정산 신청 내역이 없습니다.</div>`}</div>`;
 };
 BIND.mine = () => {
@@ -4798,6 +4803,10 @@ BIND.mine = () => {
     const r = S.reports.find(x => x.id === b.dataset.editReport); if(r) openReportForm(r); }));
   $$('#main [data-del-report]').forEach(b => b.addEventListener('click', ()=>{
     const r = S.reports.find(x => x.id === b.dataset.delReport); if(r) deleteReport(r); }));
+  $$('#main [data-edit-expense]').forEach(b => b.addEventListener('click', ()=>{
+    const r = S.expenses.find(x => x.id === b.dataset.editExpense); if(r) openExpenseForm(r); }));
+  $$('#main [data-del-expense]').forEach(b => b.addEventListener('click', ()=>{
+    const r = S.expenses.find(x => x.id === b.dataset.delExpense); if(r) deleteExpense(r); }));
 };
 
 /* ============================================================================
@@ -5001,8 +5010,26 @@ async function deleteReport(r){
   if(error) return failed('보고서 삭제', error);
   await refresh(); closeModal(); toast('삭제되었습니다'); go(CURRENT);
 }
+/* 활동비 정산 — 신청한 사람은 '접수완료·확인 중' 일 때만 고치고 내릴 수 있습니다.
+   담당관이 처리완료·반려한 뒤에는 처리 결과를 지키려고 잠급니다(관리자는 언제든 삭제).
+   같은 규칙을 데이터베이스에도 걸어 두었습니다(schema.sql 36절). */
+/* 지금 팀 목록에 없는 팀이 적혀 있으면(팀 이름이 바뀐 경우 등) 그 값을 한 줄 넣어
+   수정만 해도 소속 팀이 지워지지 않게 합니다 */
+const teamOpt = (cur) => {
+  const names = (intro().teams || []).map(t => t.name);
+  return cur && !names.includes(cur) ? `<option selected>${esc(cur)}</option>` : '';
+};
+const expenseOpen = (r) => ['접수','검토중'].includes(r.status || '접수');
+const myExpense   = (r) => r.author_id === S.user?.id;
+const canEditExp  = (r) => myExpense(r) && expenseOpen(r);
+const canDelExp   = (r) => isAdmin() || canEditExp(r);
+
 function showExpense(id, canProcess){
   const r = S.expenses.find(x=>x.id===id); if(!r) return;
+  const acts = [
+    canEditExp(r) ? '<button class="btn sm" id="exEdit">정산 수정</button>' : '',
+    canDelExp(r)  ? `<button class="btn sm danger" id="exDel">${isAdmin() && !myExpense(r) ? '관리자 삭제' : '신청 취소(삭제)'}</button>` : '',
+  ].filter(Boolean).join('');
   openModal('정산 신청 · ' + r.activity, `<dl>
     <dt>신청자</dt><dd>${esc(r.author_name)}${r.team?' · '+esc(r.team):''}${r.contact?' · '+esc(r.contact):''}</dd>
     <dt>활동일자 / 활동명</dt><dd>${esc(r.act_date)} · ${esc(r.activity)}</dd>
@@ -5014,8 +5041,14 @@ function showExpense(id, canProcess){
     ${r.officer_comment?`<dt>담당관 코멘트</dt><dd>${esc(r.officer_comment)}</dd>`:''}
     <dt>영수증 (${(r.receipts||[]).length}장)</dt><dd>${attHTML(r.receipts)}</dd>
     <dt>제출일시</dt><dd>${fmt(r.created_at)}</dd>
-  </dl>` + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
+  </dl>`
+    + (acts ? `<div class="row-actions" style="margin-top:6px">${acts}</div>` : '')
+    + (myExpense(r) && !expenseOpen(r)
+        ? '<p class="hint" style="margin:8px 0 0">담당관이 처리한 정산은 수정·삭제할 수 없습니다. 고칠 일이 있으면 혁신행정담당관에게 알려 주세요.</p>' : '')
+    + (canProcess ? processBlock(r.status, r.officer_comment) : ''));
   bindZoom();
+  $('#exEdit')?.addEventListener('click', ()=>{ closeModal(); openExpenseForm(r); });
+  $('#exDel')?.addEventListener('click', ()=> deleteExpense(r));
   $('#mdSave')?.addEventListener('click', async ()=>{
     busy(true);
     const { error } = await sb.from('expenses')
@@ -5025,15 +5058,88 @@ function showExpense(id, canProcess){
     await refresh(); closeModal(); toast('저장되었습니다'); go(CURRENT);
   });
 }
+/* 정산 수정 — 금액·항목·계좌를 고치고, 영수증을 새로 고르면 예전 사진과 바꿉니다 */
+function openExpenseForm(r){
+  openModal('활동비 정산 수정', `
+    <div class="grid c2">
+      <label class="field">신청자 <span class="req">*</span><input id="xeName" value="${esc(r.author_name||'')}"></label>
+      <label class="field">연락처 <span class="hint" style="display:inline">선택</span>
+        <input id="xeContact" value="${esc(r.contact||'')}"></label>
+      <label class="field">소속 팀<select id="xeTeam"><option value="">선택 안 함</option>
+        ${teamOpt(r.team)}
+        ${(intro().teams||[]).map(t=>`<option ${t.name===r.team?'selected':''}>${esc(t.name)}</option>`).join('')}</select></label>
+      <label class="field">활동일자 <span class="req">*</span><input id="xeDate" type="date" value="${esc(r.act_date||'')}"></label>
+      <label class="field">활동명 <span class="req">*</span><input id="xeActivity" value="${esc(r.activity||'')}"></label>
+      <label class="field">사용처 / 항목 <span class="req">*</span><input id="xeItem" value="${esc(r.item||'')}"></label>
+      <label class="field">금액(원) <span class="req">*</span>
+        <input id="xeAmount" type="number" min="0" value="${esc(String(r.amount ?? ''))}"></label>
+    </div>
+    <div class="field" style="margin-bottom:0">입금 계좌 <span class="hint" style="display:inline">승인 시 지급</span></div>
+    <div class="grid c3" style="margin-bottom:14px">
+      <label class="field" style="margin:0">은행명<input id="xeBank" value="${esc(r.bank||'')}"></label>
+      <label class="field" style="margin:0">계좌번호<input id="xeAcct" inputmode="numeric" value="${esc(r.acct_no||'')}"></label>
+      <label class="field" style="margin:0">예금주<input id="xeHolder" value="${esc(r.holder||'')}"></label>
+    </div>
+    <label class="field">상세 내역 / 비고<textarea id="xeNote">${esc(r.note||'')}</textarea></label>
+    <label class="field">지금 올라가 있는 영수증 (${(r.receipts||[]).length}장)</label>
+    <div style="margin:-6px 0 14px">${attHTML(r.receipts)}</div>
+    <label class="field">영수증 바꾸기 <span class="hint" style="display:inline">선택</span>
+      <input id="xeFiles" type="file" multiple accept="image/*">
+      <span class="hint">새로 고르면 <b>기존 영수증은 모두 교체</b>됩니다. 그대로 두려면 건드리지 마세요.</span></label>
+    <div class="thumbs" id="xeThumbs"></div>
+    <div class="row-actions"><button class="btn primary" id="xeSave">수정 저장</button></div>`);
+  bindZoom();
+  let picked = [];
+  $('#xeFiles').addEventListener('change', async e => {
+    picked = await prepImages(e.target.files); previewLocal('#xeThumbs', picked); });
+  $('#xeSave').addEventListener('click', async ()=>{
+    const name = $('#xeName').value.trim(), date = $('#xeDate').value;
+    const act = $('#xeActivity').value.trim(), item = $('#xeItem').value.trim(), amount = $('#xeAmount').value;
+    if(!name || !date || !act || !item || !amount){ toast('필수 항목을 모두 입력하세요'); return; }
+    const btn = $('#xeSave'); btn.disabled = true; busy(true);
+    let fresh = [];
+    try{
+      const fields = {
+        author_name:name, act_date:date, activity:act, item, amount:Number(amount),
+        team:$('#xeTeam').value, bank:$('#xeBank').value.trim(), acct_no:$('#xeAcct').value.trim(),
+        holder:$('#xeHolder').value.trim(), contact:$('#xeContact').value.trim(), note:$('#xeNote').value.trim(),
+      };
+      if(picked.length) fields.receipts = fresh = await uploadAll('docs', picked, 'receipts');
+      const { error } = await sb.from('expenses').update(fields).eq('id', r.id);
+      if(error) throw error;
+      /* 바꿨으면 예전 영수증은 저장소에서 지웁니다(남겨 두면 아무도 못 보는 파일로 쌓입니다) */
+      const old = picked.length ? (r.receipts||[]).map(f => f.path).filter(Boolean) : [];
+      if(old.length) await sb.storage.from('docs').remove(old);
+      await refresh(); closeModal(); toast('수정되었습니다'); go(CURRENT);
+    }catch(e){
+      if(fresh.length) await sb.storage.from('docs').remove(fresh.map(f => f.path));
+      failed('정산 수정', e); btn.disabled = false;
+    }finally{ busy(false); }
+  });
+}
+/* 정산 삭제 — 올린 본인(처리 전)과 관리자. 영수증 파일도 함께 지웁니다 */
+async function deleteExpense(r){
+  const who = isAdmin() && !myExpense(r) ? `${r.author_name} 님의 ` : '';
+  if(!confirm(`${who}정산 신청을 삭제할까요?\n\n· 올린 영수증도 함께 지워집니다.\n· 되돌릴 수 없습니다.`)) return;
+  busy(true);
+  const { error } = await sb.from('expenses').delete().eq('id', r.id);
+  const paths = (r.receipts||[]).map(f => f.path).filter(Boolean);
+  if(!error && paths.length) await sb.storage.from('docs').remove(paths);
+  busy(false);
+  if(error) return failed('정산 삭제', error);
+  await refresh(); closeModal(); toast('삭제되었습니다'); go(CURRENT);
+}
+
 const ATT_IMG_RE = /\.(jpe?g|png|gif|webp)$/i;
 /* 영수증·보고서 첨부 — 사진은 썸네일로, 나머지는 [열기][내려받기] 줄로 */
 function attHTML(files){
   if(!files || !files.length) return '<span class="hint">첨부 없음</span>';
   const imgs = files.filter(f => ATT_IMG_RE.test(f.name||'') && fileUrl(f));
-  const rest = files.filter(f => !imgs.includes(f));
+  /* 사진은 썸네일로 크게 보여 주고(눌러서 확대), 그 아래에 올린 파일을 한 줄씩
+     모두 적어 둡니다. 영수증 사진도 한 장씩 따로 내려받을 수 있게 하려는 것입니다. */
   return (imgs.length ? '<div class="thumbs">' + imgs.map(f => { const u = fileUrl(f);
       return `<img src="${esc(u)}" alt="${esc(f.name||'')}" data-zoom="${esc(u)}">`; }).join('') + '</div>' : '')
-    + (rest.length ? '<div class="att-list">' + rest.map(f => fileRow(f, fileUrl(f))).join('') + '</div>' : '');
+    + '<div class="att-list">' + files.map(f => fileRow(f, fileUrl(f))).join('') + '</div>';
 }
 function bindZoom(){ $$('#modalBody [data-zoom]').forEach(im =>
   im.addEventListener('click', ()=> lightbox(im.dataset.zoom))); }

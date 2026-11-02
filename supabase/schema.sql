@@ -1898,3 +1898,51 @@ create trigger posts_guard_collab
 drop policy if exists posts_select on public.posts;
 create policy posts_select on public.posts for select
   using ( board in ('news','mascot','ai','relief') or public.is_inner() );
+
+-- ============================================================================
+--  36. 활동비 정산 — 신청한 사람이 고치고 내릴 수 있게
+--
+--  지금까지는 담당관만 정산 내용을 고칠 수 있었습니다. 금액을 잘못 적거나
+--  영수증을 다시 찍어 올리려면 담당관에게 부탁해야 했습니다. 다음처럼 엽니다.
+--
+--    · 신청한 사람 : '접수완료' 또는 '확인 중' 일 때만 고치고 내릴 수 있습니다.
+--                    담당관이 처리완료·반려한 뒤에는 손댈 수 없습니다(처리 결과 보존).
+--    · 담당관      : 지금처럼 상태·코멘트를 바꿉니다.
+--    · 관리자      : 어떤 정산이든 지울 수 있습니다.
+--
+--  신청한 사람이 상태나 담당관 코멘트를 몰래 바꾸지 못하도록, 담당관이 아니면
+--  그 칸들은 예전 값 그대로 두도록 서버에서 되돌립니다(28절 보고서와 같은 방식).
+--
+--  영수증 파일 권한은 그대로입니다 — 올린 본인과 담당관만 봅니다. ★그대로 보호
+-- ============================================================================
+
+drop policy if exists expenses_update on public.expenses;
+create policy expenses_update on public.expenses for update
+  using (
+    public.is_officer()
+    or (author_id = auth.uid() and coalesce(status, '접수') in ('접수','검토중'))
+  )
+  with check ( public.is_officer() or author_id = auth.uid() );
+
+drop policy if exists expenses_delete on public.expenses;
+create policy expenses_delete on public.expenses for delete
+  using (
+    public.is_admin()
+    or (author_id = auth.uid() and coalesce(status, '접수') in ('접수','검토중'))
+  );
+
+-- 담당관이 아니면 상태·코멘트·신청자는 바꿀 수 없습니다
+create or replace function public.guard_expense_update()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if public.is_officer() then return new; end if;
+  new.status          := old.status;
+  new.officer_comment := old.officer_comment;
+  new.author_id       := old.author_id;
+  return new;
+end $$;
+
+drop trigger if exists expenses_guard on public.expenses;
+create trigger expenses_guard
+  before update on public.expenses
+  for each row execute function public.guard_expense_update();
