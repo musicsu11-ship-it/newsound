@@ -236,6 +236,7 @@
   .photo-card .meta{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;
     gap:8px;align-items:center}
   .photo-card .hero-wrap{position:relative;cursor:pointer}
+  .photo-card .hero-wrap .new-badge{position:absolute;top:10px;left:10px}
   .photo-card h3,.photo-card .excerpt{cursor:pointer}
   .hero-more{position:absolute;right:10px;bottom:10px;background:rgba(22,34,92,.82);color:#fff;
     font-size:12px;font-weight:900;border-radius:999px;padding:4px 11px}
@@ -926,8 +927,44 @@
   .news-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
   /* flex:0 0 auto — 카드 높이가 늘어나도 사진이 따라 늘어나지 않습니다.
      min-height:0 + overflow:hidden — 사진 원본 높이가 16:10 비율을 밀어내지 못하게 합니다 */
-  .news-card .ph{aspect-ratio:16/10;background:linear-gradient(150deg,#f3f2fd,#fff9ec);display:grid;
+  .news-card .ph{position:relative;aspect-ratio:16/10;background:linear-gradient(150deg,#f3f2fd,#fff9ec);display:grid;
     place-items:center;color:#a2a9c6;font-size:28px;flex:0 0 auto;overflow:hidden;min-height:0}
+  /* ── NEW 표시 — 올라온 지 7일이 안 된 소식에 붙습니다 ── */
+  .new-badge{display:inline-grid;place-items:center;background:var(--brand);color:#fff;
+    font-size:11.5px;font-weight:900;letter-spacing:.04em;border-radius:999px;padding:4px 10px;
+    line-height:1;box-shadow:0 4px 12px rgba(214,30,92,.35)}
+  .news-card .ph .new-badge{position:absolute;top:12px;left:12px}
+
+  /* ── 새 소식 팝업 — 홈에 들어올 때 한 번 ── */
+  .news-pop{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;
+    background:rgba(22,34,92,.35);opacity:0;transition:opacity .18s}
+  .news-pop.on{opacity:1}
+  .np-card{background:var(--surface);border-radius:24px;box-shadow:0 24px 60px rgba(22,34,92,.3);
+    width:min(420px,100%);padding:20px 20px 18px;position:relative;
+    transform:translateY(10px) scale(.98);transition:transform .18s}
+  .news-pop.on .np-card{transform:none}
+  .np-x{position:absolute;top:12px;right:12px;border:0;background:var(--surface-2);color:var(--muted);
+    width:30px;height:30px;border-radius:50%;font-size:13px;cursor:pointer;line-height:1}
+  .np-x:hover{background:var(--brand-weak);color:var(--brand)}
+  .np-top{display:flex;align-items:center;gap:8px;margin:0 0 13px}
+  .np-top b{font-size:15.5px;font-weight:900}
+  .np-body{display:flex;gap:13px;width:100%;text-align:left;background:var(--surface-2);border:0;
+    border-radius:16px;padding:12px;cursor:pointer;font:inherit;color:var(--text)}
+  .np-body:hover{background:var(--brand-weak)}
+  .np-ph{flex:none;width:78px;height:78px;border-radius:12px;overflow:hidden;background:#fff}
+  .np-ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .np-txt{min-width:0;display:flex;flex-direction:column;gap:4px;justify-content:center}
+  .np-title{font-size:15px;font-weight:900;line-height:1.4;word-break:keep-all;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .np-ex{font-size:12.5px;color:var(--muted);line-height:1.5;word-break:keep-all;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .np-dt{font-size:11.5px;color:var(--muted)}
+  .np-acts{display:flex;gap:8px;align-items:center;margin-top:14px}
+  .np-acts .btn.primary{flex:1}
+  @media (max-width:560px){
+    .news-pop{place-items:end center;padding:0}
+    .np-card{width:100%;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
+  }
   .news-card .ph img{width:100%;height:100%;object-fit:cover;display:block;min-width:0;min-height:0}
   .news-card .bd{padding:18px 22px 22px;flex:1 1 auto}
   .news-card h3{margin:10px 0 8px;font-size:clamp(17px,1.8vw,23px);font-weight:900;letter-spacing:-.03em;
@@ -1952,6 +1989,7 @@ async function afterLogin(){
   finally{
     S.loading = false;
     if(!$('#modalBg').classList.contains('open')) go(CURRENT || 'home');
+    newsPopup();                   // ④ 새 소식이 있으면 한 번 알려 줍니다
   }
 }
 
@@ -2487,7 +2525,8 @@ VIEWS.home = () => {
     ${news.length ? `<div class="news-grid">${news.map(p=>{
       const img=(p.images||[])[0];
       return `<article class="news-card" data-open-post="${p.id}">
-        <div class="ph">${img?`<img src="${esc(mediaUrl(img.path))}" alt="" loading="lazy">`:'📰'}</div>
+        <div class="ph">${img?`<img src="${esc(mediaUrl(img.path))}" alt="" loading="lazy">`:'📰'}${
+          isNewPost(p) ? NEW_BADGE : ''}</div>
         <div class="bd"><span class="tag brand">활동 소식</span>
           <h3>${esc(p.title)}</h3>
           <p>${esc(excerpt(p.body,60))}</p>
@@ -2785,7 +2824,8 @@ function boardView(key){
       ? loadBox(q ? '검색 결과가 없습니다.' : '아직 등록된 소식이 없습니다.')
       : `<div class="news-grid">
           ${list.map(p=>`<article class="news-card">
-            <div class="ph" data-open-post="${p.id}">${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="" loading="lazy">`:'📰'}</div>
+            <div class="ph" data-open-post="${p.id}">${photoOf(p)?`<img src="${esc(photoOf(p))}" alt="" loading="lazy">`:'📰'}${
+              isNewPost(p) ? NEW_BADGE : ''}</div>
             <div class="bd"><span class="tag brand">활동 소식</span>
               <h3 data-open-post="${p.id}">${esc(p.title)}</h3>
               <p data-open-post="${p.id}">${esc(excerpt(p.body,70))}</p>
@@ -3029,6 +3069,66 @@ function boardView(key){
     </div>`).join('')}</div>`
     : loadBox(q ? '검색 결과가 없습니다.' : '아직 등록된 글이 없습니다.')}`;
 }
+/* ── 새 글 표시 ────────────────────────────────────────────────────────────
+   올라온 지 7일이 안 된 글에 NEW 를 붙입니다. 날짜만 보고 정하므로
+   처음 들어온 사람에게도 똑같이 보입니다. */
+const NEW_DAYS  = 7;
+const NEW_BADGE = '<span class="new-badge">NEW</span>';
+const isNewPost = (p) => {
+  const t = Date.parse(p?.created_at || '');
+  return !!t && (Date.now() - t) < NEW_DAYS * 86400000;
+};
+
+/* ── 새 소식 팝업 ──────────────────────────────────────────────────────────
+   홈에 들어올 때 가장 최근 소식을 한 번 알려 줍니다.
+   한 번 보여 준 글은 브라우저에 기록해 두고 다시 띄우지 않습니다
+   (기록은 이 브라우저에만 남고 서버로 가지 않습니다). */
+const NEWS_SEEN_KEY = 'sm_news_seen';
+const newsSeen = () => { try{ return localStorage.getItem(NEWS_SEEN_KEY) || ''; }catch(e){ return ''; } };
+const markNewsSeen = (v) => { try{ localStorage.setItem(NEWS_SEEN_KEY, v); }catch(e){} };
+
+function closeNewsPop(){ $('#newsPop')?.remove(); }
+
+function newsPopup(){
+  if(CURRENT !== 'home' || $('#newsPop')) return;
+  if($('#modalBg')?.classList.contains('open')) return;     // 다른 창이 떠 있으면 건너뜁니다
+  const p = S.posts.filter(x => x.board === 'news')
+    .slice().sort((a,b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
+  if(!p || !isNewPost(p)) return;                           // 오래된 글로는 띄우지 않습니다
+  if(newsSeen() >= String(p.created_at)) return;            // 이미 알려 준 글
+
+  const img = (p.images || []).find(a => a.kind !== 'doc');
+  const el = document.createElement('div');
+  el.id = 'newsPop';
+  el.className = 'news-pop';
+  el.innerHTML = `<div class="np-card" role="dialog" aria-label="새 소식 알림">
+      <button class="np-x" id="npClose" aria-label="닫기">✕</button>
+      <div class="np-top"><span class="new-badge">NEW</span><b>새 소식이 올라왔어요</b></div>
+      <button class="np-body" id="npGo">
+        ${img ? `<span class="np-ph"><img src="${esc(mediaUrl(img.path))}" alt="" loading="lazy"></span>` : ''}
+        <span class="np-txt">
+          <span class="np-title">${esc(p.title)}</span>
+          <span class="np-ex">${esc(excerpt(p.body, 60))}</span>
+          <span class="np-dt">${fmtDay(p.created_at)}</span>
+        </span>
+      </button>
+      <div class="np-acts">
+        <button class="btn primary" id="npGo2">소식 보러 가기 →</button>
+        <button class="btn ghost sm" id="npLater">나중에</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=> el.classList.add('on'));
+
+  const done = () => { markNewsSeen(String(p.created_at)); closeNewsPop(); };
+  const open = () => { done(); go('news'); openPost(p.id); };
+  $('#npGo').addEventListener('click', open);
+  $('#npGo2').addEventListener('click', open);
+  $('#npClose').addEventListener('click', done);
+  $('#npLater').addEventListener('click', done);
+  el.addEventListener('click', e => { if(e.target === el) done(); });
+}
+
 /* 목록 카드 썸네일 — 사진을 먼저 쓰고, 줄이지 못해 문서로 올라간 그림(svg 등)도 씁니다 */
 const photoOf = (p) => {
   const all = p.images || [];
