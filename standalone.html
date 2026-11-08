@@ -254,20 +254,47 @@
   .nc-cmt{font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer}
   .photo-card .meta .btn.like{padding:4px 10px}
   /* ── 출근룩 사진 콘테스트 ───────────────────────────────────────────── */
-  .ootd-how{background:var(--surface-2);border:1px solid var(--border);border-radius:20px;
-    padding:16px 18px;margin:0 0 20px}
-  .oh-steps{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:11px}
-  .oh-steps span{font-size:13.5px;font-weight:800;background:var(--surface);border:1px solid var(--border);
-    border-radius:999px;padding:7px 14px;word-break:keep-all}
-  .oh-steps b{color:var(--brand);margin-right:5px}
-  .oh-prize{display:flex;gap:8px;flex-wrap:wrap}
-  .op{font-size:12.5px;font-weight:900;border-radius:999px;padding:5px 12px;
-    background:var(--surface);border:1px solid var(--border);white-space:nowrap}
-  .op.g{background:#fff4d6;border-color:#f0c64a;color:#8a6200}
-  .op.s{background:#eef1f6;border-color:#c6cede;color:#4a5570}
-  .op.b{background:#fbe9dd;border-color:#dfae8c;color:#8a4f24}
-  .ootd-how .hint{margin-top:10px;word-break:keep-all}
-  .ootd-h2{margin:22px 0 12px;font-size:19px;font-weight:900;letter-spacing:-.02em}
+  /* 참여 안내 — 눈에 먼저 들어오게 분홍 띠를 두르고 글씨를 키웠습니다 */
+  .ootd-guide{background:linear-gradient(150deg,var(--brand-weak),var(--surface-2) 60%,#fff9ec);
+    border:1.5px solid var(--brand);border-radius:24px;padding:22px 24px;margin:0 0 24px;
+    box-shadow:0 10px 30px rgba(214,30,92,.1)}
+  .og-head{display:flex;align-items:center;gap:13px;margin-bottom:18px}
+  .og-ic{font-size:30px;line-height:1;flex:none}
+  .og-head b{display:block;font-size:20px;font-weight:900;letter-spacing:-.02em;color:#16225c}
+  .og-head span{display:block;margin-top:3px;font-size:14.5px;color:#3a4478;
+    line-height:1.55;word-break:keep-all}
+
+  .og-steps{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px;
+    grid-template-columns:repeat(3,minmax(0,1fr))}
+  .og-steps li{position:relative;background:var(--surface);border:1px solid var(--border);
+    border-radius:18px;padding:16px 16px 14px;min-width:0}
+  .og-steps .n{position:absolute;top:-10px;left:16px;display:grid;place-items:center;
+    width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;
+    font-size:13px;font-weight:900;box-shadow:0 3px 9px rgba(214,30,92,.35)}
+  .og-steps .ic{display:block;font-size:24px;line-height:1;margin:6px 0 9px}
+  .og-steps b{display:block;font-size:16px;font-weight:900;line-height:1.45;
+    letter-spacing:-.02em;word-break:keep-all}
+  .og-steps em{display:block;margin-top:5px;font-style:normal;font-size:13px;
+    color:var(--muted);line-height:1.5;word-break:keep-all}
+
+  .og-prize{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .pz{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;
+    padding:14px 10px 12px;text-align:center;min-width:0}
+  .pz .m{display:block;font-size:24px;line-height:1}
+  .pz b{display:block;margin-top:5px;font-size:13.5px;font-weight:900;color:var(--muted)}
+  .pz i{display:block;font-style:normal;font-size:21px;font-weight:900;letter-spacing:-.03em;
+    line-height:1.25;margin-top:2px}
+  .pz em{display:block;font-style:normal;font-size:12.5px;font-weight:700;color:var(--muted);margin-top:3px}
+  .pz.g{background:#fffaed;border-color:#f0c64a} .pz.g i{color:#8a6200}
+  .pz.s{background:#f6f8fb;border-color:#c6cede} .pz.s i{color:#48536d}
+  .pz.b{background:#fdf2ea;border-color:#dfae8c} .pz.b i{color:#8a4f24}
+  .pz.p{background:var(--surface-2);border-color:var(--lav)} .pz.p i{color:#4b3f9e}
+
+  .og-note{margin:16px 0 0;font-size:14px;line-height:1.6;color:#3a4478;word-break:keep-all}
+  .og-note b{font-weight:900;color:var(--brand)}
+  .og-note span{margin-right:5px}
+  .page-head p.og-lead,.og-lead{font-size:16px;font-weight:700;color:#3a4478;line-height:1.6;word-break:keep-all}
+  .ootd-h2{margin:26px 0 13px;font-size:21px;font-weight:900;letter-spacing:-.02em}
   .ootd-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
   .ootd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:14px}
   .ootd-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;
@@ -276,7 +303,7 @@
   .ootd-ph{position:relative;aspect-ratio:3/4;display:grid;place-items:center;cursor:pointer;
     background:linear-gradient(150deg,#f3f2fd,#fff9ec);color:#a2a9c6;font-size:40px;overflow:hidden}
   .ootd-ph img{width:100%;height:100%;object-fit:cover;display:block}
-  .ootd-rank{position:absolute;top:10px;left:10px;font-size:12.5px;font-weight:900;
+  .ootd-rank{position:absolute;top:10px;left:10px;font-size:13.5px;font-weight:900;
     background:var(--surface);color:var(--text);border-radius:9px;padding:4px 11px;
     box-shadow:0 3px 10px rgba(22,34,92,.2)}
   .ootd-card.r1 .ootd-rank{background:#f0c64a;color:#4a3500}
@@ -284,17 +311,30 @@
   .ootd-card.r3 .ootd-rank{background:#e3b391;color:#5e3415}
   .ootd-card.r1{border-color:#f0c64a}
   .ootd-bd{padding:13px 14px 12px;display:flex;flex-direction:column;gap:5px}
-  .ootd-bd b{font-size:14.5px;font-weight:900;cursor:pointer;word-break:keep-all}
-  .ootd-bd p{margin:0;font-size:12.5px;color:var(--muted);cursor:pointer;word-break:keep-all;
+  .ootd-bd b{font-size:15.5px;font-weight:900;cursor:pointer;word-break:keep-all}
+  .ootd-bd p{margin:0;font-size:13.5px;color:var(--muted);cursor:pointer;word-break:keep-all;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .ootd-like{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:3px}
-  .ootd-n{font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px;white-space:nowrap}
-  .ootd-n .ico{font-size:14px}
-  .ootd-n b{font-size:14.5px;color:var(--brand)}
+  .ootd-n{font-size:14px;font-weight:800;display:flex;align-items:center;gap:4px;white-space:nowrap}
+  .ootd-n .ico{font-size:15px}
+  .ootd-n b{font-size:16px;color:var(--brand)}
   .ootd-cmt{margin-top:4px;padding:7px 0 0;border:0;border-top:1px dashed var(--border);background:none;
-    font:inherit;font-size:11.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
+    font:inherit;font-size:12.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
   .ootd-cmt:hover{color:var(--brand)}
+  @media (max-width:860px){
+    .og-steps{grid-template-columns:minmax(0,1fr);gap:14px}
+    .og-steps li{display:grid;grid-template-columns:auto 1fr;gap:0 13px;align-items:center;
+      padding:14px 16px}
+    .og-steps .n{position:static;grid-row:span 2;align-self:center}
+    .og-steps .ic{display:none}
+    .og-steps em{grid-column:2}
+    .og-prize{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
   @media (max-width:700px){
+    .ootd-guide{padding:18px 16px;border-radius:20px}
+    .og-head b{font-size:18px}
+    .og-head span{font-size:13.5px}
+    .pz i{font-size:19px}
     .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     .ootd-bd{padding:10px 10px 10px}
     .ootd-bd b{font-size:13px}
@@ -2507,20 +2547,30 @@ function boardView(key){
     };
 
     return pageHead(`${b.icon} ${b.label}`, b.desc,
-        canWrite(key) ? '<button class="btn primary" id="bdWrite">＋ 내 출근룩 올리기</button>' : '')
-      + `<div class="ootd-how">
-          <div class="oh-steps">
-            <span><b>①</b> 사진을 올리고</span>
-            <span><b>②</b> 마음에 드는 출근룩에 좋아요</span>
-            <span><b>③</b> 좋아요 많은 순으로 시상</span>
+        canWrite(key) ? '<button class="btn primary" id="bdWrite">＋ 내 출근룩 올리기</button>' : '', 'og-lead')
+      + `<section class="ootd-guide">
+          <div class="og-head">
+            <span class="og-ic" aria-hidden="true">🏆</span>
+            <div><b>이렇게 참여하세요</b>
+              <span>사진 한 장이면 끝! 좋아요를 가장 많이 받은 출근룩이 1등입니다.</span></div>
           </div>
-          <div class="oh-prize">
-            <span class="op g">🥇 1등 10만원</span><span class="op s">🥈 2등 5만원</span>
-            <span class="op b">🥉 3등 3만원</span><span class="op">🎁 참가상 5천원 · 10명</span>
+          <ol class="og-steps">
+            <li><span class="n">1</span><span class="ic" aria-hidden="true">📷</span>
+              <b>사진을 올리고</b><em>출근룩 한 장 + 한 줄 소개</em></li>
+            <li><span class="n">2</span><span class="ic" aria-hidden="true">💗</span>
+              <b>마음에 드는 출근룩에 좋아요</b><em>한 사람이 한 장에 한 번</em></li>
+            <li><span class="n">3</span><span class="ic" aria-hidden="true">🎁</span>
+              <b>좋아요 많은 순으로 시상</b><em>상품권으로 드려요</em></li>
+          </ol>
+          <div class="og-prize">
+            <div class="pz g"><span class="m" aria-hidden="true">🥇</span><b>1등</b><i>10만원</i><em>1명</em></div>
+            <div class="pz s"><span class="m" aria-hidden="true">🥈</span><b>2등</b><i>5만원</i><em>1명</em></div>
+            <div class="pz b"><span class="m" aria-hidden="true">🥉</span><b>3등</b><i>3만원</i><em>1명</em></div>
+            <div class="pz p"><span class="m" aria-hidden="true">🎁</span><b>참가상</b><i>5천원</i><em>10명</em></div>
           </div>
-          <p class="hint">상품권으로 드립니다. 한 사람이 한 장에 한 번만 좋아요를 누를 수 있어요.
-            직원이면 누구나 올리고 누를 수 있습니다.</p>
-        </div>`
+          <p class="og-note"><span aria-hidden="true">💡</span>
+            <b>직원이면 누구나</b> 올리고 좋아요를 누를 수 있습니다. 상품권으로 드립니다.</p>
+        </section>`
       + (top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
           <div class="ootd-top">${top.map((p,i) => card(p, i+1)).join('')}</div>` : '')
       + searchBar(key, '이름·한 줄 소개로 검색')
