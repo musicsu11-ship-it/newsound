@@ -50,6 +50,14 @@
   .nav-btn.active{color:var(--brand);background:var(--brand-weak);font-weight:900}
   /* 공지사항 — 단원 전용 묶음 메뉴 맨 위에서 한눈에 띄게 */
   .navdrop-panel .nav-btn.first{font-weight:900;color:var(--brand);background:var(--brand-weak)}
+  /* 새로 생긴 메뉴 — 하늘색 + NEW (출근룩 사진 콘테스트) */
+  .nav-btn.sky{color:#0a6fb5;background:#e4f2fd;font-weight:900;border:1px solid #bfe0f7}
+  .nav-btn.sky:hover{color:#06557f;background:#cfe8fb;border-color:#8fcaf0}
+  .nav-btn.sky.active{color:#fff;background:#1a8fd4;border-color:#1a8fd4}
+  .nav-new{display:inline-block;margin-left:6px;vertical-align:middle;
+    font-size:9.5px;font-weight:900;letter-spacing:.06em;line-height:1;
+    background:#1a8fd4;color:#fff;border-radius:999px;padding:3px 6px 2px}
+  .nav-btn.sky.active .nav-new{background:#fff;color:#1a8fd4}
   .navdrop-panel .nav-btn.first:hover{background:#ffd2e0}
   .nav-right{display:flex;align-items:center;gap:10px;flex:none}
   .whoami{font-size:13px;font-weight:800;color:var(--brand);white-space:nowrap}
@@ -1007,6 +1015,20 @@
   .np-dt{font-size:11.5px;color:var(--muted)}
   .np-acts{display:flex;gap:8px;align-items:center;margin-top:14px}
   .np-acts .btn.primary{flex:1}
+  /* 출근룩 콘테스트 참여 안내 창 — 하늘색 띠 */
+  .ootd-pop .np-card{border-top:5px solid #1a8fd4}
+  .op-top{display:flex;align-items:center;gap:8px;margin:0 0 11px}
+  .op-top b{font-size:18px;font-weight:900;letter-spacing:-.02em}
+  .op-lead2{margin:0 0 13px;font-size:14.5px;line-height:1.65;color:#3a4478;word-break:keep-all}
+  .op-lead2 b{font-weight:900;color:var(--brand)}
+  .op-prizes{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+  .op-prizes span{font-size:12.5px;font-weight:900;border-radius:999px;padding:5px 11px;
+    background:var(--surface-2);border:1px solid var(--border);white-space:nowrap}
+  .op-prizes .g{background:#fffaed;border-color:#f0c64a;color:#8a6200}
+  .op-prizes .s{background:#f6f8fb;border-color:#c6cede;color:#48536d}
+  .op-prizes .b{background:#fdf2ea;border-color:#dfae8c;color:#8a4f24}
+  .op-sub{margin:0;font-size:13px;color:var(--muted);line-height:1.55;word-break:keep-all}
+  .op-sub b{font-weight:900;color:#0a6fb5}
   @media (max-width:560px){
     .news-pop{place-items:end center;padding:0}
     .np-card{width:100%;border-radius:24px 24px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
@@ -1618,6 +1640,59 @@ const NEWS_SEEN_KEY = 'sm_news_seen';
 const newsSeen = () => { try{ return localStorage.getItem(NEWS_SEEN_KEY) || ''; }catch(e){ return ''; } };
 const markNewsSeen = (v) => { try{ localStorage.setItem(NEWS_SEEN_KEY, v); }catch(e){} };
 function closeNewsPop(){ $('#newsPop')?.remove(); }
+
+/* ── 홈에 들어올 때 뜨는 창 두 가지 ──────────────────────────────────────
+   ① 출근룩 콘테스트 참여 안내 — 들어올 때마다 뜹니다(진행 중인 행사라서)
+   ② 새 소식 알림 — 새 글이 있을 때 한 번만
+   둘 다 뜰 일이 있으면 콘테스트를 먼저 보여 주고, 닫으면 소식을 이어서 띄웁니다. */
+function openingPopups(){
+  if(CURRENT !== 'home') return;
+  contestPopup(() => newsPopup());
+}
+
+function closeContestPop(){ $('#ootdPop')?.remove(); }
+
+function contestPopup(next){
+  const done = () => { closeContestPop(); next && next(); };
+  if(CURRENT !== 'home' || $('#ootdPop')) return done();
+  if($('#modalBg')?.classList.contains('open')) return done();   // 다른 창이 떠 있으면 건너뜁니다
+
+  /* 지금 1위가 있으면 몇 표인지 같이 보여 줍니다 */
+  const top1 = DB.posts().filter(p => p.board === 'ootd')
+    .slice().sort((a,b) => likeCount(b) - likeCount(a))[0];
+  const joined = DB.posts().some(p => p.board === 'ootd' && (p.realAuthor || p.author) === SESSION.name);
+
+  const el = document.createElement('div');
+  el.id = 'ootdPop';
+  el.className = 'news-pop ootd-pop';
+  el.innerHTML = `<div class="np-card" role="dialog" aria-label="출근룩 사진 콘테스트 안내">
+      <button class="np-x" id="opClose" aria-label="닫기">✕</button>
+      <div class="op-top"><span class="nav-new">NEW</span><b>출근룩 사진 콘테스트</b></div>
+      <p class="op-lead2">반바지 착용 지양 같은 경직된 관행은 그만!<br>
+        자유로운 <b>오늘의 출근룩</b>을 사진 한 장으로 보여 주세요.</p>
+      <div class="op-prizes">
+        <span class="g">🥇 10만원</span><span class="s">🥈 5만원</span>
+        <span class="b">🥉 3만원</span><span>🎁 참가상 10명</span>
+      </div>
+      <p class="op-sub">${joined
+        ? '이미 참여하셨어요! 다른 사람 출근룩에도 좋아요를 눌러 주세요.'
+        : (top1 && likeCount(top1) > 0
+            ? `지금 1위는 좋아요 <b>${likeCount(top1)}</b>개예요. 도전해 보세요!`
+            : '아직 아무도 올리지 않았어요. 첫 번째 주인공이 되어 보세요!')}</p>
+      <div class="np-acts">
+        <button class="btn primary" id="opGo">${joined ? '콘테스트 보러 가기 →' : '참여하러 가기 →'}</button>
+        <button class="btn ghost sm" id="opLater">나중에</button>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=> el.classList.add('on'));
+
+  $('#opGo').addEventListener('click', ()=>{ closeContestPop(); go('ootd'); });
+  $('#opClose').addEventListener('click', done);
+  $('#opLater').addEventListener('click', done);
+  el.addEventListener('click', e => { if(e.target === el) done(); });
+}
+
 function newsPopup(){
   if(CURRENT !== 'home' || $('#newsPop')) return;
   if($('#modalBg')?.classList.contains('open')) return;
@@ -1836,7 +1911,7 @@ const MENUS = [
 
   /* 라운지 — 누구나 볼 수 있는 공간 세 곳 */
   /* 출근룩 콘테스트 — 의견함 옆, 상단 메뉴에 따로 둡니다 */
-  { id:'ootd',     icon:'👔', label:'출근룩 사진 콘테스트', roles:ALL, group:'출근룩' },
+  { id:'ootd',     icon:'👔', label:'출근룩 사진 콘테스트', roles:ALL, group:'출근룩', hot:true },
   { id:'mascot',   icon:'🐉', label:'고드래곤&새초롱이', roles:ALL, group:'라운지' },
   { id:'ai',       icon:'🤖', label:'AI.zip',        roles:ALL,   group:'라운지' },
   { id:'relief',   icon:'💛', label:'멘탈관리.zip',   roles:ALL,   group:'라운지' },
@@ -1894,7 +1969,7 @@ function enterApp(){
   paintWho();
   const start = location.hash.replace('#','') || 'home';
   go(can(start) ? start : 'home');
-  newsPopup();                 // 새 소식이 있으면 한 번 알려 줍니다
+  openingPopups();             // 콘테스트 안내 · 새 소식 알림
 }
 
 /* 로그인은 전체 화면이 아니라 모달로 (시안 구조) */
@@ -1949,8 +2024,9 @@ function renderNav(){
     && m.id!=='home' && m.id!=='game' && m.id!=='share');
   const lounge = LOUNGE_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
 
-  let html = top.map(m => `<button class="nav-btn" data-go="${m.id}">${
-    esc(m.label)}</button>`).join('');
+  /* hot:true 인 메뉴는 하늘색 + NEW 로 새로 생긴 곳임을 알려 줍니다 */
+  let html = top.map(m => `<button class="nav-btn${m.hot ? ' sky' : ''}" data-go="${m.id}">${
+    esc(m.label)}${m.hot ? '<span class="nav-new">NEW</span>' : ''}</button>`).join('');
 
   if(lounge.length){
     html += `<div class="navdrop" id="loungeDrop">
