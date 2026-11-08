@@ -253,6 +253,54 @@
   .nc-acts{display:flex;align-items:center;gap:7px}
   .nc-cmt{font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer}
   .photo-card .meta .btn.like{padding:4px 10px}
+  /* ── 출근룩 사진 콘테스트 ───────────────────────────────────────────── */
+  .ootd-how{background:var(--surface-2);border:1px solid var(--border);border-radius:20px;
+    padding:16px 18px;margin:0 0 20px}
+  .oh-steps{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+  .oh-steps span{font-size:13.5px;font-weight:800;background:var(--surface);border:1px solid var(--border);
+    border-radius:999px;padding:7px 14px;word-break:keep-all}
+  .oh-steps b{color:var(--brand);margin-right:5px}
+  .oh-prize{display:flex;gap:8px;flex-wrap:wrap}
+  .op{font-size:12.5px;font-weight:900;border-radius:999px;padding:5px 12px;
+    background:var(--surface);border:1px solid var(--border);white-space:nowrap}
+  .op.g{background:#fff4d6;border-color:#f0c64a;color:#8a6200}
+  .op.s{background:#eef1f6;border-color:#c6cede;color:#4a5570}
+  .op.b{background:#fbe9dd;border-color:#dfae8c;color:#8a4f24}
+  .ootd-how .hint{margin-top:10px;word-break:keep-all}
+  .ootd-h2{margin:22px 0 12px;font-size:19px;font-weight:900;letter-spacing:-.02em}
+  .ootd-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+  .ootd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:14px}
+  .ootd-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;
+    box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
+  .ootd-card:hover{border-color:var(--brand)}
+  .ootd-ph{position:relative;aspect-ratio:3/4;display:grid;place-items:center;cursor:pointer;
+    background:linear-gradient(150deg,#f3f2fd,#fff9ec);color:#a2a9c6;font-size:40px;overflow:hidden}
+  .ootd-ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .ootd-rank{position:absolute;top:10px;left:10px;font-size:12.5px;font-weight:900;
+    background:var(--surface);color:var(--text);border-radius:9px;padding:4px 11px;
+    box-shadow:0 3px 10px rgba(22,34,92,.2)}
+  .ootd-card.r1 .ootd-rank{background:#f0c64a;color:#4a3500}
+  .ootd-card.r2 .ootd-rank{background:#cfd6e4;color:#2f3950}
+  .ootd-card.r3 .ootd-rank{background:#e3b391;color:#5e3415}
+  .ootd-card.r1{border-color:#f0c64a}
+  .ootd-bd{padding:13px 14px 12px;display:flex;flex-direction:column;gap:5px}
+  .ootd-bd b{font-size:14.5px;font-weight:900;cursor:pointer;word-break:keep-all}
+  .ootd-bd p{margin:0;font-size:12.5px;color:var(--muted);cursor:pointer;word-break:keep-all;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .ootd-like{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:3px}
+  .ootd-n{font-size:13px;font-weight:800;display:flex;align-items:center;gap:4px;white-space:nowrap}
+  .ootd-n .ico{font-size:14px}
+  .ootd-n b{font-size:14.5px;color:var(--brand)}
+  .ootd-cmt{margin-top:4px;padding:7px 0 0;border:0;border-top:1px dashed var(--border);background:none;
+    font:inherit;font-size:11.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
+  .ootd-cmt:hover{color:var(--brand)}
+  @media (max-width:700px){
+    .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .ootd-bd{padding:10px 10px 10px}
+    .ootd-bd b{font-size:13px}
+    .ootd-top .ootd-like{flex-direction:column;align-items:flex-start;gap:5px}
+    .ootd-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  }
   /* 무기명 안내 */
   .anon-note{display:flex;gap:11px;align-items:flex-start;background:var(--surface-2);
     border:1px solid var(--border);border-radius:16px;padding:13px 15px;margin:0 0 16px}
@@ -1687,6 +1735,10 @@ const BOARDS = {
             read:INNER, write:INNER },
   /* ── 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 ── */
   /* gallery = 사진이 있으면 크게, 없어도 OK. anon = 이름 없이 올립니다 */
+  /* 출근룩 사진 콘테스트 — 이 게시판만 일반 직원도 직접 올립니다(schema.sql 37절) */
+  ootd:   { label:'출근룩 사진 콘테스트', icon:'👔', layout:'ootd',
+            desc:'반바지 착용 지양 같은 경직된 관행을 풀고, 자유로운 출근룩을 나누는 콘테스트입니다.',
+            read:ALL,   write:ALL },
   mascot: { label:'고드래곤&새초롱이', icon:'🐉', layout:'gallery', anon:true,
             desc:'고용노동부 마스코트 고드래곤과 새소리단 마스코트 새초롱이의 각종 자료를 공유하는 공간입니다.',
             read:ALL,   write:INNER },
@@ -1743,6 +1795,7 @@ const MENUS = [
   { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
 
   /* 라운지 — 누구나 볼 수 있는 공간 세 곳 */
+  { id:'ootd',     icon:'👔', label:'출근룩 사진 콘테스트', roles:ALL, group:'라운지' },
   { id:'mascot',   icon:'🐉', label:'고드래곤&새초롱이', roles:ALL, group:'라운지' },
   { id:'ai',       icon:'🤖', label:'AI.zip',        roles:ALL,   group:'라운지' },
   { id:'relief',   icon:'💛', label:'멘탈관리.zip',   roles:ALL,   group:'라운지' },
@@ -1844,7 +1897,7 @@ function openLogin(){
 const DROP_FIRST = ['notice'];
 const PUBLIC_NAV = ['intro','news','opinion','vote','calendar'];
 /* 누구나 볼 수 있는 '라운지' 세 곳 — 상단에 따로 묶음 메뉴로 */
-const LOUNGE_NAV = ['mascot','ai','relief'];
+const LOUNGE_NAV = ['ootd','mascot','ai','relief'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
@@ -2421,6 +2474,61 @@ function boardView(key){
   const writeBtn = canWrite(key) ? `<button class="btn primary" id="bdWrite">✏️ 글쓰기</button>` : '';
   let body = '';
 
+  /* ── 출근룩 사진 콘테스트: 좋아요 많은 순으로 등수 (index.html 과 같은 화면) ── */
+  if(key === 'ootd'){
+    const all = DB.posts().filter(p => p.board === 'ootd');
+    const ranked = all.slice().sort((a,b) =>
+      likeCount(b) - likeCount(a) || String(a.at).localeCompare(String(b.at)));
+    const rankOf = (p) => ranked.indexOf(p) + 1;
+    const shown = q ? list.slice().sort((a,b) => rankOf(a) - rankOf(b)) : ranked;
+    const top = q ? [] : ranked.slice(0, 3).filter(p => likeCount(p) > 0);
+
+    const who = (p) => [p.authorTeam, p.author].filter(Boolean).map(esc).join(' ') || '익명';
+    const cap = (p) => esc(p.title || '오늘의 출근룩');
+    const card = (p, rank) => {
+      const img = firstImg(p.atts);
+      return `<article class="ootd-card${rank ? ` r${rank}` : ''}">
+        <div class="ootd-ph" data-open-post="${p.id}">
+          ${img ? `<img src="${img.data}" alt="${cap(p)}" loading="lazy">` : '👔'}
+          ${rank ? `<span class="ootd-rank">${rank}위</span>` : ''}
+        </div>
+        <div class="ootd-bd">
+          <b data-open-post="${p.id}">${who(p)}</b>
+          <p data-open-post="${p.id}">${cap(p)}</p>
+          <div class="ootd-like">
+            <span class="ootd-n"><span class="ico" aria-hidden="true">❤️</span>좋아요 <b>${likeCount(p)}</b></span>
+            <button class="btn sm like${likedPost(p) ? ' on' : ''}" data-plike="${p.id}">
+              <span class="ico" aria-hidden="true">💗</span>${likedPost(p) ? '좋아요 취소' : '좋아요'}</button>
+          </div>
+          <button class="ootd-cmt" data-open-post="${p.id}">댓글 ${cmtsOf(p).length}개 · 응원 한마디를 남겨주세요</button>
+        </div>
+      </article>`;
+    };
+
+    return pageHead(`${b.icon} ${b.label}`, b.desc,
+        canWrite(key) ? '<button class="btn primary" id="bdWrite">＋ 내 출근룩 올리기</button>' : '')
+      + `<div class="ootd-how">
+          <div class="oh-steps">
+            <span><b>①</b> 사진을 올리고</span>
+            <span><b>②</b> 마음에 드는 출근룩에 좋아요</span>
+            <span><b>③</b> 좋아요 많은 순으로 시상</span>
+          </div>
+          <div class="oh-prize">
+            <span class="op g">🥇 1등 10만원</span><span class="op s">🥈 2등 5만원</span>
+            <span class="op b">🥉 3등 3만원</span><span class="op">🎁 참가상 5천원 · 10명</span>
+          </div>
+          <p class="hint">상품권으로 드립니다. 한 사람이 한 장에 한 번만 좋아요를 누를 수 있어요.
+            직원이면 누구나 올리고 누를 수 있습니다.</p>
+        </div>`
+      + (top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
+          <div class="ootd-top">${top.map((p,i) => card(p, i+1)).join('')}</div>` : '')
+      + searchBar(key, '이름·한 줄 소개로 검색')
+      + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
+      + (shown.length ? `<h2 class="ootd-h2">참가 사진 ${all.length}장</h2>
+          <div class="ootd-grid">${shown.map(p => card(p, rankOf(p))).join('')}</div>`
+        : `<div class="empty">${q ? '검색 결과가 없습니다.' : '아직 올라온 출근룩이 없습니다.'}</div>`);
+  }
+
   /* ── 협업: 제안 카드 + 참여자 (index.html 과 같은 화면) ── */
   /* ── AI.zip: 큰 분야 탭 + 담당 업무 탭 + 목록 ── */
   if(key === 'ai'){
@@ -2554,7 +2662,7 @@ function bindBoard(key){
     t.collabStatus = next;
     if(DB.savePosts(arr)){ go('collab'); toast(`‘${COLLAB_LABEL[next]}’(으)로 옮겼습니다`); }
   }));
-  $('#bdWrite')?.addEventListener('click', ()=> openPostForm(key));
+  $('#bdWrite')?.addEventListener('click', ()=> key === 'ootd' ? openOotdForm() : openPostForm(key));
   /* 활동 게시판 팀 고르기 */
   $$('#main [data-act-team]').forEach(el => el.addEventListener('click', ()=>{
     ACT_TEAM = Number(el.dataset.actTeam) || 0;
@@ -2580,6 +2688,49 @@ const authorTeamOptions = (selected) => {
   return `<option value="">선택 안 함</option>` +
     list.map(n=>`<option ${n===selected?'selected':''}>${esc(n)}</option>`).join('');
 };
+
+/* 출근룩 사진 콘테스트 — 올리는 칸을 따로 둡니다(index.html 과 같은 화면).
+   일반 직원도 올리는 게시판이라 팀 고르기 대신 소속을 직접 적게 했습니다. */
+function openOotdForm(edit){
+  const e0 = edit || null;
+  const img0 = e0 ? firstImg(e0.atts) : null;
+  openModal(`👔 출근룩 사진 콘테스트 · ${e0 ? '수정' : '내 출근룩 올리기'}`, `
+    <div class="grid c2">
+      <label class="field">소속 <span class="hint" style="display:inline">선택</span>
+        <input id="odTeam" placeholder="예) 고용지원과" value="${esc(e0?.authorTeam || '')}"></label>
+      <label class="field">이름 <span class="req">*</span>
+        <input id="odName" placeholder="예) 홍길동 주무관" value="${esc(e0?.author || SESSION.name || '')}"></label>
+    </div>
+    <label class="field">한 줄 소개 <span class="req">*</span>
+      <input id="odTitle" placeholder="예) 편안함과 단정함" value="${e0 ? esc(e0.title) : ''}"></label>
+    <label class="field">출근룩 사진${e0 ? ' <span class="hint" style="display:inline">선택 — 새로 고르면 바뀝니다</span>' : ' <span class="req">*</span>'}
+      <input id="odFile" type="file" accept="image/*">
+      <span class="hint">한 장만 올려 주세요. 자동으로 줄여서 올라갑니다.</span></label>
+    <div class="thumbs" id="odThumbs">${img0 ? `<img src="${img0.data}" alt="">` : ''}</div>
+    <p class="hint" style="margin:4px 0 0">올린 사진과 이름은 <b>직원 누구나</b> 볼 수 있습니다.</p>
+    <div class="row-actions"><button class="btn primary" id="odSave">${e0 ? '수정 저장' : '올리기'}</button></div>`);
+  let picked = [];
+  $('#odFile').addEventListener('change', async ev => {
+    picked = (await collectFiles(ev.target.files, true)).slice(0, 1);
+    renderThumbs('#odThumbs', picked);
+  });
+  $('#odSave').addEventListener('click', ()=>{
+    const name = $('#odName').value.trim(), title = $('#odTitle').value.trim();
+    if(!name || !title){ toast('이름과 한 줄 소개를 입력하세요'); return; }
+    if(!e0 && !picked.length){ toast('출근룩 사진을 한 장 올려 주세요'); return; }
+    const arr = DB.posts();
+    const fields = { title, author:name, authorTeam:$('#odTeam').value.trim(),
+                     ...(picked.length ? { atts:picked } : {}) };
+    if(e0){
+      const t = arr.find(x => x.id === e0.id); if(!t) return;
+      Object.assign(t, fields);
+    }else{
+      arr.push({ id:uid(), board:'ootd', body:'', atts:[], realAuthor:SESSION.name,
+                 at:nowISO(), likedBy:[], ...fields });
+    }
+    if(DB.savePosts(arr)){ closeModal(); toast(e0 ? '수정되었습니다' : '올렸습니다. 많은 좋아요 받으세요!'); go('ootd'); }
+  });
+}
 
 function openPostForm(key, edit){
   const b = BOARDS[key];
@@ -2676,7 +2827,9 @@ function openPost(id){
   const imgs = (p.atts||[]).filter(isShowableImg);
   const docs = (p.atts||[]).filter(a => !isShowableImg(a));
   /* 무기명 글은 이름이 비어 있으니 realAuthor 로 '내 글인지' 를 봅니다 */
-  const mine = (p.realAuthor || p.author) === SESSION.name || SESSION.role==='admin';
+  /* 출근룩은 부적절한 사진을 담당관도 내릴 수 있습니다 */
+  const mine = (p.realAuthor || p.author) === SESSION.name || SESSION.role==='admin'
+    || (p.board === 'ootd' && SESSION.role === 'officer');
   const who = BOARDS[p.board]?.anon ? '🙈 무기명'
     : ([p.author, p.authorTeam, p.authorDept].filter(Boolean).map(esc).join(' · ') || '이름 없음');
   const at  = p.board === 'activity' ? actTeam(p.teamNo) : null;
@@ -2744,7 +2897,8 @@ function openPost(id){
     toast(`‘${COLLAB_LABEL[next]}’(으)로 바꿨습니다`);
   }));
 
-  $('#ppEdit')?.addEventListener('click', ()=>{ closeModal(); openPostForm(p.board, p); });
+  $('#ppEdit')?.addEventListener('click', ()=>{ closeModal();
+    p.board === 'ootd' ? openOotdForm(p) : openPostForm(p.board, p); });
   $('#ppDel')?.addEventListener('click', ()=>{
     if(!confirm('이 글을 삭제할까요? 되돌릴 수 없습니다.')) return;
     DB.savePosts(DB.posts().filter(x=>x.id!==id));
@@ -3109,20 +3263,21 @@ function commentBlock(p){
       ${c.body ? `<p>${esc(c.body)}</p>` : ''}
       ${(c.atts||[]).length ? `<div class="att-list">${c.atts.map(fileRow).join('')}</div>` : ''}
     </div>`;
-  const canWriteCmt = ['member','officer','admin'].includes(SESSION.role);
+  /* 출근룩 콘테스트는 응원 한마디를 직원 누구나 남길 수 있습니다 */
+  const canWriteCmt = ['member','officer','admin'].includes(SESSION.role) || p.board === 'ootd';
   return `<hr style="border:0;border-top:1px solid var(--border);margin:20px 0 14px">
-    <div class="pc-head"><h3>${sub ? '제출 내역' : '댓글'} <b>${cs.length}</b></h3>${sub ? dueTag(p) : ''}</div>
+    <div class="pc-head"><h3>${sub ? '제출 내역' : (p.board === 'ootd' ? '응원 한마디' : '댓글')} <b>${cs.length}</b></h3>${sub ? dueTag(p) : ''}</div>
     ${sub ? `<p class="hint" style="margin:0 0 12px">본 사이트에서는 올린 파일을 <b>낸 본인과 혁신행정담당관만</b> 열 수 있습니다.
       (연습용은 혼자 쓰는 것이라 그대로 열립니다.)</p>` : ''}
     ${done ? '<div class="notice ok" style="margin-bottom:12px"><b>✅ 제출했습니다</b> — 다시 내려면 아래에 한 번 더 올리면 됩니다.</div>' : ''}
     ${cs.length ? `<div class="pc-list">${cs.map(row).join('')}</div>`
-      : `<div class="empty" style="margin-bottom:12px">${sub ? '아직 아무도 내지 않았습니다.' : '아직 댓글이 없습니다.'}</div>`}
+      : `<div class="empty" style="margin-bottom:12px">${sub ? '아직 아무도 내지 않았습니다.' : (p.board === 'ootd' ? '첫 번째 응원을 남겨 주세요!' : '아직 댓글이 없습니다.')}</div>`}
     ${canWriteCmt ? `<div class="pc-form">
-      <textarea id="pcBody" placeholder="${sub ? '한 줄 남겨 주세요. (선택)' : '댓글을 남겨 주세요.'}"></textarea>
+      <textarea id="pcBody" placeholder="${sub ? '한 줄 남겨 주세요. (선택)' : (p.board === 'ootd' ? '응원 한마디를 남겨주세요' : '댓글을 남겨 주세요.')}"></textarea>
       ${sub ? `<label class="field" style="margin:10px 0 0">제출 파일
         <input id="pcFiles" type="file" multiple></label>
         <div class="thumbs" id="pcThumbs"></div>` : ''}
-      <div class="row-actions"><button class="btn primary" id="pcSave">${sub ? '제출하기' : '댓글 남기기'}</button></div>
+      <div class="row-actions"><button class="btn primary" id="pcSave">${sub ? '제출하기' : (p.board === 'ootd' ? '응원 남기기' : '댓글 남기기')}</button></div>
     </div>` : `<p class="hint">${sub ? '제출은 단원만 할 수 있습니다.' : '댓글은 단원만 남길 수 있습니다.'}</p>`}`;
 }
 

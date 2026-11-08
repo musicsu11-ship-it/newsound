@@ -1,5 +1,5 @@
 -- ============================================================================
---  새소리단 — 지금 실행해야 하는 SQL  (2026-11-03)
+--  새소리단 — 지금 실행해야 하는 SQL  (2026-11-08)
 --
 --  ▷ 하는 법
 --     1. 이 파일 안을 아무 데나 클릭
@@ -9,13 +9,15 @@
 --     5. 'Success' 라고 나오면 끝입니다.
 --
 --  ▷ 이번에 새로 들어간 것
---     36절 — 활동비 정산을 신청한 사람이 고치고 내릴 수 있게
---        · '접수완료 · 확인 중' 일 때만 됩니다. 담당관이 처리한 뒤에는 잠깁니다.
---        · 금액·항목·계좌를 고치거나 영수증을 다시 올릴 수 있습니다.
---        · 신청자가 처리 상태나 담당관 코멘트를 바꾸는 것은 서버가 막습니다.
---        · 영수증 파일 권한은 그대로입니다 — 올린 본인과 담당관만. ★그대로 보호
+--     37절 — 출근룩 사진 콘테스트 게시판
+--        · 직원이 사진을 올리고, 다른 직원이 '좋아요' 로 투표하고,
+--          좋아요 많은 순으로 등수가 매겨집니다.
+--        · ★ 이 게시판만 '일반 직원도 직접 올릴 수 있게' 엽니다.
+--             다른 게시판은 지금처럼 단원 이상만 글을 씁니다.
+--             의견함과 같은 수준의 개방이고, 사진은 ootd 폴더에만 올라갑니다.
+--        · 부적절한 사진은 혁신행정담당관이 바로 내릴 수 있게 해 두었습니다.
 --
---  ▷ 아직 안 하셨다면 29~35절도 함께 들어 있습니다.
+--  ▷ 아직 안 하셨다면 29~36절도 함께 들어 있습니다.
 --     이미 실행하셨다면 그냥 다시 지나갑니다(여러 번 해도 안전합니다).
 --        29절 — 투표를 올린 뒤에도 고칠 수 있게(실명 → 무기명)
 --        30절 — 라운지 게시판 셋
@@ -26,12 +28,13 @@
 --        34절 — 협업 게시판을 칸반 보드로
 --        35절 — 활동 게시판을 단원 전용으로
 --                ★ 일반 직원은 활동 게시판을 볼 수 없게 됩니다
+--        36절 — 활동비 정산을 신청한 사람이 고치고 내릴 수 있게
 --
 --  ▷ 안전한가요?
 --     네. 글·사진·의견·투표·보고서·정산·가입한 회원은 지우지 않습니다.
 --     영수증과 공지사항 제출 파일은 그대로 본인과 담당관만 봅니다. ★보호
 --
---  ▷ 이 내용은 supabase/schema.sql 29~36절과 같습니다.
+--  ▷ 이 내용은 supabase/schema.sql 29~37절과 같습니다.
 -- ============================================================================
 
 --  29. 투표 수정 — 실명 투표를 무기명(익명)으로 바꿀 수 있게
@@ -431,3 +434,116 @@ drop trigger if exists expenses_guard on public.expenses;
 create trigger expenses_guard
   before update on public.expenses
   for each row execute function public.guard_expense_update();
+
+-- ============================================================================
+--  37. 출근룩 사진 콘테스트 게시판 (ootd)
+--
+--  반바지 착용 지양 같은 경직된 관행을 풀고, 자유로운 출근룩을 나누는 콘테스트입니다.
+--    ① 직원이 사진을 올리고   ② 다른 직원이 '좋아요' 로 투표   ③ 좋아요 많은 순으로 시상
+--
+--  ★ 이 게시판만 '일반 직원도 직접 올릴 수 있게' 엽니다.
+--    다른 게시판은 지금처럼 단원 이상만 글을 씁니다. 의견함과 같은 수준의 개방입니다.
+--      · 읽기     : 누구나
+--      · 올리기   : 홈페이지에 들어온 사람 누구나(익명 접속 포함)
+--      · 좋아요   : 누구나 (32절 그대로, 한 사람이 한 장에 한 번)
+--      · 응원 댓글 : 누구나
+--      · 지우기   : 올린 본인 · 혁신행정담당관 · 관리자
+--                   (장난 사진이 올라오면 담당관이 바로 내릴 수 있어야 해서 넓혔습니다)
+--    사진은 media 저장소의 ootd/<올린 사람 번호>/ 폴더에만 올릴 수 있습니다.
+--    다른 폴더(posts 등)는 예전처럼 단원 이상만 올립니다.
+-- ============================================================================
+
+-- 게시판 이름 목록 다시 걸기 (30절과 같은 방식 — 다시 실행해도 안전)
+do $$
+declare c text;
+begin
+  for c in
+    select conname from pg_constraint
+     where conrelid = 'public.posts'::regclass
+       and contype  = 'c'
+       and pg_get_constraintdef(oid) ilike '%board%'
+  loop
+    execute format('alter table public.posts drop constraint %I', c);
+  end loop;
+end $$;
+
+alter table public.posts add constraint posts_board_check
+  check (board in ('news','notice','free','share','activity','collab',
+                   'mascot','ai','relief','ootd'));
+
+-- 읽기 — 소식·라운지 셋과 콘테스트는 누구나, 나머지는 단원 이상(35절에 ootd 추가)
+drop policy if exists posts_select on public.posts;
+create policy posts_select on public.posts for select
+  using ( board in ('news','mascot','ai','relief','ootd') or public.is_inner() );
+
+-- 올리기 — 콘테스트만 누구나, 공지사항은 담당관, 나머지는 단원 이상
+drop policy if exists posts_insert on public.posts;
+create policy posts_insert on public.posts for insert
+  with check (
+    author_id = auth.uid()
+    and case board
+          when 'ootd'   then auth.uid() is not null
+          when 'notice' then public.is_officer()
+          else public.is_inner()
+        end
+  );
+
+-- 지우기 — 콘테스트는 담당관도 내릴 수 있게(부적절한 사진 정리용)
+drop policy if exists posts_delete on public.posts;
+create policy posts_delete on public.posts for delete
+  using (
+    author_id = auth.uid()
+    or public.is_admin()
+    or (board = 'ootd' and public.is_officer())
+  );
+
+-- 응원 댓글 — 콘테스트는 누구나, 나머지는 단원 이상
+drop policy if exists pc_insert on public.post_comments;
+create policy pc_insert on public.post_comments for insert
+  with check (
+    author_id = auth.uid()
+    and (
+      public.is_inner()
+      or exists (select 1 from public.posts p where p.id = post_id and p.board = 'ootd')
+    )
+  );
+
+-- 댓글 이름 — 콘테스트는 단원이 아니어도 달 수 있으므로 이름이 없으면 '직원' 으로 둡니다
+create or replace function public.set_comment_author()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare bd text;
+begin
+  select p.board into bd from public.posts p where p.id = new.post_id;
+  if bd = 'mascot' then
+    new.author_name := '';
+  else
+    new.author_name := coalesce(
+      nullif((select name from public.profiles where id = auth.uid()), ''),
+      '직원');
+  end if;
+  return new;
+end $$;
+
+-- 사진 올리기 — ootd/ 폴더는 누구나(자기 폴더에만), 그 밖은 예전처럼 단원 이상
+drop policy if exists media_write on storage.objects;
+create policy media_write on storage.objects for insert
+  with check (
+    bucket_id = 'media'
+    and public.storage_owner(name) = auth.uid()        -- 남의 폴더에 못 올림
+    and (
+      public.is_inner()
+      or (storage.foldername(name))[1] = 'ootd'
+    )
+  );
+
+-- 콘테스트 사진 내리기 — 올린 본인·관리자에 더해 담당관도
+drop policy if exists media_delete on storage.objects;
+create policy media_delete on storage.objects for delete
+  using (
+    bucket_id = 'media'
+    and (
+      public.storage_owner(name) = auth.uid()
+      or public.is_admin()
+      or ((storage.foldername(name))[1] = 'ootd' and public.is_officer())
+    )
+  );
