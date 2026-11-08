@@ -1795,7 +1795,8 @@ const MENUS = [
   { id:'calendar', icon:'📅', label:'일정',           roles:ALL,   group:'일정' },
 
   /* 라운지 — 누구나 볼 수 있는 공간 세 곳 */
-  { id:'ootd',     icon:'👔', label:'출근룩 사진 콘테스트', roles:ALL, group:'라운지' },
+  /* 출근룩 콘테스트 — 의견함 옆, 상단 메뉴에 따로 둡니다 */
+  { id:'ootd',     icon:'👔', label:'출근룩 사진 콘테스트', roles:ALL, group:'출근룩' },
   { id:'mascot',   icon:'🐉', label:'고드래곤&새초롱이', roles:ALL, group:'라운지' },
   { id:'ai',       icon:'🤖', label:'AI.zip',        roles:ALL,   group:'라운지' },
   { id:'relief',   icon:'💛', label:'멘탈관리.zip',   roles:ALL,   group:'라운지' },
@@ -1895,9 +1896,9 @@ function openLogin(){
 /* 시안의 상단 메뉴 6개는 그대로 노출하고, 단원·담당관 전용 메뉴는 드롭다운에 넣습니다 */
 /* 공지사항은 단원 전용 묶음 메뉴 안에서 맨 위에 둡니다(DROP_FIRST) */
 const DROP_FIRST = ['notice'];
-const PUBLIC_NAV = ['intro','news','opinion','vote','calendar'];
+const PUBLIC_NAV = ['intro','news','opinion','ootd','vote','calendar'];
 /* 누구나 볼 수 있는 '라운지' 세 곳 — 상단에 따로 묶음 메뉴로 */
-const LOUNGE_NAV = ['ootd','mascot','ai','relief'];
+const LOUNGE_NAV = ['mascot','ai','relief'];
 
 function renderNav(){
   const mine = MENUS.filter(m => m.roles.includes(SESSION.role));
