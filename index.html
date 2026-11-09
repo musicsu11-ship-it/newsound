@@ -285,19 +285,37 @@
   .nc-cmt{font-size:12.5px;font-weight:800;color:var(--muted);cursor:pointer}
   .news-card .btn.like{padding:4px 10px}
   /* ── 출근룩 사진 콘테스트 ───────────────────────────────────────────── */
-  /* 참여 안내 — 눈에 먼저 들어오게 분홍 띠를 두르고 글씨를 키웠습니다 */
-  .ootd-guide{background:linear-gradient(150deg,var(--brand-weak),var(--surface-2) 60%,#fff9ec);
-    border:1.5px solid var(--brand);border-radius:24px;padding:22px 24px;margin:0 0 24px;
-    box-shadow:0 10px 30px rgba(214,30,92,.1)}
+  /* 제목 — 포스터처럼 '출근룩' 은 분홍, '사진 콘테스트' 는 청록으로 */
+  .ootd-title .t1{color:var(--brand)}
+  .ootd-title .t2{color:#13a0a0}
+
+  /* 참여 안내 — 포스터 느낌의 하늘색 판. 마스코트와 리본 띠를 얹었습니다 */
+  .ootd-guide{position:relative;overflow:hidden;
+    background:linear-gradient(165deg,#e8f4fd 0%,#f3fbff 45%,#fffdf5 100%);
+    border:1.5px solid #9ed2f2;border-radius:28px;padding:22px 24px;margin:0 0 24px;
+    box-shadow:0 12px 34px rgba(26,143,212,.16)}
+  /* 마스코트 — 오른쪽 아래에 장식으로. 좁은 화면에서는 숨깁니다 */
+  .og-mascot{position:absolute;right:4px;bottom:-14px;width:214px;height:auto;
+    pointer-events:none;user-select:none;opacity:.95}
+  /* 리본 띠 — 포스터의 파란 배너 */
+  .og-ribbon{display:flex;justify-content:center;margin:0 0 18px}
+  .og-ribbon span{position:relative;display:inline-block;
+    background:linear-gradient(180deg,#3f7bea,#2353c9);color:#fff;
+    font-size:16px;font-weight:900;letter-spacing:-.01em;padding:10px 30px;border-radius:10px;
+    box-shadow:0 7px 18px rgba(35,83,201,.34);word-break:keep-all;text-align:center}
+  .og-ribbon span::before,.og-ribbon span::after{content:'';position:absolute;top:50%;
+    width:0;height:0;border:11px solid transparent}
+  .og-ribbon span::before{left:-21px;border-right-color:#1c43a6;transform:translateY(-50%)}
+  .og-ribbon span::after{right:-21px;border-left-color:#1c43a6;transform:translateY(-50%)}
   .og-head{display:flex;align-items:center;gap:13px;margin-bottom:18px}
   .og-ic{font-size:30px;line-height:1;flex:none}
-  .og-head b{display:block;font-size:20px;font-weight:900;letter-spacing:-.02em;color:#16225c}
-  .og-head span{display:block;margin-top:3px;font-size:14.5px;color:#3a4478;
+  .og-head b{display:block;font-size:20px;font-weight:900;letter-spacing:-.02em;color:#0d3b5c}
+  .og-head span{display:block;margin-top:3px;font-size:14.5px;color:#2b4a63;
     line-height:1.55;word-break:keep-all}
 
   .og-steps{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px;
     grid-template-columns:repeat(3,minmax(0,1fr))}
-  .og-steps li{position:relative;background:var(--surface);border:1px solid var(--border);
+  .og-steps li{position:relative;background:rgba(255,255,255,.92);border:1px solid #cfe8fa;
     border-radius:18px;padding:16px 16px 14px;min-width:0}
   .og-steps .n{position:absolute;top:-10px;left:16px;display:grid;place-items:center;
     width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;
@@ -309,7 +327,7 @@
     color:var(--muted);line-height:1.5;word-break:keep-all}
 
   .og-prize{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-  .pz{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;
+  .pz{background:rgba(255,255,255,.94);border:1.5px solid #cfe8fa;border-radius:18px;
     padding:14px 10px 12px;text-align:center;min-width:0}
   .pz .m{display:block;font-size:24px;line-height:1}
   .pz b{display:block;margin-top:5px;font-size:13.5px;font-weight:900;color:var(--muted)}
@@ -321,7 +339,8 @@
   .pz.b{background:#fdf2ea;border-color:#dfae8c} .pz.b i{color:#8a4f24}
   .pz.p{background:var(--surface-2);border-color:var(--lav)} .pz.p i{color:#4b3f9e}
 
-  .og-note{margin:16px 0 0;font-size:14px;line-height:1.6;color:#3a4478;word-break:keep-all}
+  .og-note{position:relative;margin:16px 0 0;font-size:14px;line-height:1.6;color:#2b4a63;
+    word-break:keep-all;max-width:calc(100% - 200px)}
   .og-note b{font-weight:900;color:var(--brand)}
   .og-note span{margin-right:5px}
   .pg-sub.og-lead,.og-lead{font-size:16px;font-weight:700;color:#3a4478;line-height:1.6;word-break:keep-all}
@@ -340,7 +359,9 @@
   .ootd-card.r1 .ootd-rank{background:#f0c64a;color:#4a3500}
   .ootd-card.r2 .ootd-rank{background:#cfd6e4;color:#2f3950}
   .ootd-card.r3 .ootd-rank{background:#e3b391;color:#5e3415}
-  .ootd-card.r1{border-color:#f0c64a}
+  .ootd-card.r1{border-color:#f0c64a;box-shadow:0 10px 26px rgba(240,198,74,.3)}
+  .ootd-crown{position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:30px;
+    line-height:1;filter:drop-shadow(0 3px 5px rgba(0,0,0,.25));z-index:1}
   .ootd-bd{padding:13px 14px 12px;display:flex;flex-direction:column;gap:5px}
   .ootd-bd b{font-size:15.5px;font-weight:900;cursor:pointer;word-break:keep-all}
   .ootd-bd p{margin:0;font-size:13.5px;color:var(--muted);cursor:pointer;word-break:keep-all;
@@ -352,7 +373,16 @@
   .ootd-cmt{margin-top:4px;padding:7px 0 0;border:0;border-top:1px dashed var(--border);background:none;
     font:inherit;font-size:12.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
   .ootd-cmt:hover{color:var(--brand)}
+  /* 넓은 화면에서는 오른쪽 200px 를 마스코트 자리로 비워 둡니다 */
+  @media (min-width:1041px){ .og-steps,.og-prize{padding-right:200px} }
+  @media (max-width:1040px){
+    .og-mascot{width:150px;opacity:.9;bottom:-10px}
+    .og-note{max-width:calc(100% - 160px)}
+  }
   @media (max-width:860px){
+    .og-mascot{display:none}
+    .og-note{max-width:none}
+    .og-ribbon span{font-size:14.5px;padding:9px 24px}
     .og-steps{grid-template-columns:minmax(0,1fr);gap:14px}
     .og-steps li{display:grid;grid-template-columns:auto 1fr;gap:0 13px;align-items:center;
       padding:14px 16px}
@@ -3057,7 +3087,7 @@ function boardView(key){
     const card = (p, rank) => `<article class="ootd-card${rank ? ` r${rank}` : ''}">
       <div class="ootd-ph" data-open-post="${p.id}">
         ${photoOf(p) ? `<img src="${esc(photoOf(p))}" alt="${cap(p)}" loading="lazy" decoding="async">` : '👔'}
-        ${rank ? `<span class="ootd-rank">${rank}위</span>` : ''}
+        ${rank === 1 ? '<span class="ootd-crown" aria-hidden="true">👑</span>' : ''}${rank ? `<span class="ootd-rank">${rank}위</span>` : ''}
       </div>
       <div class="ootd-bd">
         <b data-open-post="${p.id}">${who(p)}</b>
@@ -3072,12 +3102,15 @@ function boardView(key){
 
     return `<div class="crumb">홈 · ${esc(CRUMB[key])}</div>
     <div class="pg-head">
-      <div><h1 class="pg-title">${b.icon} ${esc(b.label)}</h1>
+      <div><h1 class="pg-title ootd-title">${b.icon}
+          <span class="t1">출근룩</span> <span class="t2">사진 콘테스트</span></h1>
         <p class="pg-sub og-lead">${esc(b.desc)}</p></div>
       ${canWrite(key) ? `<button class="btn primary" id="bdWrite">＋ 내 출근룩 올리기</button>` : ''}
     </div>
 
     <section class="ootd-guide">
+      <img class="og-mascot" src="assets/mascots.png" alt="" aria-hidden="true" loading="lazy">
+      <div class="og-ribbon"><span>👑 고용노동부 패셔니스타를 찾아라! 👑</span></div>
       <div class="og-head">
         <span class="og-ic" aria-hidden="true">🏆</span>
         <div><b>이렇게 참여하세요</b>
