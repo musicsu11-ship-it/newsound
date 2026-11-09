@@ -363,32 +363,33 @@
   .pg-sub.og-lead,.og-lead{font-size:16px;font-weight:700;color:#3a4478;line-height:1.6;word-break:keep-all}
   .ootd-h2{margin:26px 0 13px;font-size:21px;font-weight:900;letter-spacing:-.02em}
   .ootd-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
-  .ootd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:14px}
+  /* 한 장만 올라와도 작게 남지 않도록 칸을 크게 잡았습니다(넓은 화면 3칸) */
+  .ootd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:16px}
   .ootd-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;
     box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
   .ootd-card:hover{border-color:var(--brand)}
   .ootd-ph{position:relative;aspect-ratio:3/4;display:grid;place-items:center;cursor:pointer;
     background:linear-gradient(150deg,#f3f2fd,#fff9ec);color:#a2a9c6;font-size:40px;overflow:hidden}
   .ootd-ph img{width:100%;height:100%;object-fit:cover;display:block}
-  .ootd-rank{position:absolute;top:10px;left:10px;font-size:13.5px;font-weight:900;
-    background:var(--surface);color:var(--text);border-radius:9px;padding:4px 11px;
+  .ootd-rank{position:absolute;top:12px;left:12px;font-size:15px;font-weight:900;
+    background:var(--surface);color:var(--text);border-radius:10px;padding:5px 13px;
     box-shadow:0 3px 10px rgba(22,34,92,.2)}
   .ootd-card.r1 .ootd-rank{background:#f0c64a;color:#4a3500}
   .ootd-card.r2 .ootd-rank{background:#cfd6e4;color:#2f3950}
   .ootd-card.r3 .ootd-rank{background:#e3b391;color:#5e3415}
   .ootd-card.r1{border-color:#f0c64a;box-shadow:0 10px 26px rgba(240,198,74,.3)}
-  .ootd-crown{position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:30px;
+  .ootd-crown{position:absolute;top:-4px;left:50%;transform:translateX(-50%);font-size:36px;
     line-height:1;filter:drop-shadow(0 3px 5px rgba(0,0,0,.25));z-index:1}
-  .ootd-bd{padding:13px 14px 12px;display:flex;flex-direction:column;gap:5px}
-  .ootd-bd b{font-size:15.5px;font-weight:900;cursor:pointer;word-break:keep-all}
-  .ootd-bd p{margin:0;font-size:13.5px;color:var(--muted);cursor:pointer;word-break:keep-all;
+  .ootd-bd{padding:15px 16px 14px;display:flex;flex-direction:column;gap:6px}
+  .ootd-bd b{font-size:18px;font-weight:900;cursor:pointer;word-break:keep-all}
+  .ootd-bd p{margin:0;font-size:15px;color:var(--muted);cursor:pointer;word-break:keep-all;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .ootd-like{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:3px}
-  .ootd-n{font-size:14px;font-weight:800;display:flex;align-items:center;gap:4px;white-space:nowrap}
-  .ootd-n .ico{font-size:15px}
-  .ootd-n b{font-size:16px;color:var(--brand)}
+  .ootd-n{font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:5px;white-space:nowrap}
+  .ootd-n .ico{font-size:17px}
+  .ootd-n b{font-size:19px;color:var(--brand)}
   .ootd-cmt{margin-top:4px;padding:7px 0 0;border:0;border-top:1px dashed var(--border);background:none;
-    font:inherit;font-size:12.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
+    font:inherit;font-size:13.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
   .ootd-cmt:hover{color:var(--brand)}
   /* 넓은 화면에서는 오른쪽을 마스코트 자리로 비워 둡니다 */
   @media (max-width:1040px){
@@ -416,8 +417,10 @@
     .og-info li{font-size:14.5px}
     .og-info b{font-size:13px;padding:3px 9px}
     .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-    .ootd-bd{padding:10px 10px 10px}
-    .ootd-bd b{font-size:13px}
+    .ootd-bd{padding:12px 12px 11px}
+    .ootd-bd b{font-size:15px}
+    .ootd-bd p{font-size:13px}
+    .ootd-n{font-size:13.5px} .ootd-n b{font-size:16px}
     .ootd-top .ootd-like{flex-direction:column;align-items:flex-start;gap:5px}
     .ootd-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   }
