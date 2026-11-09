@@ -274,59 +274,60 @@
     border:1.5px solid #9ed2f2;border-radius:28px;padding:22px 24px;margin:0 0 24px;
     box-shadow:0 12px 34px rgba(26,143,212,.16)}
   /* 마스코트 — 오른쪽 아래에 장식으로. 좁은 화면에서는 숨깁니다 */
-  .og-mascot{position:absolute;right:4px;bottom:-14px;width:214px;height:auto;
+  .og-mascot{position:absolute;right:6px;bottom:-16px;width:262px;height:auto;
     pointer-events:none;user-select:none;opacity:.95}
   /* 리본 띠 — 포스터의 파란 배너 */
-  .og-ribbon{display:flex;justify-content:center;margin:0 0 18px}
+  .og-ribbon{display:flex;justify-content:center;margin:0 0 20px}
   .og-ribbon span{position:relative;display:inline-block;
     background:linear-gradient(180deg,#3f7bea,#2353c9);color:#fff;
-    font-size:16px;font-weight:900;letter-spacing:-.01em;padding:10px 30px;border-radius:10px;
+    font-size:27px;font-weight:900;letter-spacing:-.02em;padding:13px 38px;border-radius:12px;
     box-shadow:0 7px 18px rgba(35,83,201,.34);word-break:keep-all;text-align:center}
   .og-ribbon span::before,.og-ribbon span::after{content:'';position:absolute;top:50%;
-    width:0;height:0;border:11px solid transparent}
-  .og-ribbon span::before{left:-21px;border-right-color:#1c43a6;transform:translateY(-50%)}
-  .og-ribbon span::after{right:-21px;border-left-color:#1c43a6;transform:translateY(-50%)}
+    width:0;height:0;border:15px solid transparent}
+  .og-ribbon span::before{left:-29px;border-right-color:#1c43a6;transform:translateY(-50%)}
+  .og-ribbon span::after{right:-29px;border-left-color:#1c43a6;transform:translateY(-50%)}
   /* 한 줄 설명 — 리본 바로 아래 가운데 */
-  .og-tag{margin:0 0 16px;text-align:center;font-size:15px;line-height:1.55;
-    color:#2b4a63;word-break:keep-all}
+  /* 한 줄 설명 — 리본 바로 아래 가운데 */
+  .og-tag{margin:0 0 20px;text-align:center;font-size:26px;line-height:1.5;
+    font-weight:700;color:#2b4a63;word-break:keep-all}
   .og-tag b{font-weight:900;color:#0d6ea8}
 
   /* 참여 방법 — 번호와 글을 가로로 붙여 빈 공간을 없앴습니다 */
-  .og-steps{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:10px;
+  .og-steps{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:12px;
     grid-template-columns:repeat(3,minmax(0,1fr))}
-  .og-steps li{display:flex;align-items:center;gap:13px;min-width:0;
-    background:#fff;border:1.5px solid #cfe8fa;border-radius:16px;padding:14px 16px;
+  .og-steps li{display:flex;align-items:center;gap:16px;min-width:0;
+    background:#fff;border:1.5px solid #cfe8fa;border-radius:18px;padding:18px 20px;
     box-shadow:0 3px 10px rgba(26,143,212,.08)}
-  .og-steps .n{flex:none;display:grid;place-items:center;width:34px;height:34px;
+  .og-steps .n{flex:none;display:grid;place-items:center;width:52px;height:52px;
     border-radius:50%;background:linear-gradient(180deg,#f04c80,#d61e5c);color:#fff;
-    font-size:16px;font-weight:900;box-shadow:0 4px 10px rgba(214,30,92,.33)}
+    font-size:26px;font-weight:900;box-shadow:0 5px 13px rgba(214,30,92,.33)}
   .og-steps .tx{min-width:0}
-  .og-steps b{display:block;font-size:15.5px;font-weight:900;line-height:1.4;
-    letter-spacing:-.02em;color:#123a56;word-break:keep-all}
-  .og-steps em{display:block;margin-top:3px;font-style:normal;font-size:12.5px;
+  .og-steps b{display:block;font-size:27px;font-weight:900;line-height:1.35;
+    letter-spacing:-.03em;color:#123a56;word-break:keep-all}
+  .og-steps em{display:block;margin-top:5px;font-style:normal;font-size:20px;
     color:#5b7892;line-height:1.45;word-break:keep-all}
 
-  /* 시상 — 메달과 금액을 한 줄로 붙여 납작하게 */
-  .og-prize{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-  .pz{display:flex;align-items:center;gap:11px;min-width:0;
-    background:#fff;border:1.5px solid #cfe8fa;border-radius:16px;padding:12px 14px;
+  /* 시상 — 메달과 금액을 한 줄로. 글씨가 커서 두 칸씩 놓습니다 */
+  .og-prize{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .pz{display:flex;align-items:center;gap:16px;min-width:0;
+    background:#fff;border:1.5px solid #cfe8fa;border-radius:18px;padding:16px 20px;
     box-shadow:0 3px 10px rgba(26,143,212,.08)}
-  .pz .m{flex:none;font-size:27px;line-height:1}
+  .pz .m{flex:none;font-size:46px;line-height:1}
   .pz .tx{min-width:0;flex:1}
-  .pz b{display:block;font-size:12.5px;font-weight:800;color:#5b7892;letter-spacing:.02em}
-  .pz i{display:block;font-style:normal;font-size:20px;font-weight:900;white-space:nowrap;
-    letter-spacing:-.03em;line-height:1.2}
-  .pz em{flex:none;font-style:normal;font-size:12px;font-weight:800;color:#5b7892;
-    background:#eef6fc;border-radius:999px;padding:3px 9px;white-space:nowrap}
+  .pz b{display:block;font-size:21px;font-weight:800;color:#5b7892;letter-spacing:.01em}
+  .pz i{display:block;font-style:normal;font-size:38px;font-weight:900;white-space:nowrap;
+    letter-spacing:-.04em;line-height:1.2}
+  .pz em{flex:none;font-style:normal;font-size:20px;font-weight:800;color:#5b7892;
+    background:#eef6fc;border-radius:999px;padding:6px 15px;white-space:nowrap}
   .pz.g{background:linear-gradient(135deg,#fffaea,#fff)} .pz.g i{color:#9a6c00} .pz.g em{background:#fdf0cf}
   .pz.s{background:linear-gradient(135deg,#f6f8fc,#fff)} .pz.s i{color:#44506b} .pz.s em{background:#e9edf5}
   .pz.b{background:linear-gradient(135deg,#fdf3ec,#fff)} .pz.b i{color:#90511f} .pz.b em{background:#f7e3d4}
   .pz.p{background:linear-gradient(135deg,#f4f2ff,#fff)} .pz.p i{color:#4b3f9e} .pz.p em{background:#eae6fb}
 
-  .og-note{position:relative;margin:14px 0 0;font-size:13.5px;line-height:1.6;color:#2b4a63;
-    word-break:keep-all;max-width:calc(100% - 200px)}
+  .og-note{position:relative;margin:18px 0 0;font-size:24px;line-height:1.5;color:#2b4a63;
+    font-weight:700;word-break:keep-all;max-width:calc(100% - 250px)}
   .og-note b{font-weight:900;color:var(--brand)}
-  .og-note span{margin-right:5px}
+  .og-note span{margin-right:6px}
   .pg-sub.og-lead,.og-lead{font-size:16px;font-weight:700;color:#3a4478;line-height:1.6;word-break:keep-all}
   .ootd-h2{margin:26px 0 13px;font-size:21px;font-weight:900;letter-spacing:-.02em}
   .ootd-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
@@ -358,15 +359,19 @@
     font:inherit;font-size:12.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
   .ootd-cmt:hover{color:var(--brand)}
   /* 넓은 화면에서는 오른쪽 200px 를 마스코트 자리로 비워 둡니다 */
-  @media (min-width:1041px){ .og-steps,.og-prize{padding-right:200px} }
+  @media (min-width:1041px){ .og-steps,.og-prize{padding-right:250px} }
   @media (max-width:1040px){
-    .og-mascot{width:150px;opacity:.9;bottom:-10px}
-    .og-note{max-width:calc(100% - 160px)}
+    .og-mascot{width:180px;opacity:.9;bottom:-12px}
+    .og-note{max-width:calc(100% - 190px)}
   }
   @media (max-width:860px){
     .og-mascot{display:none}
     .og-note{max-width:none}
-    .og-ribbon span{font-size:14.5px;padding:9px 24px}
+    .og-ribbon span{font-size:20px;padding:11px 26px}
+    .og-tag{font-size:21px}
+    .og-steps b{font-size:23px}
+    .og-steps em{font-size:17px}
+    .og-note{font-size:20px}
     .og-steps{grid-template-columns:minmax(0,1fr);gap:8px}
     .og-prize{grid-template-columns:repeat(2,minmax(0,1fr))}
   }
@@ -377,9 +382,13 @@
   }
   @media (max-width:700px){
     .ootd-guide{padding:18px 16px;border-radius:20px}
-    .og-tag{font-size:14px}
-    .pz i{font-size:18.5px}
-    .pz .m{font-size:24px}
+    .og-tag{font-size:19px}
+    .pz i{font-size:31px}
+    .pz .m{font-size:38px}
+    .pz b{font-size:18px}
+    .pz em{font-size:17px;padding:5px 12px}
+    .og-steps b{font-size:21px}
+    .og-steps .n{width:46px;height:46px;font-size:23px}
     .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     .ootd-bd{padding:10px 10px 10px}
     .ootd-bd b{font-size:13px}
