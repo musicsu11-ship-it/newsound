@@ -298,15 +298,7 @@
   .pz.b{background:#fdf2ea;border-color:#dfae8c} .pz.b i{color:#8a4f24}
   .pz.p{background:var(--surface-2);border-color:var(--lav)} .pz.p i{color:#4b3f9e}
 
-  .og-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;
-    flex-wrap:wrap;margin-top:16px}
-  .og-note{margin:0;font-size:14px;line-height:1.6;color:#3a4478;word-break:keep-all;flex:1 1 300px}
-  /* QR 창 */
-  .qr-box{position:relative;display:grid;place-items:center;background:#fff;
-    border:1px solid var(--border);border-radius:18px;padding:16px;min-height:200px}
-  .qr-box canvas{width:min(260px,100%);height:auto;display:block;image-rendering:pixelated}
-  .qr-wait{position:absolute;inset:0;display:grid;place-items:center;padding:20px;
-    font-size:13px;color:var(--muted);text-align:center;word-break:keep-all;background:#fff;border-radius:18px}
+  .og-note{margin:16px 0 0;font-size:14px;line-height:1.6;color:#3a4478;word-break:keep-all}
   .og-note b{font-weight:900;color:var(--brand)}
   .og-note span{margin-right:5px}
   .page-head p.og-lead,.og-lead{font-size:16px;font-weight:700;color:#3a4478;line-height:1.6;word-break:keep-all}
@@ -2652,11 +2644,8 @@ function boardView(key){
             <div class="pz b"><span class="m" aria-hidden="true">🥉</span><b>3등</b><i>3만원</i><em>1명</em></div>
             <div class="pz p"><span class="m" aria-hidden="true">🎁</span><b>참가상</b><i>5천원</i><em>10명</em></div>
           </div>
-          <div class="og-foot">
-            <p class="og-note"><span aria-hidden="true">💡</span>
-              <b>직원이면 누구나</b> 올리고 좋아요를 누를 수 있습니다. 상품권으로 드립니다.</p>
-            <button class="btn sm" id="ootdQr">📱 휴대폰으로 바로 가기 (QR)</button>
-          </div>
+          <p class="og-note"><span aria-hidden="true">💡</span>
+            <b>직원이면 누구나</b> 올리고 좋아요를 누를 수 있습니다. 상품권으로 드립니다.</p>
         </section>`
       + (top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
           <div class="ootd-top">${top.map((p,i) => card(p, i+1)).join('')}</div>` : '')
@@ -2801,7 +2790,6 @@ function bindBoard(key){
     if(DB.savePosts(arr)){ go('collab'); toast(`‘${COLLAB_LABEL[next]}’(으)로 옮겼습니다`); }
   }));
   $('#bdWrite')?.addEventListener('click', ()=> key === 'ootd' ? openOotdForm() : openPostForm(key));
-  $('#ootdQr')?.addEventListener('click', openQrModal);
   /* 활동 게시판 팀 고르기 */
   $$('#main [data-act-team]').forEach(el => el.addEventListener('click', ()=>{
     ACT_TEAM = Number(el.dataset.actTeam) || 0;
@@ -2828,76 +2816,6 @@ const authorTeamOptions = (selected) => {
     list.map(n=>`<option ${n===selected?'selected':''}>${esc(n)}</option>`).join('');
 };
 
-
-/* ── 휴대폰으로 바로 오는 QR 코드 ──────────────────────────────────────────
-   포스터·메신저에 붙여 쓰시라고, 지금 보고 있는 주소로 QR 을 그려 줍니다.
-   주소를 코드에 적어 두지 않고 location 에서 가져오므로 도메인이 바뀌어도 맞습니다.
-   QR 을 그리는 라이브러리는 이 창을 열 때 한 번만 내려받습니다. */
-const QRLIB_VER = '1.4.4';
-let QRLIB_P = null;
-function loadQrLib(){
-  if(QRLIB_P) return QRLIB_P;
-  QRLIB_P = new Promise((res, rej) => {
-    const s = document.createElement('script');
-    s.src = `https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/${QRLIB_VER}/qrcode.min.js`;
-    s.onload = () => window.qrcode ? res(window.qrcode) : rej(new Error('qr'));
-    s.onerror = () => rej(new Error('qr load'));
-    document.head.appendChild(s);
-  });
-  return QRLIB_P;
-}
-/* 캔버스에 QR 을 그립니다. 가장자리 여백(quiet zone)을 4칸 두어야 잘 읽힙니다 */
-function drawQr(canvas, text, target = 640){
-  const qr = window.qrcode(0, 'M');
-  qr.addData(text); qr.make();
-  const n = qr.getModuleCount(), pad = 4;
-  const scale = Math.max(4, Math.floor(target / (n + pad * 2)));
-  const size = (n + pad * 2) * scale;
-  canvas.width = canvas.height = size;
-  const g = canvas.getContext('2d');
-  g.fillStyle = '#fff'; g.fillRect(0, 0, size, size);
-  g.fillStyle = '#16225c';                       // 사이트 남색으로 — 검정보다 부드럽습니다
-  for(let r = 0; r < n; r++) for(let c = 0; c < n; c++)
-    if(qr.isDark(r, c)) g.fillRect((c + pad) * scale, (r + pad) * scale, scale, scale);
-  return size;
-}
-
-function openQrModal(){
-  /* 해시 주소라 홈 주소 뒤에 #ootd 만 붙이면 그 게시판이 바로 열립니다 */
-  const url = `${location.origin}/#ootd`;
-  openModal('📱 휴대폰으로 바로 가기', `
-    <p class="hint" style="margin:0 0 14px">휴대폰 카메라로 아래 QR 을 비추면
-      <b>출근룩 사진 콘테스트</b> 게시판이 바로 열립니다. 포스터나 메신저에 붙여 쓰세요.</p>
-    <div class="qr-box"><canvas id="qrCv" aria-label="출근룩 콘테스트 QR 코드"></canvas>
-      <div class="qr-wait" id="qrWait">QR 을 만드는 중…</div></div>
-    <label class="field" style="margin-top:14px">주소
-      <input id="qrUrl" value="${esc(url)}" readonly onclick="this.select()"></label>
-    <div class="row-actions">
-      <button class="btn primary" id="qrSave">이미지로 저장</button>
-      <button class="btn" id="qrCopy">주소 복사</button>
-    </div>`);
-  loadQrLib().then(()=>{
-    drawQr($('#qrCv'), url);
-    $('#qrWait')?.remove();
-  }).catch(()=>{
-    const w = $('#qrWait');
-    if(w) w.textContent = 'QR 을 만들지 못했습니다. 인터넷 연결을 확인해 주세요. 아래 주소는 그대로 쓰실 수 있습니다.';
-  });
-  $('#qrSave').addEventListener('click', ()=>{
-    const cv = $('#qrCv');
-    if(!cv?.width){ toast('아직 QR 을 만드는 중입니다'); return; }
-    const a = document.createElement('a');
-    a.href = cv.toDataURL('image/png');
-    a.download = '출근룩-사진-콘테스트-QR.png';
-    a.click();
-    toast('이미지로 저장했습니다');
-  });
-  $('#qrCopy').addEventListener('click', async ()=>{
-    try{ await navigator.clipboard.writeText(url); toast('주소를 복사했습니다'); }
-    catch(e){ $('#qrUrl').select(); toast('주소를 길게 눌러 복사해 주세요'); }
-  });
-}
-
 /* 출근룩 사진 콘테스트 — 올리는 칸을 따로 둡니다(index.html 과 같은 화면).
    일반 직원도 올리는 게시판이라 팀 고르기 대신 소속을 직접 적게 했습니다. */
 function openOotdForm(edit){
@@ -2909,10 +2827,10 @@ function openOotdForm(edit){
         <input id="odTeam" placeholder="예) 서울남부고용센터 실업급여팀" value="${esc(e0?.authorTeam || '')}">
         <span class="hint">기관과 팀까지 적어 주세요.</span></label>
       <label class="field">이름 <span class="req">*</span>
-        <input id="odName" placeholder="예) 홍길동 주무관" value="${esc(e0?.author || SESSION.name || '')}"></label>
+        <input id="odName" value="${esc(e0?.author || SESSION.name || '')}"></label>
     </div>
     <label class="field">한 줄 소개 <span class="req">*</span>
-      <input id="odTitle" placeholder="예) 편안함과 단정함" value="${e0 ? esc(e0.title) : ''}"></label>
+      <input id="odTitle" value="${e0 ? esc(e0.title) : ''}"></label>
     <label class="field">출근룩 사진${e0 ? ' <span class="hint" style="display:inline">선택 — 새로 고르면 바뀝니다</span>' : ' <span class="req">*</span>'}
       <input id="odFile" type="file" accept="image/*">
       <span class="hint">한 장만 올려 주세요. 자동으로 줄여서 올라갑니다.</span></label>
