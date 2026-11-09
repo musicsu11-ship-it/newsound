@@ -271,10 +271,10 @@
   /* 참여 안내 — 포스터 느낌의 하늘색 판. 마스코트와 리본 띠를 얹었습니다 */
   .ootd-guide{position:relative;overflow:hidden;
     background:linear-gradient(165deg,#e8f4fd 0%,#f3fbff 45%,#fffdf5 100%);
-    border:1.5px solid #9ed2f2;border-radius:28px;padding:22px 24px;margin:0 0 24px;
+    border:1.5px solid #9ed2f2;border-radius:28px;padding:22px 24px 26px;margin:0 0 24px;
     box-shadow:0 12px 34px rgba(26,143,212,.16)}
   /* 마스코트 — 오른쪽 아래에 장식으로. 좁은 화면에서는 숨깁니다 */
-  .og-mascot{position:absolute;right:6px;bottom:-16px;width:262px;height:auto;
+  .og-mascot{position:absolute;right:8px;bottom:-20px;width:152px;height:auto;
     pointer-events:none;user-select:none;opacity:.95}
   /* 리본 띠 — 포스터의 파란 배너 */
   .og-ribbon{display:flex;justify-content:center;margin:0 0 20px}
@@ -288,46 +288,52 @@
   .og-ribbon span::after{right:-29px;border-left-color:#1c43a6;transform:translateY(-50%)}
   /* 한 줄 설명 — 리본 바로 아래 가운데 */
   /* 한 줄 설명 — 리본 바로 아래 가운데 */
-  .og-tag{margin:0 0 20px;text-align:center;font-size:26px;line-height:1.5;
-    font-weight:700;color:#2b4a63;word-break:keep-all}
-  .og-tag b{font-weight:900;color:#0d6ea8}
+  /* 캐치프레이즈 — 리본 바로 아래 */
+  .og-catch{margin:0 0 20px;text-align:center;font-size:25px;line-height:1.45;
+    font-weight:900;letter-spacing:-.03em;color:#123a56;word-break:keep-all}
+  .og-catch b{color:var(--brand)}
 
-  /* 참여 방법 — 번호와 글을 가로로 붙여 빈 공간을 없앴습니다 */
-  .og-steps{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:12px;
-    grid-template-columns:repeat(3,minmax(0,1fr))}
-  .og-steps li{display:flex;align-items:center;gap:16px;min-width:0;
-    background:#fff;border:1.5px solid #cfe8fa;border-radius:18px;padding:18px 20px;
-    box-shadow:0 3px 10px rgba(26,143,212,.08)}
-  .og-steps .n{flex:none;display:grid;place-items:center;width:52px;height:52px;
+  /* 응모 방법 · 시상 내역 두 칸 */
+  .og-cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
+  .og-box{background:#fff;border:1.5px solid #cfe8fa;border-radius:20px;padding:16px 18px 18px;
+    box-shadow:0 4px 14px rgba(26,143,212,.1);min-width:0}
+  .og-box h3{margin:0 0 12px;font-size:18px;font-weight:900;letter-spacing:-.02em;color:#0d6ea8;
+    padding-bottom:9px;border-bottom:2px solid #e3f1fb}
+
+  /* 응모 방법 — 번호 + 글 */
+  .og-steps{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+  .og-steps li{display:flex;align-items:center;gap:14px;min-width:0}
+  .og-steps .n{flex:none;display:grid;place-items:center;width:40px;height:40px;
     border-radius:50%;background:linear-gradient(180deg,#f04c80,#d61e5c);color:#fff;
-    font-size:26px;font-weight:900;box-shadow:0 5px 13px rgba(214,30,92,.33)}
+    font-size:20px;font-weight:900;box-shadow:0 4px 11px rgba(214,30,92,.3)}
   .og-steps .tx{min-width:0}
-  .og-steps b{display:block;font-size:27px;font-weight:900;line-height:1.35;
+  .og-steps b{display:block;font-size:20px;font-weight:900;line-height:1.35;
     letter-spacing:-.03em;color:#123a56;word-break:keep-all}
-  .og-steps em{display:block;margin-top:5px;font-style:normal;font-size:20px;
-    color:#5b7892;line-height:1.45;word-break:keep-all}
+  .og-steps em{display:block;margin-top:2px;font-style:normal;font-size:15px;
+    color:#5b7892;line-height:1.4;word-break:keep-all}
 
-  /* 시상 — 메달과 금액을 한 줄로. 글씨가 커서 두 칸씩 놓습니다 */
-  .og-prize{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .pz{display:flex;align-items:center;gap:16px;min-width:0;
-    background:#fff;border:1.5px solid #cfe8fa;border-radius:18px;padding:16px 20px;
-    box-shadow:0 3px 10px rgba(26,143,212,.08)}
-  .pz .m{flex:none;font-size:46px;line-height:1}
-  .pz .tx{min-width:0;flex:1}
-  .pz b{display:block;font-size:21px;font-weight:800;color:#5b7892;letter-spacing:.01em}
-  .pz i{display:block;font-style:normal;font-size:38px;font-weight:900;white-space:nowrap;
-    letter-spacing:-.04em;line-height:1.2}
-  .pz em{flex:none;font-style:normal;font-size:20px;font-weight:800;color:#5b7892;
-    background:#eef6fc;border-radius:999px;padding:6px 15px;white-space:nowrap}
-  .pz.g{background:linear-gradient(135deg,#fffaea,#fff)} .pz.g i{color:#9a6c00} .pz.g em{background:#fdf0cf}
-  .pz.s{background:linear-gradient(135deg,#f6f8fc,#fff)} .pz.s i{color:#44506b} .pz.s em{background:#e9edf5}
-  .pz.b{background:linear-gradient(135deg,#fdf3ec,#fff)} .pz.b i{color:#90511f} .pz.b em{background:#f7e3d4}
-  .pz.p{background:linear-gradient(135deg,#f4f2ff,#fff)} .pz.p i{color:#4b3f9e} .pz.p em{background:#eae6fb}
+  /* 시상 내역 — 시안처럼 표로 */
+  .og-award table{width:100%;border-collapse:collapse}
+  .og-award tr{border-bottom:1px dashed #dceaf6}
+  .og-award tr:last-child{border-bottom:0}
+  .og-award th,.og-award td{padding:9px 0;vertical-align:middle}
+  .og-award th{text-align:left;font-size:18px;font-weight:900;color:#123a56;white-space:nowrap}
+  .og-award th span{margin-right:7px;font-size:22px;vertical-align:-2px}
+  .og-award .c{text-align:center;font-size:15px;font-weight:800;color:#5b7892;white-space:nowrap}
+  .og-award .v{text-align:right;font-size:26px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
+  .og-award .g .v{color:#9a6c00} .og-award .s .v{color:#44506b}
+  .og-award .b .v{color:#90511f} .og-award .p .v{color:#4b3f9e}
+  .aw-foot{margin:11px 0 0;padding-top:10px;border-top:2px solid #e3f1fb;
+    font-size:14px;font-weight:700;color:#5b7892;text-align:right}
 
-  .og-note{position:relative;margin:18px 0 0;font-size:24px;line-height:1.5;color:#2b4a63;
-    font-weight:700;word-break:keep-all;max-width:calc(100% - 250px)}
-  .og-note b{font-weight:900;color:var(--brand)}
-  .og-note span{margin-right:6px}
+  /* 응모 자격 · 투표 방법 */
+  .og-info{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:7px;
+    max-width:calc(100% - 170px)}
+  .og-info li{display:flex;gap:12px;align-items:baseline;font-size:16px;
+    line-height:1.5;word-break:keep-all}
+  .og-info b{flex:none;font-size:14px;font-weight:900;color:#fff;background:#2353c9;
+    border-radius:7px;padding:4px 11px;letter-spacing:.02em}
+  .og-info span{color:#2b4a63;font-weight:700}
   .pg-sub.og-lead,.og-lead{font-size:16px;font-weight:700;color:#3a4478;line-height:1.6;word-break:keep-all}
   .ootd-h2{margin:26px 0 13px;font-size:21px;font-weight:900;letter-spacing:-.02em}
   .ootd-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
@@ -358,37 +364,31 @@
   .ootd-cmt{margin-top:4px;padding:7px 0 0;border:0;border-top:1px dashed var(--border);background:none;
     font:inherit;font-size:12.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
   .ootd-cmt:hover{color:var(--brand)}
-  /* 넓은 화면에서는 오른쪽 200px 를 마스코트 자리로 비워 둡니다 */
-  @media (min-width:1041px){ .og-steps,.og-prize{padding-right:250px} }
+  /* 넓은 화면에서는 오른쪽을 마스코트 자리로 비워 둡니다 */
   @media (max-width:1040px){
-    .og-mascot{width:180px;opacity:.9;bottom:-12px}
-    .og-note{max-width:calc(100% - 190px)}
+    .og-mascot{width:132px;opacity:.92;bottom:-16px}
+    .og-info{max-width:calc(100% - 148px)}
   }
   @media (max-width:860px){
     .og-mascot{display:none}
-    .og-note{max-width:none}
+    .og-info{max-width:none}
+    .og-cols{grid-template-columns:minmax(0,1fr)}
     .og-ribbon span{font-size:20px;padding:11px 26px}
-    .og-tag{font-size:21px}
-    .og-steps b{font-size:23px}
-    .og-steps em{font-size:17px}
-    .og-note{font-size:20px}
-    .og-steps{grid-template-columns:minmax(0,1fr);gap:8px}
-    .og-prize{grid-template-columns:repeat(2,minmax(0,1fr))}
-  }
-  @media (max-width:560px){
-    /* 좁은 화면에서는 금액이 쪼개지지 않게 한 줄씩 쌓습니다 */
-    .og-prize{grid-template-columns:minmax(0,1fr);gap:8px}
-    .pz{padding:11px 14px}
+    .og-catch{font-size:21px}
   }
   @media (max-width:700px){
-    .ootd-guide{padding:18px 16px;border-radius:20px}
-    .og-tag{font-size:19px}
-    .pz i{font-size:31px}
-    .pz .m{font-size:38px}
-    .pz b{font-size:18px}
-    .pz em{font-size:17px;padding:5px 12px}
-    .og-steps b{font-size:21px}
-    .og-steps .n{width:46px;height:46px;font-size:23px}
+    .ootd-guide{padding:18px 16px 22px;border-radius:20px}
+    .og-catch{font-size:19px}
+    .og-box{padding:14px 15px 16px;border-radius:17px}
+    .og-box h3{font-size:16.5px}
+    .og-steps b{font-size:18px}
+    .og-steps em{font-size:14px}
+    .og-steps .n{width:36px;height:36px;font-size:18px}
+    .og-award th{font-size:16.5px}
+    .og-award .v{font-size:23px}
+    .og-award .c{font-size:14px}
+    .og-info li{font-size:14.5px}
+    .og-info b{font-size:13px;padding:3px 9px}
     .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     .ootd-bd{padding:10px 10px 10px}
     .ootd-bd b{font-size:13px}
@@ -2679,27 +2679,37 @@ function boardView(key){
       + `<section class="ootd-guide">
           <img class="og-mascot" src="assets/mascots.png" alt="" aria-hidden="true" loading="lazy">
           <div class="og-ribbon"><span>👑 고용노동부 패셔니스타를 찾아라! 👑</span></div>
-          <p class="og-tag">사진 한 장이면 끝! <b>좋아요를 가장 많이 받은 출근룩</b>이 1등입니다.</p>
-          <ol class="og-steps">
-            <li><span class="n">1</span>
-              <span class="tx"><b>사진을 올리고</b><em>출근룩 한 장 + 한 줄 소개</em></span></li>
-            <li><span class="n">2</span>
-              <span class="tx"><b>마음에 드는 출근룩에 좋아요</b><em>한 사람이 한 장에 한 번</em></span></li>
-            <li><span class="n">3</span>
-              <span class="tx"><b>좋아요 많은 순으로 시상</b><em>상품권으로 드려요</em></span></li>
-          </ol>
-          <div class="og-prize">
-            <div class="pz g"><span class="m" aria-hidden="true">🥇</span>
-              <span class="tx"><b>1등</b><i>10만원</i></span><em>1명</em></div>
-            <div class="pz s"><span class="m" aria-hidden="true">🥈</span>
-              <span class="tx"><b>2등</b><i>5만원</i></span><em>1명</em></div>
-            <div class="pz b"><span class="m" aria-hidden="true">🥉</span>
-              <span class="tx"><b>3등</b><i>3만원</i></span><em>1명</em></div>
-            <div class="pz p"><span class="m" aria-hidden="true">🎁</span>
-              <span class="tx"><b>참가상</b><i>5천원</i></span><em>10명</em></div>
+          <p class="og-catch">트렌디한 감각으로 <b>나만의 출근룩</b>을 보여 주세요!</p>
+
+          <div class="og-cols">
+            <div class="og-box">
+              <h3>응모 방법</h3>
+              <ol class="og-steps">
+                <li><span class="n">1</span>
+                  <span class="tx"><b>사진을 올리고</b><em>출근룩 한 장 + 한 줄 소개</em></span></li>
+                <li><span class="n">2</span>
+                  <span class="tx"><b>마음에 드는 출근룩에 좋아요</b><em>한 사람이 한 장에 한 번</em></span></li>
+                <li><span class="n">3</span>
+                  <span class="tx"><b>좋아요 많은 순으로 시상</b><em>순위는 실시간으로 바뀝니다</em></span></li>
+              </ol>
+            </div>
+
+            <div class="og-box og-award">
+              <h3>시상 내역</h3>
+              <table>
+                <tr class="g"><th><span aria-hidden="true">🥇</span>1 등</th><td class="c">1명</td><td class="v">10만원</td></tr>
+                <tr class="s"><th><span aria-hidden="true">🥈</span>2 등</th><td class="c">1명</td><td class="v">5만원</td></tr>
+                <tr class="b"><th><span aria-hidden="true">🥉</span>3 등</th><td class="c">1명</td><td class="v">3만원</td></tr>
+                <tr class="p"><th><span aria-hidden="true">🎁</span>참가상</th><td class="c">10명</td><td class="v">5천원</td></tr>
+              </table>
+              <p class="aw-foot">상품권으로 지급합니다</p>
+            </div>
           </div>
-          <p class="og-note"><span aria-hidden="true">💡</span>
-            <b>직원이면 누구나</b> 올리고 좋아요를 누를 수 있습니다. 상품권으로 드립니다.</p>
+
+          <ul class="og-info">
+            <li><b>응모 자격</b><span>고용노동부 직원이면 누구나</span></li>
+            <li><b>투표 방법</b><span>마음에 드는 사진에 좋아요 · 한 사람이 한 장에 한 번</span></li>
+          </ul>
         </section>`
       + (top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
           <div class="ootd-top">${top.map((p,i) => card(p, i+1)).join('')}</div>` : '')
