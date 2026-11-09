@@ -318,13 +318,16 @@
 
   /* 응모 방법 · 시상 내역 두 칸 */
   .og-cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px}
-  .og-box{background:#fff;border:1.5px solid #cfe8fa;border-radius:20px;padding:16px 18px 18px;
+  /* 두 칸은 높이가 같아집니다. 안쪽 내용이 남는 높이를 채우도록 폅니다 */
+  .og-box{display:flex;flex-direction:column;
+    background:#fff;border:1.5px solid #cfe8fa;border-radius:20px;padding:16px 18px 18px;
     box-shadow:0 4px 14px rgba(26,143,212,.1);min-width:0}
-  .og-box h3{margin:0 0 12px;font-size:18px;font-weight:900;letter-spacing:-.02em;color:#0d6ea8;
+  .og-box h3{flex:none;margin:0 0 12px;font-size:18px;font-weight:900;letter-spacing:-.02em;color:#0d6ea8;
     padding-bottom:9px;border-bottom:2px solid #e3f1fb}
 
   /* 응모 방법 — 번호 + 글 */
-  .og-steps{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+  .og-steps{flex:1;list-style:none;margin:0;padding:0;
+    display:flex;flex-direction:column;justify-content:space-between;gap:11px}
   .og-steps li{display:flex;align-items:center;gap:14px;min-width:0}
   .og-steps .n{flex:none;display:grid;place-items:center;width:40px;height:40px;
     border-radius:50%;background:linear-gradient(180deg,#f04c80,#d61e5c);color:#fff;
@@ -336,7 +339,7 @@
     color:#5b7892;line-height:1.4;word-break:keep-all}
 
   /* 시상 내역 — 시안처럼 표로 */
-  .og-award table{width:100%;border-collapse:collapse}
+  .og-award table{flex:1;width:100%;border-collapse:collapse}
   .og-award tr{border-bottom:1px dashed #dceaf6}
   .og-award tr:last-child{border-bottom:0}
   .og-award th,.og-award td{padding:9px 0;vertical-align:middle}
@@ -346,7 +349,7 @@
   .og-award .v{text-align:right;font-size:26px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
   .og-award .g .v{color:#9a6c00} .og-award .s .v{color:#44506b}
   .og-award .b .v{color:#90511f} .og-award .p .v{color:#4b3f9e}
-  .aw-foot{margin:11px 0 0;padding-top:10px;border-top:2px solid #e3f1fb;
+  .aw-foot{flex:none;margin:11px 0 0;padding-top:10px;border-top:2px solid #e3f1fb;
     font-size:14px;font-weight:700;color:#5b7892;text-align:right}
 
   /* 응모 자격 · 투표 방법 */
