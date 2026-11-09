@@ -1104,11 +1104,13 @@
   .np-acts{display:flex;gap:8px;align-items:center;margin-top:14px}
   .np-acts .btn.primary{flex:1}
   /* 출근룩 콘테스트 참여 안내 창 — 하늘색 띠 */
-  .ootd-pop .np-card{border-top:5px solid #1a8fd4}
+  .ootd-pop .np-card{border-top:5px solid #1a8fd4;width:min(460px,100%)}
   .op-top{display:flex;align-items:center;gap:8px;margin:0 0 11px}
   .op-top b{font-size:18px;font-weight:900;letter-spacing:-.02em}
-  .op-lead2{margin:0 0 13px;font-size:14.5px;line-height:1.65;color:#3a4478;word-break:keep-all}
-  .op-lead2 b{font-weight:900;color:var(--brand)}
+  /* 포스터 — 화면이 짧으면 알아서 작아집니다(잘리지 않게 contain) */
+  .op-poster{display:block;width:100%;height:auto;max-height:min(46vh,420px);object-fit:contain;
+    border-radius:16px;background:#eaf4fd;margin:0 0 13px}
+
   .op-prizes{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
   .op-prizes span{font-size:12.5px;font-weight:900;border-radius:999px;padding:5px 11px;
     background:var(--surface-2);border:1px solid var(--border);white-space:nowrap}
@@ -3362,8 +3364,8 @@ function contestPopup(next){
   el.innerHTML = `<div class="np-card" role="dialog" aria-label="출근룩 사진 콘테스트 안내">
       <button class="np-x" id="opClose" aria-label="닫기">✕</button>
       <div class="op-top"><span class="nav-new">NEW</span><b>출근룩 사진 콘테스트</b></div>
-      <p class="op-lead2">반바지 착용 지양 같은 경직된 관행은 그만!<br>
-        자유로운 <b>오늘의 출근룩</b>을 사진 한 장으로 보여 주세요.</p>
+      <img class="op-poster" src="assets/ootd-poster.webp"
+        alt="출근룩 콘테스트 — 고용노동부 패셔니스타를 찾아라!">
       <div class="op-prizes">
         <span class="g">🥇 10만원</span><span class="s">🥈 5만원</span>
         <span class="b">🥉 3만원</span><span>🎁 참가상 10명</span>
