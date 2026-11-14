@@ -1962,6 +1962,13 @@ function myAlias(){
 const myKey = () => LS.get('sm_visitor', null);
 
 /* ---------- 게시판 정의 ---------- */
+/* ── 로그인 없이도 글을 쓸 수 있는 게시판 ──
+   새소리단 전용 공간이 아닌 곳(출근룩 콘테스트 · 라운지 네 곳)은
+   가입하지 않은 일반 직원도 바로 글을 올리고 댓글을 달 수 있습니다.
+   본 사이트는 서버에서도 같은 규칙으로 열어 두었습니다(schema.sql 40절). */
+const OPEN_BOARDS = ['ootd','mascot','ai','relief','food'];
+const isOpenBoard = (b) => OPEN_BOARDS.includes(b);
+
 const BOARDS = {
   news:   { label:'새소리단 소식', icon:'📰', layout:'photo',
             desc:'새소리단 활동 안내와 소식입니다. 누구나 볼 수 있습니다.',
@@ -1991,17 +1998,17 @@ const BOARDS = {
             read:ALL,   write:ALL },
   mascot: { label:'고드래곤&새초롱이', icon:'🐉', layout:'gallery', anon:true,
             desc:'고용노동부 마스코트 고드래곤과 새소리단 마스코트 새초롱이의 각종 자료를 공유하는 공간입니다.',
-            read:ALL,   write:INNER },
+            read:ALL,   write:ALL },
   ai:     { label:'AI.zip', icon:'🤖', layout:'list',
             desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.',
-            read:ALL,   write:INNER },
+            read:ALL,   write:ALL },
   relief: { label:'멘탈관리.zip', icon:'💛', layout:'list',
             desc:'지칠 때 힘이 된 것들을 나누는 공간입니다. 사진·영상·파일 모두 올릴 수 있어요.',
-            read:ALL,   write:INNER },
+            read:ALL,   write:ALL },
   /* 맛집 — 사진이 있으면 크게 보이고, 없어도 글만 올릴 수 있습니다(gallery) */
   food:   { label:'우리 지청 맛집', icon:'🍜', layout:'gallery',
             desc:'지청 가까운 맛집을 서로 추천하는 공간입니다. 가게 이름·메뉴·위치를 사진과 함께 올려 주세요.',
-            read:ALL,   write:INNER },
+            read:ALL,   write:ALL },
 };
 /* AI.zip 분야 — 큰 분야(고용·노동·산안·기타) 안에 담당 업무가 들어 있습니다 (index.html 과 같음) */
 const AI_FIELDS = [
@@ -3115,7 +3122,7 @@ function openPost(id){
   /* 무기명 글은 이름이 비어 있으니 realAuthor 로 '내 글인지' 를 봅니다 */
   /* 출근룩은 부적절한 사진을 담당관도 내릴 수 있습니다 */
   const mine = (p.realAuthor || p.author) === SESSION.name || SESSION.role==='admin'
-    || (p.board === 'ootd' && SESSION.role === 'officer');
+    || (isOpenBoard(p.board) && ['officer','admin'].includes(SESSION.role));
   const who = BOARDS[p.board]?.anon ? '🙈 무기명'
     : ([p.author, p.authorTeam, p.authorDept].filter(Boolean).map(esc).join(' · ') || '이름 없음');
   const at  = p.board === 'activity' ? actTeam(p.teamNo) : null;
@@ -3544,13 +3551,14 @@ function commentBlock(p){
         <b>${esc(c.author || '이름 없음')}</b>
         <span class="hint">${fmt(c.at)}</span>
         ${lateCmt(p, c) ? '<span class="tag reject">마감 후 제출</span>' : ''}
-        ${myCmt(c) || SESSION.role === 'admin' ? `<button class="btn sm ghost" data-cdel="${c.id}">삭제</button>` : ''}
+        ${myCmt(c) || SESSION.role === 'admin' || (isOpenBoard(p.board) && SESSION.role === 'officer')
+          ? `<button class="btn sm ghost" data-cdel="${c.id}">삭제</button>` : ''}
       </div>
       ${c.body ? `<p>${esc(c.body)}</p>` : ''}
       ${(c.atts||[]).length ? `<div class="att-list">${c.atts.map(fileRow).join('')}</div>` : ''}
     </div>`;
   /* 출근룩 콘테스트는 응원 한마디를 직원 누구나 남길 수 있습니다 */
-  const canWriteCmt = ['member','officer','admin'].includes(SESSION.role) || p.board === 'ootd';
+  const canWriteCmt = ['member','officer','admin'].includes(SESSION.role) || isOpenBoard(p.board);
   return `<hr style="border:0;border-top:1px solid var(--border);margin:20px 0 14px">
     <div class="pc-head"><h3>${sub ? '제출 내역' : (p.board === 'ootd' ? '응원 한마디' : '댓글')} <b>${cs.length}</b></h3>${sub ? dueTag(p) : ''}</div>
     ${sub ? `<p class="hint" style="margin:0 0 12px">본 사이트에서는 올린 파일을 <b>낸 본인과 혁신행정담당관만</b> 열 수 있습니다.

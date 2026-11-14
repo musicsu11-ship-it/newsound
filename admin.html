@@ -297,10 +297,12 @@ const BOARDS = {
   share:  { label:'활동 공유방',   icon:'📸', photo:true,  adminOnly:false },
   activity:{ label:'활동',        icon:'📋', photo:false, adminOnly:false },   // 일반 직원도 읽는 게시판
   collab: { label:'협업',         icon:'🤝', photo:false, adminOnly:false },   // 단원 전용 — 참여자 모집
-  /* 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 */
+  /* 아래 다섯 곳은 로그인 없이도 글을 쓸 수 있는 게시판입니다(schema.sql 40절) */
+  ootd:   { label:'출근룩 사진 콘테스트', icon:'👔', photo:true,  adminOnly:false },
   mascot: { label:'고드래곤&새초롱이', icon:'🐉', photo:false, adminOnly:false, anon:true },
   ai:     { label:'AI.zip',        icon:'🤖', photo:false, adminOnly:false },
   relief: { label:'멘탈관리.zip',   icon:'💛', photo:false, adminOnly:false },
+  food:   { label:'우리 지청 맛집',  icon:'🍜', photo:true,  adminOnly:false },
 };
 
 const DEFAULT_INTRO = {

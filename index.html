@@ -1936,6 +1936,16 @@ const intro = () => {
 };
 
 /* ---------- 게시판 정의 ---------- */
+/* ── 로그인 없이도 글을 쓸 수 있는 게시판 ──
+   새소리단 전용 공간이 아닌 곳(출근룩 콘테스트 · 라운지 네 곳)은
+   가입하지 않은 일반 직원도 바로 글을 올리고 댓글을 달 수 있습니다.
+   · 첨부 파일은 그 게시판 이름의 폴더에만 올라갑니다(media/<게시판>/<사람>/…)
+   · 장난 글·사진은 혁신행정담당관이 바로 내릴 수 있습니다
+   서버에서도 같은 규칙으로 열어 두었습니다(schema.sql 40절). */
+const OPEN_BOARDS = ['ootd','mascot','ai','relief','food'];
+const OPEN_WRITE  = ['visitor', ...INNER];
+const isOpenBoard = (b) => OPEN_BOARDS.includes(b);
+
 const BOARDS = {
   news:   { label:'새소리단 소식', icon:'📰', layout:'photo',
             desc:'새소리단 활동 안내와 소식입니다. 누구나 볼 수 있습니다.', write:INNER },
@@ -1958,21 +1968,21 @@ const BOARDS = {
 
   /* 출근룩 사진 콘테스트 — 이 게시판만 일반 직원도 직접 올릴 수 있습니다(schema.sql 37절).
      좋아요 많은 순으로 등수가 매겨지고 1~3위는 시상대에 크게 걸립니다. */
-  ootd:   { label:'출근룩 사진 콘테스트', icon:'👔', layout:'ootd', write:['visitor', ...INNER],
+  ootd:   { label:'출근룩 사진 콘테스트', icon:'👔', layout:'ootd', write:OPEN_WRITE,
             desc:'반바지 착용 지양 같은 경직된 관행을 풀고, 자유로운 출근룩을 나누는 콘테스트입니다.' },
 
   /* ── 라운지 세 곳 — 읽기는 누구나, 쓰기는 단원 이상 (schema.sql 30절) ── */
   /* 'gallery' 는 사진이 있으면 크게 보여 주되 사진이 없어도 됩니다(zip·hwp 만 올려도 OK).
      anon:true 면 이름 없이 올립니다 — schema.sql 32절에서 서버도 이름을 지웁니다. */
   mascot: { label:'고드래곤&새초롱이', icon:'🐉', layout:'gallery', anon:true,
-            desc:'고용노동부 마스코트 고드래곤과 새소리단 마스코트 새초롱이의 각종 자료를 공유하는 공간입니다.', write:INNER },
+            desc:'고용노동부 마스코트 고드래곤과 새소리단 마스코트 새초롱이의 각종 자료를 공유하는 공간입니다.', write:OPEN_WRITE },
   ai:     { label:'AI.zip', icon:'🤖', layout:'list',
-            desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.', write:INNER },
+            desc:'고용·노동·산업안전 업무에 바로 쓰는 AI 꿀팁을 담당 업무별로 나누는 공간입니다.', write:OPEN_WRITE },
   relief: { label:'멘탈관리.zip', icon:'💛', layout:'list',
-            desc:'지칠 때 힘이 된 것들을 나누는 공간입니다. 사진·영상·파일 모두 올릴 수 있어요.', write:INNER },
+            desc:'지칠 때 힘이 된 것들을 나누는 공간입니다. 사진·영상·파일 모두 올릴 수 있어요.', write:OPEN_WRITE },
   /* 맛집 — 사진이 있으면 크게 보이고, 없어도 글만 올릴 수 있습니다(gallery) */
   food:   { label:'우리 지청 맛집', icon:'🍜', layout:'gallery',
-            desc:'지청 가까운 맛집을 서로 추천하는 공간입니다. 가게 이름·메뉴·위치를 사진과 함께 올려 주세요.', write:INNER },
+            desc:'지청 가까운 맛집을 서로 추천하는 공간입니다. 가게 이름·메뉴·위치를 사진과 함께 올려 주세요.', write:OPEN_WRITE },
 };
 /* AI.zip 분야 — 큰 분야(고용·노동·산안·기타) 안에 담당 업무가 들어 있습니다.
    글에는 담당 업무 이름(예: '실업급여')을 저장하고, 큰 분야는 여기서 찾아 씁니다.
@@ -3615,7 +3625,8 @@ function commentBlock(p){
         <b>${esc(c.author_name || '이름 없음')}</b>
         <span class="hint">${fmt(c.created_at)}</span>
         ${lateCmt(p, c) ? '<span class="tag reject">마감 후 제출</span>' : ''}
-        ${myCmt(c) || isAdmin() ? `<button class="btn sm ghost" data-cdel="${c.id}">삭제</button>` : ''}
+        ${myCmt(c) || isAdmin() || (isOpenBoard(p.board) && isOfficer())
+          ? `<button class="btn sm ghost" data-cdel="${c.id}">삭제</button>` : ''}
       </div>
       ${c.body ? `<p>${esc(c.body)}</p>` : ''}
       ${files.length ? `<div class="att-list">${files.map(f => fileRow(f, fileUrl(f))).join('')}</div>` : ''}
@@ -3623,7 +3634,7 @@ function commentBlock(p){
   };
 
   /* 출근룩 콘테스트는 응원 한마디를 직원 누구나 남길 수 있습니다(schema.sql 37절) */
-  const canWriteCmt = isInner() || p.board === 'ootd';
+  const canWriteCmt = isInner() || isOpenBoard(p.board);
   return `<hr style="border:0;border-top:1px solid var(--border);margin:20px 0 14px">
     <div class="pc-head">
       <h3>${title} <b>${cs.length}</b></h3>
@@ -3794,6 +3805,8 @@ function openPostForm(key, edit){
   const isCollab = key === 'collab';
   const isAi     = key === 'ai';
   const isNotice = key === 'notice';   // 제출기한을 걸 수 있는 게시판
+  /* 로그인하지 않은 일반 직원 — 이름을 적는 칸을 따로 보여 줍니다(가입 계정이 없으니까요) */
+  const guest = !isSignedIn() && isOpenBoard(key);
   const defTeam = isAct ? (Number(e0?.team_no) || ACT_TEAM || myTeamNo()) : 0;
   openModal(`${b.icon} ${b.label} · ${e0 ? '글 수정' : (isCollab ? '협업 제안하기' : '글쓰기')}`, `
     ${isAi ? `<label class="field">분야 <span class="req">*</span>
@@ -3821,6 +3834,13 @@ function openPostForm(key, edit){
       <div><b>이름 없이 올라갑니다</b>
         <span>이 게시판은 무기명이라 작성자 이름과 소속을 적지 않습니다.
           올린 뒤에도 나만 내 글을 고치고 지울 수 있어요.</span></div></div>`
+    : guest ? `<div class="grid c2">
+      <label class="field">이름 <span class="hint" style="display:inline">선택 — 비우면 ‘직원’ 으로 올라갑니다</span>
+        <input id="pfName" maxlength="20" placeholder="예) 홍길동" value="${e0?esc(e0.author_name||''):''}"></label>
+      <label class="field">소속 <span class="hint" style="display:inline">선택</span>
+        <input id="pfDept" placeholder="예) 서울남부고용센터 실업급여팀" value="${e0?esc(e0.author_dept||''):''}"></label>
+    </div>
+    <p class="hint" style="margin:-6px 0 14px">로그인 없이 올리는 글입니다. 올린 뒤에는 <b>이 브라우저에서만</b> 고치고 지울 수 있어요.</p>`
     : `<div class="grid c2">
       <label class="field">작성자 소속<select id="pfTeam">${authorTeamOptions(e0?.author_team)}</select></label>
       <label class="field">소속청 · 부서 <span class="hint" style="display:inline">선택</span>
@@ -3860,11 +3880,12 @@ function openPostForm(key, edit){
          서버에서도 한 번 더 지웁니다(schema.sql 32절) — 화면을 고쳐도 이름이 남지 않게. */
       const fields = {
         title, body,
-        author_team: anon ? '' : $('#pfTeam').value,
-        author_dept: anon ? '' : $('#pfDept').value.trim(),
+        author_team: anon ? '' : ($('#pfTeam')?.value || ''),
+        author_dept: anon ? '' : ($('#pfDept')?.value.trim() || ''),
         pinned: !!$('#pfPin')?.checked
       };
       if(anon) fields.author_name = '';
+      else if(guest) fields.author_name = $('#pfName')?.value.trim() || '직원';
       if(isAct) fields.team_no = teamNo;
       if(isAi){ fields.topic = $('#pfTopic').value; AI_TAB = ''; AI_SUB = ''; }
       if(isNotice) fields.due_at = $('#pfDue').value || null;   // 비우면 기한 없는 공지
@@ -3874,7 +3895,7 @@ function openPostForm(key, edit){
       if(isAct) ACT_TEAM = teamNo;
       if(e0){
         /* 파일을 새로 고른 경우에만 첨부를 교체합니다 */
-        if(touched) fields.images = uploaded = await uploadMixed('media', imgPicked, docPicked, 'posts');
+        if(touched) fields.images = uploaded = await uploadMixed('media', imgPicked, docPicked, mediaFolder(key));
         const { error } = await sb.from('posts').update(fields).eq('id', e0.id);
         if(error) throw error;
         /* 교체했으면 예전 첨부는 저장소에서 지웁니다(남겨 두면 아무도 못 보는 파일로 쌓입니다) */
@@ -3882,7 +3903,7 @@ function openPostForm(key, edit){
         if(old.length) await sb.storage.from('media').remove(old);
         await refresh(); closeModal(); toast('수정되었습니다'); go(CURRENT);
       }else{
-        const images = uploaded = await uploadMixed('media', imgPicked, docPicked, 'posts');
+        const images = uploaded = await uploadMixed('media', imgPicked, docPicked, mediaFolder(key));
         const { error } = await sb.from('posts').insert({
           board:key, images, author_id:S.user?.id, author_name:myName(), ...fields });
         if(error) throw error;
@@ -3900,7 +3921,7 @@ function openPost(id){
   const p = S.posts.find(x=>x.id===id); if(!p) return;
   const imgs = imagesOf(p), docs = docsOf(p);
   /* 출근룩은 부적절한 사진을 담당관도 내릴 수 있습니다(schema.sql 37절) */
-  const mine = p.author_id===S.user?.id || isAdmin() || (p.board === 'ootd' && isOfficer());
+  const mine = p.author_id===S.user?.id || isAdmin() || (isOpenBoard(p.board) && isOfficer());
   /* 무기명 게시판은 이름 자리에 '무기명' 만 적습니다(이름 칸은 애초에 비어 있습니다) */
   const who = BOARDS[p.board]?.anon ? '🙈 무기명'
     : ([p.author_name, p.author_team, p.author_dept].filter(Boolean).map(esc).join(' · ') || '이름 없음');
@@ -5967,6 +5988,10 @@ const DOC_EXT_RE    = /\.(pdf|docx?|hwpx?|pptx?|xlsx?)$/i;                 // �
 const BLOCK_EXT_RE  = /\.(exe|msi|bat|cmd|com|scr|pif|cpl|msc|jar|js|jse|vbs|vbe|wsf|wsh|ps1|psm1|reg|lnk|hta|dll|sys|apk|sh)$/i;  // 실행 파일
 const INLINE_EXT_RE = /\.(pdf|png|jpe?g|gif|webp|mp4|webm|m4v|mov|mp3|m4a|wav|ogg|oga)$/i;         // 브라우저가 바로 보여 주는 형식
 const extOf    = (name) => { const m = /\.([A-Za-z0-9]{1,10})$/.exec(name || ''); return m ? '.' + m[1].toLowerCase() : ''; };
+/* 첨부를 담을 폴더 — 누구나 쓰는 게시판은 게시판 이름 폴더에 담습니다.
+   그래야 가입하지 않은 직원도 올릴 수 있고(40절 media_write),
+   담당관이 그 폴더의 장난 파일만 골라 내릴 수 있습니다(40절 media_delete). */
+const mediaFolder = (board) => isOpenBoard(board) ? board : 'posts';
 const storeKey = (folder, name) => `${folder}/${S.user?.id}/${Date.now()}-${Math.random().toString(36).slice(2,8)}${extOf(name)}`;
 const fmtSize  = (n) => !n ? '' : n < 1024*1024 ? `${Math.max(1, Math.round(n/1024))}KB` : `${(n/1024/1024).toFixed(1)}MB`;
 function fileIcon(name){
