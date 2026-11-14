@@ -1598,8 +1598,13 @@ end $$;
 alter table public.posts add column if not exists topic text;
 
 -- 게시판 이름 목록 다시 걸기 (20·27절과 같은 방식 — 다시 실행해도 안전)
+--
+--  ★ 이 절보다 나중에 생긴 게시판(예: 37절 출근룩 'ootd')에 이미 글이 있을 수 있어서,
+--    목록에 없는 이름이 글에 있으면 그 이름도 함께 넣습니다. 그러지 않으면
+--    "check constraint posts_board_check ... is violated by some row" 로 멈춥니다.
+--    글을 지우거나 고치지 않습니다. 어떤 이름이 더 들어갔는지는 Notice 줄에 나옵니다.
 do $$
-declare c text;
+declare c text; extra text;
 begin
   for c in
     select conname from pg_constraint
@@ -1609,10 +1614,19 @@ begin
   loop
     execute format('alter table public.posts drop constraint %I', c);
   end loop;
-end $$;
 
-alter table public.posts add constraint posts_board_check
-  check (board in ('news','notice','free','share','activity','collab','mascot','ai','relief'));
+  select string_agg(distinct quote_literal(board), ', ') into extra
+    from public.posts
+   where board not in ('news','notice','free','share','activity','collab','mascot','ai','relief');
+
+  if extra is not null then
+    raise notice '30절 — 목록에 없던 게시판 이름을 함께 넣었습니다: %', extra;
+  end if;
+
+  execute 'alter table public.posts add constraint posts_board_check check (board in ('
+       || '''news'',''notice'',''free'',''share'',''activity'',''collab'',''mascot'',''ai'',''relief'''
+       || coalesce(', ' || extra, '') || '))';
+end $$;
 
 -- 읽기 권한 — 소식·활동과 새 게시판 셋은 누구나, 나머지는 단원 이상
 drop policy if exists posts_select on public.posts;
@@ -1966,8 +1980,14 @@ create trigger expenses_guard
 -- ============================================================================
 
 -- 게시판 이름 목록 다시 걸기 (30절과 같은 방식 — 다시 실행해도 안전)
+--
+--  ★ 예전에 쓰던 게시판 이름이 글에 남아 있을 수 있어서, 목록에 없는 이름이
+--    글에 있으면 그 이름도 목록에 함께 넣습니다. 그러지 않으면
+--    "check constraint posts_board_check ... is violated by some row" 로 멈춥니다.
+--    글을 지우거나 고치지 않습니다. 여기서 하려는 일은 'ootd' 를 더하는 것뿐입니다.
+--    어떤 이름이 더 들어갔는지는 실행 결과의 Notice 줄에 적어 줍니다.
 do $$
-declare c text;
+declare c text; extra text;
 begin
   for c in
     select conname from pg_constraint
@@ -1977,11 +1997,21 @@ begin
   loop
     execute format('alter table public.posts drop constraint %I', c);
   end loop;
-end $$;
 
-alter table public.posts add constraint posts_board_check
-  check (board in ('news','notice','free','share','activity','collab',
-                   'mascot','ai','relief','ootd'));
+  select string_agg(distinct quote_literal(board), ', ') into extra
+    from public.posts
+   where board not in ('news','notice','free','share','activity','collab',
+                       'mascot','ai','relief','ootd');
+
+  if extra is not null then
+    raise notice '목록에 없던 게시판 이름을 함께 넣었습니다: %', extra;
+  end if;
+
+  execute 'alter table public.posts add constraint posts_board_check check (board in ('
+       || '''news'',''notice'',''free'',''share'',''activity'',''collab'','
+       || '''mascot'',''ai'',''relief'',''ootd'''
+       || coalesce(', ' || extra, '') || '))';
+end $$;
 
 -- 읽기 — 소식·라운지 셋과 콘테스트는 누구나, 나머지는 단원 이상(35절에 ootd 추가)
 drop policy if exists posts_select on public.posts;
