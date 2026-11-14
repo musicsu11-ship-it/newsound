@@ -61,6 +61,12 @@
     font-size:9.5px;font-weight:900;letter-spacing:.06em;line-height:1;
     background:#1a8fd4;color:#fff;border-radius:999px;padding:3px 6px 2px}
   .nav-btn.sky.active .nav-new{background:#fff;color:#1a8fd4}
+  /* 새로 생긴 메뉴 — 노란색 + NEW (밸런스 게임) */
+  .nav-btn.gold{color:#8a5500;background:#fff5d9;font-weight:900;border:1px solid #ffdc8a}
+  .nav-btn.gold:hover{color:#6b4200;background:#ffecb8;border-color:#f0bf4d}
+  .nav-btn.gold.active{color:#4a2e00;background:#ffc53d;border-color:#ffc53d}
+  .nav-btn.gold .nav-new{background:#e08a00}
+  .nav-btn.gold.active .nav-new{background:#4a2e00;color:#ffd978}
   .navdrop-panel .nav-btn.first:hover{background:#ffd2e0}
   .nav-right{display:flex;align-items:center;gap:10px;flex:none}
   .whoami{font-size:13px;font-weight:800;color:var(--brand);white-space:nowrap}
@@ -765,6 +771,65 @@
   .bg-split.empty i{background:#e3e6f2}
   .bg-tip{margin:10px 2px 0;text-align:center;font-size:13px;font-weight:700;color:var(--muted)}
 
+  /* ── 밸런스 게임 목록형 ── 진행 중인 게임이 여러 개일 때 한눈에 보고 골라 들어갑니다 */
+  .bg-view{display:flex;align-items:center;gap:6px;margin:-6px 0 14px;flex-wrap:wrap}
+  .pv-grid.one{grid-template-columns:minmax(0,1fr)}
+  .bg-view .lb{margin-right:auto;font-size:13px;font-weight:800;color:var(--muted)}
+  .bg-view button{border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
+    font-size:13px;font-weight:800;padding:6px 13px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .bg-view button.on{background:var(--text);border-color:var(--text);color:#fff}
+  .bg-list{display:flex;flex-direction:column;gap:10px}
+  .bg-item{display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;text-align:left;
+    border:1.5px solid var(--border);border-radius:16px;background:var(--surface);font:inherit;color:var(--text);
+    cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s}
+  .bg-item:hover{border-color:#16225c;box-shadow:0 8px 20px rgba(22,34,92,.1);transform:translateY(-1px)}
+  .bg-no{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;
+    background:#16225c;color:#fff;font-size:14.5px;font-weight:900}
+  .bg-item.done .bg-no{background:#9aa2c4}
+  .bg-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+  .bg-q{font-size:17px;font-weight:900;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}
+  .bg-ab2{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .bg-ab2 i{font-style:normal;font-size:13.5px;font-weight:800;border-radius:999px;padding:4px 11px;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .bg-ab2 i.a{background:#ffe1ec;color:#b3134f}
+  .bg-ab2 i.b{background:#dfeaff;color:#1f4fc4}
+  .bg-ab2 em{font-style:normal;font-size:11.5px;font-weight:900;color:var(--muted)}
+  .bg-mini{display:flex;height:8px;max-width:340px;border-radius:999px;overflow:hidden;background:var(--surface-2)}
+  .bg-mini i{display:block;height:100%}
+  .bg-mini .s0{background:#f06292}
+  .bg-mini .s1{background:#5c8df6}
+  .bg-sub{font-size:12.5px;font-weight:700;color:var(--muted)}
+  .bg-sub b{color:#8a5500;font-weight:900}
+  .bg-go{flex:none;font-size:13.5px;font-weight:900;color:#16225c;white-space:nowrap}
+  .bg-back{margin:0 0 14px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font:inherit;
+    font-size:13.5px;font-weight:800;padding:7px 14px;border-radius:999px;cursor:pointer}
+  .bg-back:hover{border-color:var(--text)}
+
+  /* ── 참여 이벤트 ── 투표한 뒤 소속·연락처를 남기면 추첨에 들어갑니다 */
+  .bg-ev{margin-top:12px;padding:13px 15px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
+  .bg-ev .evh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .bg-ev .evh b{font-size:14.5px;font-weight:900;color:#8a5500}
+  .bg-ev .evh .ok{font-size:12.5px;font-weight:900;color:#1f7a3d;background:#e3f7e8;border-radius:999px;padding:3px 10px}
+  .bg-ev p{margin:7px 0 0;font-size:12.5px;font-weight:700;color:#7a5a1a;line-height:1.6;word-break:keep-all}
+  .bg-ev .evb{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .btn.gold{background:#ffc53d;border-color:#ffc53d;color:#4a2e00;font-weight:900}
+  .btn.gold:hover{background:#f0b020;border-color:#f0b020}
+
+  /* 이벤트 참여 창 · 응모 명단 */
+  .pe-top{margin:0 0 12px;padding:13px 15px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
+  .pe-top b{display:block;font-size:16px;font-weight:900;color:#8a5500}
+  .pe-top p{margin:5px 0 0;font-size:14px;font-weight:800;line-height:1.45;word-break:keep-all;overflow-wrap:anywhere}
+  .pe-why{margin:0 0 14px;font-size:13px;font-weight:700;color:var(--text);line-height:1.65;word-break:keep-all}
+  .pe-why span{display:block;margin-top:6px;font-size:12.5px;font-weight:600;color:var(--muted)}
+  .pe-list{list-style:none;margin:0;padding:0;counter-reset:pe}
+  .pe-list li{display:flex;align-items:baseline;gap:12px;padding:11px 2px;border-top:1px solid var(--border)}
+  .pe-list li:first-child{border-top:0}
+  .pe-list li::before{counter-increment:pe;content:counter(pe);flex:none;display:grid;place-items:center;
+    width:24px;height:24px;border-radius:50%;background:var(--surface-2);color:var(--muted);font-size:12px;font-weight:900}
+  .pe-list b{flex:1;min-width:0;font-size:14.5px;font-weight:800;word-break:keep-all;overflow-wrap:anywhere}
+  .pe-list span{flex:none;font-size:14px;font-weight:800;color:#16225c}
+  .pe-list em{flex:none;font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+
   /* 만들기 창 — 일반 투표 / 밸런스 게임 고르기 */
   .pv-kind{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 16px;padding:5px;border-radius:14px;background:var(--surface-2)}
   .pv-kind button{border:0;border-radius:10px;background:transparent;font:inherit;font-size:14.5px;font-weight:800;
@@ -778,6 +843,8 @@
   .pv-form.balance #pvOpts{counter-reset:ab;margin-bottom:16px}
   .pv-form.balance .pv-optin::before{counter-increment:ab;content:counter(ab, upper-alpha);flex:none;display:grid;place-items:center;
     width:28px;height:28px;border-radius:50%;font-size:13px;font-weight:900;color:#fff}
+  .pv-form .pv-sw.ev{display:none}
+  .pv-form.balance .pv-sw.ev{display:flex}
   .pv-form.balance .pv-optin:nth-child(1)::before{background:var(--brand)}
   .pv-form.balance .pv-optin:nth-child(2)::before{background:#2b5fd9}
 
@@ -828,6 +895,16 @@
     border-radius:999px;padding:1px 7px;vertical-align:1px}
 
   @media (max-width:860px){ .pv-grid{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:700px){
+    .bg-view .lb{flex:1 0 100%;margin:0 0 2px}
+    .bg-item{gap:11px;padding:14px 15px}
+    .bg-no{width:30px;height:30px;font-size:13.5px}
+    .bg-q{font-size:15.5px}
+    .bg-ab2 i{font-size:12.5px;padding:3px 10px}
+    .bg-go{display:none}
+    .pe-list li{flex-wrap:wrap}
+    .pe-list b{flex:1 0 100%}
+  }
   @media (max-width:700px){
     .pv-card{padding:18px 16px 14px}
     .pv-title{font-size:17.5px}
@@ -1790,6 +1867,9 @@ const S = {
   polls:[], ballots:[],            // ballots: 내 표 + 실명 투표의 모든 표(권한이 그렇게 걸려 있음)
   pollResults:{},                  // { 투표id: { tally:[항목별 표 수], voters:참여 인원 } }
   votesReady:false,                // 투표 표가 준비됐는지(schema.sql 23절)
+  pollEntries:[],                  // 이벤트 응모 — 내가 남긴 것(담당관은 전부)
+  entryCounts:{},                  // { 투표id: 응모 인원 }
+  entriesReady:false,              // 응모 표가 준비됐는지(schema.sql 38절)
   /* 협업 게시판 */
   joins:[],                        // 협업 참여자 (단원 이상만 읽힘)
   joinsReady:false                 // 참여 표가 준비됐는지(schema.sql 27절)
@@ -1932,7 +2012,7 @@ const MENUS = [
   { id:'news',     icon:'📰', label:'소식', roles:ALL,   group:'소식' },
 
   { id:'opinion',  icon:'💬', label:'의견함',       roles:ALL,   group:'의견함' },
-  { id:'vote',     icon:'🗳️', label:'투표', roles:ALL,   group:'투표' },
+  { id:'vote',     icon:'⚖️', label:'밸런스 게임', roles:ALL, group:'밸런스 게임', hot:'gold' },
   { id:'calendar', icon:'📅', label:'일정',     roles:ALL,   group:'일정' },
 
   /* 라운지 — 누구나 읽는 공간 세 곳. 상단 '라운지' 묶음 메뉴에 들어갑니다 */
@@ -1995,6 +2075,12 @@ async function refresh(opt = {}){
       sb.from('polls').select('*').order('created_at', { ascending:false }),
       sb.from('poll_ballots').select('*'),
       sb.rpc('poll_results'),
+    ]).catch(e => e);
+    /* 이벤트 응모 — 38절을 아직 실행하지 않았으면 조용히 쉽니다.
+       읽히는 것은 '내가 남긴 것' 뿐이고, 혁신행정담당관·관리자만 전부 읽힙니다. */
+    const pEntries = Promise.all([
+      sb.from('poll_entries').select('*').order('created_at'),
+      sb.rpc('poll_entry_counts'),
     ]).catch(e => e);
     const pJoins = isInner() ? sb.from('post_joins').select('*').then(r => r, e => ({ error:e })) : null;
 
@@ -2069,13 +2155,21 @@ async function refresh(opt = {}){
       const [pa, pb, pr] = await pPolls;
       S.votesReady  = !pa.error && !pb.error && !pr.error;
       S.polls       = pa.data || [];
-      if(S.polls.length) ['option_images', 'kind'].forEach(c => POLL_COLS[c] = c in S.polls[0]);   // 새 칸(24·25절)이 있는지
+      if(S.polls.length) ['option_images', 'kind', 'event_on'].forEach(c => POLL_COLS[c] = c in S.polls[0]);  // 새 칸(24·25·38절)이 있는지
       S.ballots     = pb.data || [];
       S.pollResults = Object.fromEntries((pr.data || []).map(r =>
         [r.poll_id, { tally: r.tally || [], voters: r.voters || 0 }]));
     }catch(e){
       S.votesReady = false; S.polls = []; S.ballots = []; S.pollResults = {};
     }
+
+    /* 이벤트 응모 — 표가 없으면 이벤트 기능만 쉬고 투표는 그대로 돕니다 */
+    try{
+      const [ea, ec] = await pEntries;
+      S.entriesReady = !ea.error && !ec.error;
+      S.pollEntries  = ea.data || [];
+      S.entryCounts  = Object.fromEntries((ec.data || []).map(r => [r.poll_id, r.entries || 0]));
+    }catch(e){ S.entriesReady = false; S.pollEntries = []; S.entryCounts = {}; }
 
     /* 협업 게시판 참여자 — 단원 이상만 읽을 수 있습니다(schema.sql 27절).
        표가 아직 없으면 참여 기능만 쉬고 게시판과 나머지 화면은 그대로 나옵니다. */
@@ -2405,7 +2499,7 @@ function renderNav(){
   const lounge = LOUNGE_NAV.map(id => mine.find(m => m.id===id)).filter(Boolean);
 
   /* hot:true 인 메뉴는 하늘색 + NEW 로 새로 생긴 곳임을 알려 줍니다 */
-  let html = top.map(m => `<button class="nav-btn${m.hot ? ' sky' : ''}" data-go="${m.id}">${
+  let html = top.map(m => `<button class="nav-btn${m.hot ? (m.hot === true ? ' sky' : ' ' + m.hot) : ''}" data-go="${m.id}">${
     esc(m.label)}${m.hot ? '<span class="nav-new">NEW</span>' : ''}</button>`).join('');
 
   /* 라운지 — 누구나 들어갈 수 있는 공간 세 곳 */
@@ -4193,7 +4287,7 @@ BIND.opinion = () => {
    · 밸런스 게임(kind='balance')은 같은 표·같은 규칙을 쓰는 'A vs B' 두 칸짜리 투표입니다.
    서버에서도 같은 규칙으로 막아 두었습니다(schema.sql 23~25절).
    ============================================================================ */
-let VOTE_TAB = 'open';                 // 'open' 진행 중 · 'done' 종료 · 'balance' 밸런스 게임
+let VOTE_TAB = 'balance';              // 'balance' 밸런스 게임(처음 화면) · 'open' 진행 중 · 'done' 종료
 const VOTE_DRAFT = {};                 // 투표하기 전에 고르는 중인 항목 { 투표id: [번호…] }
 const VOTE_EDIT  = new Set();          // '다시 투표하기' 를 누른 투표
 const VOTE_PEEK  = new Set();          // 만든 사람·관리자가 '결과 미리 보기' 를 연 투표
@@ -4211,13 +4305,24 @@ const vsTitle = (t) => esc(t).replace(/\s*\bvs\b\s*/gi, '<wbr><span class="vs-in
    option_images: 항목 사진(schema.sql 24절) · kind: 밸런스 게임(25절) */
 const POLL_COLS = {};
 async function checkPollCols(){
-  for(const c of ['option_images', 'kind']){
+  for(const c of ['option_images', 'kind', 'event_on']){
     if(POLL_COLS[c] === true) continue;
     const { error } = await sb.from('polls').select(c).limit(1);
     POLL_COLS[c] = !error;
   }
 }
 const isBalance = (p) => p.kind === 'balance';
+
+/* ── 참여 이벤트 (38절) ──
+   투표한 뒤에 소속·연락처를 남기면 추첨 명단에 들어갑니다.
+   명단에는 '어느 쪽을 골랐는지' 를 아예 적지 않아서, 명단을 보는 담당관도
+   그 사람이 A 를 골랐는지 B 를 골랐는지 알 수 없습니다(결과는 끝까지 익명). */
+let BG_VIEW = 'list';                  // 'list' 목록형 · 'card' 카드형 (게임이 여럿일 때만 고를 수 있음)
+let BG_OPEN = '';                      // 목록에서 눌러 들어간 게임 id
+
+const eventOn  = (p) => !!p.event_on && S.entriesReady;
+const myEntry  = (pid) => S.pollEntries.find(e => e.poll_id === pid && e.user_id === S.user?.id);
+const entryCnt = (pid) => S.entryCounts[pid] || 0;
 
 /* 항목 사진 — option_images 는 항목 순서대로 저장소 경로, 사진 없는 항목은 '' */
 const pollPic  = (p, i) => { const path = (p.option_images || [])[i]; return path ? mediaUrl(path) : ''; };
@@ -4379,6 +4484,7 @@ function pollCard(p){
         : (!block ? `<span class="pv-acts">${editing ? '<button class="btn sm ghost" data-pv-cancel>취소</button>' : ''}
             <button class="btn primary sm" data-pv-vote ${draft.length ? '' : 'disabled'}>${editing ? '바꿔서 투표' : '투표하기'}</button></span>` : '')}
     </div>
+    ${eventBox(p)}
 
     ${pollManage(p, closed, mine, peek)}
   </article>`;
@@ -4414,6 +4520,9 @@ function openPollEdit(p){
       : `<label class="pv-sw" style="margin:0 0 14px"><input type="checkbox" id="peAnon">
           <span><b>무기명(익명)으로 바꾸기</b><em>지금은 실명 투표입니다. 바꾸면 누가 무엇을 골랐는지 아무에게도 보이지 않고 '참여자 보기'도 닫힙니다. 한 번 바꾸면 되돌릴 수 없습니다.</em></span></label>`}
 
+    ${bal && POLL_COLS.event_on === true ? `<label class="pv-sw" style="margin:0 0 14px"><input type="checkbox" id="peEvent" ${p.event_on ? 'checked' : ''}>
+      <span><b>🎁 참여 이벤트 받기</b><em>고른 뒤에 소속·연락처를 남기는 창이 뜹니다. 끄면 더 받지 않습니다(이미 남긴 명단은 그대로 있습니다)</em></span></label>` : ''}
+
     <div class="grid c2">
       <label class="field">마감<select id="peClose">
         <option value="keep" selected>그대로 두기${p.closes_at ? ` (${shortWhen(p.closes_at)})` : ' (마감 없음)'}</option>
@@ -4438,6 +4547,7 @@ function openPollEdit(p){
       if(new Set(opts).size !== opts.length){ toast('같은 항목이 두 번 들어 있습니다'); return; }
       if(opts.some((o, i) => o !== p.options[i])) fields.options = opts;
     }
+    if($('#peEvent')) fields.event_on = $('#peEvent').checked;
     if(!p.anonymous && $('#peAnon')?.checked){
       if(!confirm('무기명(익명)으로 바꿀까요?\n\n· 누가 무엇을 골랐는지 아무에게도 보이지 않게 됩니다.\n· 다시 실명으로 되돌릴 수 없습니다.')) return;
       fields.anonymous = true;
@@ -4461,6 +4571,85 @@ function openPollEdit(p){
     busy(false); btn.disabled = false;
     if(error) return failed('투표 수정', error);
     await refresh(); closeModal(); toast('수정했습니다'); redrawVote();
+  });
+}
+
+/* ── 참여 이벤트 칸 ──
+   투표한 뒤에 뜨는 응모 창을 이 칸에서도 열 수 있습니다(창을 닫았던 사람용).
+   담당관·관리자에게는 '응모 명단 보기' 가 함께 보입니다.
+   이벤트를 받지 않는 투표·38절 실행 전에는 아무것도 그리지 않습니다. */
+function eventBox(p){
+  if(!eventOn(p)) return '';
+  const mine = myBallot(p.id);
+  const ent  = myEntry(p.id);
+  const off  = isOfficer();
+  return `<div class="bg-ev">
+    <div class="evh"><b>🎁 참여 이벤트</b>${ent ? '<span class="ok">✅ 참여 완료</span>' : ''}</div>
+    <p>${ent
+      ? `남겨 주신 <b>${esc(ent.team)}</b> · ${esc(ent.contact)} 로 추첨 결과를 알려 드립니다.`
+      : mine ? '소속과 연락처를 남기시면 추첨에 참여됩니다.'
+             : '한쪽을 고르면 이벤트 참여 창이 열립니다. 소속·연락처를 남기시면 추첨에 참여됩니다.'}
+      <br>🔒 남긴 정보는 혁신행정담당관·관리자만 보고, <b>어느 쪽을 골랐는지는 적지 않아</b> 아무도 알 수 없습니다.</p>
+    ${mine || off ? `<div class="evb">
+      ${mine ? `<button class="btn sm${ent ? '' : ' gold'}" data-pv-ev>${ent ? '참여 정보 수정' : '🎁 이벤트 참여하기'}</button>` : ''}
+      ${off  ? `<button class="btn sm" data-pv-elist>📋 응모 명단 보기 (${entryCnt(p.id)}명)</button>` : ''}
+    </div>` : ''}
+  </div>`;
+}
+
+/* ── 이벤트 참여 창 ──
+   소속·연락처만 받습니다. '어느 쪽을 골랐는지' 는 받지도, 저장하지도 않습니다.
+   한 사람 한 번이고 나중에 고쳐 쓸 수 있습니다(schema.sql 38절). */
+function openEntryForm(p, auto){
+  const cur = myEntry(p.id);
+  openModal(cur ? '이벤트 참여 정보 수정' : '🎁 이벤트 참여', `
+    <div class="pe-top"><b>${auto ? '투표 완료! 이벤트에 참여해 보세요' : '🎁 참여 이벤트'}</b>
+      <p>${vsTitle(p.title)}</p></div>
+    <p class="pe-why">소속과 연락처를 남기시면 추첨에 참여됩니다.
+      <span>· 남긴 정보는 <b>혁신행정담당관·운영 관리자</b>만 보고, 추첨·당첨 안내에만 씁니다.<br>
+        · <b>어느 쪽을 골랐는지는 명단에 적지 않습니다.</b> 누가 무엇을 골랐는지는 끝까지 아무도 알 수 없습니다.</span></p>
+    <label class="field">소속 <span class="req">*</span>
+      <input id="peTeam" maxlength="60" placeholder="예) 서울남부고용센터 실업급여팀" value="${esc(cur?.team || '')}"></label>
+    <label class="field">연락처 <span class="req">*</span>
+      <input id="peContact" maxlength="40" placeholder="예) 010-1234-5678" value="${esc(cur?.contact || '')}"></label>
+    <div class="row-actions">${auto ? '<button class="btn ghost" id="peLater">나중에 하기</button>' : ''}
+      <button class="btn primary" id="peGo">${cur ? '수정 저장' : '참여하기'}</button></div>`);
+
+  $('#peLater')?.addEventListener('click', ()=> closeModal());
+  $('#peGo').addEventListener('click', async ()=>{
+    const team = $('#peTeam').value.trim(), contact = $('#peContact').value.trim();
+    if(!team)   { toast('소속을 입력하세요'); return; }
+    if(!contact){ toast('연락처를 입력하세요'); return; }
+    const btn = $('#peGo'); btn.disabled = true; busy(true);
+    const { error } = await sb.from('poll_entries')
+      .upsert({ poll_id: p.id, user_id: S.user.id, team, contact }, { onConflict: 'poll_id,user_id' });
+    busy(false); btn.disabled = false;
+    if(error) return failed('이벤트 참여', error);
+    await refresh(); closeModal(); toast(cur ? '수정했습니다' : '이벤트에 참여했습니다 🎁'); redrawVote();
+  });
+  setTimeout(()=> $('#peTeam')?.focus(), 60);
+}
+
+/* ── 응모 명단 (혁신행정담당관·운영 관리자) ──
+   목록형으로 소속·연락처·남긴 때만 보여 줍니다. 고른 쪽은 애초에 저장하지 않습니다. */
+function openEntries(p){
+  const rows = S.pollEntries.filter(e => e.poll_id === p.id)
+    .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+  openModal('🎁 이벤트 응모 명단', `
+    <div class="vw-top"><h3>${vsTitle(p.title)}</h3>
+      <p>응모 ${rows.length}명 · 👥 ${resultOf(p.id).voters}명 참여</p></div>
+    <div class="notice" style="margin:0 0 14px">🔒 이 명단에는 <b>어느 쪽을 골랐는지</b>가 없습니다(익명 투표).
+      연락처는 추첨·당첨 안내에만 써 주세요.</div>
+    ${rows.length
+      ? `<ol class="pe-list">${rows.map(e =>
+          `<li><b>${esc(e.team)}</b><span>${esc(e.contact)}</span><em>${fmtDay(e.created_at)}</em></li>`).join('')}</ol>
+         <div class="row-actions"><button class="btn sm" id="peCopy">명단 복사</button></div>`
+      : '<div class="empty">아직 응모한 사람이 없습니다.</div>'}`);
+
+  $('#peCopy')?.addEventListener('click', async ()=>{
+    const txt = rows.map((e, i) => `${i + 1}. ${e.team} / ${e.contact} / ${fmtDay(e.created_at)}`).join('\n');
+    try{ await navigator.clipboard.writeText(txt); toast('명단을 복사했습니다'); }
+    catch(e){ toast('복사할 수 없습니다. 화면에서 직접 적어 주세요'); }
   });
 }
 
@@ -4526,15 +4715,42 @@ function balanceCard(p){
         ? (!closed && mine && !block ? '<button class="btn sm" data-pv-again>다시 고르기</button>' : '')
         : (editing ? '<button class="btn sm ghost" data-pv-cancel>취소</button>' : '')}
     </div>
+    ${eventBox(p)}
     ${pollManage(p, closed, mine, peek)}
   </article>`;
 }
 
+/* ── 밸런스 게임 한 줄(목록형) ──
+   게임이 여러 개면 카드를 길게 늘어놓는 대신 한 줄씩 보여 주고,
+   누르면 그 게임만 크게 펼쳐 봅니다(가독성). */
+function bgRow(p, i){
+  const closed = pollClosed(p);
+  const mine   = myBallot(p.id);
+  const res    = resultOf(p.id);
+  const show   = closed || !!mine;
+  const t      = [res.tally[0] || 0, res.tally[1] || 0];
+  const sum    = t[0] + t[1];
+  const pct    = sum ? Math.round(t[0] * 100 / sum) : 50;
+  const ent    = eventOn(p) && myEntry(p.id);
+  return `<button type="button" class="bg-item${closed ? ' done' : ''}" data-bg-open="${p.id}">
+    <span class="bg-no">${i + 1}</span>
+    <span class="bg-mid">
+      <span class="bg-q">${vsTitle(p.title)}</span>
+      <span class="bg-ab2"><i class="a">${esc(p.options[0])}</i><em>VS</em><i class="b">${esc(p.options[1])}</i></span>
+      ${show && sum ? `<span class="bg-mini" aria-hidden="true"><i class="s0" style="width:${pct}%"></i><i
+        class="s1" style="width:${100 - pct}%"></i></span>` : ''}
+      <span class="bg-sub">${closed ? '종료' : leftText(p)} · 👥 ${res.voters}명 참여${mine ? ' · ✅ 참여함' : ''}${
+        eventOn(p) ? (ent ? ' · <b>🎁 이벤트 응모 완료</b>' : ' · <b>🎁 이벤트</b>') : ''}</span>
+    </span>
+    <span class="bg-go">${closed || mine ? '결과 보기' : '참여하기'} ›</span>
+  </button>`;
+}
+
 VIEWS.vote = () => {
   const bal = VOTE_TAB === 'balance';
-  const head = `<div class="crumb">홈 · 투표${bal ? ' · 밸런스 게임' : ''}</div>
+  const head = `<div class="crumb">홈 · 밸런스 게임${bal ? '' : ' · 투표'}</div>
   <div class="pg-head">
-    <div><h1 class="pg-title">투표</h1>
+    <div><h1 class="pg-title">${bal ? '⚖️ 밸런스 게임' : '투표'}</h1>
       <p class="pg-sub">${bal
         ? '둘 중 하나만 고른다면? 가볍게 골라 보는 밸런스 게임입니다. 한쪽을 누르면 바로 투표돼요.'
         : '익명 또는 실명으로 의견을 모읍니다. 한 사람 한 표이고, 마감 전에는 다시 고를 수 있습니다.'}</p></div>
@@ -4549,32 +4765,71 @@ VIEWS.vote = () => {
   /* 진행 중·종료 탭에는 일반 투표와 밸런스 게임이 함께 나옵니다.
      밸런스 게임 탭은 게임만 모아 보는 자리입니다(진행 중인 것 먼저). */
   const games = S.polls.filter(isBalance)
-    .sort((a, b) => (pollClosed(a) - pollClosed(b)) || b.created_at.localeCompare(a.created_at));
+    .sort((a, b) => (pollClosed(a) - pollClosed(b)) || a.created_at.localeCompare(b.created_at));
   const open = S.polls.filter(p => !pollClosed(p));
   const done = S.polls.filter(p =>  pollClosed(p));
-  const list = bal ? games : VOTE_TAB === 'done' ? done : open;
-  const empty = bal
-    ? `아직 밸런스 게임이 없습니다.${isSignedIn() ? '<br>위의 ‘밸런스 게임 만들기’로 첫 게임을 올려 보세요.' : ''}`
-    : VOTE_TAB === 'done' ? '종료된 투표가 없습니다.'
-    : `진행 중인 투표·밸런스 게임이 없습니다.${isSignedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`;
-  return head + `
-  ${!isSignedIn() ? `<p class="hint" style="margin:-8px 0 16px">${bal ? '밸런스 게임을' : '투표를'} 만들려면 로그인하세요. 익명 ${
-    bal ? '게임' : '투표'}에는 로그인 없이도 참여할 수 있습니다.</p>` : ''}
-  <div class="pv-tabs">
+
+  const hint = !isSignedIn() ? `<p class="hint" style="margin:-8px 0 16px">${bal ? '밸런스 게임을' : '투표를'} 만들려면 로그인하세요. 익명 ${
+    bal ? '게임' : '투표'}에는 로그인 없이도 참여할 수 있습니다.</p>` : '';
+  const tabs = `<div class="pv-tabs">
+    <button class="${bal ? 'on' : ''}" data-pv-tab="balance">⚖️ 밸런스 게임<b>${games.length}</b></button>
     <button class="${VOTE_TAB === 'open' ? 'on' : ''}" data-pv-tab="open">진행 중<b>${open.length}</b></button>
     <button class="${VOTE_TAB === 'done' ? 'on' : ''}" data-pv-tab="done">종료<b>${done.length}</b></button>
-    <button class="${bal ? 'on' : ''}" data-pv-tab="balance">⚖️ 밸런스 게임<b>${games.length}</b></button>
-  </div>
-  ${list.length ? `<div class="pv-grid">${list.map(p => isBalance(p) ? balanceCard(p) : pollCard(p)).join('')}</div>`
-    : loadBox(empty)}`;
+  </div>`;
+
+  /* ── 밸런스 게임 탭 ──
+     ① 목록에서 하나를 눌렀으면 그 게임만 크게 보여 줍니다
+     ② 게임이 둘 이상이면 목록형(기본) · 카드형을 고를 수 있습니다
+     ③ 하나뿐이면 그냥 카드로 보여 줍니다 */
+  if(bal){
+    const one = BG_OPEN ? games.find(g => g.id === BG_OPEN) : null;
+    if(one) return head + hint + tabs
+      + '<button type="button" class="bg-back" data-bg-back>‹ 밸런스 게임 목록</button>'
+      + `<div class="pv-grid one">${balanceCard(one)}</div>`;
+
+    if(!games.length) return head + hint + tabs + loadBox(
+      `아직 밸런스 게임이 없습니다.${isSignedIn() ? '<br>위의 ‘밸런스 게임 만들기’로 첫 게임을 올려 보세요.' : ''}`);
+
+    const many = games.length >= 2;
+    const asList = many && BG_VIEW !== 'card';
+    const view = many ? `<div class="bg-view"><span class="lb">모두 ${games.length}개 · 진행 중인 게임이 먼저, 올라온 차례대로</span>
+      <button class="${asList ? 'on' : ''}" data-bg-view="list">목록형</button>
+      <button class="${asList ? '' : 'on'}" data-bg-view="card">카드형</button></div>` : '';
+    return head + hint + tabs + view + (asList
+      ? `<div class="bg-list">${games.map((p, i) => bgRow(p, i)).join('')}</div>`
+      : `<div class="pv-grid">${games.map(p => balanceCard(p)).join('')}</div>`);
+  }
+
+  const list  = VOTE_TAB === 'done' ? done : open;
+  const empty = VOTE_TAB === 'done' ? '종료된 투표가 없습니다.'
+    : `진행 중인 투표·밸런스 게임이 없습니다.${isSignedIn() ? '<br>위의 ‘투표 만들기’로 첫 투표를 올려 보세요.' : ''}`;
+  return head + hint + tabs
+    + (list.length ? `<div class="pv-grid">${list.map(p => isBalance(p) ? balanceCard(p) : pollCard(p)).join('')}</div>`
+      : loadBox(empty));
 };
+
+/* 투표를 막 마친 사람에게 이벤트 참여 창을 띄웁니다.
+   이벤트를 받는 투표이고, 아직 응모하지 않았을 때만 한 번 뜹니다('나중에 하기' 로 닫을 수 있음). */
+function askEntry(pid){
+  const p = S.polls.find(x => x.id === pid);
+  if(p && eventOn(p) && !myEntry(pid)) openEntryForm(p, true);
+}
 
 /* 투표 화면을 다시 그리되 보던 위치는 그대로 — 아래쪽 카드에서 투표해도 맨 위로 튀지 않게 */
 function redrawVote(){ const y = window.scrollY; go('vote'); window.scrollTo(0, y); }
 
 BIND.vote = () => {
   $('#pvNew')?.addEventListener('click', ()=> openPollForm(VOTE_TAB === 'balance' ? 'balance' : 'poll'));
-  $$('#main [data-pv-tab]').forEach(b => b.addEventListener('click', ()=>{ VOTE_TAB = b.dataset.pvTab; go('vote'); }));
+  $$('#main [data-pv-tab]').forEach(b => b.addEventListener('click', ()=>{
+    VOTE_TAB = b.dataset.pvTab; BG_OPEN = ''; go('vote');
+  }));
+
+  /* 밸런스 게임 목록 — 목록형/카드형 고르기 · 한 줄을 눌러 그 게임만 보기 · 목록으로 돌아가기 */
+  $$('#main [data-bg-view]').forEach(b => b.addEventListener('click', ()=>{ BG_VIEW = b.dataset.bgView; go('vote'); }));
+  $$('#main [data-bg-open]').forEach(b => b.addEventListener('click', ()=>{
+    BG_OPEN = b.dataset.bgOpen; go('vote'); window.scrollTo(0, 0);
+  }));
+  $('#main [data-bg-back]')?.addEventListener('click', ()=>{ BG_OPEN = ''; go('vote'); window.scrollTo(0, 0); });
 
   $$('#main [data-pv]').forEach(card => {
     const pid = card.dataset.pv;
@@ -4603,6 +4858,7 @@ BIND.vote = () => {
       if(error) return failed('투표', error);
       VOTE_EDIT.delete(pid); delete VOTE_DRAFT[pid];
       await refresh(); toast('투표했습니다'); redrawVote();
+      askEntry(pid);
     });
 
     card.querySelector('[data-pv-again]')?.addEventListener('click', ()=>{
@@ -4625,6 +4881,8 @@ BIND.vote = () => {
       await refresh(); toast('무기명으로 바꿨습니다'); redrawVote();
     });
     card.querySelector('[data-pv-who]')?.addEventListener('click', ()=> openVoters(p));
+    card.querySelector('[data-pv-ev]')?.addEventListener('click', ()=> openEntryForm(p, false));
+    card.querySelector('[data-pv-elist]')?.addEventListener('click', ()=> openEntries(p));
     card.querySelectorAll('[data-zoom]').forEach(b => b.addEventListener('click', ()=> lightbox(b.dataset.zoom)));
 
     /* 밸런스 게임 — 한쪽을 누르면 바로 투표합니다 */
@@ -4639,6 +4897,7 @@ BIND.vote = () => {
       if(error){ picks.forEach(b => b.disabled = false); return failed('투표', error); }
       VOTE_EDIT.delete(pid);
       await refresh(); toast('골랐습니다! 결과를 확인해 보세요'); redrawVote();
+      askEntry(pid);
     }));
 
     card.querySelector('[data-pv-close]')?.addEventListener('click', async ()=>{
@@ -4670,6 +4929,7 @@ async function openPollForm(kind = 'poll'){
   if(POLL_COLS.option_images !== true || POLL_COLS.kind !== true){ busy(true); await checkPollCols(); busy(false); }
   const picsOn = POLL_COLS.option_images === true;
   const balOn  = POLL_COLS.kind === true;
+  const evOn   = POLL_COLS.event_on === true;      // 참여 이벤트(38절)
   if(kind === 'balance' && !balOn){
     toast(isAdmin() ? '밸런스 게임은 Supabase 에서 SQL(25절)을 실행하면 만들 수 있습니다.'
                     : '밸런스 게임은 곧 열립니다. 조금만 기다려 주세요.');
@@ -4696,6 +4956,8 @@ async function openPollForm(kind = 'poll'){
         <span><b>익명 투표</b><em>끄면 실명 투표 — 누가 무엇을 골랐는지 '참여자 보기'로 모두 볼 수 있고, 로그인한 회원만 참여합니다</em></span></label>
       <label class="pv-sw multi"><input type="checkbox" id="pvMulti">
         <span><b>복수 선택</b><em>한 사람이 여러 항목을 고를 수 있습니다</em></span></label>
+      ${evOn ? `<label class="pv-sw ev"><input type="checkbox" id="pvEvent" checked>
+        <span><b>🎁 참여 이벤트 받기</b><em>고른 뒤에 소속·연락처를 남기는 창이 뜹니다. 남긴 정보는 혁신행정담당관·관리자만 보고, 어느 쪽을 골랐는지는 명단에 적지 않습니다</em></span></label>` : ''}
     </div>
     <div class="grid c2">
       <label class="field">마감<select id="pvClose">
@@ -4797,6 +5059,7 @@ async function openPollForm(kind = 'poll'){
     const row = { title, options, multi: !bal && $('#pvMulti').checked, anonymous: $('#pvAnon').checked,
                   closes_at, author_id: S.user?.id, author_name: myName() };
     if(bal) row.kind = 'balance';          // 일반 투표는 칸을 보내지 않아 25절 실행 전에도 그대로 올라갑니다
+    if(bal && evOn && $('#pvEvent')?.checked) row.event_on = true;   // 참여 이벤트(38절)
     const uploaded = [];          // 중간에 실패하면 올려 둔 사진을 도로 지웁니다
     let stage = 'upload';
     try{
