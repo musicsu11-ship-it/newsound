@@ -4833,13 +4833,11 @@ function openEntryForm(p, auto){
       <span><b>개인정보 제공에 동의합니다 <i class="rq">필수</i></b>
         <em>· 수집 항목 : 이름 · 소속 · 연락처<br>
           · 이용 목적 : 밸런스 게임 참여 이벤트 추첨 및 당첨 안내<br>
-          · 보유 기간 : 당첨자 발표 후 1개월 이내 파기<br>
-          · 동의를 거부하실 수 있으며, 거부하시면 이벤트 응모만 제한됩니다(투표는 그대로 참여됩니다).</em></span></label>
+          · 보유 기간 : 당첨자 발표 후 1개월 이내 파기</em></span></label>
 
-    <div class="row-actions">${auto ? '<button class="btn ghost" id="peLater">나중에 하기</button>' : ''}
+    <div class="row-actions">
       <button class="btn primary" id="peGo">${cur ? '수정 저장' : '참여하기'}</button></div>`);
 
-  $('#peLater')?.addEventListener('click', ()=> closeModal());
   $('#peGo').addEventListener('click', async ()=>{
     const name    = $('#peName')?.value.trim() || '';
     const team    = $('#peTeam').value.trim();
