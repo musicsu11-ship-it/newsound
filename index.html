@@ -888,6 +888,43 @@
   .bgq-no{margin-right:auto;font-size:13.5px;font-weight:800;color:var(--muted)}
   .bgq-no b{color:#16225c;font-size:15px}
 
+  /* ── PC 화면에서는 글씨를 한 단계 크게 ──
+     휴대폰(860px 이하)은 지금 크기 그대로 둡니다. 숫자만 고치면 크기가 바뀝니다. */
+  @media (min-width:861px){
+    /* 캠페인 안내 */
+    .bgc-tag{font-size:13px;padding:6px 14px}
+    .bgc-title{font-size:28px}
+    .bgc-title em{font-size:17px;padding:6px 14px}
+    .bgc-lead{font-size:15.5px}
+    .bgc-facts>div{padding:13px 16px}
+    .bgc-facts b{font-size:12.5px}
+    .bgc-facts span{font-size:16px}
+    .bgp-top b{font-size:17px}
+    .bgp-top span{font-size:16px}
+    .bgp-dots span{width:29px;height:29px;font-size:13px}
+    .bgc-note{font-size:13.5px}
+    /* 이벤트 칸 */
+    .bgc-ev b.h{font-size:17px}
+    .ev-k{min-width:52px;padding:6px 12px;font-size:13.5px}
+    .ev-v{font-size:16px}
+    .evpic span{font-size:13px}
+    /* 목록형 한 줄 */
+    .bg-view .lb{font-size:14px}
+    .bg-view button{font-size:14px;padding:7px 15px}
+    .bg-no{width:38px;height:38px;font-size:16px}
+    .bg-q{font-size:19.5px}
+    .bg-ab2 i{font-size:15.5px}
+    .bg-ab2 em{font-size:12.5px}
+    .bg-ab2 .more{font-size:14px}
+    .bg-sub{font-size:14px}
+    .bg-go{font-size:15px}
+    /* 문항 이동 줄 · 카드 */
+    .bgq-no{font-size:15px}
+    .bgq-no b{font-size:17px}
+    .bg-lbl{font-size:19px}
+    .pv-tabs button{font-size:15.5px;padding:10px 20px}
+  }
+
   /* 이벤트 참여 창 · 응모 명단 */
   .pe-top{margin:0 0 12px;padding:13px 15px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
   .pe-top b{display:block;font-size:16px;font-weight:900;color:#8a5500}
@@ -4190,7 +4227,12 @@ VIEWS.opinion = () => {
   const top = S.opinions.filter(o => (o.likes||0) > 0)
     .sort((a,b) => (b.likes - a.likes) || b.created_at.localeCompare(a.created_at)).slice(0,3);
   const MEDAL = ['🥇','🥈','🥉'];
-  const CUT   = [120, 80, 60];                  // 등수별 본문 길이 — 1위를 가장 길게
+  const CUT   = [120, 80, 60];                  // 자리별 본문 길이 — 맨 앞자리를 가장 길게
+  /* 공감 수가 같으면 공동 등수로 — 5·5·3 이면 '공동 1위, 공동 1위, 3위' 입니다.
+     (같은 수를 받은 의견 가운데 가장 앞선 자리의 번호를 함께 씁니다) */
+  const RANK = top.map(o => top.findIndex(x => (x.likes||0) === (o.likes||0)) + 1);
+  const rankLabel = (i) => `${RANK.filter(r => r === RANK[i]).length > 1 ? '공동 ' : ''}${RANK[i]}위`;
+  const allTied = RANK.length > 1 && RANK.every(r => r === 1);
 
   return `<div class="crumb">홈 · 의견함</div>
   <div class="pg-head">
@@ -4202,10 +4244,10 @@ VIEWS.opinion = () => {
   ${(!q && top.length) ? `<section class="awd">
     <div class="awd-top"><span class="awd-cup" aria-hidden="true">🏆</span>
       <div><h2>가장 공감한 의견</h2>
-        <p>우리 부 직원들이 가장 공감하고 있는 의견 1~${top.length}위입니다.</p></div></div>
+        <p>우리 부 직원들이 가장 공감하고 있는 의견${allTied ? '입니다. 공감 수가 같아 공동 1위예요.' : ` 1~${top.length}위입니다.`}</p></div></div>
     <div class="awd-grid n${top.length}">
       ${top.map((o,i)=>`<article class="awd-card r${i+1}" data-opopen="${o.id}" tabindex="0" role="button">
-        <div class="awd-rank"><span class="medal" aria-hidden="true">${MEDAL[i]}</span><b>${i+1}위</b>${catTag(o.cat)}</div>
+        <div class="awd-rank"><span class="medal" aria-hidden="true">${MEDAL[RANK[i]-1]}</span><b>${rankLabel(i)}</b>${catTag(o.cat)}</div>
         <p class="awd-body">${esc(excerpt(o.body, CUT[i]))}</p>
         <div class="awd-foot"><span class="awd-like"><span class="ico" aria-hidden="true">💗</span><b>${o.likes}</b><em>공감</em></span>
           <span class="awd-alias">${esc(o.alias||'익명')}</span></div>
