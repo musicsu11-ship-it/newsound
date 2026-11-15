@@ -770,16 +770,18 @@ VIEWS.polls = () => {
        <div class="empty">응모 표가 아직 없습니다.<br>Supabase 에서 SQL(38절)을 실행하면 열립니다.</div></div>`
     : `<div class="card"><h2>🎁 이벤트 응모 명단 <span class="tag brand">${rows.length}명</span></h2>
       <p style="margin:0 0 12px;font-size:13px;color:var(--muted)">
-        투표를 마치고 소속·연락처를 남긴 분들입니다. 추첨·당첨 안내에만 써 주세요.
+        투표를 마치고 이름·소속·연락처를 남기고 <b>개인정보 제공에 동의</b>한 분들입니다.
+        추첨·당첨 안내에만 쓰고, 당첨자 발표 뒤에는 지워 주세요.
         한 사람이 여러 번 남겼어도 한 줄로 모읍니다.</p>
       <div class="row-actions" style="margin:0 0 12px">
         <button class="btn" id="plECopy" ${rows.length ? '' : 'disabled'}>명단 복사</button>
         <button class="btn" id="plECsv" ${rows.length ? '' : 'disabled'}>엑셀(CSV)로 내려받기</button>
       </div>
       ${rows.length
-        ? table(['#','소속','연락처','남긴 때'])
-          + rows.map((e, i) => `<tr><td>${i + 1}</td><td>${esc(e.team)}</td>
-              <td>${esc(e.contact)}</td><td>${fmtDay(e.created_at)}</td></tr>`).join('')
+        ? table(['#','이름','소속','연락처','남긴 때','동의'])
+          + rows.map((e, i) => `<tr><td>${i + 1}</td><td>${esc(e.name || '-')}</td><td>${esc(e.team)}</td>
+              <td>${esc(e.contact)}</td><td>${fmtDay(e.created_at)}</td>
+              <td>${e.agreed_at ? '<span class="tag ok-sub">동의</span>' : '-'}</td></tr>`).join('')
           + tableEnd
         : '<div class="empty">아직 응모한 분이 없습니다.</div>'}
       </div>`;
@@ -808,15 +810,17 @@ BIND.polls = () => {
   });
 
   $('#plECopy')?.addEventListener('click', ()=>{
-    const txt = entryRows().map((e, i) => `${i + 1}. ${e.team} / ${e.contact} / ${fmtDay(e.created_at)}`).join('\n');
+    const txt = entryRows().map((e, i) =>
+      `${i + 1}. ${[e.name, e.team, e.contact, fmtDay(e.created_at)].filter(Boolean).join(' / ')}`).join('\n');
     copyText(txt, '명단을 복사했습니다');
   });
 
   /* 엑셀에서 한글이 깨지지 않도록 맨 앞에 BOM 을 붙입니다 */
   $('#plECsv')?.addEventListener('click', ()=>{
     const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const csv = ['번호,소속,연락처,남긴 때']
-      .concat(entryRows().map((e, i) => [i + 1, cell(e.team), cell(e.contact), cell(fmtDay(e.created_at))].join(',')))
+    const csv = ['번호,이름,소속,연락처,남긴 때,개인정보 동의']
+      .concat(entryRows().map((e, i) => [i + 1, cell(e.name || ''), cell(e.team), cell(e.contact),
+        cell(fmtDay(e.created_at)), cell(e.agreed_at ? '동의' : '')].join(',')))
       .join('\r\n');
     const url = URL.createObjectURL(new Blob(['﻿' + csv], { type:'text/csv;charset=utf-8' }));
     const a = document.createElement('a');

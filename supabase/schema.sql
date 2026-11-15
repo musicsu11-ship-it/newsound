@@ -2339,3 +2339,45 @@ create policy pc_delete on public.post_comments for delete
            where p.id = post_id
              and p.board in ('ootd','mascot','ai','relief','food')))
   );
+
+-- ============================================================================
+--  41. 이벤트 응모에 이름 + 개인정보 제공 동의 받기
+--
+--  · 응모할 때 이름 · 소속 · 연락처를 받고, 개인정보 제공 동의를 체크해야
+--    응모가 됩니다(체크하지 않으면 서버에서도 막습니다).
+--  · 동의한 시각은 서버 시계로 적습니다(화면에서 꾸며 보낼 수 없습니다).
+--
+--  ★ 그대로 지킨 것 — 응모 명단에는 '어느 쪽을 골랐는지' 가 여전히 없습니다.
+--    익명 투표의 표는 본인 말고 아무도(관리자도) 못 읽습니다(23·38절 그대로).
+-- ============================================================================
+
+alter table public.poll_entries add column if not exists name      text not null default '';
+alter table public.poll_entries add column if not exists agreed_at timestamptz;
+
+create or replace function public.check_entry()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (select 1 from public.polls p where p.id = new.poll_id and p.event_on) then
+    raise exception '이 투표는 이벤트 응모를 받지 않습니다';
+  end if;
+  if not exists (select 1 from public.poll_ballots b
+                  where b.poll_id = new.poll_id and b.user_id = auth.uid()) then
+    raise exception '먼저 투표한 뒤에 이벤트에 참여할 수 있습니다';
+  end if;
+
+  new.user_id := auth.uid();
+  new.name    := btrim(coalesce(new.name, ''));
+  new.team    := btrim(coalesce(new.team, ''));
+  new.contact := btrim(coalesce(new.contact, ''));
+  if new.name    = '' then raise exception '이름을 입력해 주세요'; end if;
+  if new.team    = '' then raise exception '소속을 입력해 주세요'; end if;
+  if new.contact = '' then raise exception '연락처를 입력해 주세요'; end if;
+
+  -- 개인정보 제공에 동의해야 응모됩니다. 동의 시각은 서버 시계로 적습니다.
+  if new.agreed_at is null then
+    raise exception '개인정보 제공에 동의해야 응모할 수 있습니다';
+  end if;
+  new.agreed_at  := now();
+  new.updated_at := now();
+  return new;
+end $$;

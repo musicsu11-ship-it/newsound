@@ -881,6 +881,27 @@
   .pe-top p{margin:5px 0 0;font-size:14px;font-weight:800;line-height:1.45;word-break:keep-all;overflow-wrap:anywhere}
   .pe-why{margin:0 0 14px;font-size:13px;font-weight:700;color:var(--text);line-height:1.65;word-break:keep-all}
   .pe-why span{display:block;margin-top:6px;font-size:12.5px;font-weight:600;color:var(--muted)}
+  /* 개인정보 제공 동의 — 체크해야 응모됩니다 */
+  .pv-sw.agree{margin:0 0 16px;background:#fff8e4;border:1px solid #ffdf9b;align-items:flex-start}
+  .pv-sw.agree b{color:#8a5500}
+  .pv-sw.agree .rq{display:inline-block;margin-left:5px;font-style:normal;font-size:10.5px;font-weight:900;
+    color:#fff;background:var(--brand);border-radius:999px;padding:2px 7px;vertical-align:1px}
+  .pv-sw.agree em{color:#7a5a1a;line-height:1.65}
+  /* 응모 완료 안내 */
+  .pe-done{text-align:center;padding:4px 2px 2px}
+  .pe-done .ico{font-size:44px;line-height:1}
+  .pe-done b{display:block;margin:10px 0 0;font-size:18px;font-weight:900;color:#16225c;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .pe-done p{margin:6px 0 0;font-size:13.5px;font-weight:700;color:var(--muted);word-break:keep-all}
+  .pe-done .when{margin:14px 0 0;padding:11px 14px;border-radius:12px;background:#fff8e4;
+    border:1px solid #ffdf9b;color:#8a5500;font-weight:800;line-height:1.6}
+  .pe-chk{list-style:none;margin:14px 0 0;padding:0;text-align:left}
+  .pe-chk li{display:flex;align-items:baseline;gap:12px;padding:9px 12px;border-radius:10px;
+    background:var(--surface-2);margin-top:6px}
+  .pe-chk b{flex:none;width:52px;font-size:12.5px;font-weight:800;color:var(--muted)}
+  .pe-chk span{flex:1;min-width:0;font-size:14.5px;font-weight:800;color:#16225c;
+    word-break:keep-all;overflow-wrap:anywhere}
+
   .pe-list{list-style:none;margin:0;padding:0;counter-reset:pe}
   .pe-list li{display:flex;align-items:baseline;gap:12px;padding:11px 2px;border-top:1px solid var(--border)}
   .pe-list li:first-child{border-top:0}
@@ -1940,6 +1961,7 @@ const S = {
   pollEntries:[],                  // 이벤트 응모 — 내가 남긴 것(담당관은 전부)
   entryCounts:{},                  // { 투표id: 응모 인원 }
   entriesReady:false,              // 응모 표가 준비됐는지(schema.sql 38절)
+  entryNameOn:false,               // 이름·개인정보 동의 칸이 준비됐는지(41절)
   /* 협업 게시판 */
   joins:[],                        // 협업 참여자 (단원 이상만 읽힘)
   joinsReady:false                 // 참여 표가 준비됐는지(schema.sql 27절)
@@ -2165,6 +2187,7 @@ async function refresh(opt = {}){
     const pEntries = Promise.all([
       sb.from('poll_entries').select('*').order('created_at'),
       sb.rpc('poll_entry_counts'),
+      sb.from('poll_entries').select('name').limit(1),   // 이름 칸(41절)이 있는지
     ]).catch(e => e);
     const pJoins = isInner() ? sb.from('post_joins').select('*').then(r => r, e => ({ error:e })) : null;
 
@@ -2249,11 +2272,12 @@ async function refresh(opt = {}){
 
     /* 이벤트 응모 — 표가 없으면 이벤트 기능만 쉬고 투표는 그대로 돕니다 */
     try{
-      const [ea, ec] = await pEntries;
+      const [ea, ec, en] = await pEntries;
       S.entriesReady = !ea.error && !ec.error;
+      S.entryNameOn  = !en.error;                        // 이름·동의 칸(41절)
       S.pollEntries  = ea.data || [];
       S.entryCounts  = Object.fromEntries((ec.data || []).map(r => [r.poll_id, r.entries || 0]));
-    }catch(e){ S.entriesReady = false; S.pollEntries = []; S.entryCounts = {}; }
+    }catch(e){ S.entriesReady = false; S.entryNameOn = false; S.pollEntries = []; S.entryCounts = {}; }
 
     /* 협업 게시판 참여자 — 단원 이상만 읽을 수 있습니다(schema.sql 27절).
        표가 아직 없으면 참여 기능만 쉬고 게시판과 나머지 화면은 그대로 나옵니다. */
@@ -4703,30 +4727,67 @@ function openEntryForm(p, auto){
   openModal(cur ? '이벤트 참여 정보 수정' : '🎁 이벤트 참여', `
     <div class="pe-top"><b>${auto ? '투표 완료! 이벤트에 참여해 보세요 🎉' : '🎁 참여 이벤트'}</b>
       <p>${esc(BG_CAMPAIGN.title)} 밸런스 게임</p></div>
-    <p class="pe-why">소속과 연락처를 남기시면 추첨을 통해 <b>${BG_CAMPAIGN.winners}분</b>께
+    <p class="pe-why">아래 정보를 남기시면 추첨을 통해 <b>${BG_CAMPAIGN.winners}분</b>께
       <b>${esc(BG_CAMPAIGN.prize)}</b>을 드립니다. (${esc(BG_CAMPAIGN.when)})
       <span>· 남긴 정보는 <b>혁신행정담당관·운영 관리자</b>만 보고, 추첨·당첨 안내에만 씁니다.<br>
         · <b>어느 쪽을 골랐는지는 명단에 적지 않습니다.</b> 누가 무엇을 골랐는지는 끝까지 아무도 알 수 없습니다.</span></p>
+    ${S.entryNameOn ? `<label class="field">이름 <span class="req">*</span>
+      <input id="peName" maxlength="20" placeholder="예) 홍길동" value="${esc(cur?.name || '')}"></label>` : ''}
     <label class="field">소속 <span class="req">*</span>
       <input id="peTeam" maxlength="60" placeholder="예) 서울남부고용센터 실업급여팀" value="${esc(cur?.team || '')}"></label>
     <label class="field">연락처 <span class="req">*</span>
       <input id="peContact" maxlength="40" placeholder="예) 010-1234-5678" value="${esc(cur?.contact || '')}"></label>
+
+    <label class="pv-sw agree"><input type="checkbox" id="peAgree" ${cur ? 'checked' : ''}>
+      <span><b>개인정보 제공에 동의합니다 <i class="rq">필수</i></b>
+        <em>· 수집 항목 : 이름 · 소속 · 연락처<br>
+          · 이용 목적 : 밸런스 게임 참여 이벤트 추첨 및 당첨 안내<br>
+          · 보유 기간 : 당첨자 발표 후 1개월 이내 파기<br>
+          · 동의를 거부하실 수 있으며, 거부하시면 이벤트 응모만 제한됩니다(투표는 그대로 참여됩니다).</em></span></label>
+
     <div class="row-actions">${auto ? '<button class="btn ghost" id="peLater">나중에 하기</button>' : ''}
       <button class="btn primary" id="peGo">${cur ? '수정 저장' : '참여하기'}</button></div>`);
 
   $('#peLater')?.addEventListener('click', ()=> closeModal());
   $('#peGo').addEventListener('click', async ()=>{
-    const team = $('#peTeam').value.trim(), contact = $('#peContact').value.trim();
+    const name    = $('#peName')?.value.trim() || '';
+    const team    = $('#peTeam').value.trim();
+    const contact = $('#peContact').value.trim();
+    if(S.entryNameOn && !name){ toast('이름을 입력하세요'); return; }
     if(!team)   { toast('소속을 입력하세요'); return; }
     if(!contact){ toast('연락처를 입력하세요'); return; }
+    if(!$('#peAgree')?.checked){ toast('개인정보 제공에 동의해야 응모할 수 있습니다'); return; }
+
+    const row = { poll_id: p.id, user_id: S.user.id, team, contact };
+    if(S.entryNameOn){ row.name = name; row.agreed_at = new Date().toISOString(); }
+
     const btn = $('#peGo'); btn.disabled = true; busy(true);
-    const { error } = await sb.from('poll_entries')
-      .upsert({ poll_id: p.id, user_id: S.user.id, team, contact }, { onConflict: 'poll_id,user_id' });
+    const { error } = await sb.from('poll_entries').upsert(row, { onConflict: 'poll_id,user_id' });
     busy(false); btn.disabled = false;
     if(error) return failed('이벤트 참여', error);
-    await refresh(); closeModal(); toast(cur ? '수정했습니다' : '이벤트에 참여했습니다 🎁'); redrawVote();
+    await refresh(); closeModal(); redrawVote();
+    entryDone({ name, team, contact }, !!cur);
   });
-  setTimeout(()=> $('#peTeam')?.focus(), 60);
+  setTimeout(()=> ($('#peName') || $('#peTeam'))?.focus(), 60);
+}
+
+/* ── 응모 완료 안내 ── 제대로 접수됐는지 한눈에 보여 줍니다 */
+function entryDone(v, edited){
+  const c = BG_CAMPAIGN;
+  openModal(edited ? '수정 완료' : '응모 완료', `
+    <div class="pe-done">
+      <div class="ico" aria-hidden="true">🎉</div>
+      <b>${edited ? '응모 정보를 수정했습니다' : '이벤트 참여에 정상적으로 응모되었습니다'}</b>
+      <p>남겨 주신 정보로 추첨 결과를 알려 드리겠습니다.</p>
+      <ul class="pe-chk">
+        ${v.name ? `<li><b>이름</b><span>${esc(v.name)}</span></li>` : ''}
+        <li><b>소속</b><span>${esc(v.team)}</span></li>
+        <li><b>연락처</b><span>${esc(v.contact)}</span></li>
+      </ul>
+      <p class="when">🎁 ${esc(c.prize)} · ${c.winners}분 추첨<br>${esc(c.when)}</p>
+    </div>
+    <div class="row-actions"><button class="btn primary" id="peOk">확인</button></div>`);
+  $('#peOk').addEventListener('click', ()=> closeModal());
 }
 
 /* ── 응모 명단 (혁신행정담당관·운영 관리자) ──
@@ -4746,12 +4807,13 @@ function openEntries(){
       연락처는 추첨·당첨 안내에만 써 주세요.</div>
     ${rows.length
       ? `<ol class="pe-list">${rows.map(e =>
-          `<li><b>${esc(e.team)}</b><span>${esc(e.contact)}</span><em>${fmtDay(e.created_at)}</em></li>`).join('')}</ol>
+          `<li><b>${e.name ? `${esc(e.name)} · ` : ''}${esc(e.team)}</b><span>${esc(e.contact)}</span><em>${fmtDay(e.created_at)}</em></li>`).join('')}</ol>
          <div class="row-actions"><button class="btn sm" id="peCopy">명단 복사</button></div>`
       : '<div class="empty">아직 응모한 사람이 없습니다.</div>'}`);
 
   $('#peCopy')?.addEventListener('click', async ()=>{
-    const txt = rows.map((e, i) => `${i + 1}. ${e.team} / ${e.contact} / ${fmtDay(e.created_at)}`).join('\n');
+    const txt = rows.map((e, i) =>
+      `${i + 1}. ${[e.name, e.team, e.contact, fmtDay(e.created_at)].filter(Boolean).join(' / ')}`).join('\n');
     try{ await navigator.clipboard.writeText(txt); toast('명단을 복사했습니다'); }
     catch(e){ toast('복사할 수 없습니다. 화면에서 직접 적어 주세요'); }
   });
@@ -4895,8 +4957,8 @@ function campaignBox(){
       <div class="evtx">
       <b class="h">🎁 참여 이벤트</b>
       <p>${ent
-        ? `이벤트 참여가 끝났습니다. 남겨 주신 <b>${esc(ent.team)}</b> · ${esc(ent.contact)} 로 알려 드릴게요.`
-        : `${n}문항을 모두 고른 뒤 <b>이벤트 참여</b>를 남겨 주시면, 추첨을 통해 <b>${c.winners}분</b>께 <b>${esc(c.prize)}</b>을 드립니다.`}
+        ? `이벤트 참여가 끝났습니다. 남겨 주신 <b>${esc([ent.name, ent.team].filter(Boolean).join(' · '))}</b> · ${esc(ent.contact)} 로 알려 드릴게요.`
+        : `${n}문항을 모두 고른 뒤 <b>이름·소속·연락처</b>를 남겨 주시면, 추첨을 통해 <b>${c.winners}분</b>께 <b>${esc(c.prize)}</b>을 드립니다.`}
         <span class="when">${esc(c.when)}</span></p>
       <div class="evb">
         ${ent ? '<button class="btn sm" data-camp-ev>참여 정보 수정</button>'
