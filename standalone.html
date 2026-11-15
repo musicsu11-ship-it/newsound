@@ -802,17 +802,30 @@
   /* 글은 읽기 좋은 길이까지만 — 화면이 넓어도 글과 사진이 떨어지지 않게 가운데로 모읍니다 */
   .bgc-ev .evtx{flex:1 1 380px;min-width:0;max-width:720px}
   /* 경품 사진 — 누르면 크게 볼 수 있습니다 */
-  .evpic{flex:0 0 auto;width:230px;display:block;padding:0;border:0;background:transparent;
+  .evpic{position:relative;flex:0 0 auto;width:230px;display:block;padding:0;border:0;background:transparent;
     font:inherit;cursor:zoom-in}
   .evpic img{display:block;width:100%;border-radius:12px;border:1px solid #f0dcae;
     box-shadow:0 6px 18px rgba(122,90,26,.18);transition:transform .15s}
   .evpic:hover img{transform:translateY(-2px)}
   .evpic span{display:block;margin-top:6px;text-align:center;font-size:11.5px;font-weight:800;color:#8a5500}
-  .bgc-ev b.h{display:block;font-size:14.5px;font-weight:900;color:#8a5500}
-  .bgc-ev p{margin:6px 0 0;font-size:13px;font-weight:700;line-height:1.65;color:#7a5a1a;word-break:keep-all}
-  .bgc-ev p b{color:#8a5500}
-  .bgc-ev .when{display:block;margin-top:4px;font-size:12.5px;font-weight:800;color:#9a7a3a}
-  .bgc-ev .evb{display:flex;gap:6px;flex-wrap:wrap;margin:11px 0 0}
+  .bgc-ev b.h{font-size:15px;font-weight:900;color:#8a5500}
+  .ev-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 11px}
+  /* 꼬리표 줄 — 왼쪽에 짙은 알약, 오른쪽에 내용 */
+  .ev-rows{display:flex;flex-direction:column;gap:8px}
+  .ev-row{display:flex;align-items:baseline;gap:11px}
+  .ev-k{flex:none;min-width:48px;text-align:center;padding:5px 11px;border-radius:9px;
+    background:#3a2a10;color:#fff;font-size:12.5px;font-weight:900;letter-spacing:.02em}
+  .ev-v{flex:1;min-width:0;font-size:14px;font-weight:800;color:#6b4e12;line-height:1.55;word-break:keep-all}
+  .ev-v b{color:#8a5500}
+  .ev-v em{font-style:normal;font-weight:700;color:#9a7a3a}
+  .bgc-ev .evb{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}
+  /* 상품 사진 위에 올라가는 동그란 인원 표 */
+  .ev-badge{position:absolute;top:-10px;right:-10px;z-index:1;display:grid;place-items:center;
+    width:62px;height:62px;border-radius:50%;border:3px solid #fff8e4;
+    background:linear-gradient(150deg,#ffb340,#f58220);color:#fff;
+    box-shadow:0 5px 14px rgba(190,110,20,.32);line-height:1}
+  .ev-badge i{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.02em}
+  .ev-badge b{font-size:18px;font-weight:900;letter-spacing:-.02em;margin-top:1px;white-space:nowrap}
   .bgc-note{margin:12px 2px 0;font-size:12.5px;font-weight:700;line-height:1.7;color:var(--muted);word-break:keep-all}
   /* 문항 이동 줄 */
   .bgq-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
@@ -926,6 +939,10 @@
     .bgc-ev{flex-direction:column;align-items:stretch;gap:12px}
     .bgc-ev .evtx{flex:0 0 auto;max-width:none}
     .evpic{width:100%;order:-1}
+    .ev-badge{width:54px;height:54px;top:-8px;right:-4px}
+    .ev-badge b{font-size:16px}
+    .ev-k{min-width:44px;padding:4px 9px;font-size:11.5px}
+    .ev-v{font-size:13.5px}
     .bgq-no{flex:1 0 100%;margin:0}
     .bg-view .lb{flex:1 0 100%;margin:0 0 2px}
     .bg-item{gap:11px;padding:14px 15px}
@@ -3965,9 +3982,7 @@ function openEntryForm(p, auto){
     <div class="pe-top"><b>${auto ? '투표 완료! 이벤트에 참여해 보세요 🎉' : '🎁 참여 이벤트'}</b>
       <p>${esc(BG_CAMPAIGN.title)} 밸런스 게임</p></div>
     <p class="pe-why">아래 정보를 남기시면 추첨을 통해 <b>${BG_CAMPAIGN.winners}분</b>께
-      <b>${esc(BG_CAMPAIGN.prize)}</b>을 드립니다. (${esc(BG_CAMPAIGN.when)})
-      <span>· 남긴 정보는 <b>혁신행정담당관·운영 관리자</b>만 보고, 추첨·당첨 안내에만 씁니다.<br>
-        · <b>어느 쪽을 골랐는지는 명단에 적지 않습니다.</b> 누가 무엇을 골랐는지는 끝까지 아무도 알 수 없습니다.</span></p>
+      <b>${esc(BG_CAMPAIGN.prize)}</b>을 드립니다. (${esc(BG_CAMPAIGN.when)})</p>
     <label class="field">이름 <span class="req">*</span>
       <input id="peName" maxlength="20" placeholder="예) 홍길동" value="${esc(cur?.name || '')}"></label>
     <label class="field">소속 <span class="req">*</span>
@@ -4120,11 +4135,19 @@ function campaignBox(){
 
     ${evOn ? `<div class="bgc-ev">
       <div class="evtx">
-      <b class="h">🎁 참여 이벤트</b>
-      <p>${ent
-        ? `이벤트 참여가 끝났습니다. 남겨 주신 <b>${esc([ent.name, ent.team].filter(Boolean).join(' · '))}</b> · ${esc(ent.contact)} 로 알려 드릴게요.`
-        : `${n}문항을 모두 고른 뒤 <b>이름·소속·연락처</b>를 남겨 주시면, 추첨을 통해 <b>${c.winners}분</b>께 <b>${esc(c.prize)}</b>을 드립니다.`}
-        <span class="when">${esc(c.when)}</span></p>
+      <div class="ev-h"><b class="h">🎁 참여 이벤트</b>${ent ? '<span class="ok">✅ 참여 완료</span>' : ''}</div>
+      <div class="ev-rows">
+        <div class="ev-row"><span class="ev-k">대상</span>
+          <span class="ev-v">밸런스 게임 <b>${n}문항에 모두 참여한 직원 누구나</b></span></div>
+        <div class="ev-row"><span class="ev-k">상품</span>
+          <span class="ev-v"><b>${esc(c.prize)}</b> <em>— 추첨 ${c.winners}명</em></span></div>
+        <div class="ev-row"><span class="ev-k">발표</span>
+          <span class="ev-v">${esc(c.when)}</span></div>
+        <div class="ev-row"><span class="ev-k">응모</span>
+          <span class="ev-v">${ent
+            ? `응모를 마쳤습니다 — 남겨 주신 <b>${esc([ent.name, ent.team].filter(Boolean).join(' · '))}</b> · ${esc(ent.contact)} 로 알려 드릴게요`
+            : `${n}문항을 모두 고른 뒤 <b>이름·소속·연락처</b>를 남겨 주세요`}</span></div>
+      </div>
       <div class="evb">
         ${ent ? '<button class="btn sm" data-camp-ev>참여 정보 수정</button>'
               : `<button class="btn sm gold" data-camp-ev ${all ? '' : 'disabled'}>${
@@ -4134,7 +4157,8 @@ function campaignBox(){
       </div>
       <button type="button" class="evpic" data-zoom="${CAMP_PRIZE_PIC}"
         aria-label="${esc(c.prize)} 사진 크게 보기">
-        <img src="${CAMP_PRIZE_PIC}" alt="${esc(c.prize)}" loading="lazy">
+        <span class="ev-badge" aria-hidden="true"><i>추첨</i><b>${c.winners}명</b></span>
+        <img src="${CAMP_PRIZE_PIC}" alt="${esc(c.prize)}" loading="lazy" decoding="async">
         <span>${esc(c.prize)}</span></button>
     </div>` : ''}
 
