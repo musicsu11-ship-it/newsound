@@ -852,11 +852,12 @@
     font-size:12px;font-weight:900;color:var(--muted);background:var(--surface-2);border:1px solid var(--border)}
   .bgp-dots span.on{color:#fff;background:#16225c;border-color:#16225c}
   /* 이벤트 안내 */
-  .bgc-ev{display:flex;align-items:center;gap:18px;
-    margin:14px 0 0;padding:14px 16px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
-  .bgc-ev .evtx{flex:1;min-width:0}
+  .bgc-ev{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;
+    margin:14px 0 0;padding:15px 16px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
+  /* 글은 읽기 좋은 길이까지만 — 화면이 넓어도 글과 사진이 떨어지지 않게 가운데로 모읍니다 */
+  .bgc-ev .evtx{flex:1 1 380px;min-width:0;max-width:720px}
   /* 경품 사진 — 누르면 크게 볼 수 있습니다 */
-  .evpic{flex:none;width:min(300px,38%);display:block;padding:0;border:0;background:transparent;
+  .evpic{flex:0 0 auto;width:230px;display:block;padding:0;border:0;background:transparent;
     font:inherit;cursor:zoom-in}
   .evpic img{display:block;width:100%;border-radius:12px;border:1px solid #f0dcae;
     box-shadow:0 6px 18px rgba(122,90,26,.18);transition:transform .15s}
@@ -960,6 +961,7 @@
     .bgc-title em{font-size:14px;padding:4px 11px;vertical-align:3px}
     .bgc-lead{font-size:13.5px}
     .bgc-ev{flex-direction:column;align-items:stretch;gap:12px}
+    .bgc-ev .evtx{flex:0 0 auto;max-width:none}
     .evpic{width:100%;order:-1}
     .bgq-no{flex:1 0 100%;margin:0}
     .bg-view .lb{flex:1 0 100%;margin:0 0 2px}
@@ -4555,6 +4557,7 @@ function pollCard(p){
     <div class="pv-top">
       <span class="pv-state ${closed ? 'off' : 'on'}">${closed ? '종료' : '진행 중'}</span>
       <span class="pv-tag${p.anonymous ? '' : ' named'}">${p.anonymous ? '익명' : '실명'}</span>
+      ${inCamp(p) ? '<span class="pv-tag bal">⚖️ 밸런스 게임</span>' : ''}
       ${p.multi ? '<span class="pv-tag">복수 선택</span>' : ''}
       <span class="pv-left">${leftText(p)}</span>
     </div>
@@ -4850,6 +4853,10 @@ function campQuestions(){
   const ev = S.polls.filter(p => !!p.event_on);
   return (ev.length ? ev : S.polls).slice().sort(byOld);
 }
+/* 이 캠페인(「세대가 함께 그리는 조직문화」 밸런스게임)에 들어가는 문항인가?
+   항목이 둘(A vs B)이 아니어도 같은 밸런스게임의 한 문항이므로 똑같이 표시합니다. */
+const inCamp = (p) => BG_CAMPAIGN.on && campQuestions().some(q => q.id === p.id);
+
 /* 이벤트는 캠페인 전체에 한 번만 남깁니다(문항마다 묻지 않습니다) */
 const hasEntry = () => !!S.user && S.pollEntries.some(e => e.user_id === S.user.id);
 const myEntryAny = () => (S.user ? S.pollEntries.find(e => e.user_id === S.user.id) : null);
@@ -4964,7 +4971,8 @@ function pollRow(p, i){
     <span class="bg-mid">
       <span class="bg-q">${vsTitle(p.title)}</span>
       ${bal ? duel : many}
-      <span class="bg-sub">${bal ? '⚖️ 밸런스 게임' : `📊 투표${p.multi ? ' · 복수 선택' : ''}`} · ${
+      <span class="bg-sub">${bal || inCamp(p) ? `⚖️ 밸런스 게임${!bal && p.multi ? ' · 복수 선택' : ''}`
+        : `📊 투표${p.multi ? ' · 복수 선택' : ''}`} · ${
         closed ? '종료' : leftText(p)} · 👥 ${res.voters}명 참여${mine ? ' · <b>✅ 참여함</b>' : ''}</span>
     </span>
     <span class="bg-go">${closed || mine ? '결과 보기' : '참여하기'} ›</span>
