@@ -732,7 +732,11 @@
     background:#16225c;color:#fff;font-size:14.5px;font-weight:900}
   .bg-item.done .bg-no{background:#9aa2c4}
   .bg-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
-  .bg-q{font-size:17px;font-weight:900;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}
+  /* 질문 — 선택지 칸(연분홍·연파랑)에 묻히지 않도록 짙은 남색 띠에 흰 글씨로 */
+  .bg-q{align-self:flex-start;max-width:100%;padding:5px 12px;border-radius:9px;
+    background:#16225c;color:#fff;font-size:17px;font-weight:900;line-height:1.4;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .bg-q .vs-in{background:#fff;color:#16225c}
   .bg-ab2{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
   .bg-ab2 i{display:inline-flex;align-items:center;gap:10px;font-style:normal;font-size:13.5px;font-weight:800;
     border-radius:14px;padding:5px 14px;word-break:keep-all;overflow-wrap:anywhere}
@@ -782,6 +786,10 @@
   .bgc-facts b{display:block;font-size:11.5px;font-weight:900;letter-spacing:.02em;color:var(--muted)}
   .bgc-facts span{display:block;margin-top:4px;font-size:14px;font-weight:800;color:#16225c;
     line-height:1.45;word-break:keep-all}
+  /* 참여 기간 — 가장 먼저 눈에 들어오도록 자줏빛으로 크게 */
+  .bgc-facts .hi{background:#fff2f7;border-color:#ffc9dd}
+  .bgc-facts .hi b{color:var(--brand)}
+  .bgc-facts .hi span{color:var(--brand);font-size:18px;letter-spacing:-.01em}
   /* 진행 막대 */
   .bgp{margin:16px 0 0;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid #e3e7f5}
   .bgp-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
@@ -820,12 +828,13 @@
   .ev-v em{font-style:normal;font-weight:700;color:#9a7a3a}
   .bgc-ev .evb{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}
   /* 상품 사진 위에 올라가는 동그란 인원 표 */
-  .ev-badge{position:absolute;top:-10px;right:-10px;z-index:1;display:grid;place-items:center;
+  .ev-badge{position:absolute;top:-10px;right:-10px;z-index:1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
     width:62px;height:62px;border-radius:50%;border:3px solid #fff8e4;
     background:linear-gradient(150deg,#ffb340,#f58220);color:#fff;
     box-shadow:0 5px 14px rgba(190,110,20,.32);line-height:1}
-  .ev-badge i{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.02em}
-  .ev-badge b{font-size:18px;font-weight:900;letter-spacing:-.02em;margin-top:1px;white-space:nowrap}
+  .ev-badge i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.02em}
+  .ev-badge b{display:block;font-size:18px;font-weight:900;letter-spacing:-.02em;margin-top:3px;white-space:nowrap}
   .bgc-note{margin:12px 2px 0;font-size:12.5px;font-weight:700;line-height:1.7;color:var(--muted);word-break:keep-all}
   /* 문항 이동 줄 */
   .bgq-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
@@ -844,6 +853,7 @@
     .bgc-facts>div{padding:13px 16px}
     .bgc-facts b{font-size:12.5px}
     .bgc-facts span{font-size:16px}
+    .bgc-facts .hi span{font-size:22px}
     .bgp-top b{font-size:17px}
     .bgp-top span{font-size:16px}
     .bgp-dots span{width:29px;height:29px;font-size:13px}
@@ -852,14 +862,18 @@
     .bgc-ev b.h{font-size:17px}
     .ev-k{min-width:52px;padding:6px 12px;font-size:13.5px}
     .ev-v{font-size:16px}
-    .evpic span{font-size:13px}
+    .evpic{width:260px}
+    .evpic span{font-size:13.5px}
+    .ev-badge{width:72px;height:72px;top:-12px;right:-12px}
+    .ev-badge i{font-size:12px}
+    .ev-badge b{font-size:21px}
     /* 목록형 한 줄 — 글씨와 사진을 큼직하게 */
     .bg-view .lb{font-size:14.5px}
     .bg-view button{font-size:14.5px;padding:8px 16px}
     .bg-item{gap:18px;padding:20px 22px}
     .bg-no{width:46px;height:46px;font-size:20px}
     .bg-mid{gap:10px}
-    .bg-q{font-size:26px}
+    .bg-q{font-size:26px;padding:8px 17px;border-radius:12px}
     /* A·B 두 칸은 한 줄에 나란히 — 글이 길면 칸 안에서 접힙니다 */
     .bg-ab2{flex-wrap:nowrap;gap:12px}
     .bg-ab2 i{flex:1 1 0;min-width:0;font-size:22px;line-height:1.45;border-radius:18px;padding:7px 18px;gap:14px}
@@ -996,7 +1010,7 @@
     .bg-view .lb{flex:1 0 100%;margin:0 0 2px}
     .bg-item{gap:11px;padding:14px 15px}
     .bg-no{width:30px;height:30px;font-size:13.5px}
-    .bg-q{font-size:15.5px}
+    .bg-q{font-size:15.5px;padding:4px 10px;border-radius:8px}
     .bg-ab2 i{font-size:12.5px;padding:4px 11px;border-radius:12px;gap:8px}
     .bg-ab2 i.haspic{padding:4px 11px 4px 4px}
     .bg-ab2 i img{width:46px;height:46px;border-radius:9px}
@@ -4175,7 +4189,7 @@ function campaignBox(){
     <p class="bgc-lead">${esc(c.lead)}</p>
 
     <div class="bgc-facts">
-      <div><b>참여 기간</b><span>${campDay(c.from)} ~ ${campDay(c.to)}</span></div>
+      <div class="hi"><b>참여 기간</b><span>${campDay(c.from)} ~ ${campDay(c.to)}</span></div>
       <div><b>참여 대상</b><span>${c.who}</span></div>
       <div><b>참여 방법</b><span>${n}문항 선택 · ${esc(c.howlong)}</span></div>
     </div>
