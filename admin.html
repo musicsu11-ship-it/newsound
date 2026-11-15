@@ -94,6 +94,38 @@
   th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
   tr:hover td{background:var(--surface-2)}
   /* 좁은 화면에서 칸이 짓눌려 글자가 세로로 쪼개지지 않게, 표는 옆으로 밀어서 봅니다 */
+  /* ── 밸런스 게임 결과 ── 문항마다 막대그래프로 바로 읽히게 */
+  .pl-sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 16px}
+  .pl-sum>div{padding:13px 15px;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+  .pl-sum b{display:block;font-size:11.5px;font-weight:700;color:var(--muted)}
+  .pl-sum span{display:block;margin-top:3px;font-size:21px;font-weight:900;color:var(--text);letter-spacing:-.02em}
+  .pl-sum span em{font-style:normal;font-size:13px;font-weight:700;color:var(--muted);margin-left:3px}
+  .pl-q{margin:0 0 14px;padding:18px 20px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+  .pl-qh{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin:0 0 4px}
+  .pl-no{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;
+    background:var(--brand-weak);color:var(--brand);font-size:13px;font-weight:900}
+  .pl-qt{flex:1;min-width:0;margin:0;font-size:16px;font-weight:800;line-height:1.45;word-break:keep-all}
+  .pl-meta{margin:0 0 12px 38px;font-size:12.5px;color:var(--muted);font-weight:600}
+  .pl-bars{display:flex;flex-direction:column;gap:9px}
+  .pl-bar{position:relative;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;
+    background:var(--surface-2);overflow:hidden}
+  .pl-bar i{position:absolute;left:0;top:0;bottom:0;background:rgba(255,111,156,.22);transition:width .5s ease}
+  .pl-bar.lead i{background:rgba(255,111,156,.42)}
+  .pl-bar .tx{position:relative;flex:1;min-width:0;font-size:13.5px;font-weight:700;word-break:keep-all}
+  .pl-bar .nm{position:relative;flex:none;display:flex;align-items:baseline;gap:7px}
+  .pl-bar .nm b{font-size:17px;font-weight:900;letter-spacing:-.02em}
+  .pl-bar.lead .nm b{color:var(--brand)}
+  .pl-bar .nm em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+  .pl-bar .top{position:relative;flex:none;font-size:11px;font-weight:900;color:#2a0a18;
+    background:var(--brand);border-radius:999px;padding:2px 8px}
+  .pl-note{margin:14px 0 0;padding:12px 14px;border-radius:10px;border:1px solid var(--border);
+    background:var(--surface-2);font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.7}
+  @media (max-width:860px){ .pl-sum{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  @media (max-width:560px){
+    .pl-bar{flex-wrap:wrap;gap:6px}
+    .pl-bar .tx{flex:1 0 100%}
+  }
+
   .table-wrap{overflow-x:auto}
   .table-wrap table{min-width:640px}
   .empty{text-align:center;color:var(--muted);padding:34px 10px;font-size:13.5px}
@@ -273,7 +305,10 @@ function failed(where, e){
 /* ---------- 상태 ---------- */
 const S = { user:null, profile:null, posts:[], opinions:[], comments:[],
             reports:[], expenses:[], events:[], site:null, profiles:[],
-            visits:null, visitSeries:[], visitReady:false };
+            visits:null, visitSeries:[], visitReady:false,
+            /* 밸런스 게임 — 투표 목록 · 항목별 표 수 · 이벤트 응모 명단 */
+            polls:[], pollResults:{}, pollsReady:false,
+            pollEntries:[], entriesReady:false };
 const SIGNED = {};
 const role = () => S.profile?.role || 'visitor';
 const myName = () => S.profile?.name || '';
@@ -324,6 +359,7 @@ const actTeamLabel = (no) => { const t = actTeams().find(x => x.no === Number(no
 const MENUS = [
   { id:'dash',    icon:'📊', label:'대시보드',      group:'현황', roles:['officer','admin'] },
   { id:'visits',  icon:'📈', label:'방문자 통계',    group:'현황', roles:['officer','admin'] },
+  { id:'polls',   icon:'⚖️', label:'밸런스 게임 결과', group:'현황', roles:['officer','admin'] },
   { id:'posts',   icon:'📝', label:'게시글 관리',    group:'콘텐츠', roles:['officer','admin'] },
   { id:'events',  icon:'📅', label:'일정 관리',      group:'콘텐츠', roles:['officer','admin'] },
   { id:'intro',   icon:'🐦', label:'소개 편집',      group:'콘텐츠', roles:['admin'] },
@@ -366,6 +402,26 @@ async function refresh(){
     S.site=res[0].data; S.posts=res[1].data||[]; S.opinions=res[2].data||[];
     S.comments=res[3].data||[]; S.events=res[4].data||[]; S.reports=res[5].data||[];
     S.expenses=res[6].data||[]; S.profiles=res[7].data||[];
+
+    /* 밸런스 게임 — 투표 목록 · 항목별 표 수 · 이벤트 응모 명단.
+       SQL(23·38절)을 아직 실행하지 않았으면 이 화면만 '준비 중' 이 되고 나머지는 그대로입니다.
+       ※ 누가 무엇을 골랐는지(poll_ballots)는 익명 투표라 관리자도 읽을 수 없습니다. */
+    try{
+      const [pp, pr, pe] = await Promise.all([
+        sb.from('polls').select('*').order('created_at'),
+        sb.rpc('poll_results'),
+        sb.from('poll_entries').select('*').order('created_at'),
+      ]);
+      S.pollsReady   = !pp.error && !pr.error;
+      S.polls        = pp.data || [];
+      S.pollResults  = Object.fromEntries((pr.data || []).map(r =>
+        [r.poll_id, { tally: r.tally || [], voters: r.voters || 0 }]));
+      S.entriesReady = !pe.error;
+      S.pollEntries  = pe.data || [];
+    }catch(e){
+      S.pollsReady = false; S.polls = []; S.pollResults = {};
+      S.entriesReady = false; S.pollEntries = [];
+    }
 
     // 방문자 집계 (함수가 아직 없으면 조용히 건너뜁니다)
     const [st, se] = await Promise.all([ sb.rpc('visit_stats'), sb.rpc('visit_series',{ days:14 }) ]);
@@ -634,6 +690,148 @@ BIND.visits = () => {
     Q.vmode = b.dataset.vmode; go('visits');
   }));
 };
+
+/* ---------- 밸런스 게임 결과 ----------
+   홈페이지 투표(밸런스 게임 · 여러 항목 투표)의 결과를 한 화면에 모읍니다.
+   · 문항마다 항목별 표 수와 비율을 막대로 보여 줍니다(가장 많이 받은 항목에 '최다').
+   · 🎁 이벤트 응모 명단(소속·연락처)도 여기서 보고 엑셀로 내려받을 수 있습니다.
+   ★ 누가 무엇을 골랐는지는 익명 투표라 관리자도 볼 수 없습니다.
+     응모 명단에도 고른 항목은 들어 있지 않습니다(schema.sql 23·38절). */
+const pollClosed = p => !!p.closed || (!!p.closes_at && new Date(p.closes_at) <= new Date());
+const pollRes    = p => S.pollResults[p.id] || { tally: [], voters: 0 };
+const pollSorted = () => S.polls.slice()
+  .sort((a, b) => (pollClosed(a) - pollClosed(b)) || String(a.created_at).localeCompare(String(b.created_at)));
+/* 한 사람이 여러 문항에 응모했어도 한 줄로 모읍니다(가장 최근에 적은 것) */
+function entryRows(){
+  const by = new Map();
+  S.pollEntries.slice()
+    .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))
+    .forEach(e => by.set(e.user_id, e));
+  return [...by.values()];
+}
+
+VIEWS.polls = () => {
+  if(!S.pollsReady){
+    return pageHead('밸런스 게임 결과', '홈페이지 투표 결과를 모아 봅니다.')
+      + `<div class="card"><div class="empty">투표 표가 아직 없습니다.<br>
+         Supabase 에서 SQL(23절)을 실행하면 이 화면이 열립니다.</div></div>`;
+  }
+  const list = pollSorted();
+  if(!list.length){
+    return pageHead('밸런스 게임 결과', '홈페이지 투표 결과를 모아 봅니다.')
+      + `<div class="card"><div class="empty">아직 올라온 투표가 없습니다.</div></div>`;
+  }
+
+  const open   = list.filter(p => !pollClosed(p)).length;
+  const votes  = list.reduce((n, p) => n + pollRes(p).voters, 0);
+  const most   = Math.max(...list.map(p => pollRes(p).voters));
+  const rows   = entryRows();
+
+  const head = pageHead('밸런스 게임 결과',
+    '홈페이지에 올라온 투표의 항목별 표 수입니다. 카드뉴스로 옮겨 쓸 수 있게 복사 버튼을 두었습니다.',
+    `<button class="btn" id="plCopy">결과 복사</button>
+     <button class="btn" id="plReload">새로고침</button>`);
+
+  const sum = `<div class="pl-sum">
+    <div><b>문항</b><span>${list.length}<em>개</em></span></div>
+    <div><b>진행 중</b><span>${open}<em>개</em></span></div>
+    <div><b>받은 표</b><span>${votes}<em>표</em></span></div>
+    <div><b>가장 많이 참여한 문항</b><span>${most}<em>명</em></span></div>
+  </div>`;
+
+  const qs = list.map((p, i) => {
+    const r = pollRes(p);
+    const max = Math.max(0, ...r.tally);
+    const bal = p.kind === 'balance';
+    return `<section class="pl-q">
+      <div class="pl-qh"><span class="pl-no">${i + 1}</span>
+        <h2 class="pl-qt">${esc(p.title)}</h2>
+        <span class="tag ${pollClosed(p) ? 'recv' : 'ok-sub'}">${pollClosed(p) ? '종료' : '진행 중'}</span></div>
+      <p class="pl-meta">${bal ? '⚖️ 밸런스 게임' : `📊 투표${p.multi ? ' · 복수 선택' : ''}`}
+        · ${p.anonymous ? '익명' : '실명'} · 👥 ${r.voters}명 참여
+        · ${esc(p.author_name || '')} · ${fmtDay(p.created_at)}${
+        p.closes_at ? ` · ${fmtDay(p.closes_at)} 마감` : ''}${p.event_on ? ' · 🎁 이벤트' : ''}</p>
+      <div class="pl-bars">${p.options.map((o, k) => {
+        const v = r.tally[k] || 0;
+        const pct = r.voters ? Math.round(v * 100 / r.voters) : 0;
+        const lead = v > 0 && v === max;
+        return `<div class="pl-bar${lead ? ' lead' : ''}"><i style="width:${pct}%"></i>
+          <span class="tx">${bal ? `<b style="color:var(--muted)">${k ? 'B' : 'A'}</b> ` : ''}${esc(o)}</span>
+          ${lead ? '<span class="top">최다</span>' : ''}
+          <span class="nm"><b>${pct}%</b><em>${v}표</em></span></div>`;
+      }).join('')}</div>
+      ${p.multi && r.voters ? '<p class="pl-meta" style="margin:10px 0 0">복수 선택이라 합계가 100%를 넘을 수 있습니다.</p>' : ''}
+    </section>`;
+  }).join('');
+
+  /* 🎁 이벤트 응모 명단 — 소속·연락처. 고른 항목은 들어 있지 않습니다. */
+  const ev = !S.entriesReady
+    ? `<div class="card"><h2>🎁 이벤트 응모 명단</h2>
+       <div class="empty">응모 표가 아직 없습니다.<br>Supabase 에서 SQL(38절)을 실행하면 열립니다.</div></div>`
+    : `<div class="card"><h2>🎁 이벤트 응모 명단 <span class="tag brand">${rows.length}명</span></h2>
+      <p style="margin:0 0 12px;font-size:13px;color:var(--muted)">
+        투표를 마치고 소속·연락처를 남긴 분들입니다. 추첨·당첨 안내에만 써 주세요.
+        한 사람이 여러 번 남겼어도 한 줄로 모읍니다.</p>
+      <div class="row-actions" style="margin:0 0 12px">
+        <button class="btn" id="plECopy" ${rows.length ? '' : 'disabled'}>명단 복사</button>
+        <button class="btn" id="plECsv" ${rows.length ? '' : 'disabled'}>엑셀(CSV)로 내려받기</button>
+      </div>
+      ${rows.length
+        ? table(['#','소속','연락처','남긴 때'])
+          + rows.map((e, i) => `<tr><td>${i + 1}</td><td>${esc(e.team)}</td>
+              <td>${esc(e.contact)}</td><td>${fmtDay(e.created_at)}</td></tr>`).join('')
+          + tableEnd
+        : '<div class="empty">아직 응모한 분이 없습니다.</div>'}
+      </div>`;
+
+  return head + sum + qs + ev + `<div class="pl-note">
+    🔒 <b>누가 무엇을 골랐는지는 관리자도 볼 수 없습니다.</b> 익명 투표라 개별 응답은 서버에서부터 가려져 있고,
+    위 숫자는 항목별 표 수만 세어 돌려준 값입니다. 응모 명단에도 고른 항목은 들어 있지 않습니다.</div>`;
+};
+
+BIND.polls = () => {
+  $('#plReload')?.addEventListener('click', async ()=>{ await refresh(); go('polls'); });
+
+  /* 결과를 글로 복사 — 카드뉴스·보고서에 바로 붙여 넣을 수 있게 */
+  $('#plCopy')?.addEventListener('click', ()=>{
+    const txt = pollSorted().map((p, i) => {
+      const r = pollRes(p);
+      const max = Math.max(0, ...r.tally);
+      const lines = p.options.map((o, k) => {
+        const v = r.tally[k] || 0;
+        const pct = r.voters ? Math.round(v * 100 / r.voters) : 0;
+        return `   ${v > 0 && v === max ? '★' : '·'} ${o} — ${pct}% (${v}표)`;
+      }).join('\n');
+      return `${i + 1}. ${p.title}  [${r.voters}명 참여]\n${lines}`;
+    }).join('\n\n');
+    copyText(txt, '결과를 복사했습니다');
+  });
+
+  $('#plECopy')?.addEventListener('click', ()=>{
+    const txt = entryRows().map((e, i) => `${i + 1}. ${e.team} / ${e.contact} / ${fmtDay(e.created_at)}`).join('\n');
+    copyText(txt, '명단을 복사했습니다');
+  });
+
+  /* 엑셀에서 한글이 깨지지 않도록 맨 앞에 BOM 을 붙입니다 */
+  $('#plECsv')?.addEventListener('click', ()=>{
+    const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = ['번호,소속,연락처,남긴 때']
+      .concat(entryRows().map((e, i) => [i + 1, cell(e.team), cell(e.contact), cell(fmtDay(e.created_at))].join(',')))
+      .join('\r\n');
+    const url = URL.createObjectURL(new Blob(['﻿' + csv], { type:'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = `밸런스게임_응모명단_${ymd(new Date())}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 1000);
+    toast('내려받았습니다');
+  });
+};
+
+/* 클립보드 — 안 되는 브라우저에서는 조용히 알려 줍니다 */
+async function copyText(txt, ok){
+  try{ await navigator.clipboard.writeText(txt); toast(ok); }
+  catch(e){ toast('복사할 수 없습니다. 화면에서 직접 옮겨 적어 주세요'); }
+}
 
 /* ---------- 게시글 관리 ---------- */
 VIEWS.posts = () => {
