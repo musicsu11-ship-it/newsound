@@ -762,6 +762,50 @@
   .btn.gold{background:#ffc53d;border-color:#ffc53d;color:#4a2e00;font-weight:900}
   .btn.gold:hover{background:#f0b020;border-color:#f0b020}
 
+  /* ── 캠페인 안내 칸 ── 「세대가 함께 그리는 조직문화」 밸런스게임 */
+  .bgc{margin:0 0 18px;padding:22px 24px;border-radius:20px;border:1px solid #d9def2;
+    background:linear-gradient(145deg,#f3f6ff 0%,#fff6fa 60%,#fffaf0 100%)}
+  .bgc-tag{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.02em;
+    color:#fff;background:#16225c;border-radius:999px;padding:5px 12px}
+  .bgc-title{margin:10px 0 0;font-size:25px;font-weight:900;line-height:1.3;color:#16225c;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .bgc-title em{display:inline-block;margin-left:8px;font-style:normal;font-size:16px;font-weight:900;
+    color:#fff;background:var(--brand);border-radius:999px;padding:5px 13px;vertical-align:4px;white-space:nowrap}
+  .bgc-lead{margin:10px 0 0;font-size:14px;font-weight:700;line-height:1.7;color:#3a4478;word-break:keep-all}
+  .bgc-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0 0}
+  .bgc-facts>div{min-width:0;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.75);
+    border:1px solid #e3e7f5}
+  .bgc-facts b{display:block;font-size:11.5px;font-weight:900;letter-spacing:.02em;color:var(--muted)}
+  .bgc-facts span{display:block;margin-top:4px;font-size:14px;font-weight:800;color:#16225c;
+    line-height:1.45;word-break:keep-all}
+  /* 진행 막대 */
+  .bgp{margin:16px 0 0;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid #e3e7f5}
+  .bgp-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .bgp-top b{font-size:15px;font-weight:900;color:#16225c;word-break:keep-all}
+  .bgp-top span{flex:none;font-size:14px;font-weight:900;color:var(--brand)}
+  .bgp-bar{height:10px;margin:9px 0 0;border-radius:999px;overflow:hidden;background:var(--surface-2)}
+  .bgp-bar i{display:block;height:100%;border-radius:999px;transition:width .5s ease;
+    background:linear-gradient(90deg,#f06292,#5c8df6)}
+  .bgp.done .bgp-bar i{background:linear-gradient(90deg,#34b36b,#2b9e5f)}
+  .bgp.done .bgp-top span{color:#1f7a3d}
+  .bgp-dots{display:flex;gap:6px;margin:10px 0 0;flex-wrap:wrap}
+  .bgp-dots span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+    font-size:12px;font-weight:900;color:var(--muted);background:var(--surface-2);border:1px solid var(--border)}
+  .bgp-dots span.on{color:#fff;background:#16225c;border-color:#16225c}
+  /* 이벤트 안내 */
+  .bgc-ev{margin:14px 0 0;padding:14px 16px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
+  .bgc-ev b.h{display:block;font-size:14.5px;font-weight:900;color:#8a5500}
+  .bgc-ev p{margin:6px 0 0;font-size:13px;font-weight:700;line-height:1.65;color:#7a5a1a;word-break:keep-all}
+  .bgc-ev p b{color:#8a5500}
+  .bgc-ev .when{display:block;margin-top:4px;font-size:12.5px;font-weight:800;color:#9a7a3a}
+  .bgc-ev .evb{display:flex;gap:6px;flex-wrap:wrap;margin:11px 0 0}
+  .bgc-note{margin:12px 2px 0;font-size:12.5px;font-weight:700;line-height:1.7;color:var(--muted);word-break:keep-all}
+  /* 문항 이동 줄 */
+  .bgq-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+  .bgq-nav.below{margin:14px 0 0}
+  .bgq-no{margin-right:auto;font-size:13.5px;font-weight:800;color:var(--muted)}
+  .bgq-no b{color:#16225c;font-size:15px}
+
   /* 이벤트 참여 창 · 응모 명단 */
   .pe-top{margin:0 0 12px;padding:13px 15px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
   .pe-top b{display:block;font-size:16px;font-weight:900;color:#8a5500}
@@ -838,7 +882,13 @@
   .pv-sw em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);line-height:1.5;word-break:keep-all}
 
   @media (max-width:860px){ .pv-grid{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:860px){ .bgc-facts{grid-template-columns:minmax(0,1fr)} }
   @media (max-width:700px){
+    .bgc{padding:18px 16px;border-radius:16px}
+    .bgc-title{font-size:20px}
+    .bgc-title em{font-size:14px;padding:4px 11px;vertical-align:3px}
+    .bgc-lead{font-size:13.5px}
+    .bgq-no{flex:1 0 100%;margin:0}
     .bg-view .lb{flex:1 0 100%;margin:0 0 2px}
     .bg-item{gap:11px;padding:14px 15px}
     .bg-no{width:30px;height:30px;font-size:13.5px}
@@ -3847,6 +3897,8 @@ function openPollEdit(p){
    담당관·관리자에게는 '응모 명단 보기' 가 함께 보입니다. */
 function eventBox(p){
   if(!eventOn(p)) return '';
+  /* 캠페인 안내 칸이 떠 있으면 이벤트 안내는 거기 한 번만 둡니다(카드마다 반복하지 않게) */
+  if(BG_CAMPAIGN.on) return '';
   const mine = myBallot(p.id);
   const ent  = myEntry(p.id);
   const off  = canSeeEntries();
@@ -3869,9 +3921,10 @@ function eventBox(p){
 function openEntryForm(p, auto){
   const cur = myEntry(p.id);
   openModal(cur ? '이벤트 참여 정보 수정' : '🎁 이벤트 참여', `
-    <div class="pe-top"><b>${auto ? '투표 완료! 이벤트에 참여해 보세요' : '🎁 참여 이벤트'}</b>
-      <p>${vsTitle(p.title)}</p></div>
-    <p class="pe-why">소속과 연락처를 남기시면 추첨에 참여됩니다.
+    <div class="pe-top"><b>${auto ? '투표 완료! 이벤트에 참여해 보세요 🎉' : '🎁 참여 이벤트'}</b>
+      <p>${esc(BG_CAMPAIGN.title)} 밸런스 게임</p></div>
+    <p class="pe-why">소속과 연락처를 남기시면 추첨을 통해 <b>${BG_CAMPAIGN.winners}분</b>께
+      <b>${esc(BG_CAMPAIGN.prize)}</b>을 드립니다. (${esc(BG_CAMPAIGN.when)})
       <span>· 남긴 정보는 <b>혁신행정담당관·운영 관리자</b>만 보고, 추첨·당첨 안내에만 씁니다.<br>
         · <b>어느 쪽을 골랐는지는 명단에 적지 않습니다.</b> 누가 무엇을 골랐는지는 끝까지 아무도 알 수 없습니다.</span></p>
     <label class="field">소속 <span class="req">*</span>
@@ -3896,12 +3949,17 @@ function openEntryForm(p, auto){
 }
 
 /* ── 응모 명단 (혁신행정담당관·운영 관리자) ── 소속·연락처·남긴 때만 보여 줍니다 */
-function openEntries(p){
-  const rows = DB.entries().filter(e => e.poll_id === p.id)
-    .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+function openEntries(){
+  /* 한 사람이 여러 문항에 남겼어도 한 줄로 모읍니다(가장 최근에 적은 것) */
+  const byUser = new Map();
+  DB.entries().slice()
+    .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)))
+    .forEach(e => byUser.set(e.voter, e));
+  const rows = [...byUser.values()];
+  const qs = campQuestions();
   openModal('🎁 이벤트 응모 명단', `
-    <div class="vw-top"><h3>${vsTitle(p.title)}</h3>
-      <p>응모 ${rows.length}명 · 👥 ${resultOf(p).voters}명 참여</p></div>
+    <div class="vw-top"><h3>${esc(BG_CAMPAIGN.title)} 밸런스 게임</h3>
+      <p>응모 ${rows.length}명 · ${qs.length}문항 · ${esc(BG_CAMPAIGN.prize)} ${BG_CAMPAIGN.winners}분</p></div>
     <div class="notice" style="margin:0 0 14px">🔒 이 명단에는 <b>어느 쪽을 골랐는지</b>가 없습니다(익명 투표).
       연락처는 추첨·당첨 안내에만 써 주세요.</div>
     ${rows.length
@@ -3913,18 +3971,111 @@ function openEntries(p){
 /* 투표를 막 마친 사람에게 이벤트 참여 창을 띄웁니다 */
 function askEntry(pid){
   const p = DB.polls().find(x => x.id === pid);
-  if(p && eventOn(p) && !myEntry(pid)) openEntryForm(p, true);
+  if(!p || !eventOn(p)) return;
+  if(hasEntry()) return;                       // 이미 남겼으면 다시 묻지 않습니다
+  const left = campQuestions().filter(q => !pollClosed(q) && !myBallot(q.id));
+  if(left.length) return;                      // 남은 문항을 다 고른 뒤에 한 번만
+  openEntryForm(p, true);
 }
 
-/* ── 목록형 한 줄 ── 투표가 여러 개면 한 줄씩 보여 주고 눌러서 펼칩니다
-   밸런스 게임(A vs B)은 두 칸을 'VS' 로, 여러 항목 투표는 항목 몇 개를 미리 보여 줍니다. */
+/* ── 「세대가 함께 그리는 조직문화」 밸런스게임 안내 ── (index.html 과 같은 내용) */
+const BG_CAMPAIGN = {
+  on:      true,
+  tag:     '새소리단 8기 3조 세대공감팀',
+  title:   '세대가 함께 그리는 조직문화',
+  lead:    '입직 1년 차 신규 직원부터 수십 년 경력의 선배님까지, 세대마다 다른 생각과 일하는 방식을 함께 들여다봅니다. 정답은 없으니 편하고 솔직하게 골라 주세요!',
+  from:    '2026-11-16',
+  to:      '2026-11-24',
+  who:     '고용노동부 전 직원<br>연차·직급·새소리단 여부 무관',
+  howlong: '약 1분',
+  prize:   '한정판 고드래곤 키캡',
+  winners: 30,
+  when:    '당첨자 발표 11월 말 · 개별 연락',
+  after:   '투표 결과는 카드뉴스로 정리해 우리부 소식과 새소리단 홈페이지에 공유할 예정입니다.',
+};
+const campDay = (d) => { const x = new Date(d + 'T00:00:00');
+  return `${x.getMonth() + 1}. ${x.getDate()}.(${'일월화수목금토'[x.getDay()]})`; };
+
+function campQuestions(){
+  const byOld = (a, b) => a.created_at.localeCompare(b.created_at);
+  const all = DB.polls();
+  const ev = all.filter(p => !!p.event_on);
+  return (ev.length ? ev : all).slice().sort(byOld);
+}
+const hasEntry   = () => DB.entries().some(e => e.voter === myVoterId());
+const myEntryAny = () => DB.entries().find(e => e.voter === myVoterId());
+const campEntryCount = () => new Set(DB.entries().map(e => e.voter)).size;
+
+/* ── 캠페인 안내 칸 ── */
+function campaignBox(){
+  const c = BG_CAMPAIGN;
+  const list = campQuestions();
+  if(!c.on || !list.length) return '';
+  const n = list.length;
+  const mine = list.filter(p => myBallot(p.id)).length;
+  const pct  = n ? Math.round(mine * 100 / n) : 0;
+  const all  = mine >= n;
+  const ent  = myEntryAny();
+  const evOn = list.some(p => eventOn(p));
+
+  return `<section class="bgc">
+    <span class="bgc-tag">${esc(c.tag)}</span>
+    <h2 class="bgc-title">${esc(c.title)}<em>밸런스 게임</em></h2>
+    <p class="bgc-lead">${esc(c.lead)}</p>
+
+    <div class="bgc-facts">
+      <div><b>참여 기간</b><span>${campDay(c.from)} ~ ${campDay(c.to)}</span></div>
+      <div><b>참여 대상</b><span>${c.who}</span></div>
+      <div><b>참여 방법</b><span>${n}문항 선택 · ${esc(c.howlong)}</span></div>
+    </div>
+
+    <div class="bgp${all ? ' done' : ''}">
+      <div class="bgp-top"><b>${all ? `🎉 ${n}문항 모두 참여했습니다!` : `${n}문항 중 ${mine}문항 참여`}</b><span>${pct}%</span></div>
+      <div class="bgp-bar"><i style="width:${pct}%"></i></div>
+      <div class="bgp-dots">${list.map((p, i) =>
+        `<span class="${myBallot(p.id) ? 'on' : ''}" title="${esc(excerpt(p.title, 40))}">${i + 1}</span>`).join('')}</div>
+    </div>
+
+    ${evOn ? `<div class="bgc-ev">
+      <b class="h">🎁 참여 이벤트</b>
+      <p>${ent
+        ? `이벤트 참여가 끝났습니다. 남겨 주신 <b>${esc(ent.team)}</b> · ${esc(ent.contact)} 로 알려 드릴게요.`
+        : `${n}문항을 모두 고른 뒤 <b>이벤트 참여</b>를 남겨 주시면, 추첨을 통해 <b>${c.winners}분</b>께 <b>${esc(c.prize)}</b>을 드립니다.`}
+        <span class="when">${esc(c.when)}</span></p>
+      <div class="evb">
+        ${ent ? '<button class="btn sm" data-camp-ev>참여 정보 수정</button>'
+              : `<button class="btn sm gold" data-camp-ev ${all ? '' : 'disabled'}>${
+                  all ? '🎁 이벤트 참여하기' : `🎁 ${n - mine}문항 더 고르면 참여할 수 있어요`}</button>`}
+        ${canSeeEntries() ? `<button class="btn sm" data-camp-list>📋 응모 명단 보기 (${campEntryCount()}명)</button>` : ''}
+      </div>
+    </div>` : ''}
+
+    <p class="bgc-note">※ 투표는 <b>익명</b>으로 진행되며, 누가 무엇을 골랐는지는 아무에게도 보이지 않습니다.<br>
+      ※ ${esc(c.after)}</p>
+  </section>`;
+}
+
+/* ── 문항 이동 줄 ── */
+function questNav(one, list, below){
+  const i = list.findIndex(g => g.id === one.id);
+  const next = list.find((g, j) => j > i && !myBallot(g.id))
+            || list.find((g, j) => j !== i && !myBallot(g.id));
+  const left = list.filter(g => !myBallot(g.id)).length;
+  return `<div class="bgq-nav${below ? ' below' : ''}">
+    <button type="button" class="btn sm ghost" data-bg-back>‹ 목록으로</button>
+    <span class="bgq-no">${list.length}문항 중 <b>${i < 0 ? 1 : i + 1}</b>번째${
+      left ? ` · ${left}문항 남음` : ' · 모두 참여했습니다'}</span>
+    ${next ? `<button type="button" class="btn primary sm" data-bg-next="${next.id}">다음 문항 →</button>` : ''}
+  </div>`;
+}
+
+/* ── 목록형 한 줄 ── */
 function pollRow(p, i){
   const closed = pollClosed(p);
   const mine   = myBallot(p.id);
   const res    = resultOf(p);
   const show   = closed || !!mine;
   const bal    = isBalance(p);
-  const ent    = eventOn(p) && myEntry(p.id);
 
   const t   = [res.tally[0] || 0, res.tally[1] || 0];
   const sum = t[0] + t[1];
@@ -3944,8 +4095,7 @@ function pollRow(p, i){
       <span class="bg-q">${vsTitle(p.title)}</span>
       ${bal ? duel : many}
       <span class="bg-sub">${bal ? '⚖️ 밸런스 게임' : `📊 투표${p.multi ? ' · 복수 선택' : ''}`} · ${
-        closed ? '종료' : leftText(p)} · 👥 ${res.voters}명 참여${mine ? ' · ✅ 참여함' : ''}${
-        eventOn(p) ? (ent ? ' · <b>🎁 이벤트 응모 완료</b>' : ' · <b>🎁 이벤트</b>') : ''}</span>
+        closed ? '종료' : leftText(p)} · 👥 ${res.voters}명 참여${mine ? ' · <b>✅ 참여함</b>' : ''}</span>
     </span>
     <span class="bg-go">${closed || mine ? '결과 보기' : '참여하기'} ›</span>
   </button>`;
@@ -4019,22 +4169,27 @@ VIEWS.vote = () => {
   const open  = all.filter(p => !pollClosed(p)).sort(byOld);
   const shut  = all.filter(p =>  pollClosed(p)).sort(byOld);
   const games = done ? shut : open;
+  const camp  = campaignBox();
 
   const head = pageHead('⚖️ 밸런스 게임 🎮',
       '둘 중 하나만 고른다면? 가볍게 골라 보는 밸런스 게임입니다. 누르면 바로 투표돼요.',
       signedIn() ? '<button class="btn primary" id="pvNew">＋ 새로 만들기</button>' : '')
-    + (!signedIn() ? '<p class="hint" style="margin:-8px 0 16px">새 게임을 만들려면 로그인하세요. 익명 게임에는 로그인 없이도 참여할 수 있습니다.</p>' : '');
+    + (!signedIn() ? '<p class="hint" style="margin:-8px 0 16px">새 게임을 만들려면 로그인하세요. 참여(투표)는 로그인 없이도 할 수 있습니다.</p>' : '');
   const tabs = `<div class="pv-tabs">
       <button class="${done ? '' : 'on'}" data-pv-tab="open">진행 중<b>${open.length}</b></button>
       <button class="${done ? 'on' : ''}" data-pv-tab="done">종료<b>${shut.length}</b></button>
     </div>`;
 
   const one = BG_OPEN ? games.find(g => g.id === BG_OPEN) : null;
-  if(one) return head + tabs
-    + '<button type="button" class="bg-back" data-bg-back>‹ 목록으로</button>'
-    + `<div class="pv-grid one">${isBalance(one) ? balanceCard(one) : pollCard(one)}</div>`;
+  if(one){
+    const qs = campQuestions();
+    const seq = qs.some(g => g.id === one.id) ? qs : games;
+    return head + tabs + questNav(one, seq, false)
+      + `<div class="pv-grid one">${isBalance(one) ? balanceCard(one) : pollCard(one)}</div>`
+      + questNav(one, seq, true);
+  }
 
-  if(!games.length) return head + tabs + `<div class="empty">${done
+  if(!games.length) return head + camp + tabs + `<div class="empty">${done
     ? '종료된 게임이 없습니다.'
     : `진행 중인 게임이 없습니다.${signedIn() ? '<br>위의 ‘＋ 새로 만들기’로 첫 게임을 올려 보세요.' : ''}`}</div>`;
 
@@ -4043,7 +4198,7 @@ VIEWS.vote = () => {
   const view = multi ? `<div class="bg-view"><span class="lb">모두 ${games.length}개 · 올라온 차례대로</span>
     <button class="${asList ? 'on' : ''}" data-bg-view="list">목록형</button>
     <button class="${asList ? '' : 'on'}" data-bg-view="card">카드형</button></div>` : '';
-  return head + tabs + view + (asList
+  return head + camp + tabs + view + (asList
     ? `<div class="bg-list">${games.map((p, i) => pollRow(p, i)).join('')}</div>`
     : `<div class="pv-grid">${games.map(p => isBalance(p) ? balanceCard(p) : pollCard(p)).join('')}</div>`);
 };
@@ -4061,7 +4216,18 @@ BIND.vote = () => {
   $$('#main [data-bg-open]').forEach(b => b.addEventListener('click', ()=>{
     BG_OPEN = b.dataset.bgOpen; go('vote'); window.scrollTo(0, 0);
   }));
-  $('#main [data-bg-back]')?.addEventListener('click', ()=>{ BG_OPEN = ''; go('vote'); window.scrollTo(0, 0); });
+  $$('#main [data-bg-back]').forEach(b => b.addEventListener('click', ()=>{
+    BG_OPEN = ''; go('vote'); window.scrollTo(0, 0);
+  }));
+  /* 다음 문항 — 아직 고르지 않은 문항으로 바로 넘어갑니다 */
+  $$('#main [data-bg-next]').forEach(b => b.addEventListener('click', ()=>{
+    BG_OPEN = b.dataset.bgNext; go('vote'); window.scrollTo(0, 0);
+  }));
+  /* 캠페인 칸의 이벤트 버튼 */
+  $('#main [data-camp-ev]')?.addEventListener('click', ()=>{
+    const q = campQuestions().find(x => eventOn(x)); if(q) openEntryForm(q, false);
+  });
+  $('#main [data-camp-list]')?.addEventListener('click', ()=> openEntries());
 
   $$('#main [data-pv]').forEach(card => {
     const pid = card.dataset.pv;
@@ -4111,7 +4277,7 @@ BIND.vote = () => {
     });
     card.querySelector('[data-pv-who]')?.addEventListener('click', ()=> openVoters(p));
     card.querySelector('[data-pv-ev]')?.addEventListener('click', ()=> openEntryForm(p, false));
-    card.querySelector('[data-pv-elist]')?.addEventListener('click', ()=> openEntries(p));
+    card.querySelector('[data-pv-elist]')?.addEventListener('click', ()=> openEntries());
     card.querySelectorAll('[data-zoom]').forEach(b => b.addEventListener('click', ()=> lightbox(b.dataset.zoom)));
     /* 밸런스 게임 — 한쪽을 누르면 바로 투표 */
     card.querySelectorAll('[data-bg-pick]').forEach(btn => btn.addEventListener('click', ()=>{
