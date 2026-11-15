@@ -734,8 +734,12 @@
   .bg-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
   .bg-q{font-size:17px;font-weight:900;line-height:1.35;word-break:keep-all;overflow-wrap:anywhere}
   .bg-ab2{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-  .bg-ab2 i{font-style:normal;font-size:13.5px;font-weight:800;border-radius:999px;padding:4px 11px;
-    word-break:keep-all;overflow-wrap:anywhere}
+  .bg-ab2 i{display:inline-flex;align-items:center;gap:7px;font-style:normal;font-size:13.5px;font-weight:800;
+    border-radius:999px;padding:4px 11px;word-break:keep-all;overflow-wrap:anywhere}
+  /* 항목 사진 — 카드형과 같은 사진을 작게 붙입니다 */
+  .bg-ab2 i.haspic{padding-left:4px}
+  .bg-ab2 i img{flex:none;width:30px;height:30px;border-radius:50%;object-fit:cover;
+    background:#fff;box-shadow:0 1px 3px rgba(22,34,92,.18)}
   .bg-ab2 i.a{background:#ffe1ec;color:#b3134f}
   .bg-ab2 i.b{background:#dfeaff;color:#1f4fc4}
   .bg-ab2 em{font-style:normal;font-size:11.5px;font-weight:900;color:var(--muted)}
@@ -905,6 +909,8 @@
     .bg-no{width:30px;height:30px;font-size:13.5px}
     .bg-q{font-size:15.5px}
     .bg-ab2 i{font-size:12.5px;padding:3px 10px}
+    .bg-ab2 i.haspic{padding-left:3px}
+    .bg-ab2 i img{width:26px;height:26px}
     .bg-go{display:none}
     .pe-list li{flex-wrap:wrap}
     .pe-list b{flex:1 0 100%}
@@ -3774,7 +3780,7 @@ function pollCard(p){
   /* ── 사진이 있는 투표 (index.html 과 같은 화면) ──
      사진을 크게 보여 주고 사진을 눌러 고릅니다. 고른 뒤에는 사진 아래 막대그래프로 결과를 봅니다 */
   const photoPh = (o, i, extra = '') => { const u = pollPic(p, i);
-    return `<span class="ph">${u ? `<img src="${u}" alt="" loading="lazy">` : '<i class="none">사진 없음</i>'}${extra}</span>`; };
+    return `<span class="ph">${u ? `<img src="${u}" alt="" loading="lazy" decoding="async">` : '<i class="none">사진 없음</i>'}${extra}</span>`; };
   const photoZoom = (o, i) => { const u = pollPic(p, i);
     return u ? `<button type="button" class="pv-pzoom" data-zoom="${u}" aria-label="${esc(o)} 사진 크게 보기">＋</button>` : ''; };
 
@@ -4099,14 +4105,21 @@ function pollRow(p, i){
   const t   = [res.tally[0] || 0, res.tally[1] || 0];
   const sum = t[0] + t[1];
   const pct = sum ? Math.round(t[0] * 100 / sum) : 50;
-  const duel = `<span class="bg-ab2"><i class="a">${esc(p.options[0])}</i><em>VS</em><i class="b">${esc(p.options[1])}</i></span>
+  /* 항목 한 칸 — 사진이 있으면 카드형처럼 작게 붙여 줍니다 */
+  const chip = (k, cls, cut) => {
+    const u = pollPic(p, k);
+    return `<i class="${cls}${u ? ' haspic' : ''}">${
+      u ? `<img src="${u}" alt="" loading="lazy" decoding="async">` : ''}${esc(cut ? excerpt(p.options[k], cut) : p.options[k])}</i>`;
+  };
+
+  const duel = `<span class="bg-ab2">${chip(0, 'a')}<em>VS</em>${chip(1, 'b')}</span>
     ${show && sum ? `<span class="bg-mini" aria-hidden="true"><i class="s0" style="width:${pct}%"></i><i
       class="s1" style="width:${100 - pct}%"></i></span>` : ''}`;
 
   const head = p.options.slice(0, 3);
   const rest = p.options.length - head.length;
-  const many = `<span class="bg-ab2 multi">${head.map(o =>
-      `<i>${esc(excerpt(o, 26))}</i>`).join('')}${rest > 0 ? `<em class="more">외 ${rest}개</em>` : ''}</span>`;
+  const many = `<span class="bg-ab2 multi">${head.map((o, k) =>
+      chip(k, '', 26)).join('')}${rest > 0 ? `<em class="more">외 ${rest}개</em>` : ''}</span>`;
 
   return `<button type="button" class="bg-item${closed ? ' done' : ''}" data-bg-open="${p.id}">
     <span class="bg-no">${i + 1}</span>
@@ -4140,7 +4153,7 @@ function balanceCard(p){
     const picked = !!mine?.choices?.includes(i);
     const win = showRes && t[i] > t[1 - i];
     const inner = `<span class="bg-ab" aria-hidden="true">${i ? 'B' : 'A'}</span>
-      ${u ? `<span class="bg-ph"><img src="${u}" alt="" loading="lazy"></span>` : ''}
+      ${u ? `<span class="bg-ph"><img src="${u}" alt="" loading="lazy" decoding="async"></span>` : ''}
       <span class="bg-lbl">${esc(p.options[i])}</span>
       ${showRes ? `<span class="bg-res">${win ? '<i title="더 많이 고른 쪽">👑</i>' : ''}<b>${pct[i]}%</b><em>${t[i]}표</em></span>` : ''}
       ${showRes && picked ? '<span class="bg-flag">✓ 내 선택</span>' : ''}
