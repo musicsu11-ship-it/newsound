@@ -853,16 +853,27 @@
     .ev-k{min-width:52px;padding:6px 12px;font-size:13.5px}
     .ev-v{font-size:16px}
     .evpic span{font-size:13px}
-    /* 목록형 한 줄 */
-    .bg-view .lb{font-size:14px}
-    .bg-view button{font-size:14px;padding:7px 15px}
-    .bg-no{width:38px;height:38px;font-size:16px}
-    .bg-q{font-size:19.5px}
-    .bg-ab2 i{font-size:15.5px}
-    .bg-ab2 em{font-size:12.5px}
-    .bg-ab2 .more{font-size:14px}
-    .bg-sub{font-size:14px}
-    .bg-go{font-size:15px}
+    /* 목록형 한 줄 — 글씨와 사진을 큼직하게 */
+    .bg-view .lb{font-size:14.5px}
+    .bg-view button{font-size:14.5px;padding:8px 16px}
+    .bg-item{gap:18px;padding:20px 22px}
+    .bg-no{width:46px;height:46px;font-size:20px}
+    .bg-mid{gap:10px}
+    .bg-q{font-size:26px}
+    /* A·B 두 칸은 한 줄에 나란히 — 글이 길면 칸 안에서 접힙니다 */
+    .bg-ab2{flex-wrap:nowrap;gap:12px}
+    .bg-ab2 i{flex:1 1 0;min-width:0;font-size:22px;line-height:1.45;border-radius:18px;padding:7px 18px;gap:14px}
+    .bg-ab2 i.haspic{padding:7px 18px 7px 7px}
+    .bg-ab2 i img{width:104px;height:104px;border-radius:14px}
+    .bg-ab2 em{flex:none;font-size:17px}
+    /* 여러 항목 투표는 칸이 많으므로 줄을 바꿔 가며 늘어놓습니다 */
+    .bg-ab2.multi{flex-wrap:wrap}
+    .bg-ab2.multi i{flex:0 1 auto;font-size:18px;padding:6px 15px 6px 6px}
+    .bg-ab2.multi i img{width:72px;height:72px;border-radius:12px}
+    .bg-ab2 .more{font-size:18px}
+    .bg-mini{height:12px;max-width:none}
+    .bg-sub{font-size:17px}
+    .bg-go{font-size:18px}
     /* 문항 이동 줄 · 카드 */
     .bgq-no{font-size:15px}
     .bgq-no b{font-size:17px}
