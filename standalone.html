@@ -797,12 +797,12 @@
     font-size:12px;font-weight:900;color:var(--muted);background:var(--surface-2);border:1px solid var(--border)}
   .bgp-dots span.on{color:#fff;background:#16225c;border-color:#16225c}
   /* 이벤트 안내 */
-  .bgc-ev{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap;
-    margin:14px 0 0;padding:15px 16px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
-  /* 글은 읽기 좋은 길이까지만 — 화면이 넓어도 글과 사진이 떨어지지 않게 가운데로 모읍니다 */
-  .bgc-ev .evtx{flex:1 1 380px;min-width:0;max-width:720px}
+  .bgc-ev{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+    margin:14px 0 0;padding:16px 18px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
+  /* 왼쪽 꼬리표 줄이 칸을 꽉 채우고, 경품 사진은 오른쪽 끝에 붙습니다 */
+  .bgc-ev .evtx{flex:1 1 380px;min-width:0}
   /* 경품 사진 — 누르면 크게 볼 수 있습니다 */
-  .evpic{position:relative;flex:0 0 auto;width:230px;display:block;padding:0;border:0;background:transparent;
+  .evpic{position:relative;flex:0 0 auto;width:200px;display:block;padding:0;border:0;background:transparent;
     font:inherit;cursor:zoom-in}
   .evpic img{display:block;width:100%;border-radius:12px;border:1px solid #f0dcae;
     box-shadow:0 6px 18px rgba(122,90,26,.18);transition:transform .15s}
@@ -811,7 +811,7 @@
   .bgc-ev b.h{font-size:15px;font-weight:900;color:#8a5500}
   .ev-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 11px}
   /* 꼬리표 줄 — 왼쪽에 짙은 알약, 오른쪽에 내용 */
-  .ev-rows{display:flex;flex-direction:column;gap:8px}
+  .ev-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 24px}
   .ev-row{display:flex;align-items:baseline;gap:11px}
   .ev-k{flex:none;min-width:48px;text-align:center;padding:5px 11px;border-radius:9px;
     background:#3a2a10;color:#fff;font-size:12.5px;font-weight:900;letter-spacing:.02em}
@@ -930,6 +930,7 @@
   .pv-sw em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);line-height:1.5;word-break:keep-all}
 
   @media (max-width:860px){ .pv-grid{grid-template-columns:minmax(0,1fr)} }
+  @media (max-width:1040px){ .ev-rows{grid-template-columns:minmax(0,1fr)} }
   @media (max-width:860px){ .bgc-facts{grid-template-columns:minmax(0,1fr)} }
   @media (max-width:700px){
     .bgc{padding:18px 16px;border-radius:16px}
@@ -4292,8 +4293,7 @@ VIEWS.vote = () => {
 
   const head = pageHead('⚖️ 밸런스 게임 🎮',
       '둘 중 하나만 고른다면? 가볍게 골라 보는 밸런스 게임입니다. 누르면 바로 투표돼요.',
-      signedIn() ? '<button class="btn primary" id="pvNew">＋ 새로 만들기</button>' : '')
-    + (!signedIn() ? '<p class="hint" style="margin:-8px 0 16px">새 게임을 만들려면 로그인하세요. 참여(투표)는 로그인 없이도 할 수 있습니다.</p>' : '');
+      signedIn() ? '<button class="btn primary" id="pvNew">＋ 새로 만들기</button>' : '');
   const tabs = `<div class="pv-tabs">
       <button class="${done ? '' : 'on'}" data-pv-tab="open">진행 중<b>${open.length}</b></button>
       <button class="${done ? 'on' : ''}" data-pv-tab="done">종료<b>${shut.length}</b></button>
