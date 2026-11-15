@@ -848,7 +848,16 @@
     font-size:12px;font-weight:900;color:var(--muted);background:var(--surface-2);border:1px solid var(--border)}
   .bgp-dots span.on{color:#fff;background:#16225c;border-color:#16225c}
   /* 이벤트 안내 */
-  .bgc-ev{margin:14px 0 0;padding:14px 16px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
+  .bgc-ev{display:flex;align-items:center;gap:18px;
+    margin:14px 0 0;padding:14px 16px;border-radius:14px;background:#fff8e4;border:1px solid #ffdf9b}
+  .bgc-ev .evtx{flex:1;min-width:0}
+  /* 경품 사진 — 누르면 크게 볼 수 있습니다 */
+  .evpic{flex:none;width:min(300px,38%);display:block;padding:0;border:0;background:transparent;
+    font:inherit;cursor:zoom-in}
+  .evpic img{display:block;width:100%;border-radius:12px;border:1px solid #f0dcae;
+    box-shadow:0 6px 18px rgba(122,90,26,.18);transition:transform .15s}
+  .evpic:hover img{transform:translateY(-2px)}
+  .evpic span{display:block;margin-top:6px;text-align:center;font-size:11.5px;font-weight:800;color:#8a5500}
   .bgc-ev b.h{display:block;font-size:14.5px;font-weight:900;color:#8a5500}
   .bgc-ev p{margin:6px 0 0;font-size:13px;font-weight:700;line-height:1.65;color:#7a5a1a;word-break:keep-all}
   .bgc-ev p b{color:#8a5500}
@@ -946,6 +955,8 @@
     .bgc-title{font-size:20px}
     .bgc-title em{font-size:14px;padding:4px 11px;vertical-align:3px}
     .bgc-lead{font-size:13.5px}
+    .bgc-ev{flex-direction:column;align-items:stretch;gap:12px}
+    .evpic{width:100%;order:-1}
     .bgq-no{flex:1 0 100%;margin:0}
     .bg-view .lb{flex:1 0 100%;margin:0 0 2px}
     .bg-item{gap:11px;padding:14px 15px}
@@ -4821,6 +4832,8 @@ const BG_CAMPAIGN = {
   when:    '당첨자 발표 11월 말 · 개별 연락',
   after:   '투표 결과는 카드뉴스로 정리해 우리부 소식과 새소리단 홈페이지에 공유할 예정입니다.',
 };
+/* 경품 사진 — 다른 경품으로 바뀌면 이 줄의 파일 이름만 고치면 됩니다 */
+const CAMP_PRIZE_PIC = 'assets/prize-keycap.webp';
 const campDay = (d) => { const x = new Date(d + 'T00:00:00');
   return `${x.getMonth() + 1}. ${x.getDate()}.(${'일월화수목금토'[x.getDay()]})`; };
 
@@ -4866,6 +4879,7 @@ function campaignBox(){
     </div>
 
     ${evOn ? `<div class="bgc-ev">
+      <div class="evtx">
       <b class="h">🎁 참여 이벤트</b>
       <p>${ent
         ? `이벤트 참여가 끝났습니다. 남겨 주신 <b>${esc(ent.team)}</b> · ${esc(ent.contact)} 로 알려 드릴게요.`
@@ -4877,6 +4891,11 @@ function campaignBox(){
                   all ? '🎁 이벤트 참여하기' : `🎁 ${n - mine}문항 더 고르면 참여할 수 있어요`}</button>`}
         ${isOfficer() ? `<button class="btn sm" data-camp-list>📋 응모 명단 보기 (${campEntryCount()}명)</button>` : ''}
       </div>
+      </div>
+      <button type="button" class="evpic" data-zoom="${CAMP_PRIZE_PIC}"
+        aria-label="${esc(c.prize)} 사진 크게 보기">
+        <img src="${CAMP_PRIZE_PIC}" alt="${esc(c.prize)}" loading="lazy">
+        <span>${esc(c.prize)}</span></button>
     </div>` : ''}
 
     <p class="bgc-note">※ 투표는 <b>익명</b>으로 진행되며, 누가 무엇을 골랐는지는 아무에게도 보이지 않습니다.<br>
@@ -5030,6 +5049,7 @@ BIND.vote = () => {
     const q = campQuestions().find(x => eventOn(x)); if(q) openEntryForm(q, false);
   });
   $('#main [data-camp-list]')?.addEventListener('click', ()=> openEntries());
+  $('#main .evpic')?.addEventListener('click', (e)=> lightbox(e.currentTarget.dataset.zoom));
 
   $$('#main [data-pv]').forEach(card => {
     const pid = card.dataset.pv;
