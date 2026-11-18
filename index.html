@@ -3596,8 +3596,8 @@ function boardView(key){
 
       <ul class="og-info">
         <li class="hi"><b>참여 기간</b><span>11/23(월) ~ 11/30(월)</span></li>
-        <li><b>응모 자격</b><span>고용노동부 직원이면 누구나 · <b>한 사람이 한 장</b></span></li>
-        <li><b>투표 방법</b><span>마음에 드는 사진에 좋아요 · 한 사람이 한 장에 한 번</span></li>
+        <li><b>응모 자격</b><span>고용노동부 직원이면 누구나</span></li>
+        <li><b>투표 방법</b><span>마음에 드는 사진에 좋아요 누르기</span></li>
       </ul>
       </div>
       </div>
@@ -3640,7 +3640,7 @@ function boardView(key){
       <h3>${highlight(p.title, Q[key])}</h3>
       ${pl.star ? `<div class="fd-rate">${stars(pl.star)}<em>${Number(pl.star)}.0</em></div>` : ''}
       ${pl.loc ? `<p class="fd-loc">📍 ${esc(pl.loc)}</p>` : ''}
-      ${pl.menu ? `<p class="fd-menu">🍽️ ${esc(pl.menu)}</p>` : ''}
+      ${pl.menu ? `<p class="fd-menu">🍽️ 최애 ${esc(pl.menu)}</p>` : ''}
       <p>${highlight(excerpt(p.body, 42), Q[key])}</p>
       <div class="fd-foot">
         ${pl.price ? `<span class="fd-price">${esc(pl.price)}</span>` : ''}
@@ -4124,12 +4124,13 @@ function openFoodForm(edit){
 
     <label class="field">위치 <span class="hint" style="display:inline">지청에서 어떻게 가는지 적어 주세요</span>
       <input id="fdLoc" maxlength="60" placeholder="예) 지청 정문 건너편 · 도보 5분" value="${esc(pl.loc || '')}"></label>
-    <label class="field">대표 메뉴 <span class="hint" style="display:inline">가격까지 적으면 더 좋아요</span>
-      <input id="fdMenu" maxlength="60" placeholder="예) 손칼국수 8,000원 / 보리밥 7,000원" value="${esc(pl.menu || '')}"></label>` : ''}
+    <label class="field">나의 최애 메뉴 <span class="hint" style="display:inline">여기 오면 꼭 먹는 메뉴를 적어 주세요</span>
+      <input id="fdMenu" maxlength="60" placeholder="예) 손칼국수 8,000원 · 겉절이도 꼭!" value="${esc(pl.menu || '')}"></label>` : ''}
 
-    <label class="field">한 줄 평 <span class="req">*</span>
-      <textarea id="fdBody" style="min-height:92px" maxlength="300"
-        placeholder="예) 국물이 진하고 반찬이 깔끔해요. 점심시간엔 조금 일찍 가야 자리가 있어요.">${e0 ? esc(e0.body) : ''}</textarea></label>
+    <label class="field">소개 <span class="req">*</span>
+      <span class="hint">맛·분위기·가는 길·팁… 자유롭게 적어 주세요. 길게 써도 괜찮습니다.</span>
+      <textarea id="fdBody" style="min-height:140px" maxlength="1000"
+        placeholder="예) 국물이 진하고 반찬이 깔끔해요.&#10;점심시간엔 조금 일찍 가야 자리가 있고, 2층은 조용해서 이야기하기 좋아요.&#10;사장님이 겉절이를 리필해 주십니다!">${e0 ? esc(e0.body) : ''}</textarea></label>
 
     <label class="field">올리는 이름 <span class="hint" style="display:inline">비우면 <b>익명</b>으로 올라갑니다</span>
       <input id="fdNick" maxlength="20" placeholder="예) 김밥러버 (별명도 좋아요)"
@@ -4174,7 +4175,7 @@ function openFoodForm(edit){
   $('#fdSave').addEventListener('click', async ()=>{
     const title = $('#fdName').value.trim(), body = $('#fdBody').value.trim();
     if(!title){ toast('가게 이름을 입력하세요'); return; }
-    if(!body) { toast('한 줄 평을 입력하세요'); return; }
+    if(!body) { toast('소개를 입력하세요'); return; }
 
     const fields = { title, body, author_name: $('#fdNick').value.trim() || '익명' };
     if(on) fields.place = { office: $('#fdOffice').value.trim(), cat: $('#fdCat').value,
@@ -4513,7 +4514,7 @@ function openPost(id){
     const pl = placeOf(p);
     const rows = [['지청', pl.office], ['분류', pl.cat],
                   ['별점', pl.star ? `${stars(pl.star)} ${Number(pl.star)}.0` : ''],
-                  ['위치', pl.loc], ['대표 메뉴', pl.menu], ['가격대', pl.price]]
+                  ['위치', pl.loc], ['최애 메뉴', pl.menu], ['가격대', pl.price]]
       .filter(r => r[1]);
     if(rows.length) $('#modalBody .post-body, #modalBody .pp-body')?.insertAdjacentHTML('beforebegin',
       `<dl class="fd-info">${rows.map(([k, v]) =>
