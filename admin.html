@@ -368,6 +368,7 @@ const MENUS = [
   { id:'exps',    icon:'💳', label:'활동비 정산',    group:'심사', roles:['officer','admin'] },
   { id:'opinions',icon:'💬', label:'의견함 관리',    group:'심사', roles:['officer','admin'] },
   { id:'members', icon:'👥', label:'회원 · 권한',    group:'운영', roles:['officer','admin'] },
+  { id:'backup',  icon:'💾', label:'백업',          group:'운영', roles:['officer','admin'] },
 ];
 const can = id => { const m = MENUS.find(x=>x.id===id); return !!m && m.roles.includes(role()); };
 
@@ -626,6 +627,60 @@ BIND.dash = () => {
 };
 
 /* ---------- 방문자 통계 ---------- */
+/* ── 백업 ───────────────────────────────────────────────────────────────── */
+VIEWS.backup = () => pageHead('백업',
+    '사이트의 모든 글·댓글·투표·응모 명단을 파일 하나로 내려받습니다.')
+  + `<div class="card">
+      <h2>전체 백업 내려받기</h2>
+      <p class="sub">단추를 누르면 <b>.json</b> 파일 하나가 내려받아집니다.
+        일주일에 한 번만 눌러 두셔도 충분합니다.</p>
+      <div class="notice amber" style="margin:12px 0">
+        2026년 11월 19일, SQL 한 줄에 밸런스게임 표와 이벤트 응모 명단이 모두 지워진 일이
+        있었습니다. 무료 요금제에는 되돌릴 백업이 없어 끝내 복구하지 못했습니다.
+        <b>이 단추로 받아 둔 파일이 그때 유일한 사본이 됩니다.</b>
+      </div>
+      <button class="btn primary" id="bkRun">💾 전체 백업 내려받기</button>
+      <span class="hint" id="bkMsg" style="margin-left:10px"></span>
+    </div>
+    <div class="card">
+      <h2>마지막으로 받은 백업</h2>
+      <p class="sub" id="bkLast">이 컴퓨터에서는 아직 받은 적이 없습니다.</p>
+      <p class="hint">내려받은 파일은 업무용 PC나 부서 공유 폴더처럼
+        이 사이트와 다른 곳에 두셔야 의미가 있습니다.</p>
+    </div>`;
+
+BIND.backup = () => {
+  let last = null;
+  try{ last = localStorage.getItem('sd_last_backup'); }catch(_){}
+  if(last && $('#bkLast')) $('#bkLast').textContent = `${last} — 이 컴퓨터 기준입니다.`;
+
+  $('#bkRun')?.addEventListener('click', async (ev) => {
+    const b = ev.currentTarget;
+    b.disabled = true;
+    if($('#bkMsg')) $('#bkMsg').textContent = '모으는 중…';
+    const { data, error } = await sb.rpc('backup_dump');
+    b.disabled = false;
+    if($('#bkMsg')) $('#bkMsg').textContent = '';
+    if(error || !data){
+      toast(error?.message || '백업을 만들지 못했습니다. 47절 SQL을 먼저 실행하셨는지 확인해 주세요.');
+      return;
+    }
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(data, null, 1)], { type:'application/json' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = `새소리단_백업_${ymd(new Date())}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 1000);
+
+    const rows = Object.entries(data).filter(([,v]) => Array.isArray(v))
+      .reduce((n,[,v]) => n + v.length, 0);
+    const now = fmtDay(new Date().toISOString());
+    try{ localStorage.setItem('sd_last_backup', now); }catch(_){}
+    if($('#bkLast')) $('#bkLast').textContent = `${now} — 이 컴퓨터 기준입니다.`;
+    toast(`백업을 내려받았습니다 (${rows.toLocaleString('ko-KR')}줄)`);
+  });
+};
+
 VIEWS.visits = () => {
   if(!S.visitReady) return pageHead('방문자 통계','접속 IP를 기준으로 방문자를 셉니다.')
     + `<div class="card"><div class="notice amber" style="margin:0">
