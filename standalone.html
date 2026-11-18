@@ -3045,11 +3045,14 @@ function boardView(key){
     const all = DB.posts().filter(p => p.board === 'ootd');
     /* 출근룩은 한 사람이 한 장만 — 이미 올렸으면 '수정하기' 로 바뀝니다 */
     const mineP = myOotd();
+    /* 좋아요가 같으면 등수를 '공동'으로 매깁니다(본 사이트와 같은 방식) */
     const ranked = all.slice().sort((a,b) =>
       likeCount(b) - likeCount(a) || String(a.at).localeCompare(String(b.at)));
-    const rankOf = (p) => ranked.indexOf(p) + 1;
-    const shown = q ? list.slice().sort((a,b) => rankOf(a) - rankOf(b)) : ranked;
-    const top = q ? [] : ranked.slice(0, 3).filter(p => likeCount(p) > 0);
+    const rankOf = (p) => ranked.findIndex(x => likeCount(x) === likeCount(p)) + 1;
+    const tied   = (p) => ranked.filter(x => likeCount(x) === likeCount(p)).length > 1;
+    const shown = q ? list.slice().sort((a,b) => rankOf(a) - rankOf(b)
+      || String(a.at).localeCompare(String(b.at))) : ranked;
+    const top = q ? [] : ranked.filter(p => likeCount(p) > 0 && rankOf(p) <= 3).slice(0, 6);
 
     const who = (p) => [p.authorTeam, p.author].filter(Boolean).map(esc).join(' ') || '익명';
     const cap = (p) => esc(p.title || '오늘의 출근룩');
@@ -3059,7 +3062,8 @@ function boardView(key){
         mineP && p.id === mineP.id ? ' own' : ''}">
         <div class="ootd-ph" data-open-post="${p.id}">
           ${img ? `<img src="${img.data}" alt="${cap(p)}" loading="lazy">` : '👔'}
-          ${rank === 1 ? '<span class="ootd-crown" aria-hidden="true">👑</span>' : ''}${rank ? `<span class="ootd-rank">${rank}위</span>` : ''}
+          ${rank === 1 ? '<span class="ootd-crown" aria-hidden="true">👑</span>' : ''}${
+            rank ? `<span class="ootd-rank">${tied(p) ? '공동 ' : ''}${rank}위</span>` : ''}
         </div>
         <div class="ootd-bd">
           <b data-open-post="${p.id}">${who(p)}</b>
@@ -3134,7 +3138,7 @@ function boardView(key){
           ${searchBar(key, '예) 대구서부 · 실업급여팀 · 홍길동')}
         </div>`
       + (top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
-          <div class="ootd-top">${top.map((p,i) => card(p, i+1)).join('')}</div>` : '')
+          <div class="ootd-top">${top.map(p => card(p, rankOf(p))).join('')}</div>` : '')
       + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
       + (shown.length ? `<h2 class="ootd-h2">참가 사진 ${all.length}장</h2>
           <div class="ootd-grid">${shown.map(p => card(p, rankOf(p))).join('')}</div>`
