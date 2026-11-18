@@ -392,9 +392,21 @@
   .og-hero img{display:block;width:100%;border-radius:20px;
     box-shadow:0 10px 26px rgba(26,143,212,.22);transition:transform .15s}
   .og-hero:hover img{transform:translateY(-2px)}
-  /* 제목 줄의 검색칸 — 화면 맨 위에서 바로 찾을 수 있게 */
   .ootd-head-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-  .ootd-head-r .searchbar{margin:0;flex:0 1 340px}
+  /* 사진 바로 위 — 같은 기관 팀원 찾기 */
+  .ootd-find{margin:0 0 20px;padding:18px 22px;border-radius:20px;
+    background:linear-gradient(150deg,#e8f4fd,#fff6fa);border:1.5px solid #9ed2f2;
+    box-shadow:0 8px 22px rgba(26,143,212,.14)}
+  .ootd-find b{display:block;font-size:19px;font-weight:900;color:#0a5a8a;letter-spacing:-.02em}
+  .ootd-find p{margin:4px 0 12px;font-size:13.5px;font-weight:700;color:#3a6a86}
+  .ootd-find .searchbar{margin:0;gap:8px}
+  .ootd-find .searchbar input{height:50px;font-size:16px;font-weight:700;border-radius:14px;
+    border:1.5px solid #9ed2f2;background:#fff}
+  .ootd-find .searchbar input::placeholder{color:#7fa8c2;font-weight:600}
+  .ootd-find .searchbar .btn{height:50px;padding:0 24px;font-size:16px;font-weight:900;border-radius:14px;
+    background:#1a8fd4;border-color:#1a8fd4;color:#fff}
+  .ootd-find .searchbar .btn:hover{background:#0f76b4;border-color:#0f76b4}
+  .ootd-find .searchbar .btn.ghost{background:#fff;color:#0a5a8a}
   /* 리본 띠 — 포스터의 파란 배너 */
   .og-ribbon{display:flex;justify-content:center;margin:0 0 20px}
   .og-ribbon span{position:relative;display:inline-block;
@@ -451,10 +463,9 @@
   /* 응모 자격 · 투표 방법 */
   .og-right .og-cols{margin:0}
   .og-right .og-info{margin:0}
-  .og-info{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:7px;
-    max-width:calc(100% - 170px)}
-  .og-info li{display:flex;gap:12px;align-items:baseline;font-size:16px;
-    line-height:1.5;word-break:keep-all}
+  .og-info{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:7px}
+  .og-info li{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:16px;
+    line-height:1.5;word-break:keep-all;padding:6px 10px;border-radius:10px}
   .og-info b{flex:none;font-size:14px;font-weight:900;color:#fff;background:#2353c9;
     border-radius:7px;padding:4px 11px;letter-spacing:.02em}
   .og-info span{color:#2b4a63;font-weight:700}
@@ -467,10 +478,10 @@
   .ootd-own{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;
     padding-top:10px;border-top:1px dashed var(--border)}
   .ootd-own .tag{background:var(--brand-weak);color:var(--brand);font-weight:900;margin-right:auto}
-  /* 참여 기간 — 안내문에서 가장 먼저 보이게 */
-  .og-info li.hi{background:#fff2f7;border-color:#ffc9dd}
-  .og-info li.hi b{color:var(--brand)}
-  .og-info li.hi span{color:var(--brand);font-weight:900}
+  /* 참여 기간 — 안내문에서 가장 먼저 보이게(진한 주황으로 또렷하게) */
+  .og-info li.hi{background:#fff4e2;border:1.5px solid #ffc46b;padding:7px 12px}
+  .og-info li.hi b{background:#c2410c;color:#fff}
+  .og-info li.hi span{color:#9a3412;font-weight:900;font-size:17.5px;letter-spacing:-.01em}
   .ootd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:16px}
   .ootd-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;
     box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
@@ -506,7 +517,12 @@
     .og-main{grid-template-columns:minmax(0,1fr);gap:18px}
     .og-hero{width:min(360px,100%);margin:0 auto}
     .ootd-head-r{width:100%}
-    .ootd-head-r .searchbar{flex:1 1 100%}
+    .ootd-find{padding:14px 15px;border-radius:16px}
+    .ootd-find b{font-size:16.5px}
+    .ootd-find p{font-size:12.5px;margin-bottom:10px}
+    .ootd-find .searchbar{flex-wrap:wrap}
+    .ootd-find .searchbar input{flex:1 1 100%;height:46px;font-size:15px}
+    .ootd-find .searchbar .btn{height:44px;flex:1 1 auto;font-size:15px}
     .og-cols{grid-template-columns:minmax(0,1fr)}
     .og-ribbon span{font-size:20px;padding:11px 26px}
     .og-catch{font-size:21px}
@@ -2225,13 +2241,13 @@ const intro = () => {
    · 첨부 파일은 그 게시판 이름의 폴더에만 올라갑니다(media/<게시판>/<사람>/…)
    · 장난 글·사진은 혁신행정담당관이 바로 내릴 수 있습니다
    서버에서도 같은 규칙으로 열어 두었습니다(schema.sql 40절). */
-const OPEN_BOARDS = ['ootd','mascot','ai','relief','food'];
+const OPEN_BOARDS = ['news','ootd','mascot','ai','relief','food'];
 const OPEN_WRITE  = ['visitor', ...INNER];
 const isOpenBoard = (b) => OPEN_BOARDS.includes(b);
 
 const BOARDS = {
   news:   { label:'새소리단 소식', icon:'📰', layout:'photo',
-            desc:'새소리단 활동 안내와 소식입니다. 누구나 볼 수 있습니다.', write:INNER },
+            desc:'새소리단 활동 안내와 소식입니다. 누구나 보고, 누구나 올릴 수 있습니다.', write:OPEN_WRITE },
   notice: { label:'공지사항', icon:'📢', layout:'list',
             desc:'단원 대상 공지사항입니다.', write:OFFICER },
   free:   { label:'자유방', icon:'💭', layout:'list',
@@ -3379,7 +3395,7 @@ function boardView(key){
   }
   list = list.slice().sort((a,c)=> (c.pinned?1:0)-(a.pinned?1:0) || c.created_at.localeCompare(a.created_at));
   const writeBtn = canWrite(key)
-    ? `<button class="btn primary" id="bdWrite">${key==='news'?'단원 전용 · 소식 작성':'글쓰기'}</button>` : '';
+    ? `<button class="btn primary" id="bdWrite">${key==='news'?'＋ 소식 올리기':'글쓰기'}</button>` : '';
 
   /* ── 소식: 추천(큰 카드) + 사이드 목록 ── */
   if(key === 'news'){
@@ -3538,7 +3554,6 @@ function boardView(key){
           <span class="t1">출근룩</span> <span class="t2">사진 콘테스트</span></h1>
         <p class="pg-sub og-lead">${esc(b.desc)}</p></div>
       <div class="ootd-head-r">
-      ${searchBar(key, '소속·이름으로 찾기 (예: 대구서부)')}
       ${canWrite(key) ? (mineP
         ? '<button class="btn primary" id="bdMine">✏️ 내 출근룩 수정하기</button>'
         : '<button class="btn primary" id="bdWrite">＋ 내 출근룩 올리기</button>') : ''}
@@ -3587,6 +3602,12 @@ function boardView(key){
       </div>
       </div>
     </section>
+
+    <div class="ootd-find">
+      <b><span aria-hidden="true">🔍</span> 같은 기관 팀원 찾기</b>
+      <p>소속이나 이름으로 찾아보세요. 기관 이름만 넣어도 됩니다.</p>
+      ${searchBar(key, '예) 대구서부 · 실업급여팀 · 홍길동')}
+    </div>
 
     ${top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
       <div class="ootd-top">${top.map((p, i) => card(p, i + 1)).join('')}</div>` : ''}

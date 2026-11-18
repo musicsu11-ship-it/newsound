@@ -8,7 +8,7 @@
 --     4. 빈 칸에 Ctrl + V  (붙여넣기)   →   오른쪽 아래 'Run' 버튼
 --     5. 'Success' 라고 나오면 끝입니다.
 --
---  ▷ 이번에는 41~44절입니다 (40절까지는 이미 들어가 있습니다)
+--  ▷ 이번에는 41~45절입니다 (40절까지는 이미 들어가 있습니다)
 --
 --     41절 — 이벤트 응모에 '이름' 과 '개인정보 제공 동의' 를 더합니다
 --
@@ -36,7 +36,11 @@
 --            · 분류·별점·위치·대표 메뉴·가격대를 따로 담습니다
 --            · 칸 하나만 더하고, 지우는 것은 없습니다
 --
---  ▷ 이 내용은 supabase/schema.sql 41~44절과 같습니다.
+--     45절 — 새소리단 소식도 '누구나' 올릴 수 있게
+--            · 방문자가 볼 수 있는 게시판은 이제 모두 글을 쓸 수 있습니다
+--            · 새소리단 전용 공간(공지사항·자유방·활동·협업·공간)은 그대로입니다
+--
+--  ▷ 이 내용은 supabase/schema.sql 41~45절과 같습니다.
 -- ============================================================================
 
 -- ============================================================================
@@ -161,4 +165,87 @@ create trigger posts_ootd_one before insert on public.posts
 -- ============================================================================
 
 alter table public.posts add column if not exists place jsonb;
+
+-- ============================================================================
+--  45. 새소리단 소식도 '누구나' 올릴 수 있게
+--
+--  홈페이지에 들어온 사람이면 로그인 없이도 소식을 올릴 수 있습니다.
+--  이제 방문자가 볼 수 있는 게시판은 모두 글을 쓸 수 있습니다.
+--    · 열린 곳 : 소식 · 출근룩 콘테스트 · 고드래곤&새초롱이 · AI.zip ·
+--                멘탈관리.zip · 우리 지청 맛집   (댓글도 함께)
+--    · 그대로 : 공지사항(담당관) · 자유방 · 활동 · 협업 · 새소리단 공간
+--               — 새소리단 전용 공간이라 단원만 보고 씁니다
+--    · 투표·밸런스 게임 '만들기' 도 그대로 로그인 회원만입니다
+--
+--  장난 글은 혁신행정담당관이 바로 내릴 수 있습니다(40절과 같은 방식). ★정리
+-- ============================================================================
+
+-- 올리기
+drop policy if exists posts_insert on public.posts;
+create policy posts_insert on public.posts for insert
+  with check (
+    author_id = auth.uid()
+    and case
+          when board in ('news','ootd','mascot','ai','relief','food') then auth.uid() is not null
+          when board = 'notice' then public.is_officer()
+          else public.is_inner()
+        end
+  );
+
+-- 지우기 — 올린 본인·관리자에 더해, 열린 게시판은 담당관도
+drop policy if exists posts_delete on public.posts;
+create policy posts_delete on public.posts for delete
+  using (
+    author_id = auth.uid()
+    or public.is_admin()
+    or (board in ('news','ootd','mascot','ai','relief','food') and public.is_officer())
+  );
+
+-- 댓글
+drop policy if exists pc_insert on public.post_comments;
+create policy pc_insert on public.post_comments for insert
+  with check (
+    author_id = auth.uid()
+    and (
+      public.is_inner()
+      or exists (select 1 from public.posts p
+                  where p.id = post_id
+                    and p.board in ('news','ootd','mascot','ai','relief','food'))
+    )
+  );
+
+drop policy if exists pc_delete on public.post_comments;
+create policy pc_delete on public.post_comments for delete
+  using (
+    author_id = auth.uid()
+    or public.is_admin()
+    or (public.is_officer() and exists (
+          select 1 from public.posts p
+           where p.id = post_id
+             and p.board in ('news','ootd','mascot','ai','relief','food')))
+  );
+
+-- 사진·파일 올리기 / 내리기
+drop policy if exists media_write on storage.objects;
+create policy media_write on storage.objects for insert
+  with check (
+    bucket_id = 'media'
+    and public.storage_owner(name) = auth.uid()
+    and (
+      public.is_inner()
+      or (storage.foldername(name))[1] in ('news','ootd','mascot','ai','relief','food')
+    )
+  );
+
+drop policy if exists media_delete on storage.objects;
+create policy media_delete on storage.objects for delete
+  using (
+    bucket_id = 'media'
+    and (
+      public.storage_owner(name) = auth.uid()
+      or public.is_admin()
+      or ((storage.foldername(name))[1] in ('news','ootd','mascot','ai','relief','food')
+          and public.is_officer())
+    )
+  );
 
