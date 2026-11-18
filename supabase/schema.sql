@@ -2442,3 +2442,23 @@ end $$;
 drop trigger if exists posts_ootd_one on public.posts;
 create trigger posts_ootd_one before insert on public.posts
   for each row execute function public.check_ootd_one();
+
+-- ============================================================================
+--  44. 우리 지청 맛집 — 가게 정보 칸 (네이버 플레이스처럼)
+--
+--  맛집 글에 가게 정보를 따로 담습니다. 글 본문(한 줄 평)과 섞이지 않아
+--  목록에서 분류·별점·위치를 바로 보여 줄 수 있습니다.
+--
+--    place = {
+--      "cat"   : "한식",                 -- 분류
+--      "star"  : 4,                      -- 별점 1~5
+--      "loc"   : "지청 정문 건너편, 도보 5분",
+--      "menu"  : "김치찌개 9,000원",
+--      "price" : "1만원 미만"            -- 가격대
+--    }
+--
+--  · 맛집 게시판에서만 씁니다. 다른 게시판 글은 비어 있습니다.
+--  · 지우는 것은 없습니다. 칸 하나만 더합니다.
+-- ============================================================================
+
+alter table public.posts add column if not exists place jsonb;

@@ -299,7 +299,28 @@
     object-fit:cover;border-radius:16px;box-shadow:0 8px 20px rgba(32,30,40,.18)}
   .fd-none{position:relative;z-index:1;display:grid;place-items:center;width:100%;aspect-ratio:1/1;
     border-radius:16px;background:#fff;font-size:46px;box-shadow:0 8px 20px rgba(32,30,40,.12)}
-  .fd-card h3{margin:16px 0 5px;font-size:19px;font-weight:900;letter-spacing:-.02em;color:#2b2b33;
+  /* 분류 꼬리표 · 별점 · 위치 — 네이버 플레이스처럼 한눈에 */
+  .fd-cat{display:inline-block;margin-top:14px;padding:3px 10px;border-radius:999px;
+    background:#fff1e0;color:#c2700a;font-size:11.5px;font-weight:900}
+  .fd-rate{display:flex;align-items:center;justify-content:center;gap:5px;margin:3px 0 5px}
+  .fd-star{color:#ffb63f;font-size:14px;letter-spacing:1px}
+  .fd-rate em{font-style:normal;font-size:12.5px;font-weight:900;color:#f08a1c}
+  .fd-loc,.fd-menu{margin:0 0 2px;font-size:12.5px;font-weight:700;color:#6b6b78;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .fd-price{font-size:11.5px;font-weight:900;color:#2b7a4b;background:#e3f7ea;
+    border-radius:999px;padding:3px 9px}
+  .fd-info{margin:0 0 16px;padding:14px 16px;border:1px solid var(--border);border-radius:14px;
+    background:var(--surface-2);display:grid;gap:8px}
+  .fd-info>div{display:flex;align-items:baseline;gap:12px}
+  .fd-info dt{flex:none;width:64px;margin:0;font-size:12.5px;font-weight:800;color:var(--muted)}
+  .fd-info dd{flex:1;min-width:0;margin:0;font-size:14.5px;font-weight:800;color:var(--text);
+    word-break:keep-all;overflow-wrap:anywhere}
+  .fd-stars{display:flex;align-items:center;gap:2px;margin-top:4px}
+  .fd-stars button{border:0;background:transparent;padding:0 2px;cursor:pointer;
+    font-size:28px;line-height:1;color:#d9d9e3}
+  .fd-stars button.on{color:#ffb63f}
+  .fd-stars em{margin-left:8px;font-style:normal;font-size:13.5px;font-weight:800;color:var(--muted)}
+  .fd-card h3{margin:14px 0 5px;font-size:19px;font-weight:900;letter-spacing:-.02em;color:#2b2b33;
     word-break:keep-all;overflow-wrap:anywhere}
   .fd-card p{margin:0;font-size:14px;font-weight:600;line-height:1.55;color:#6b6b78;
     word-break:keep-all;overflow-wrap:anywhere}
@@ -3158,16 +3179,21 @@ function boardView(key){
      사진을 네모로 올리고 그 아래로 주황 카드가 살짝 삐져나오게 둡니다. */
   if(key === 'food'){
     const card = (p) => {
-      const img = firstImg(p.atts);
+      const img = firstImg(p.atts), pl = placeOf(p);
       return `<article class="fd-card" data-open-post="${p.id}" tabindex="0" role="button">
         <div class="fd-ph">
           <span class="fd-box" aria-hidden="true"></span>
           ${img ? `<img src="${img.data}" alt="${esc(p.title)}" loading="lazy" decoding="async">`
                 : '<span class="fd-none" aria-hidden="true">🍽️</span>'}
         </div>
+        ${pl.cat ? `<span class="fd-cat">${esc(pl.cat)}</span>` : ''}
         <h3>${esc(p.title)}</h3>
+        ${pl.star ? `<div class="fd-rate">${stars(pl.star)}<em>${Number(pl.star)}.0</em></div>` : ''}
+        ${pl.loc ? `<p class="fd-loc">📍 ${esc(pl.loc)}</p>` : ''}
+        ${pl.menu ? `<p class="fd-menu">🍽️ ${esc(pl.menu)}</p>` : ''}
         <p>${esc(excerpt(p.body, 42))}</p>
         <div class="fd-foot">
+          ${pl.price ? `<span class="fd-price">${esc(pl.price)}</span>` : ''}
           <span class="fd-who">${esc([p.authorTeam, p.author].filter(Boolean).join(' ') || '직원')}</span>
           ${likeChip(p)}
         </div>
@@ -3241,7 +3267,8 @@ function bindBoard(key){
     t.collabStatus = next;
     if(DB.savePosts(arr)){ go('collab'); toast(`‘${COLLAB_LABEL[next]}’(으)로 옮겼습니다`); }
   }));
-  $('#bdWrite')?.addEventListener('click', ()=> key === 'ootd' ? openOotdForm() : openPostForm(key));
+  $('#bdWrite')?.addEventListener('click', ()=>
+    key === 'ootd' ? openOotdForm() : key === 'food' ? openFoodForm() : openPostForm(key));
   /* 출근룩 — 한 사람 한 장이라, 이미 올렸으면 바로 수정 창을 엽니다 */
   $('#bdMine')?.addEventListener('click', ()=>{ const m = myOotd(); if(m) openOotdForm(m); });
   $$('#main [data-odedit]').forEach(b => b.addEventListener('click', ()=>{
@@ -3280,6 +3307,85 @@ const authorTeamOptions = (selected) => {
 
 /* 출근룩 사진 콘테스트 — 올리는 칸을 따로 둡니다(index.html 과 같은 화면).
    일반 직원도 올리는 게시판이라 팀 고르기 대신 소속을 직접 적게 했습니다. */
+/* ── 우리 지청 맛집 ──
+   가게 정보(분류·별점·위치·대표 메뉴·가격대)는 글의 place 칸에 담고,
+   본문에는 '한 줄 평' 만 둡니다 (본 사이트 schema.sql 44절과 같은 모양). */
+const FOOD_CATS  = ['한식','중식','일식','양식','분식','치킨·피자','카페·디저트','술집','기타'];
+const FOOD_PRICE = ['1만원 미만','1~2만원','2~3만원','3만원 이상'];
+const placeOf = (p) => (p && typeof p.place === 'object' && p.place) ? p.place : {};
+const stars = (n) => { const s = Math.max(0, Math.min(5, Number(n) || 0));
+  return `<span class="fd-star" title="별점 ${s}점">${'★'.repeat(s)}${'☆'.repeat(5 - s)}</span>`; };
+
+function openFoodForm(edit){
+  const e0 = edit || null;
+  const pl = placeOf(e0);
+  openModal(`🍜 우리 지청 맛집 · ${e0 ? '수정' : '맛집 올리기'}`, `
+    <label class="field">가게 이름 <span class="req">*</span>
+      <input id="fdName" maxlength="40" placeholder="예) 할매 손칼국수" value="${e0 ? esc(e0.title) : ''}"></label>
+
+    <div class="grid c2">
+      <label class="field">분류
+        <select id="fdCat">${FOOD_CATS.map(c =>
+          `<option ${pl.cat === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
+      <label class="field">가격대
+        <select id="fdPrice">${FOOD_PRICE.map(c =>
+          `<option ${pl.price === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
+    </div>
+
+    <div class="field">별점
+      <div class="fd-stars" id="fdStars">${[1,2,3,4,5].map(n =>
+        `<button type="button" data-star="${n}" class="${(Number(pl.star) || 5) >= n ? 'on' : ''}"
+          aria-label="별 ${n}점">★</button>`).join('')}<em id="fdStarN">${Number(pl.star) || 5}점</em></div></div>
+
+    <label class="field">위치 <span class="hint" style="display:inline">지청에서 어떻게 가는지 적어 주세요</span>
+      <input id="fdLoc" maxlength="60" placeholder="예) 지청 정문 건너편 · 도보 5분" value="${esc(pl.loc || '')}"></label>
+    <label class="field">대표 메뉴 <span class="hint" style="display:inline">가격까지 적으면 더 좋아요</span>
+      <input id="fdMenu" maxlength="60" placeholder="예) 손칼국수 8,000원 / 보리밥 7,000원" value="${esc(pl.menu || '')}"></label>
+
+    <label class="field">한 줄 평 <span class="req">*</span>
+      <textarea id="fdBody" style="min-height:92px" maxlength="300"
+        placeholder="예) 국물이 진하고 반찬이 깔끔해요. 점심시간엔 조금 일찍 가야 자리가 있어요.">${e0 ? esc(e0.body) : ''}</textarea></label>
+
+    <label class="field">사진 <span class="hint" style="display:inline">선택</span>
+      <input id="fdFile" type="file" accept="image/*">
+      <span class="hint">한 장만 올려 주세요. 자동으로 줄여서 올라갑니다.</span></label>
+    <div class="thumbs" id="fdThumbs"></div>
+
+    <div class="row-actions"><button class="btn primary" id="fdSave">${e0 ? '수정 저장' : '올리기'}</button></div>`);
+
+  let star = Number(pl.star) || 5;
+  $$('#fdStars [data-star]').forEach(b => b.addEventListener('click', ()=>{
+    star = Number(b.dataset.star);
+    $$('#fdStars [data-star]').forEach(x => x.classList.toggle('on', Number(x.dataset.star) <= star));
+    $('#fdStarN').textContent = `${star}점`;
+  }));
+
+  let picked = [];
+  $('#fdFile').addEventListener('change', async ev => {
+    busy(true); picked = (await prepImages(ev.target.files)).slice(0, 1); busy(false);
+    previewLocal('#fdThumbs', picked);
+  });
+
+  $('#fdSave').addEventListener('click', ()=>{
+    const title = $('#fdName').value.trim(), body = $('#fdBody').value.trim();
+    if(!title){ toast('가게 이름을 입력하세요'); return; }
+    if(!body) { toast('한 줄 평을 입력하세요'); return; }
+    const place = { cat: $('#fdCat').value, price: $('#fdPrice').value, star,
+                    loc: $('#fdLoc').value.trim(), menu: $('#fdMenu').value.trim() };
+    const arr = DB.posts();
+    if(e0){
+      const t = arr.find(x => x.id === e0.id); if(!t) return;
+      Object.assign(t, { title, body, place, ...(picked.length ? { atts: picked } : {}) });
+    }else{
+      arr.push({ id:uid(), board:'food', title, body, place, atts:picked,
+                 author: SESSION && SESSION.name ? SESSION.name : '직원',
+                 authorTeam: (SESSION && SESSION.team) || '',
+                 realAuthor: (SESSION && SESSION.name) || '', at:nowISO(), likedBy:[] });
+    }
+    if(DB.savePosts(arr)){ closeModal(); toast(e0 ? '수정되었습니다' : '맛집을 올렸습니다!'); go('food'); }
+  });
+}
+
 /* 내가 올린 출근룩 — 한 사람이 한 장만 올릴 수 있습니다 */
 function myOotd(){
   if(!SESSION) return null;
