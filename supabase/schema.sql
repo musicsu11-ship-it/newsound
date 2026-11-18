@@ -2392,14 +2392,17 @@ end $$;
 --    (다시 실행하면 그때까지 쌓인 진짜 표도 지워집니다)
 -- ============================================================================
 
--- 진행 중인 투표(Q1~Q5)의 표를 모두 지웁니다 → 모든 항목 0표
-delete from public.poll_ballots
- where poll_id in (select id from public.polls where not closed);
-
--- 시험 삼아 넣어 본 이벤트 응모도 함께 비웁니다.
---   ※ 응모 명단을 남겨 두고 싶으시면 아래 두 줄만 지우고 실행하세요.
-delete from public.poll_entries
- where poll_id in (select id from public.polls where not closed);
+-- ★★ 2026-11-19 — 아래 두 문장은 '주석 처리' 해 두었습니다 ★★
+--   이 절을 모르고 다시 실행해 쌓인 표가 지워진 일이 있었습니다.
+--   앞으로 표를 비울 일이 생기면 그때만 아래 -- 를 떼고 한 번 실행하세요.
+--
+-- 진행 중인 투표의 표를 모두 지웁니다 → 모든 항목 0표
+-- delete from public.poll_ballots
+--  where poll_id in (select id from public.polls where not closed);
+--
+-- 이벤트 응모도 함께 비웁니다
+-- delete from public.poll_entries
+--  where poll_id in (select id from public.polls where not closed);
 
 -- ============================================================================
 --  43. 출근룩 콘테스트 — 한 사람이 한 장만
