@@ -282,6 +282,41 @@
   /* 마스코트 — 오른쪽 아래에 장식으로. 좁은 화면에서는 숨깁니다 */
   .og-mascot{position:absolute;right:8px;bottom:-20px;width:152px;height:auto;
     pointer-events:none;user-select:none;opacity:.95}
+  /* ── 우리 지청 맛집 — 메뉴판 카드 ── */
+  .fd-menu{background:#f4f4f6;border:1px solid #e6e6ec;border-radius:24px;padding:28px 26px 32px}
+  .fd-catch{margin:0 0 6px;text-align:center;font-size:30px;font-weight:900;letter-spacing:-.03em;
+    color:#2b2b33;word-break:keep-all}
+  .fd-catch b{color:#f08a1c}
+  .fd-sub{margin:0 0 26px;text-align:center;font-size:15px;font-weight:700;color:#8b8b97}
+  .fd-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px 24px}
+  .fd-card{cursor:pointer;text-align:center;border-radius:16px;padding:4px;transition:transform .14s}
+  .fd-card:hover{transform:translateY(-3px)}
+  .fd-card:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  .fd-ph{position:relative;padding-bottom:34px}
+  .fd-box{position:absolute;left:9%;right:9%;bottom:0;height:92px;border-radius:14px;
+    background:linear-gradient(180deg,#ffb63f,#f59413);box-shadow:0 8px 18px rgba(217,135,20,.28)}
+  .fd-ph img{position:relative;z-index:1;display:block;width:100%;aspect-ratio:1/1;
+    object-fit:cover;border-radius:16px;box-shadow:0 8px 20px rgba(32,30,40,.18)}
+  .fd-none{position:relative;z-index:1;display:grid;place-items:center;width:100%;aspect-ratio:1/1;
+    border-radius:16px;background:#fff;font-size:46px;box-shadow:0 8px 20px rgba(32,30,40,.12)}
+  .fd-card h3{margin:16px 0 5px;font-size:19px;font-weight:900;letter-spacing:-.02em;color:#2b2b33;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .fd-card p{margin:0;font-size:14px;font-weight:600;line-height:1.55;color:#6b6b78;
+    word-break:keep-all;overflow-wrap:anywhere}
+  .fd-foot{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .fd-who{font-size:12px;font-weight:700;color:#8b8b97}
+  @media (max-width:980px){ .fd-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  @media (max-width:560px){
+    .fd-menu{padding:20px 14px 24px;border-radius:18px}
+    .fd-catch{font-size:22px;margin-bottom:5px}
+    .fd-sub{font-size:13px;margin-bottom:18px}
+    .fd-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 14px}
+    .fd-card h3{font-size:16px;margin-top:13px}
+    .fd-card p{font-size:12.5px}
+    .fd-box{height:70px;left:7%;right:7%}
+    .fd-ph{padding-bottom:26px}
+  }
+
   /* 포스터 — 패셔니스타 문구 아래 가운데. 누르면 크게 볼 수 있습니다 */
   .og-hero{display:block;margin:0 auto 20px;padding:0;border:0;background:transparent;
     width:min(360px,100%);cursor:zoom-in}
@@ -3111,6 +3146,38 @@ function boardView(key){
                   ? '‘＋ 할 일 만들기’로 시작해 보세요.' : '비어 있습니다.'}</div>`}</div>
           </section>`;
         }).join('')}</div>`;
+  }
+
+  /* ── 우리 지청 맛집 — 메뉴판처럼 ──
+     사진을 네모로 올리고 그 아래로 주황 카드가 살짝 삐져나오게 둡니다. */
+  if(key === 'food'){
+    const card = (p) => {
+      const img = firstImg(p.atts);
+      return `<article class="fd-card" data-open-post="${p.id}" tabindex="0" role="button">
+        <div class="fd-ph">
+          <span class="fd-box" aria-hidden="true"></span>
+          ${img ? `<img src="${img.data}" alt="${esc(p.title)}" loading="lazy" decoding="async">`
+                : '<span class="fd-none" aria-hidden="true">🍽️</span>'}
+        </div>
+        <h3>${esc(p.title)}</h3>
+        <p>${esc(excerpt(p.body, 42))}</p>
+        <div class="fd-foot">
+          <span class="fd-who">${esc([p.authorTeam, p.author].filter(Boolean).join(' ') || '직원')}</span>
+          ${likeChip(p)}
+        </div>
+      </article>`;
+    };
+    return pageHead('🍜 우리 지청 맛집', b.desc,
+        `<div class="ootd-head-r">${searchBar(key, '가게 이름·메뉴·소속으로 찾기')}${
+          canWrite(key) ? '<button class="btn primary" id="bdWrite">＋ 맛집 올리기</button>' : ''}</div>`)
+      + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>` : '')
+      + `<section class="fd-menu">
+          <h2 class="fd-catch">여러분의 <b>최애 맛집</b>은?</h2>
+          <p class="fd-sub">우리 지청 맛집 프로잘알러는 나.</p>
+          ${list.length ? `<div class="fd-grid">${list.map(card).join('')}</div>`
+            : `<div class="empty">${q ? '검색 결과가 없습니다.'
+                : `아직 올라온 맛집이 없습니다.${canWrite(key) ? '<br>첫 번째 맛집을 추천해 주세요!' : ''}`}</div>`}
+        </section>`;
   }
 
   if(!list.length){
