@@ -317,9 +317,12 @@
     .fd-ph{padding-bottom:26px}
   }
 
-  /* 포스터 — 패셔니스타 문구 아래 가운데. 누르면 크게 볼 수 있습니다 */
-  .og-hero{display:block;margin:0 auto 20px;padding:0;border:0;background:transparent;
-    width:min(360px,100%);cursor:zoom-in}
+  /* 포스터는 왼쪽, 안내 글은 오른쪽 — 위를 맞춰 나란히 둡니다 */
+  .og-main{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:start}
+  .og-right{min-width:0;display:flex;flex-direction:column;gap:14px}
+  /* 포스터 — 누르면 크게 볼 수 있습니다 */
+  .og-hero{display:block;margin:0;padding:0;border:0;background:transparent;
+    width:100%;cursor:zoom-in}
   .og-hero img{display:block;width:100%;border-radius:20px;
     box-shadow:0 10px 26px rgba(26,143,212,.22)}
   .og-hero:hover img{transform:translateY(-2px);transition:transform .15s}
@@ -380,6 +383,8 @@
     font-size:14px;font-weight:700;color:#5b7892;text-align:right}
 
   /* 응모 자격 · 투표 방법 */
+  .og-right .og-cols{margin:0}
+  .og-right .og-info{margin:0}
   .og-info{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:7px;
     max-width:calc(100% - 170px)}
   .og-info li{display:flex;gap:12px;align-items:baseline;font-size:16px;
@@ -429,15 +434,13 @@
   .ootd-cmt:hover{color:var(--brand)}
   /* 넓은 화면에서는 오른쪽을 마스코트 자리로 비워 둡니다 */
   @media (max-width:1040px){
-    .og-mascot{width:132px;opacity:.92;bottom:-16px}
-    .og-info{max-width:calc(100% - 148px)}
+    .og-main{grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:20px}
   }
   @media (max-width:860px){
-    .og-mascot{display:none}
-    .og-hero{width:100%;margin-bottom:16px}
+    .og-main{grid-template-columns:minmax(0,1fr);gap:18px}
+    .og-hero{width:min(360px,100%);margin:0 auto}
     .ootd-head-r{width:100%;justify-content:stretch}
     .ootd-head-r .searchbar{flex:1 1 100%}
-    .og-info{max-width:none}
     .og-cols{grid-template-columns:minmax(0,1fr)}
     .og-ribbon span{font-size:20px;padding:11px 26px}
     .og-catch{font-size:21px}
@@ -3024,13 +3027,14 @@ function boardView(key){
             ? '<button class="btn primary" id="bdMine">✏️ 내 출근룩 수정하기</button>'
             : '<button class="btn primary" id="bdWrite">＋ 내 출근룩 올리기</button>') : ''}</div></div>`
       + `<section class="ootd-guide">
-          <img class="og-mascot" src="assets/mascots.png" alt="" aria-hidden="true" loading="lazy">
           <div class="og-ribbon"><span>👑 고용노동부 패셔니스타를 찾아라! 👑</span></div>
           <p class="og-catch">트렌디한 감각으로 <b>나만의 출근룩</b>을 보여 주세요!</p>
+          <div class="og-main">
       <button type="button" class="og-hero" data-zoom="assets/ootd-poster.webp"
         aria-label="출근룩 콘테스트 포스터 크게 보기">
         <img src="assets/ootd-poster.webp" alt="출근룩 콘테스트 포스터" loading="lazy" decoding="async"></button>
 
+          <div class="og-right">
           <div class="og-cols">
             <div class="og-box">
               <h3>응모 방법</h3>
@@ -3061,6 +3065,8 @@ function boardView(key){
             <li><b>응모 자격</b><span>고용노동부 직원이면 누구나 · <b>한 사람이 한 장</b></span></li>
             <li><b>투표 방법</b><span>마음에 드는 사진에 좋아요 · 한 사람이 한 장에 한 번</span></li>
           </ul>
+          </div>
+          </div>
         </section>`
       + (top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
           <div class="ootd-top">${top.map((p,i) => card(p, i+1)).join('')}</div>` : '')
