@@ -168,6 +168,17 @@
   .notice{background:var(--brand-weak);border:1px solid var(--brand);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:16px}
   .notice.amber{background:var(--warn-weak);border-color:var(--warn)}
   .notice.ok{background:var(--ok-weak);border-color:var(--ok)}
+  .notice.red{background:var(--danger-weak);border-color:var(--danger)}
+  /* 2026-11-19 — 투표 결과가 지워진 일을 알리고 재참여를 부탁하는 안내 */
+  .bg-reset{margin:0 0 20px;padding:16px 20px;border-width:2px}
+  .bg-reset b.t{display:block;font-size:17px;font-weight:900;margin-bottom:8px}
+  .bg-reset p{margin:5px 0;font-size:15px;line-height:1.65;font-weight:600}
+  .bg-reset p.sry{margin-top:10px;opacity:.85}
+  @media (max-width:640px){
+    .bg-reset{padding:14px 16px}
+    .bg-reset b.t{font-size:16px}
+    .bg-reset p{font-size:14px}
+  }
   /* 담당관 '처리할 일' 안내 (index.html 과 같은 디자인) */
   .todo{background:var(--surface);border:1px solid var(--brand);border-radius:20px;padding:16px 18px;
     box-shadow:var(--shadow)}
@@ -4679,6 +4690,21 @@ function balanceCard(p){
   </article>`;
 }
 
+/* 2026-11-19 사고 안내 — 본 사이트(index.html)와 같은 내용입니다. */
+const BG_RESET_NOTICE = { on:true, until:'2026-11-25' };
+
+function resetNotice(){
+  if(!BG_RESET_NOTICE.on) return '';
+  if(new Date() >= new Date(BG_RESET_NOTICE.until)) return '';
+  return `<div class="notice red bg-reset">
+    <b class="t">⚠️ 투표 결과 초기화 안내</b>
+    <p>11월 19일 시스템 작업 중 오류로, 그동안 쌓인 투표와 이벤트 응모 내역이 모두 삭제되었습니다.</p>
+    <p>번거로우시겠지만 <b>다시 한 번 참여</b>해 주시기를 부탁드립니다.
+       이미 응모하셨던 분들도 <b>경품 추첨 대상에 포함되려면 다시 응모</b>해 주셔야 합니다.</p>
+    <p class="sry">불편을 드려 진심으로 죄송합니다.</p>
+  </div>`;
+}
+
 VIEWS.vote = () => {
   const done = VOTE_TAB === 'done';
   const all  = DB.polls().slice();
@@ -4691,7 +4717,8 @@ VIEWS.vote = () => {
 
   const head = pageHead('⚖️ 밸런스 게임 🎮',
       '둘 중 하나만 고른다면? 가볍게 골라 보는 밸런스 게임입니다. 누르면 바로 투표돼요.',
-      signedIn() ? '<button class="btn primary" id="pvNew">＋ 새로 만들기</button>' : '');
+      signedIn() ? '<button class="btn primary" id="pvNew">＋ 새로 만들기</button>' : '')
+      + resetNotice();
   const tabs = `<div class="pv-tabs">
       <button class="${done ? '' : 'on'}" data-pv-tab="open">진행 중<b>${open.length}</b></button>
       <button class="${done ? 'on' : ''}" data-pv-tab="done">종료<b>${shut.length}</b></button>

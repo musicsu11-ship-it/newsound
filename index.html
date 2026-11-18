@@ -208,6 +208,17 @@
   .todo-btn .go{flex:none;font-size:12.5px;font-weight:800;color:var(--brand)}
   .todo-btn.exp .go{color:#2b5fd9}
   .notice.red{background:var(--danger-weak);border-color:var(--danger)}
+
+  /* 2026-11-19 — 투표 결과가 지워진 일을 알리고 재참여를 부탁하는 안내 */
+  .bg-reset{margin:0 0 20px;padding:16px 20px;border-width:2px}
+  .bg-reset b.t{display:block;font-size:17px;font-weight:900;margin-bottom:8px}
+  .bg-reset p{margin:5px 0;font-size:15px;line-height:1.65;font-weight:600}
+  .bg-reset p.sry{margin-top:10px;opacity:.85}
+  @media (max-width:640px){
+    .bg-reset{padding:14px 16px}
+    .bg-reset b.t{font-size:16px}
+    .bg-reset p{font-size:14px}
+  }
   .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .thumbs img{width:82px;height:82px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer}
   /* 첨부파일 — 파일마다 한 줄: 종류 아이콘 · 이름(크기) · [열기] [내려받기] */
@@ -5515,6 +5526,23 @@ function pollRow(p, i){
   </button>`;
 }
 
+/* 2026-11-19, 작업 중 실수로 투표 표와 응모 명단이 모두 지워졌습니다.
+   다시 참여해 달라는 안내입니다. until 날짜가 지나면 저절로 사라집니다.
+   더 일찍 내리고 싶으시면 on 을 false 로 바꾸세요. */
+const BG_RESET_NOTICE = { on:true, until:'2026-11-25' };
+
+function resetNotice(){
+  if(!BG_RESET_NOTICE.on) return '';
+  if(new Date() >= new Date(BG_RESET_NOTICE.until)) return '';
+  return `<div class="notice red bg-reset">
+    <b class="t">⚠️ 투표 결과 초기화 안내</b>
+    <p>11월 19일 시스템 작업 중 오류로, 그동안 쌓인 투표와 이벤트 응모 내역이 모두 삭제되었습니다.</p>
+    <p>번거로우시겠지만 <b>다시 한 번 참여</b>해 주시기를 부탁드립니다.
+       이미 응모하셨던 분들도 <b>경품 추첨 대상에 포함되려면 다시 응모</b>해 주셔야 합니다.</p>
+    <p class="sry">불편을 드려 진심으로 죄송합니다.</p>
+  </div>`;
+}
+
 VIEWS.vote = () => {
   const done = VOTE_TAB === 'done';
   const head = `<div class="crumb">홈 · 밸런스 게임</div>
@@ -5522,7 +5550,7 @@ VIEWS.vote = () => {
     <div><h1 class="pg-title">⚖️ 밸런스 게임 🎮</h1>
       <p class="pg-sub">둘 중 하나만 고른다면? 가볍게 골라 보는 밸런스 게임입니다. 누르면 바로 투표돼요.</p></div>
     ${S.votesReady && isSignedIn() ? '<button class="btn primary" id="pvNew">＋ 새로 만들기</button>' : ''}
-  </div>`;
+  </div>` + resetNotice();
 
   if(!S.votesReady){
     return head + `<div class="card"><div class="empty">밸런스 게임을 준비하고 있습니다.${
