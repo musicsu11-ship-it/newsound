@@ -299,8 +299,26 @@
     object-fit:cover;border-radius:16px;box-shadow:0 8px 20px rgba(32,30,40,.18)}
   .fd-none{position:relative;z-index:1;display:grid;place-items:center;width:100%;aspect-ratio:1/1;
     border-radius:16px;background:#fff;font-size:46px;box-shadow:0 8px 20px rgba(32,30,40,.12)}
+  /* 지청 고르기 줄 */
+  .fd-offs{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:0 0 22px}
+  .fd-offs button{border:1.5px solid #e0e0e8;background:#fff;color:#55555f;font:inherit;
+    font-size:13px;font-weight:800;padding:7px 15px;border-radius:999px;cursor:pointer}
+  .fd-offs button:hover{border-color:#f08a1c;color:#c2700a}
+  .fd-offs button.on{background:#f08a1c;border-color:#f08a1c;color:#fff}
+  /* 사진 고르기 — 📷 단추 */
+  .fd-pick{display:flex;align-items:center;gap:12px;margin-top:4px}
+  .fd-picbtn{flex:none;display:grid;place-items:center;width:64px;height:64px;padding:0;overflow:hidden;
+    border:1.5px dashed #b8bdd6;border-radius:14px;background:var(--surface-2);font-size:26px;cursor:pointer}
+  .fd-picbtn:hover{border-color:var(--text)}
+  .fd-picbtn img{display:block;width:100%;height:100%;object-fit:cover}
+  .fd-pictx{font-size:13.5px;font-weight:800;color:var(--text)}
+  .fd-pictx em{display:block;margin-top:2px;font-style:normal;font-size:12px;font-weight:600;color:var(--muted)}
+  /* 지청 꼬리표 */
+  .fd-tags{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .fd-off{display:inline-block;padding:3px 10px;border-radius:999px;
+    background:#e9f1ff;color:#2b5fd9;font-size:11.5px;font-weight:900}
   /* 분류 꼬리표 · 별점 · 위치 — 네이버 플레이스처럼 한눈에 */
-  .fd-cat{display:inline-block;margin-top:14px;padding:3px 10px;border-radius:999px;
+  .fd-cat{display:inline-block;padding:3px 10px;border-radius:999px;
     background:#fff1e0;color:#c2700a;font-size:11.5px;font-weight:900}
   .fd-rate{display:flex;align-items:center;justify-content:center;gap:5px;margin:3px 0 5px}
   .fd-star{color:#ffb63f;font-size:14px;letter-spacing:1px}
@@ -2949,8 +2967,12 @@ function boardView(key){
   const q = (Q[key]||'').toLowerCase();
   let list = DB.posts().filter(p => p.board===key);
   /* 소속까지 함께 찾습니다 — '대구서부' 처럼 기관 이름으로도 검색됩니다 */
-  if(q) list = list.filter(p => [p.title, p.body, p.author, p.authorTeam, p.authorDept]
-    .filter(Boolean).join(' ').toLowerCase().includes(q));
+  if(q){
+    const pl = (p) => { const x = (p && typeof p.place === 'object' && p.place) ? p.place : {};
+      return [x.office, x.cat, x.loc, x.menu, x.price]; };
+    list = list.filter(p => [p.title, p.body, p.author, p.authorTeam, p.authorDept, ...pl(p)]
+      .filter(Boolean).join(' ').toLowerCase().includes(q));
+  }
   list.sort((a,b2)=> (b2.pinned?1:0)-(a.pinned?1:0) || b2.at.localeCompare(a.at));
 
   /* ── 활동: 1~6팀 게시판 ── */
@@ -3178,6 +3200,9 @@ function boardView(key){
   /* ── 우리 지청 맛집 — 메뉴판처럼 ──
      사진을 네모로 올리고 그 아래로 주황 카드가 살짝 삐져나오게 둡니다. */
   if(key === 'food'){
+    /* 지청으로 걸러 보기 — 고른 지청이 있으면 그 지청 맛집만 보여 줍니다 */
+    const offs = foodOffices();
+    if(FOOD_OFFICE) list = list.filter(p => (placeOf(p).office || '').trim() === FOOD_OFFICE);
     const card = (p) => {
       const img = firstImg(p.atts), pl = placeOf(p);
       return `<article class="fd-card" data-open-post="${p.id}" tabindex="0" role="button">
@@ -3186,7 +3211,8 @@ function boardView(key){
           ${img ? `<img src="${img.data}" alt="${esc(p.title)}" loading="lazy" decoding="async">`
                 : '<span class="fd-none" aria-hidden="true">🍽️</span>'}
         </div>
-        ${pl.cat ? `<span class="fd-cat">${esc(pl.cat)}</span>` : ''}
+        <span class="fd-tags">${pl.office ? `<span class="fd-off">${esc(pl.office)}</span>` : ''}${
+          pl.cat ? `<span class="fd-cat">${esc(pl.cat)}</span>` : ''}</span>
         <h3>${esc(p.title)}</h3>
         ${pl.star ? `<div class="fd-rate">${stars(pl.star)}<em>${Number(pl.star)}.0</em></div>` : ''}
         ${pl.loc ? `<p class="fd-loc">📍 ${esc(pl.loc)}</p>` : ''}
@@ -3206,6 +3232,10 @@ function boardView(key){
       + `<section class="fd-menu">
           <h2 class="fd-catch">여러분의 <b>최애 맛집</b>은?</h2>
           <p class="fd-sub">우리 지청 맛집 프로잘알러는 나.</p>
+          ${offs.length ? `<div class="fd-offs">
+            <button class="${FOOD_OFFICE ? '' : 'on'}" data-off="">전체</button>
+            ${offs.map(o => `<button class="${FOOD_OFFICE === o ? 'on' : ''}" data-off="${esc(o)}">${esc(o)}</button>`).join('')}
+          </div>` : ''}
           ${list.length ? `<div class="fd-grid">${list.map(card).join('')}</div>`
             : `<div class="empty">${q ? '검색 결과가 없습니다.'
                 : `아직 올라온 맛집이 없습니다.${canWrite(key) ? '<br>첫 번째 맛집을 추천해 주세요!' : ''}`}</div>`}
@@ -3271,6 +3301,10 @@ function bindBoard(key){
     key === 'ootd' ? openOotdForm() : key === 'food' ? openFoodForm() : openPostForm(key));
   /* 출근룩 — 한 사람 한 장이라, 이미 올렸으면 바로 수정 창을 엽니다 */
   $('#bdMine')?.addEventListener('click', ()=>{ const m = myOotd(); if(m) openOotdForm(m); });
+  /* 맛집 — 지청 고르기 */
+  $$('#main [data-off]').forEach(b => b.addEventListener('click', ()=>{
+    FOOD_OFFICE = b.dataset.off; go('food');
+  }));
   $$('#main [data-odedit]').forEach(b => b.addEventListener('click', ()=>{
     const p = DB.posts().find(x => x.id === b.dataset.odedit); if(p) openOotdForm(p);
   }));
@@ -3308,34 +3342,46 @@ const authorTeamOptions = (selected) => {
 /* 출근룩 사진 콘테스트 — 올리는 칸을 따로 둡니다(index.html 과 같은 화면).
    일반 직원도 올리는 게시판이라 팀 고르기 대신 소속을 직접 적게 했습니다. */
 /* ── 우리 지청 맛집 ──
-   가게 정보(분류·별점·위치·대표 메뉴·가격대)는 글의 place 칸에 담고,
+   가게 정보(지청·분류·별점·위치·대표 메뉴·가격대)는 글의 place 칸에 담고,
    본문에는 '한 줄 평' 만 둡니다 (본 사이트 schema.sql 44절과 같은 모양). */
 const FOOD_CATS  = ['한식','중식','일식','양식','분식','치킨·피자','카페·디저트','술집','기타'];
 const FOOD_PRICE = ['1만원 미만','1~2만원','2~3만원','3만원 이상'];
 const placeOf = (p) => (p && typeof p.place === 'object' && p.place) ? p.place : {};
+/* 별점 — 0개(별점 없음)부터 5개까지 */
 const stars = (n) => { const s = Math.max(0, Math.min(5, Number(n) || 0));
   return `<span class="fd-star" title="별점 ${s}점">${'★'.repeat(s)}${'☆'.repeat(5 - s)}</span>`; };
+/* 지청 목록 — 올라온 글에서 모읍니다(가나다순) */
+const foodOffices = () => [...new Set(DB.posts().filter(p => p.board === 'food')
+  .map(p => (placeOf(p).office || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
 
 function openFoodForm(edit){
   const e0 = edit || null;
   const pl = placeOf(e0);
+  const was = e0 ? (e0.author || '') : '';
   openModal(`🍜 우리 지청 맛집 · ${e0 ? '수정' : '맛집 올리기'}`, `
     <label class="field">가게 이름 <span class="req">*</span>
       <input id="fdName" maxlength="40" placeholder="예) 할매 손칼국수" value="${e0 ? esc(e0.title) : ''}"></label>
 
     <div class="grid c2">
+      <label class="field">지청 <span class="hint" style="display:inline">같은 지청끼리 모아 볼 수 있어요</span>
+        <input id="fdOffice" maxlength="30" list="fdOfficeList" placeholder="예) 서울남부지청"
+          value="${esc(pl.office || '')}">
+        <datalist id="fdOfficeList">${foodOffices().map(o => `<option value="${esc(o)}">`).join('')}</datalist></label>
       <label class="field">분류
         <select id="fdCat">${FOOD_CATS.map(c =>
           `<option ${pl.cat === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
+    </div>
+
+    <div class="grid c2">
       <label class="field">가격대
         <select id="fdPrice">${FOOD_PRICE.map(c =>
           `<option ${pl.price === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
+      <div class="field">별점 <span class="hint" style="display:inline">한 번 더 누르면 0점</span>
+        <div class="fd-stars" id="fdStars">${[1,2,3,4,5].map(n =>
+          `<button type="button" data-star="${n}" class="${(e0 ? Number(pl.star) || 0 : 5) >= n ? 'on' : ''}"
+            aria-label="별 ${n}점">★</button>`).join('')}<em id="fdStarN">${
+            (e0 ? Number(pl.star) || 0 : 5)}점</em></div></div>
     </div>
-
-    <div class="field">별점
-      <div class="fd-stars" id="fdStars">${[1,2,3,4,5].map(n =>
-        `<button type="button" data-star="${n}" class="${(Number(pl.star) || 5) >= n ? 'on' : ''}"
-          aria-label="별 ${n}점">★</button>`).join('')}<em id="fdStarN">${Number(pl.star) || 5}점</em></div></div>
 
     <label class="field">위치 <span class="hint" style="display:inline">지청에서 어떻게 가는지 적어 주세요</span>
       <input id="fdLoc" maxlength="60" placeholder="예) 지청 정문 건너편 · 도보 5분" value="${esc(pl.loc || '')}"></label>
@@ -3346,40 +3392,58 @@ function openFoodForm(edit){
       <textarea id="fdBody" style="min-height:92px" maxlength="300"
         placeholder="예) 국물이 진하고 반찬이 깔끔해요. 점심시간엔 조금 일찍 가야 자리가 있어요.">${e0 ? esc(e0.body) : ''}</textarea></label>
 
-    <label class="field">사진 <span class="hint" style="display:inline">선택</span>
-      <input id="fdFile" type="file" accept="image/*">
-      <span class="hint">한 장만 올려 주세요. 자동으로 줄여서 올라갑니다.</span></label>
-    <div class="thumbs" id="fdThumbs"></div>
+    <label class="field">올리는 이름 <span class="hint" style="display:inline">비우면 <b>익명</b>으로 올라갑니다</span>
+      <input id="fdNick" maxlength="20" placeholder="예) 김밥러버 (별명도 좋아요)"
+        value="${esc(was === '익명' ? '' : was)}"></label>
+
+    <div class="field">사진 <span class="hint" style="display:inline">선택 · 한 장만</span>
+      <div class="fd-pick">
+        <button type="button" class="fd-picbtn" id="fdPicBtn" aria-label="사진 고르기">📷</button>
+        <span class="fd-pictx" id="fdPicTx">눌러서 사진을 고르세요<em>자동으로 줄여서 올라갑니다</em></span>
+      </div>
+      <input id="fdFile" type="file" accept="image/*" hidden></div>
 
     <div class="row-actions"><button class="btn primary" id="fdSave">${e0 ? '수정 저장' : '올리기'}</button></div>`);
 
-  let star = Number(pl.star) || 5;
-  $$('#fdStars [data-star]').forEach(b => b.addEventListener('click', ()=>{
-    star = Number(b.dataset.star);
+  /* 별점 — 같은 자리를 다시 누르면 0점(별점 없음) */
+  let star = e0 ? Number(pl.star) || 0 : 5;
+  const paintStars = ()=>{
     $$('#fdStars [data-star]').forEach(x => x.classList.toggle('on', Number(x.dataset.star) <= star));
-    $('#fdStarN').textContent = `${star}점`;
+    $('#fdStarN').textContent = star ? `${star}점` : '별점 없음';
+  };
+  $$('#fdStars [data-star]').forEach(b => b.addEventListener('click', ()=>{
+    const n = Number(b.dataset.star);
+    star = (star === n) ? 0 : n;
+    paintStars();
   }));
+  paintStars();
 
+  /* 사진 — 📷 를 누르면 고르고, 고른 뒤에는 그 자리에 작게 보입니다 */
   let picked = [];
+  $('#fdPicBtn').addEventListener('click', ()=>{ $('#fdFile').value = ''; $('#fdFile').click(); });
   $('#fdFile').addEventListener('change', async ev => {
     busy(true); picked = (await prepImages(ev.target.files)).slice(0, 1); busy(false);
-    previewLocal('#fdThumbs', picked);
+    if(picked.length){
+      $('#fdPicBtn').innerHTML = `<img src="${picked[0].data}" alt="">`;
+      $('#fdPicTx').innerHTML = '사진을 골랐습니다<em>다시 누르면 바꿀 수 있어요</em>';
+    }
   });
 
   $('#fdSave').addEventListener('click', ()=>{
     const title = $('#fdName').value.trim(), body = $('#fdBody').value.trim();
     if(!title){ toast('가게 이름을 입력하세요'); return; }
     if(!body) { toast('한 줄 평을 입력하세요'); return; }
-    const place = { cat: $('#fdCat').value, price: $('#fdPrice').value, star,
+    const place = { office: $('#fdOffice').value.trim(), cat: $('#fdCat').value,
+                    price: $('#fdPrice').value, star,
                     loc: $('#fdLoc').value.trim(), menu: $('#fdMenu').value.trim() };
+    const who = $('#fdNick').value.trim() || '익명';
     const arr = DB.posts();
     if(e0){
       const t = arr.find(x => x.id === e0.id); if(!t) return;
-      Object.assign(t, { title, body, place, ...(picked.length ? { atts: picked } : {}) });
+      Object.assign(t, { title, body, place, author: who, ...(picked.length ? { atts: picked } : {}) });
     }else{
       arr.push({ id:uid(), board:'food', title, body, place, atts:picked,
-                 author: SESSION && SESSION.name ? SESSION.name : '직원',
-                 authorTeam: (SESSION && SESSION.team) || '',
+                 author: who, authorTeam: '',
                  realAuthor: (SESSION && SESSION.name) || '', at:nowISO(), likedBy:[] });
     }
     if(DB.savePosts(arr)){ closeModal(); toast(e0 ? '수정되었습니다' : '맛집을 올렸습니다!'); go('food'); }
@@ -4027,6 +4091,7 @@ const isBalance = (p) => p.kind === 'balance';
    투표한 뒤에 소속·연락처를 남기면 추첨 명단에 들어갑니다.
    명단에는 '어느 쪽을 골랐는지' 를 아예 담지 않아서, 명단을 보는 담당관도
    그 사람이 A 를 골랐는지 B 를 골랐는지 알 수 없습니다(결과는 끝까지 익명). */
+let FOOD_OFFICE = '';                  // 맛집 — 고른 지청('' 이면 전체)
 let BG_VIEW = 'list';                  // 'list' 목록형 · 'card' 카드형 (게임이 여럿일 때만 고를 수 있음)
 let BG_OPEN = '';                      // 목록에서 눌러 들어간 게임 id
 
