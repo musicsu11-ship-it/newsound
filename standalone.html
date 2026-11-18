@@ -347,6 +347,15 @@
   .ootd-h2{margin:26px 0 13px;font-size:21px;font-weight:900;letter-spacing:-.02em}
   .ootd-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
   /* 한 장만 올라와도 작게 남지 않도록 칸을 크게 잡았습니다(넓은 화면 3칸) */
+  /* 내 사진 — 테두리로 눈에 띄게 하고 아래에 수정·삭제 단추를 둡니다 */
+  .ootd-card.own{outline:2.5px solid var(--brand);outline-offset:-2px;border-radius:16px}
+  .ootd-own{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;
+    padding-top:10px;border-top:1px dashed var(--border)}
+  .ootd-own .tag{background:var(--brand-weak);color:var(--brand);font-weight:900;margin-right:auto}
+  /* 참여 기간 — 안내문에서 가장 먼저 보이게 */
+  .og-info li.hi{background:#fff2f7;border-color:#ffc9dd}
+  .og-info li.hi b{color:var(--brand)}
+  .og-info li.hi span{color:var(--brand);font-weight:900}
   .ootd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:16px}
   .ootd-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;
     box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
@@ -835,13 +844,15 @@
   .ev-v em{font-style:normal;font-weight:700;color:#9a7a3a}
   .bgc-ev .evb{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}
   /* 상품 사진 위에 올라가는 동그란 인원 표 */
-  .ev-badge{position:absolute;top:-10px;right:-10px;z-index:1;
+  .evpic .ev-badge{position:absolute;top:-10px;right:-10px;z-index:1;margin:0;
     display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
-    width:62px;height:62px;border-radius:50%;border:3px solid #fff8e4;
-    background:linear-gradient(150deg,#ffb340,#f58220);color:#fff;
-    box-shadow:0 5px 14px rgba(190,110,20,.32);line-height:1}
-  .ev-badge i{display:block;font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.02em}
-  .ev-badge b{display:block;font-size:18px;font-weight:900;letter-spacing:-.02em;margin-top:3px;white-space:nowrap}
+    width:62px;height:62px;border-radius:50%;border:3px solid #fff;
+    background:linear-gradient(150deg,#f5326b,#d61e5c);color:#fff;
+    box-shadow:0 6px 16px rgba(214,30,92,.4);line-height:1}
+  .evpic .ev-badge i{display:block;margin:0;font-style:normal;font-size:10.5px;font-weight:800;
+    line-height:1.15;letter-spacing:.02em;color:#fff}
+  .evpic .ev-badge b{display:block;margin:0;font-size:18px;font-weight:900;
+    line-height:1.15;letter-spacing:-.02em;color:#fff;white-space:nowrap}
   .bgc-note{margin:12px 2px 0;font-size:12.5px;font-weight:700;line-height:1.7;color:var(--muted);word-break:keep-all}
   /* 문항 이동 줄 */
   .bgq-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
@@ -871,9 +882,9 @@
     .ev-v{font-size:16px}
     .evpic{width:260px}
     .evpic span{font-size:13.5px}
-    .ev-badge{width:72px;height:72px;top:-12px;right:-12px}
-    .ev-badge i{font-size:12px}
-    .ev-badge b{font-size:21px}
+    .evpic .ev-badge{width:76px;height:76px;top:-13px;right:-13px}
+    .evpic .ev-badge i{font-size:12.5px}
+    .evpic .ev-badge b{font-size:23px}
     /* 목록형 한 줄 — 글씨와 사진을 큼직하게 */
     .bg-view .lb{font-size:14.5px}
     .bg-view button{font-size:14.5px;padding:8px 16px}
@@ -1010,8 +1021,8 @@
     .bgc-ev{flex-direction:column;align-items:stretch;gap:12px}
     .bgc-ev .evtx{flex:0 0 auto;max-width:none}
     .evpic{width:100%;order:-1}
-    .ev-badge{width:54px;height:54px;top:-8px;right:-4px}
-    .ev-badge b{font-size:16px}
+    .evpic .ev-badge{width:58px;height:58px;top:-9px;right:-5px}
+    .evpic .ev-badge b{font-size:17px}
     .ev-k{min-width:44px;padding:4px 9px;font-size:11.5px}
     .ev-v{font-size:13.5px}
     .bgq-no{flex:1 0 100%;margin:0}
@@ -2866,7 +2877,9 @@ function boardView(key){
   const b = BOARDS[key];
   const q = (Q[key]||'').toLowerCase();
   let list = DB.posts().filter(p => p.board===key);
-  if(q) list = list.filter(p => (p.title+' '+p.body+' '+p.author).toLowerCase().includes(q));
+  /* 소속까지 함께 찾습니다 — '대구서부' 처럼 기관 이름으로도 검색됩니다 */
+  if(q) list = list.filter(p => [p.title, p.body, p.author, p.authorTeam, p.authorDept]
+    .filter(Boolean).join(' ').toLowerCase().includes(q));
   list.sort((a,b2)=> (b2.pinned?1:0)-(a.pinned?1:0) || b2.at.localeCompare(a.at));
 
   /* ── 활동: 1~6팀 게시판 ── */
@@ -2919,6 +2932,8 @@ function boardView(key){
   /* ── 출근룩 사진 콘테스트: 좋아요 많은 순으로 등수 (index.html 과 같은 화면) ── */
   if(key === 'ootd'){
     const all = DB.posts().filter(p => p.board === 'ootd');
+    /* 출근룩은 한 사람이 한 장만 — 이미 올렸으면 '수정하기' 로 바뀝니다 */
+    const mineP = myOotd();
     const ranked = all.slice().sort((a,b) =>
       likeCount(b) - likeCount(a) || String(a.at).localeCompare(String(b.at)));
     const rankOf = (p) => ranked.indexOf(p) + 1;
@@ -2929,7 +2944,8 @@ function boardView(key){
     const cap = (p) => esc(p.title || '오늘의 출근룩');
     const card = (p, rank) => {
       const img = firstImg(p.atts);
-      return `<article class="ootd-card${rank ? ` r${rank}` : ''}">
+      return `<article class="ootd-card${rank ? ` r${rank}` : ''}${
+        mineP && p.id === mineP.id ? ' own' : ''}">
         <div class="ootd-ph" data-open-post="${p.id}">
           ${img ? `<img src="${img.data}" alt="${cap(p)}" loading="lazy">` : '👔'}
           ${rank === 1 ? '<span class="ootd-crown" aria-hidden="true">👑</span>' : ''}${rank ? `<span class="ootd-rank">${rank}위</span>` : ''}
@@ -2943,6 +2959,10 @@ function boardView(key){
               <span class="ico" aria-hidden="true">💗</span>${likedPost(p) ? '좋아요 취소' : '좋아요'}</button>
           </div>
           <button class="ootd-cmt" data-open-post="${p.id}">댓글 ${cmtsOf(p).length}개 · 응원 한마디를 남겨주세요</button>
+          ${mineP && p.id === mineP.id ? `<div class="ootd-own">
+            <span class="tag">내 사진</span>
+            <button class="btn sm" data-odedit="${p.id}">수정</button>
+            <button class="btn sm danger" data-oddel="${p.id}">삭제</button></div>` : ''}
         </div>
       </article>`;
     };
@@ -2951,8 +2971,9 @@ function boardView(key){
     return `<div class="page-head"><div>
         <h1 class="ootd-title">${b.icon} <span class="t1">출근룩</span> <span class="t2">사진 콘테스트</span></h1>
         <p class="og-lead">${esc(b.desc)}</p></div>
-        <div class="row-actions">${canWrite(key)
-          ? '<button class="btn primary" id="bdWrite">＋ 내 출근룩 올리기</button>' : ''}</div></div>`
+        <div class="row-actions">${canWrite(key) ? (mineP
+          ? '<button class="btn primary" id="bdMine">✏️ 내 출근룩 수정하기</button>'
+          : '<button class="btn primary" id="bdWrite">＋ 내 출근룩 올리기</button>') : ''}</div></div>`
       + `<section class="ootd-guide">
           <img class="og-mascot" src="assets/mascots.png" alt="" aria-hidden="true" loading="lazy">
           <div class="og-ribbon"><span>👑 고용노동부 패셔니스타를 찾아라! 👑</span></div>
@@ -2963,7 +2984,7 @@ function boardView(key){
               <h3>응모 방법</h3>
               <ol class="og-steps">
                 <li><span class="n">1</span>
-                  <span class="tx"><b>사진을 올리고</b><em>출근룩 한 장 + 한 줄 소개</em></span></li>
+                  <span class="tx"><b>사진을 올리고</b><em>출근룩 한 장 + 한 줄 소개 · 한 사람이 한 장</em></span></li>
                 <li><span class="n">2</span>
                   <span class="tx"><b>마음에 드는 출근룩에 좋아요</b><em>한 사람이 한 장에 한 번</em></span></li>
                 <li><span class="n">3</span>
@@ -2984,13 +3005,14 @@ function boardView(key){
           </div>
 
           <ul class="og-info">
-            <li><b>응모 자격</b><span>고용노동부 직원이면 누구나</span></li>
+            <li class="hi"><b>참여 기간</b><span>11/23(월) ~ 11/30(월)</span></li>
+            <li><b>응모 자격</b><span>고용노동부 직원이면 누구나 · <b>한 사람이 한 장</b></span></li>
             <li><b>투표 방법</b><span>마음에 드는 사진에 좋아요 · 한 사람이 한 장에 한 번</span></li>
           </ul>
         </section>`
       + (top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
           <div class="ootd-top">${top.map((p,i) => card(p, i+1)).join('')}</div>` : '')
-      + searchBar(key, '이름·한 줄 소개로 검색')
+      + searchBar(key, '소속·이름·한 줄 소개로 검색 (예: 대구서부)')
       + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
       + (shown.length ? `<h2 class="ootd-h2">참가 사진 ${all.length}장</h2>
           <div class="ootd-grid">${shown.map(p => card(p, rankOf(p))).join('')}</div>`
@@ -3131,6 +3153,16 @@ function bindBoard(key){
     if(DB.savePosts(arr)){ go('collab'); toast(`‘${COLLAB_LABEL[next]}’(으)로 옮겼습니다`); }
   }));
   $('#bdWrite')?.addEventListener('click', ()=> key === 'ootd' ? openOotdForm() : openPostForm(key));
+  /* 출근룩 — 한 사람 한 장이라, 이미 올렸으면 바로 수정 창을 엽니다 */
+  $('#bdMine')?.addEventListener('click', ()=>{ const m = myOotd(); if(m) openOotdForm(m); });
+  $$('#main [data-odedit]').forEach(b => b.addEventListener('click', ()=>{
+    const p = DB.posts().find(x => x.id === b.dataset.odedit); if(p) openOotdForm(p);
+  }));
+  $$('#main [data-oddel]').forEach(b => b.addEventListener('click', ()=>{
+    if(!confirm('내 출근룩 사진을 지울까요? 받은 좋아요와 응원 댓글도 함께 지워지고 되돌릴 수 없습니다.')) return;
+    if(!DB.savePosts(DB.posts().filter(x => x.id !== b.dataset.oddel))) return;
+    toast('지웠습니다'); go('ootd');
+  }));
   /* 활동 게시판 팀 고르기 */
   $$('#main [data-act-team]').forEach(el => el.addEventListener('click', ()=>{
     ACT_TEAM = Number(el.dataset.actTeam) || 0;
@@ -3159,6 +3191,13 @@ const authorTeamOptions = (selected) => {
 
 /* 출근룩 사진 콘테스트 — 올리는 칸을 따로 둡니다(index.html 과 같은 화면).
    일반 직원도 올리는 게시판이라 팀 고르기 대신 소속을 직접 적게 했습니다. */
+/* 내가 올린 출근룩 — 한 사람이 한 장만 올릴 수 있습니다 */
+function myOotd(){
+  if(!SESSION) return null;
+  return DB.posts().find(p => p.board === 'ootd'
+    && (p.realAuthor || p.author) === SESSION.name) || null;
+}
+
 function openOotdForm(edit){
   const e0 = edit || null;
   const img0 = e0 ? firstImg(e0.atts) : null;

@@ -2400,3 +2400,45 @@ delete from public.poll_ballots
 --   ※ 응모 명단을 남겨 두고 싶으시면 아래 두 줄만 지우고 실행하세요.
 delete from public.poll_entries
  where poll_id in (select id from public.polls where not closed);
+
+-- ============================================================================
+--  43. 출근룩 콘테스트 — 한 사람이 한 장만
+--
+--  · 같은 계정(같은 브라우저)으로는 두 번째 사진을 올릴 수 없습니다.
+--  · 이름과 소속이 똑같은 사진이 이미 있으면 그것도 막습니다.
+--    (다른 기기에서 올려 계정이 달라지는 경우를 잡기 위한 것입니다)
+--  · 이미 올라와 있는 사진은 그대로 둡니다 — 새로 올릴 때만 확인합니다.
+--    (지금 같은 이름으로 두 장이 올라와 있어도 지우지 않습니다. 필요하면
+--     혁신행정담당관이 화면에서 직접 내리면 됩니다.)
+--  · 수정은 그대로 됩니다. 올린 본인이 사진·소개를 고치고 지울 수 있습니다.
+-- ============================================================================
+
+create or replace function public.check_ootd_one()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare nm text; tm text;
+begin
+  if new.board <> 'ootd' then return new; end if;
+
+  -- 같은 계정으로 이미 올린 사진이 있는가
+  if exists (select 1 from public.posts p
+              where p.board = 'ootd' and p.author_id = new.author_id) then
+    raise exception '출근룩은 한 사람이 한 장만 올릴 수 있습니다. 이미 올리신 사진을 고쳐 주세요.';
+  end if;
+
+  -- 이름과 소속이 똑같은 사진이 이미 있는가(둘 다 적혀 있을 때만 확인)
+  nm := lower(btrim(coalesce(new.author_name, '')));
+  tm := lower(btrim(coalesce(new.author_team, '')));
+  if nm <> '' and tm <> '' and exists (
+       select 1 from public.posts p
+        where p.board = 'ootd'
+          and lower(btrim(coalesce(p.author_name, ''))) = nm
+          and lower(btrim(coalesce(p.author_team, ''))) = tm) then
+    raise exception '이미 같은 이름·소속으로 올린 출근룩이 있습니다. 한 사람이 한 장만 올릴 수 있습니다.';
+  end if;
+
+  return new;
+end $$;
+
+drop trigger if exists posts_ootd_one on public.posts;
+create trigger posts_ootd_one before insert on public.posts
+  for each row execute function public.check_ootd_one();
