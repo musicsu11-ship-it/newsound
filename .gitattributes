@@ -1,0 +1,6 @@
+# 셸 스크립트와 git 훅은 항상 LF 로 — CRLF 면 Git Bash 에서 실행이 깨집니다
+*.sh        text eol=lf
+.githooks/* text eol=lf
+
+# SQL 설계도도 LF 로 통일
+*.sql       text eol=lf
