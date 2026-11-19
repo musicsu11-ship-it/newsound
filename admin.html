@@ -258,10 +258,37 @@
 const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
-const BAKED = {
+/* 주소에 따라 '진짜'와 '연습용'을 갈라 씁니다. (index.html 과 같은 방식)
+   PRACTICE 를 비워 두면 지금까지와 똑같이 진짜만 씁니다. */
+const REAL = {
   url:'https://lixuhimwutyiqshzamtp.supabase.co',
   anonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpeHVoaW13dXR5aXFzaHphbXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMjk5MzUsImV4cCI6MjEwMzcwNTkzNX0.6Du-Koz6SOyKuB2KiUfETq4qBZ78ytSiyHgBkgEYgLE'
 };
+const PRACTICE = { url:'', anonKey:'' };
+
+const PROD_HOSTS = ['newsound-sepia.vercel.app'];
+const ON_PRACTICE_HOST = !PROD_HOSTS.includes(location.hostname)
+  && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
+      || /\.vercel\.app$/.test(location.hostname));
+const BAKED = (ON_PRACTICE_HOST && PRACTICE.url && PRACTICE.anonKey) ? PRACTICE : REAL;
+const ON_PRACTICE_DB = BAKED === PRACTICE;
+
+function envBadge(){
+  if(!ON_PRACTICE_HOST || document.getElementById('envBadge')) return;
+  const live = !ON_PRACTICE_DB;
+  const el = document.createElement('div');
+  el.id = 'envBadge';
+  el.textContent = live
+    ? '⚠️ 주의 — 진짜 자료에 연결돼 있습니다. 여기서 지우면 실제로 지워집니다'
+    : '🧪 연습용입니다 — 여기서 무엇을 하든 실제 자료는 안전합니다';
+  el.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483647;'
+    + 'padding:7px 12px;text-align:center;font-size:13px;font-weight:800;'
+    + 'line-height:1.4;letter-spacing:-.01em;pointer-events:none;'
+    + (live ? 'background:#b42318;color:#fff' : 'background:#067647;color:#fff');
+  document.body.appendChild(el);
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', envBadge);
+else envBadge();
 function getConfig(){
   if(BAKED.url && BAKED.anonKey) return BAKED;
   try{ return JSON.parse(localStorage.getItem('sb_cfg')||'null') || {url:'',anonKey:''}; }

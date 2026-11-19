@@ -2006,11 +2006,46 @@ const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
 /* ---------- 접속 설정 ----------
-   여기에 값을 직접 넣어두면 설정 화면 없이 바로 접속합니다. */
-const BAKED = {
+   주소에 따라 '진짜'와 '연습용' 데이터베이스를 자동으로 갈라 씁니다.
+     · 실제 주소(newsound-sepia.vercel.app 등)  → 진짜
+     · 내 컴퓨터(localhost)·미리보기(-git-)     → 연습용
+   PRACTICE 를 비워 두면 지금까지와 똑같이 진짜만 씁니다. */
+const REAL = {
   url:'https://lixuhimwutyiqshzamtp.supabase.co',
   anonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpeHVoaW13dXR5aXFzaHphbXRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMjk5MzUsImV4cCI6MjEwMzcwNTkzNX0.6Du-Koz6SOyKuB2KiUfETq4qBZ78ytSiyHgBkgEYgLE'
 };
+
+/* 연습용 Supabase 프로젝트를 만들면 이 두 줄만 채우세요.
+   그 뒤로는 내 컴퓨터와 미리보기 주소에서 무엇을 하든 진짜 자료가 안전합니다. */
+const PRACTICE = { url:'', anonKey:'' };
+
+/* 직원들이 들어오는 '진짜 주소'. 나중에 moel.go.kr 같은 주소가 붙으면 여기에 더하세요. */
+const PROD_HOSTS = ['newsound-sepia.vercel.app'];
+const ON_PRACTICE_HOST = !PROD_HOSTS.includes(location.hostname)
+  && (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
+      || /\.vercel\.app$/.test(location.hostname));   /* 미리보기 주소 전부 */
+const BAKED = (ON_PRACTICE_HOST && PRACTICE.url && PRACTICE.anonKey) ? PRACTICE : REAL;
+const ON_PRACTICE_DB = BAKED === PRACTICE;
+
+/* 지금 어느 자료에 붙어 있는지 화면 아래 띠로 알려 줍니다.
+   '연습용인 줄 알았는데 진짜였다' 가 사고의 가장 흔한 원인입니다.
+   실제 주소에서는 아무것도 뜨지 않습니다. */
+function envBadge(){
+  if(!ON_PRACTICE_HOST || document.getElementById('envBadge')) return;
+  const live = !ON_PRACTICE_DB;
+  const el = document.createElement('div');
+  el.id = 'envBadge';
+  el.textContent = live
+    ? '⚠️ 주의 — 진짜 자료에 연결돼 있습니다. 여기서 지우면 실제로 지워집니다'
+    : '🧪 연습용입니다 — 여기서 무엇을 하든 실제 자료는 안전합니다';
+  el.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:2147483647;'
+    + 'padding:7px 12px;text-align:center;font-size:13px;font-weight:800;'
+    + 'line-height:1.4;letter-spacing:-.01em;pointer-events:none;'
+    + (live ? 'background:#b42318;color:#fff' : 'background:#067647;color:#fff');
+  document.body.appendChild(el);
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', envBadge);
+else envBadge();
 function getConfig(){
   if(BAKED.url && BAKED.anonKey) return BAKED;
   try{ return JSON.parse(localStorage.getItem('sb_cfg')||'null') || {url:'',anonKey:''}; }
