@@ -2812,6 +2812,22 @@ grant  execute on function public.restore_votes(timestamptz) to authenticated;
 revoke execute on function public.vote_journal_status() from anon;
 grant  execute on function public.vote_journal_status() to authenticated;
 
+-- (마) 처음 한 번 — 지금 들어 있는 표를 기록장에 담아 둡니다
+--     기록장은 '앞으로 들어올 표'만 자동으로 받습니다. 이 절이 없으면
+--     48절을 켜기 전에 이미 던져진 표는 기록장에 없어 되살릴 수 없습니다.
+--     이미 담긴 것은 건너뛰므로, 몇 번 실행해도 중복되지 않습니다.
+insert into public.vote_journal(at, kind, op, poll_id, user_id, payload)
+select coalesce(b.updated_at, b.created_at, now()), 'ballot', 'I', b.poll_id, b.user_id, to_jsonb(b)
+  from public.poll_ballots b
+ where not exists (select 1 from public.vote_journal j
+                    where j.kind = 'ballot' and j.poll_id = b.poll_id and j.user_id = b.user_id);
+
+insert into public.vote_journal(at, kind, op, poll_id, user_id, payload)
+select coalesce(e.updated_at, e.created_at, now()), 'entry', 'I', e.poll_id, e.user_id, to_jsonb(e)
+  from public.poll_entries e
+ where not exists (select 1 from public.vote_journal j
+                    where j.kind = 'entry' and j.poll_id = e.poll_id and j.user_id = e.user_id);
+
 -- ============================================================================
 --  49. ★ 통째로 비우기(truncate) 차단 — 46절의 구멍을 막습니다
 -- ============================================================================
