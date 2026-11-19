@@ -1,0 +1,4 @@
+#!/bin/sh
+# 커밋 전마다 SQL 안전 검사를 돌립니다. (scripts/check-sql.sh)
+# 한 번만 켜 두면 됩니다 :  git config core.hooksPath .githooks
+exec sh "$(dirname "$0")/../scripts/check-sql.sh"

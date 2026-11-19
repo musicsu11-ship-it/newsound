@@ -647,6 +647,16 @@ VIEWS.backup = () => pageHead('백업',
       <p class="sub" id="bkLast">이 컴퓨터에서는 아직 받은 적이 없습니다.</p>
       <p class="hint">내려받은 파일은 업무용 PC나 부서 공유 폴더처럼
         이 사이트와 다른 곳에 두셔야 의미가 있습니다.</p>
+    </div>
+    <div class="card">
+      <h2>투표 기록장</h2>
+      <p class="sub">밸런스게임 표와 이벤트 응모는 던져지는 순간
+        <b>따로 한 벌 더</b> 기록장에 쌓입니다. 표가 지워져도 이 기록으로 되살릴 수 있습니다.
+        기록장은 넣기만 되고 지우기는 데이터베이스가 막습니다.</p>
+      <p class="sub" id="vjStat">확인 중…</p>
+      <button class="btn" id="vjRestore">↩︎ 지워진 표 되살리기</button>
+      <span class="hint" style="margin-left:10px">기록장에 있는데 지금 없는 표만 채웁니다.
+        이미 있는 표는 건드리지 않으니 여러 번 눌러도 괜찮습니다.</span>
     </div>`;
 
 BIND.backup = () => {
@@ -678,6 +688,40 @@ BIND.backup = () => {
     try{ localStorage.setItem('sd_last_backup', now); }catch(_){}
     if($('#bkLast')) $('#bkLast').textContent = `${now} — 이 컴퓨터 기준입니다.`;
     toast(`백업을 내려받았습니다 (${rows.toLocaleString('ko-KR')}줄)`);
+  });
+
+  /* ── 투표 기록장 (48절) ── */
+  const n = (v) => Number(v || 0).toLocaleString('ko-KR');
+
+  (async () => {
+    const el = $('#vjStat');
+    if(!el) return;
+    const { data, error } = await sb.rpc('vote_journal_status');
+    if(error || !data){
+      el.innerHTML = '<b style="color:#b42318">아직 켜지지 않았습니다</b> — '
+        + '48절 SQL을 실행하시면 이 자리에 보관 건수가 나옵니다.';
+      const r = $('#vjRestore'); if(r) r.disabled = true;
+      return;
+    }
+    el.innerHTML = `기록장에 보관 중 — 표 <b>${n(data.kept_ballots)}건</b>`
+      + ` · 응모 <b>${n(data.kept_entries)}건</b> (전체 ${n(data.rows)}줄)<br>`
+      + `지금 사이트에 보이는 것 — 표 ${n(data.live_ballots)}건`
+      + ` · 응모 ${n(data.live_entries)}건`;
+  })();
+
+  $('#vjRestore')?.addEventListener('click', async (ev) => {
+    if(!confirm('기록장에 있는데 지금 없는 표만 다시 채웁니다.\n'
+      + '이미 있는 표는 건드리지 않습니다.\n\n진행할까요?')) return;
+    const b = ev.currentTarget;
+    b.disabled = true;
+    const { data, error } = await sb.rpc('restore_votes');
+    b.disabled = false;
+    if(error || !data){
+      toast(error?.message || '되살리지 못했습니다. 48절 SQL을 먼저 실행하셨는지 확인해 주세요.');
+      return;
+    }
+    toast(`표 ${n(data.ballots_restored)}건 · 응모 ${n(data.entries_restored)}건을 되살렸습니다`);
+    setTimeout(()=> location.reload(), 1200);
   });
 };
 
