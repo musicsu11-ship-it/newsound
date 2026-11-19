@@ -874,8 +874,13 @@ VIEWS.polls = () => {
         한 사람이 여러 번 남겼어도 한 줄로 모읍니다.</p>
       <div class="row-actions" style="margin:0 0 12px">
         <button class="btn" id="plECopy" ${rows.length ? '' : 'disabled'}>명단 복사</button>
+        <button class="btn primary" id="plEXls" ${rows.length ? '' : 'disabled'}>엑셀에 붙여넣기</button>
         <button class="btn" id="plECsv" ${rows.length ? '' : 'disabled'}>엑셀(CSV)로 내려받기</button>
       </div>
+      <p class="hint" style="margin:-6px 0 12px">
+        업무용 PC에서 내려받은 파일이 안 열리면 <b>엑셀에 붙여넣기</b>를 쓰세요.
+        누른 뒤 엑셀을 열고 <b>A1 칸에 붙여넣기(Ctrl+V)</b> 하면 칸이 알아서 나뉩니다.
+        (문서보안 프로그램이 내려받은 파일을 막는 경우가 있습니다)</p>
       ${rows.length
         ? table(['#','이름','소속','연락처','남긴 때','동의'])
           + rows.map((e, i) => `<tr><td>${i + 1}</td><td>${esc(e.name || '-')}</td><td>${esc(e.team)}</td>
@@ -912,6 +917,16 @@ BIND.polls = () => {
     const txt = entryRows().map((e, i) =>
       `${i + 1}. ${[e.name, e.team, e.contact, fmtDay(e.created_at)].filter(Boolean).join(' / ')}`).join('\n');
     copyText(txt, '명단을 복사했습니다');
+  });
+
+  /* 엑셀에 바로 붙여넣기 — 칸을 탭으로 나눠 복사합니다.
+     파일을 거치지 않으므로 문서보안(DRM)이나 '다운로드 차단'에 걸리지 않습니다. */
+  $('#plEXls')?.addEventListener('click', ()=>{
+    const tsv = [['번호','이름','소속','연락처','남긴 때','개인정보 동의'].join('\t')]
+      .concat(entryRows().map((e, i) => [i + 1, e.name || '', e.team, e.contact,
+        fmtDay(e.created_at), e.agreed_at ? '동의' : ''].join('\t')))
+      .join('\n');
+    copyText(tsv, '복사했습니다 — 엑셀을 열고 A1 칸에 붙여넣으세요(Ctrl+V)');
   });
 
   /* 엑셀에서 한글이 깨지지 않도록 맨 앞에 BOM 을 붙입니다 */
