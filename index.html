@@ -436,8 +436,8 @@
   .og-catch b{color:var(--brand)}
 
   /* 응모 방법 · 시상 내역 두 칸 */
-  /* 시상 내역을 크게 — 응모 방법은 좁히고 상 내역에 자리를 몰아 줍니다 */
-  .og-cols{display:grid;grid-template-columns:minmax(0,0.85fr) minmax(0,1.6fr);gap:14px}
+  /* 시상 내역 글씨를 키우느라 그쪽 칸을 조금 넓혔습니다 */
+  .og-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px}
   /* 두 칸은 높이가 같아집니다. 안쪽 내용이 남는 높이를 채우도록 폅니다 */
   .og-box{display:flex;flex-direction:column;
     background:#fff;border:1.5px solid #cfe8fa;border-radius:20px;padding:16px 18px 18px;
@@ -463,26 +463,20 @@
   .og-award tr{border-bottom:1px dashed #dceaf6}
   .og-award tr:last-child{border-bottom:0}
   .og-award th,.og-award td{padding:9px 0;vertical-align:middle}
-  .og-award h3{font-size:22px}
-  .og-award th{text-align:left;font-size:34px;font-weight:900;color:#123a56;white-space:nowrap}
-  .og-award th span{margin-right:9px;font-size:34px;vertical-align:-3px}
-  .og-award .c{text-align:center;font-size:27px;font-weight:800;color:#5b7892;white-space:nowrap}
-  .og-award .v{text-align:right;font-size:50px;font-weight:900;letter-spacing:-.045em;white-space:nowrap}
+  .og-award h3{font-size:20px}
+  .og-award th{text-align:left;font-size:27px;font-weight:900;color:#123a56;white-space:nowrap}
+  .og-award th span{margin-right:8px;font-size:27px;vertical-align:-2px}
+  .og-award .c{text-align:center;font-size:22px;font-weight:800;color:#5b7892;white-space:nowrap}
+  .og-award .v{text-align:right;font-size:39px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
   .og-award .g .v{color:#9a6c00} .og-award .s .v{color:#44506b}
   .og-award .b .v{color:#90511f} .og-award .p .v{color:#4b3f9e}
-  /* 참가상 — 줄 전체를 강조하고, 상품 사진은 표 아래에 크게 둡니다 */
+  /* 참가상 — 금액 자리에 상품 사진이 들어가고, 줄 전체를 강조합니다 */
   .og-award tr.gift th,.og-award tr.gift td{background:#eef4ff}
   .og-award tr.gift th{padding-left:10px;color:#1b3fa0}
   .og-award tr.gift .c{color:#2353c9;font-weight:900;padding-left:12px}
-  .og-award tr.gift .v{padding-right:10px;color:#2353c9}
-  .aw-gift{flex:none;margin:14px 0 0;padding:14px;border-radius:16px;
-    background:#eef4ff;border:1.5px solid #cfe0f5;text-align:center}
-  .aw-gift img{display:block;width:100%;max-width:340px;margin:0 auto;border-radius:14px;
-    border:3px solid #fff;box-shadow:0 10px 26px rgba(35,83,201,.26)}
-  .aw-gift b{display:block;margin-top:11px;font-size:20px;font-weight:900;
-    letter-spacing:-.02em;color:#1b3fa0}
-  .aw-gift em{display:block;margin-top:3px;font-style:normal;font-size:15px;
-    font-weight:700;color:#4a6c96}
+  .og-award tr.gift .v{padding-right:10px}
+  .og-award .v img{display:block;width:130px;margin-left:auto;border-radius:12px;
+    border:2px solid #fff;box-shadow:0 6px 18px rgba(35,83,201,.28)}
   .aw-foot{flex:none;margin:11px 0 0;padding-top:10px;border-top:2px solid #e3f1fb;
     font-size:14px;font-weight:700;color:#5b7892;text-align:right}
 
@@ -561,15 +555,14 @@
     .og-steps b{font-size:18px}
     .og-steps em{font-size:14px}
     .og-steps .n{width:36px;height:36px;font-size:18px}
-    .og-award h3{font-size:19px}
-    .og-award th{font-size:21px}
-    .og-award th span{font-size:21px;margin-right:7px}
-    .og-award .v{font-size:30px}
-    .og-award .c{font-size:17px}
-    .aw-gift b{font-size:17px}
-    .aw-gift em{font-size:13.5px}
+    .og-award h3{font-size:18px}
+    .og-award th{font-size:19px}
+    .og-award th span{font-size:19px;margin-right:6px}
+    .og-award .v{font-size:26px}
+    .og-award .c{font-size:16px}
     .og-info li{font-size:14.5px}
     .og-info b{font-size:13px;padding:3px 9px}
+    .og-award .v img{width:88px}
     .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     .ootd-bd{padding:12px 12px 11px}
     .ootd-bd b{font-size:15px}
@@ -3659,14 +3652,10 @@ function boardView(key){
             <tr class="s"><th><span aria-hidden="true">🥈</span>2 등</th><td class="c">2명</td><td class="v">5만원</td></tr>
             <tr class="b"><th><span aria-hidden="true">🥉</span>3 등</th><td class="c">3명</td><td class="v">3만원</td></tr>
             <tr class="p"><th><span aria-hidden="true">🎁</span>장려상</th><td class="c">10명</td><td class="v">5천원</td></tr>
-            <tr class="gift"><th><span aria-hidden="true">🎀</span>참가상</th><td class="c">추첨 20명</td><td class="v">키캡</td></tr>
+            <tr class="gift"><th><span aria-hidden="true">🎀</span>참가상</th><td class="c">추첨 20명</td>
+              <td class="v"><img src="assets/prize-keycap.webp" loading="lazy" decoding="async"
+                alt="고드래곤과 새초롱이 그림이 들어간 키캡 6개 키링"></td></tr>
           </table>
-          <div class="aw-gift">
-            <img src="assets/prize-keycap.webp" loading="lazy" decoding="async"
-              alt="고드래곤과 새초롱이 그림이 들어간 키캡 6개 키링">
-            <b>한정판 고드래곤 키캡</b>
-            <em>참여자 중 추첨으로 20명께 드립니다</em>
-          </div>
           <p class="aw-foot">1~3등·장려상은 상품권, 참가상은 키캡으로 드립니다</p>
         </div>
       </div>
