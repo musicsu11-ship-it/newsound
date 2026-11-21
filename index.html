@@ -400,11 +400,12 @@
   }
 
   /* 포스터는 왼쪽, 안내 글은 오른쪽 — 위를 맞춰 나란히 둡니다 */
-  .og-main{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;align-items:start}
+  /* 포스터를 위에 두고 그 아래에 내용을 폅니다 — 가로를 넓게 쓰려고 */
+  .og-main{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
   .og-right{min-width:0;display:flex;flex-direction:column;gap:14px}
   /* 포스터 — 누르면 크게 볼 수 있습니다 */
-  .og-hero{display:block;margin:0;padding:0;border:0;background:transparent;
-    width:100%;cursor:zoom-in}
+  .og-hero{display:block;margin:0 auto;padding:0;border:0;background:transparent;
+    width:min(460px,100%);cursor:zoom-in}
   .og-hero img{display:block;width:100%;border-radius:20px;
     box-shadow:0 10px 26px rgba(26,143,212,.22);transition:transform .15s}
   .og-hero:hover img{transform:translateY(-2px)}
@@ -452,7 +453,7 @@
 
   /* 참여 방법 — 번호 + 글 */
   .og-steps{flex:1;list-style:none;margin:0;padding:0;
-    display:flex;flex-direction:column;justify-content:center;gap:26px}
+    display:flex;flex-direction:column;justify-content:space-between;gap:20px}
   .og-steps li{display:flex;align-items:center;gap:14px;min-width:0}
   .og-steps .n{flex:none;display:grid;place-items:center;width:40px;height:40px;
     border-radius:50%;background:linear-gradient(180deg,#f04c80,#d61e5c);color:#fff;
@@ -527,8 +528,22 @@
   .og-info li.hi{background:#fff4e2;border:1.5px solid #ffc46b;padding:7px 12px}
   .og-info li.hi b{background:#c2410c;color:#fff}
   .og-info li.hi span{color:#9a3412;font-weight:900;font-size:17.5px;letter-spacing:-.01em}
-  /* 참여 기간·응모 자격 — 캐치프레이즈 바로 아래, 넓은 화면에서는 두 칸으로 */
-  .og-info.og-strip{margin:0 0 18px;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  /* 참여 기간·응모 자격 — 1·2·3 단계와 똑같은 모양으로 맞춰 한 칸에 담습니다 */
+  .og-facts{list-style:none;margin:0 0 17px;padding:0 0 17px;
+    border-bottom:1.5px dashed #dceaf6;display:flex;flex-direction:column;gap:14px}
+  .og-facts li{display:flex;align-items:center;gap:14px;min-width:0}
+  .og-facts .n{flex:none;display:grid;place-items:center;width:40px;height:40px;
+    border-radius:50%;background:#e8f1fd;font-size:19px;
+    box-shadow:0 3px 9px rgba(35,83,201,.16)}
+  .og-facts .when .n{background:linear-gradient(180deg,#ffb45c,#f08a1e);
+    box-shadow:0 4px 11px rgba(214,122,20,.3)}
+  .og-facts .tx{min-width:0}
+  .og-facts b{display:block;font-size:20px;font-weight:900;line-height:1.35;
+    letter-spacing:-.03em;color:#123a56;word-break:keep-all}
+  .og-facts em{display:block;margin-top:2px;font-style:normal;font-size:15px;
+    color:#5b7892;line-height:1.4;word-break:keep-all}
+  .og-facts .when b{color:#9a3412}
+  .og-facts .when em{color:#c2410c;font-weight:800;font-size:17px}
   .ootd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:16px}
   .ootd-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;
     box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
@@ -556,13 +571,9 @@
   .ootd-cmt{margin-top:4px;padding:7px 0 0;border:0;border-top:1px dashed var(--border);background:none;
     font:inherit;font-size:13.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
   .ootd-cmt:hover{color:var(--brand)}
-  /* 넓은 화면에서는 오른쪽을 마스코트 자리로 비워 둡니다 */
-  @media (max-width:1040px){
-    .og-main{grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:20px}
-  }
   @media (max-width:860px){
-    .og-main{grid-template-columns:minmax(0,1fr);gap:18px}
-    .og-hero{width:min(360px,100%);margin:0 auto}
+    .og-main{gap:18px}
+    .og-hero{width:min(360px,100%)}
     .ootd-head-r{width:100%}
     .ootd-find{padding:14px 15px;border-radius:16px}
     .ootd-find b{font-size:16.5px}
@@ -576,7 +587,9 @@
   }
   @media (max-width:700px){
     .ootd-guide{padding:18px 16px 22px;border-radius:20px}
-    .og-info.og-strip{grid-template-columns:minmax(0,1fr);margin-bottom:14px}
+    .og-facts b{font-size:18px}
+    .og-facts em{font-size:14px}
+    .og-facts .when em{font-size:15.5px}
     .aw-gift b{font-size:17px}
     .aw-gift em{font-size:13px}
     .og-catch{font-size:19px}
@@ -3656,11 +3669,6 @@ function boardView(key){
       <div class="og-ribbon"><span>👑 고용노동부 패셔니스타를 찾아라! 👑</span></div>
       <p class="og-catch">트렌디한 감각으로 <b>나만의 출근룩</b>을 보여 주세요!</p>
 
-      <ul class="og-info og-strip">
-        <li class="hi"><b>참여 기간</b><span>11/23(월) ~ 11/30(월)</span></li>
-        <li><b>응모 자격</b><span>고용노동부 직원이면 누구나</span></li>
-      </ul>
-
       <div class="og-main">
       <button type="button" class="og-hero" data-zoom="assets/ootd-poster.webp"
         aria-label="출근룩 콘테스트 포스터 크게 보기">
@@ -3670,6 +3678,12 @@ function boardView(key){
       <div class="og-cols">
         <div class="og-box">
           <h3>참여 방법</h3>
+          <ul class="og-facts">
+            <li class="when"><span class="n" aria-hidden="true">🗓</span>
+              <span class="tx"><b>참여 기간</b><em>11/23(월) ~ 11/30(월)</em></span></li>
+            <li><span class="n" aria-hidden="true">👤</span>
+              <span class="tx"><b>응모 자격</b><em>고용노동부 직원이면 누구나</em></span></li>
+          </ul>
           <ol class="og-steps">
             <li><span class="n">1</span>
               <span class="tx"><b>사진을 올리고</b><em>출근룩 한 장 + 한 줄 소개 · 한 사람이 한 장</em></span></li>
