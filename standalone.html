@@ -442,9 +442,13 @@
   .og-award .v{text-align:right;font-size:26px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
   .og-award .g .v{color:#9a6c00} .og-award .s .v{color:#44506b}
   .og-award .b .v{color:#90511f} .og-award .p .v{color:#4b3f9e}
-  /* 참가상 — 금액 자리에 상품 사진이 들어갑니다 */
-  .og-award .v img{display:block;width:86px;margin-left:auto;border-radius:9px;
-    border:1px solid #cfe0f5;box-shadow:0 3px 10px rgba(35,83,201,.15)}
+  /* 참가상 — 금액 자리에 상품 사진이 들어가고, 줄 전체를 강조합니다 */
+  .og-award tr.gift th,.og-award tr.gift td{background:#eef4ff}
+  .og-award tr.gift th{padding-left:10px;color:#1b3fa0}
+  .og-award tr.gift .c{color:#2353c9;font-weight:900;padding-left:12px}
+  .og-award tr.gift .v{padding-right:10px}
+  .og-award .v img{display:block;width:130px;margin-left:auto;border-radius:12px;
+    border:2px solid #fff;box-shadow:0 6px 18px rgba(35,83,201,.28)}
   .aw-foot{flex:none;margin:11px 0 0;padding-top:10px;border-top:2px solid #e3f1fb;
     font-size:14px;font-weight:700;color:#5b7892;text-align:right}
 
@@ -529,7 +533,7 @@
     .og-award .c{font-size:14px}
     .og-info li{font-size:14.5px}
     .og-info b{font-size:13px;padding:3px 9px}
-    .og-award .v img{width:72px}
+    .og-award .v img{width:104px}
     .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
     .ootd-bd{padding:12px 12px 11px}
     .ootd-bd b{font-size:15px}
@@ -3134,7 +3138,7 @@ function boardView(key){
                 <tr class="s"><th><span aria-hidden="true">🥈</span>2 등</th><td class="c">2명</td><td class="v">5만원</td></tr>
                 <tr class="b"><th><span aria-hidden="true">🥉</span>3 등</th><td class="c">3명</td><td class="v">3만원</td></tr>
                 <tr class="p"><th><span aria-hidden="true">🎁</span>장려상</th><td class="c">10명</td><td class="v">5천원</td></tr>
-                <tr><th><span aria-hidden="true">🎀</span>참가상</th><td class="c">추첨 20명</td>
+                <tr class="gift"><th><span aria-hidden="true">🎀</span>참가상</th><td class="c">추첨 20명</td>
                   <td class="v"><img src="assets/prize-keycap.webp" loading="lazy" decoding="async"
                     alt="고드래곤과 새초롱이 그림이 들어간 키캡 6개 키링"></td></tr>
               </table>
