@@ -417,7 +417,7 @@
   /* 시상 내역 글씨를 키우느라 그쪽 칸을 조금 넓혔습니다 */
   /* 두 칸이 안내문 가로를 남김없이 채웁니다.
      왼쪽은 포스터가 칸을 꽉 채우고, 그 아래 참여 방법도 같은 폭이 됩니다. */
-  .og-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);gap:20px}
+  .og-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px}
   /* 두 칸은 높이가 같아집니다. 안쪽 내용이 남는 높이를 채우도록 폅니다 */
   .og-box{display:flex;flex-direction:column;
     background:#fff;border:1.5px solid #cfe8fa;border-radius:20px;padding:16px 18px 18px;
@@ -440,15 +440,16 @@
 
   /* 시상 내역 — 시안처럼 표로 */
   /* 표를 내용만큼만 넓혀 가운데에 둡니다 — 양옆에 여백이 생깁니다 */
-  .og-award table{flex:1;width:auto;margin:0 auto;border-collapse:collapse}
+  .og-award table{flex:1;width:min(100%,520px);margin:0 auto;border-collapse:collapse}
   .og-award tr{border-bottom:1px dashed #dceaf6}
   .og-award tr:last-child{border-bottom:0}
   .og-award th,.og-award td{padding:9px 0;vertical-align:middle}
   .og-award h3{font-size:20px}
-  .og-award th{text-align:left;font-size:clamp(19px,3.8vw,54px);font-weight:900;color:#123a56;white-space:nowrap}
-  .og-award th span{margin-right:12px;font-size:clamp(19px,3.8vw,54px);vertical-align:-4px}
-  .og-award .c{text-align:center;font-size:clamp(16px,3.1vw,44px);font-weight:800;color:#5b7892;white-space:nowrap}
-  .og-award .v{text-align:right;font-size:clamp(26px,4.8vw,68px);font-weight:900;letter-spacing:-.04em;white-space:nowrap}
+  .og-award th{text-align:left;font-size:20px;font-weight:900;color:#123a56;white-space:nowrap}
+  /* 이모지와 금액만 크게 — 상 이름·인원은 참여 방법과 같은 크기 */
+  .og-award th span{margin-right:11px;font-size:30px;vertical-align:-6px}
+  .og-award .c{text-align:center;font-size:15px;font-weight:800;color:#5b7892;white-space:nowrap}
+  .og-award .v{text-align:right;font-size:34px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
   .og-award .g .v{color:#9a6c00} .og-award .s .v{color:#44506b}
   .og-award .b .v{color:#90511f} .og-award .p .v{color:#4b3f9e}
   /* 참가상 — 줄 전체를 강조하고, 상품 사진은 표 아래에 칸 너비로 크게 */
@@ -581,7 +582,10 @@
     .og-steps em{font-size:14px}
     .og-steps .n{width:36px;height:36px;font-size:18px}
     .og-award h3{font-size:18px}
-    .og-award th span{margin-right:6px}
+    .og-award th{font-size:18px}
+    .og-award th span{font-size:26px;margin-right:8px}
+    .og-award .c{font-size:14px}
+    .og-award .v{font-size:29px}
     .og-info li{font-size:14.5px}
     .og-info b{font-size:13px;padding:3px 9px}
     .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
