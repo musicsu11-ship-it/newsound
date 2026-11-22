@@ -3215,7 +3215,7 @@ function boardView(key){
           <p>소속이나 이름으로 찾아보세요. 기관 이름만 넣어도 됩니다.</p>
           ${searchBar(key, '예) 대구서부 · 실업급여팀 · 홍길동')}
         </div>`
-      + (top.length ? `<h2 class="ootd-h2">🏆 지금 순위</h2>
+      + (top.length ? `<h2 class="ootd-h2">🏆 현재 순위</h2>
           <div class="ootd-top">${top.map(p => card(p, rankOf(p))).join('')}</div>` : '')
       + (q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${shown.length}건</div>` : '')
       + (shown.length ? `<h2 class="ootd-h2">참가 사진 ${all.length}장</h2>
