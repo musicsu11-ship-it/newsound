@@ -494,8 +494,10 @@
     font-size:22px;font-weight:900;box-shadow:0 7px 18px rgba(214,30,92,.34)}
   .aw-gift img{display:block;width:100%;margin:6px 0 0;border-radius:16px;
     border:4px solid #fff;box-shadow:0 10px 24px rgba(35,83,201,.2)}
-  .aw-gift b{display:block;margin-top:12px;font-size:35px;font-weight:900;
+  .aw-gift b{display:block;margin-top:12px;font-size:28px;font-weight:900;
     letter-spacing:-.03em;line-height:1.25;word-break:keep-all;color:#1b3fa0}
+  /* 마스코트 이름이 & 뒤에서 갈라지지 않게 */
+  .aw-gift .nb{white-space:nowrap}
   .aw-gift em{display:block;margin-top:8px;font-style:normal;font-size:25px;
     font-weight:700;line-height:1.45;word-break:keep-all;color:#5b7892}
   /* 추첨 인원 — 형광펜으로 그은 느낌. 알약보다 차분하면서 눈에 띕니다 */
@@ -508,7 +510,7 @@
     .aw-gift{display:flex;flex-direction:row;align-items:center;gap:18px;padding:22px 16px 16px}
     .aw-gift img{flex:none;width:48%;margin:0}
     .aw-gift .tx{min-width:0}
-    .aw-gift b{margin-top:0;font-size:40px}
+    .aw-gift b{margin-top:0;font-size:32px}
     .aw-gift em{margin-top:10px;font-size:26px}
   }
   .aw-foot{flex:none;margin:11px 0 0;padding-top:10px;border-top:2px solid #e3f1fb;
@@ -551,7 +553,7 @@
   .og-facts em{display:block;margin-top:2px;font-style:normal;font-size:15px;
     color:#5b7892;line-height:1.4;word-break:keep-all}
   .og-facts .when b{color:#9a3412}
-  .og-facts .when em{color:#9333ea;font-weight:800;font-size:17px}
+  .og-facts .when em{color:#db2777;font-weight:800;font-size:17px}
   .ootd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:16px}
   .ootd-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;
     box-shadow:var(--shadow);display:flex;flex-direction:column;min-width:0}
@@ -599,7 +601,7 @@
     .og-facts em{font-size:14px}
     .og-facts .when em{font-size:15.5px}
     .aw-ribbon{font-size:15.5px;padding:6px 18px;top:-17px}
-    .aw-gift b{font-size:30px}
+    .aw-gift b{font-size:25px}
     .aw-gift em{font-size:22px}
     .og-catch{font-size:19px}
     .og-box{padding:14px 15px 16px;border-radius:17px}
@@ -3718,8 +3720,8 @@ function boardView(key){
             <span class="aw-ribbon">💛 콘테스트 참가상 이벤트</span>
             <img src="assets/prize-keycap.webp" loading="lazy" decoding="async"
               alt="고드래곤과 새초롱이 그림이 들어간 키캡 6개 키링">
-            <span class="tx"><b>한정판 고드래곤 키캡</b>
-              <em>참여만 해도 추첨 <i>20명</i> 증정!</em></span>
+            <span class="tx"><b>한정판 <span class="nb">고드래곤&새초롱이</span> 키캡</b>
+              <em>참여만 해도 추첨 <span class="nb"><i>20명</i> 증정!</span></em></span>
           </div>
           <p class="aw-foot">1~3등·장려상은 상품권, 참가상은 키캡으로 드립니다</p>
         </div>
