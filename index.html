@@ -313,11 +313,6 @@
     background:linear-gradient(165deg,#e8f4fd 0%,#f3fbff 45%,#fffdf5 100%);
     border:1.5px solid #9ed2f2;border-radius:28px;padding:22px 24px 26px;margin:0 0 24px;
     box-shadow:0 12px 34px rgba(26,143,212,.16)}
-  /* 안내문만 본문 좌우 여백 바깥까지 넓혀 씁니다 (넓은 화면에서만) */
-  @media (min-width:861px){
-    .ootd-guide{margin-left:calc(-1 * clamp(16px,4vw,48px));
-      margin-right:calc(-1 * clamp(16px,4vw,48px))}
-  }
   /* 마스코트 — 오른쪽 아래에 장식으로. 좁은 화면에서는 숨깁니다 */
   .og-mascot{position:absolute;right:8px;bottom:-20px;width:152px;height:auto;
     pointer-events:none;user-select:none;opacity:.95}
@@ -446,9 +441,9 @@
 
   /* 참여 방법 · 시상 내역 두 칸 */
   /* 시상 내역 글씨를 키우느라 그쪽 칸을 조금 넓혔습니다 */
-  /* 왼쪽 칸은 포스터 폭에 맞추고, 시상 내역도 너무 벌어지지 않게 묶어 가운데로 */
-  .og-cols{display:grid;grid-template-columns:minmax(0,390px) minmax(0,660px);
-    gap:18px;justify-content:center}
+  /* 두 칸이 안내문 가로를 남김없이 채웁니다.
+     왼쪽은 포스터가 칸을 꽉 채우고, 그 아래 참여 방법도 같은 폭이 됩니다. */
+  .og-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px}
   /* 두 칸은 높이가 같아집니다. 안쪽 내용이 남는 높이를 채우도록 폅니다 */
   .og-box{display:flex;flex-direction:column;
     background:#fff;border:1.5px solid #cfe8fa;border-radius:20px;padding:16px 18px 18px;
