@@ -479,15 +479,15 @@
   /* 참가상 — 줄 전체를 강조하고, 상품 사진은 표 아래에 칸 너비로 크게 */
   .og-award tr.gift th,.og-award tr.gift td{background:#eef4ff}
   .og-award tr.gift th{padding-left:10px;color:#1b3fa0}
-  .og-award tr.gift .c{color:#2353c9;font-weight:900;padding-left:12px}
+  .og-award tr.gift .c{color:#d61e5c;font-weight:900;padding-left:12px}
   .og-award tr.gift .v{padding-right:10px;color:#2353c9}
-  .aw-gift{position:relative;flex:none;margin:17px 0 0;padding:18px 16px 16px;
+  .aw-gift{position:relative;flex:none;margin:34px 0 0;padding:18px 16px 16px;
     border-radius:20px;text-align:center;
     background:linear-gradient(160deg,#eef4ff 0%,#fff6fa 100%);border:2px dashed #b9cdf0}
-  .aw-ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);
-    padding:5px 16px;border-radius:999px;white-space:nowrap;
+  .aw-ribbon{position:absolute;top:-22px;left:50%;transform:translateX(-50%);
+    padding:8px 27px;border-radius:999px;white-space:nowrap;
     background:linear-gradient(180deg,#f04c80,#d61e5c);color:#fff;
-    font-size:13px;font-weight:900;box-shadow:0 5px 14px rgba(214,30,92,.32)}
+    font-size:22px;font-weight:900;box-shadow:0 7px 18px rgba(214,30,92,.34)}
   .aw-gift img{display:block;width:100%;margin:6px 0 0;border-radius:16px;
     border:4px solid #fff;box-shadow:0 10px 24px rgba(35,83,201,.2)}
   .aw-gift b{display:block;margin-top:12px;font-size:35px;font-weight:900;
@@ -495,17 +495,17 @@
   .aw-gift em{display:block;margin-top:8px;font-style:normal;font-size:25px;
     font-weight:700;line-height:1.45;word-break:keep-all;color:#5b7892}
   /* 추첨 인원 — 형광펜으로 그은 느낌. 알약보다 차분하면서 눈에 띕니다 */
-  .aw-gift em i{font-style:normal;font-weight:900;color:#1b3fa0;font-size:1.28em;
+  /* 추첨 인원 — 참가상 선물 리본과 같은 분홍으로 그은 형광펜 */
+  .aw-gift em i{font-style:normal;font-weight:900;color:#a8124a;font-size:1.28em;
     letter-spacing:-.02em;padding:0 3px;
-    background:linear-gradient(transparent 58%,#ffe08a 58%,#ffd45c 92%,transparent 92%)}
+    background:linear-gradient(transparent 58%,#ffc9dd 58%,#ff9dbe 92%,transparent 92%)}
   /* 넓은 화면에서는 사진 왼쪽 · 글 오른쪽으로 눕혀 칸이 덜 길어지게 */
   @media (min-width:861px){
-    .aw-gift{display:flex;align-items:center;gap:18px;text-align:left;padding:16px}
+    .aw-gift{display:flex;align-items:center;gap:18px;padding:22px 16px 16px}
     .aw-gift img{flex:none;width:40%;margin:0}
     .aw-gift .tx{min-width:0}
     .aw-gift b{margin-top:0;font-size:40px}
     .aw-gift em{margin-top:10px;font-size:26px}
-    .aw-ribbon{left:20px;transform:none}
   }
   .aw-foot{flex:none;margin:11px 0 0;padding-top:10px;border-top:2px solid #e3f1fb;
     font-size:14px;font-weight:700;color:#5b7892;text-align:right}
@@ -594,6 +594,7 @@
     .og-facts b{font-size:18px}
     .og-facts em{font-size:14px}
     .og-facts .when em{font-size:15.5px}
+    .aw-ribbon{font-size:15.5px;padding:6px 18px;top:-17px}
     .aw-gift b{font-size:30px}
     .aw-gift em{font-size:22px}
     .og-catch{font-size:19px}
@@ -3710,7 +3711,7 @@ function boardView(key){
             <tr class="gift"><th><span aria-hidden="true">💛</span>참가상</th><td class="c">추첨 20명</td><td class="v">키캡</td></tr>
           </table>
           <div class="aw-gift">
-            <span class="aw-ribbon">💛 참가상 선물</span>
+            <span class="aw-ribbon">💛 콘테스트 참가상 선물</span>
             <img src="assets/prize-keycap.webp" loading="lazy" decoding="async"
               alt="고드래곤과 새초롱이 그림이 들어간 키캡 6개 키링">
             <span class="tx"><b>한정판 고드래곤 키캡</b>
