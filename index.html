@@ -400,12 +400,13 @@
   }
 
   /* 포스터는 왼쪽, 안내 글은 오른쪽 — 위를 맞춰 나란히 둡니다 */
-  /* 포스터를 위에 두고 그 아래에 내용을 폅니다 — 가로를 넓게 쓰려고 */
-  .og-main{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+  /* 포스터는 왼쪽에, 두 칸보다 작게 — 셋이 한 줄로 나란히 섭니다 */
+  .og-main{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);
+    gap:20px;align-items:start}
   .og-right{min-width:0;display:flex;flex-direction:column;gap:14px}
   /* 포스터 — 누르면 크게 볼 수 있습니다 */
-  .og-hero{display:block;margin:0 auto;padding:0;border:0;background:transparent;
-    width:min(460px,100%);cursor:zoom-in}
+  .og-hero{display:block;margin:0;padding:0;border:0;background:transparent;
+    width:100%;cursor:zoom-in}
   .og-hero img{display:block;width:100%;border-radius:20px;
     box-shadow:0 10px 26px rgba(26,143,212,.22);transition:transform .15s}
   .og-hero:hover img{transform:translateY(-2px)}
@@ -572,8 +573,8 @@
     font:inherit;font-size:13.5px;color:var(--muted);text-align:left;cursor:pointer;width:100%}
   .ootd-cmt:hover{color:var(--brand)}
   @media (max-width:860px){
-    .og-main{gap:18px}
-    .og-hero{width:min(360px,100%)}
+    .og-main{grid-template-columns:minmax(0,1fr);gap:18px}
+    .og-hero{width:min(360px,100%);margin:0 auto}
     .ootd-head-r{width:100%}
     .ootd-find{padding:14px 15px;border-radius:16px}
     .ootd-find b{font-size:16.5px}
