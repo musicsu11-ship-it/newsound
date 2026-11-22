@@ -490,22 +490,21 @@
     font-size:13px;font-weight:900;box-shadow:0 5px 14px rgba(214,30,92,.32)}
   .aw-gift img{display:block;width:100%;margin:6px 0 0;border-radius:16px;
     border:4px solid #fff;box-shadow:0 10px 24px rgba(35,83,201,.2)}
-  .aw-gift b{display:block;margin-top:12px;font-size:22px;font-weight:900;
-    letter-spacing:-.02em;color:#1b3fa0}
-  .aw-gift em{display:block;margin-top:6px;font-style:normal;font-size:15.5px;
-    font-weight:700;color:#5b7892}
-  /* 추첨 인원을 노란 알약으로 — 참가상 하트(💛)와 색을 맞췄습니다 */
-  .aw-gift em i{display:inline-block;font-style:normal;margin:0 1px 0 4px;padding:2px 10px;
-    border-radius:999px;background:linear-gradient(180deg,#ffd45c,#f5a623);
-    color:#5e3600;font-size:1.14em;font-weight:900;letter-spacing:-.01em;
-    box-shadow:0 3px 9px rgba(214,140,20,.32)}
+  .aw-gift b{display:block;margin-top:12px;font-size:35px;font-weight:900;
+    letter-spacing:-.03em;line-height:1.25;word-break:keep-all;color:#1b3fa0}
+  .aw-gift em{display:block;margin-top:8px;font-style:normal;font-size:25px;
+    font-weight:700;line-height:1.45;word-break:keep-all;color:#5b7892}
+  /* 추첨 인원 — 형광펜으로 그은 느낌. 알약보다 차분하면서 눈에 띕니다 */
+  .aw-gift em i{font-style:normal;font-weight:900;color:#1b3fa0;font-size:1.28em;
+    letter-spacing:-.02em;padding:0 3px;
+    background:linear-gradient(transparent 58%,#ffe08a 58%,#ffd45c 92%,transparent 92%)}
   /* 넓은 화면에서는 사진 왼쪽 · 글 오른쪽으로 눕혀 칸이 덜 길어지게 */
   @media (min-width:861px){
     .aw-gift{display:flex;align-items:center;gap:18px;text-align:left;padding:16px}
-    .aw-gift img{flex:none;width:46%;margin:0}
+    .aw-gift img{flex:none;width:40%;margin:0}
     .aw-gift .tx{min-width:0}
-    .aw-gift b{margin-top:0;font-size:25px}
-    .aw-gift em{margin-top:8px;font-size:16.5px}
+    .aw-gift b{margin-top:0;font-size:40px}
+    .aw-gift em{margin-top:10px;font-size:26px}
     .aw-ribbon{left:20px;transform:none}
   }
   .aw-foot{flex:none;margin:11px 0 0;padding-top:10px;border-top:2px solid #e3f1fb;
@@ -595,8 +594,8 @@
     .og-facts b{font-size:18px}
     .og-facts em{font-size:14px}
     .og-facts .when em{font-size:15.5px}
-    .aw-gift b{font-size:19px}
-    .aw-gift em{font-size:14px}
+    .aw-gift b{font-size:30px}
+    .aw-gift em{font-size:22px}
     .og-catch{font-size:19px}
     .og-box{padding:14px 15px 16px;border-radius:17px}
     .og-box h3{font-size:16.5px}
@@ -3715,7 +3714,7 @@ function boardView(key){
             <img src="assets/prize-keycap.webp" loading="lazy" decoding="async"
               alt="고드래곤과 새초롱이 그림이 들어간 키캡 6개 키링">
             <span class="tx"><b>한정판 고드래곤 키캡</b>
-              <em>참여해 주신 분 중 추첨으로 <i>20명</i>께</em></span>
+              <em>참여만 해도 추첨 <i>20명</i> 증정</em></span>
           </div>
           <p class="aw-foot">1~3등·장려상은 상품권, 참가상은 키캡으로 드립니다</p>
         </div>
