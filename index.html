@@ -443,8 +443,8 @@
   /* 시상 내역 글씨를 키우느라 그쪽 칸을 조금 넓혔습니다 */
   /* 두 칸이 안내문 가로를 남김없이 채웁니다.
      왼쪽은 포스터가 칸을 꽉 채우고, 그 아래 참여 방법도 같은 폭이 됩니다. */
-  /* 두 칸 높이를 억지로 맞추지 않습니다 — 맞추면 남는 높이가 선물 카드로 몰립니다 */
-  .og-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px;align-items:start}
+  /* 두 칸 끝을 맞춥니다. 남는 높이는 표와 선물 카드가 반씩 나눠 갖습니다 */
+  .og-cols{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px}
   /* 두 칸은 높이가 같아집니다. 안쪽 내용이 남는 높이를 채우도록 폅니다 */
   .og-box{display:flex;flex-direction:column;
     background:#fff;border:1.5px solid #cfe8fa;border-radius:20px;padding:16px 18px 18px;
@@ -468,7 +468,7 @@
   /* 시상 내역 — 시안처럼 표로 */
   /* 표를 내용만큼만 넓혀 가운데에 둡니다 — 양옆에 여백이 생깁니다 */
   /* 표는 내용만큼만 — 늘어나면 줄 간격이 과하게 벌어집니다 */
-  .og-award table{flex:none;width:min(100%,560px);margin:0 auto;border-collapse:collapse}
+  .og-award table{flex:1;width:min(100%,560px);margin:0 auto;border-collapse:collapse}
   .og-award tr{border-bottom:1px dashed #dceaf6}
   .og-award tr:last-child{border-bottom:0}
   .og-award th,.og-award td{padding:9px 0;vertical-align:middle}
@@ -485,7 +485,7 @@
   .og-award tr.gift th{padding-left:10px;color:#1b3fa0}
   .og-award tr.gift .c{color:#d61e5c;font-weight:900;padding-left:12px}
   .og-award tr.gift .v{padding-right:10px;color:#2353c9}
-  .aw-gift{position:relative;flex:none;margin:30px 0 0;padding:18px 16px 16px;
+  .aw-gift{position:relative;flex:1;margin:30px 0 0;padding:18px 16px 16px;
     border-radius:20px;text-align:center;
     background:linear-gradient(160deg,#eef4ff 0%,#fff6fa 100%);border:2px dashed #b9cdf0}
   .aw-ribbon{position:absolute;top:-22px;left:50%;transform:translateX(-50%);
