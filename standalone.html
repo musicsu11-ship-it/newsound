@@ -373,9 +373,11 @@
   }
 
   /* 포스터는 왼쪽, 안내 글은 오른쪽 — 위를 맞춰 나란히 둡니다 */
-  /* 포스터는 왼쪽에, 두 칸보다 작게 — 셋이 한 줄로 나란히 섭니다 */
-  .og-main{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);
-    gap:20px;align-items:start}
+  /* 포스터와 '참여 방법'을 한 칸으로 묶고, 오른쪽에 시상 내역을 둡니다 */
+  .og-main{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-items:start}
+  .og-colL{display:flex;flex-direction:column;gap:16px;min-width:0}
+  .og-colL .og-hero{width:min(340px,100%);margin:0 auto}
+  .og-colL .og-box{flex:1}
   .og-right{min-width:0;display:flex;flex-direction:column;gap:14px}
   /* 포스터 — 누르면 크게 볼 수 있습니다 */
   .og-hero{display:block;margin:0;padding:0;border:0;background:transparent;
@@ -418,7 +420,7 @@
 
   /* 참여 방법 · 시상 내역 두 칸 */
   /* 시상 내역 글씨를 키우느라 그쪽 칸을 조금 넓혔습니다 */
-  .og-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px}
+  .og-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
   /* 두 칸은 높이가 같아집니다. 안쪽 내용이 남는 높이를 채우도록 폅니다 */
   .og-box{display:flex;flex-direction:column;
     background:#fff;border:1.5px solid #cfe8fa;border-radius:20px;padding:16px 18px 18px;
@@ -448,12 +450,14 @@
   .og-award th{text-align:left;font-size:27px;font-weight:900;color:#123a56;white-space:nowrap}
   .og-award th span{margin-right:8px;font-size:27px;vertical-align:-2px}
   .og-award .c{text-align:center;font-size:22px;font-weight:800;color:#5b7892;white-space:nowrap}
-  .og-award .v{text-align:right;font-size:39px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
+  .og-award .v{text-align:right;font-size:34px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
   .og-award .g .v{color:#9a6c00} .og-award .s .v{color:#44506b}
   .og-award .b .v{color:#90511f} .og-award .p .v{color:#4b3f9e}
   /* 참가상 — 줄 전체를 강조하고, 상품 사진은 표 아래에 칸 너비로 크게 */
   .og-award tr.gift th,.og-award tr.gift td{background:#eef4ff}
   .og-award tr.gift th{padding-left:10px;color:#1b3fa0}
+  /* 참가상 리본은 분홍 그림이라, 색만 돌려 민트로 보이게 합니다 */
+  .og-award tr.gift th span{filter:hue-rotate(185deg) saturate(1.15)}
   .og-award tr.gift .c{color:#2353c9;font-weight:900;padding-left:12px}
   .og-award tr.gift .v{padding-right:10px;color:#2353c9}
   .aw-gift{position:relative;flex:none;margin:17px 0 0;padding:18px 16px 16px;
@@ -578,7 +582,7 @@
     .og-award h3{font-size:18px}
     .og-award th{font-size:19px}
     .og-award th span{font-size:19px;margin-right:6px}
-    .og-award .v{font-size:26px}
+    .og-award .v{font-size:24px}
     .og-award .c{font-size:16px}
     .og-info li{font-size:14.5px}
     .og-info b{font-size:13px;padding:3px 9px}
@@ -3162,12 +3166,12 @@ function boardView(key){
           <p class="og-catch">트렌디한 감각으로 <b>나만의 출근룩</b>을 보여 주세요!</p>
 
           <div class="og-main">
-      <button type="button" class="og-hero" data-zoom="assets/ootd-poster.webp"
-        aria-label="출근룩 콘테스트 포스터 크게 보기">
-        <img src="assets/ootd-poster.webp" alt="출근룩 콘테스트 포스터" loading="lazy" decoding="async"></button>
-
           <div class="og-right">
           <div class="og-cols">
+            <div class="og-colL">
+            <button type="button" class="og-hero" data-zoom="assets/ootd-poster.webp"
+              aria-label="출근룩 콘테스트 포스터 크게 보기">
+              <img src="assets/ootd-poster.webp" alt="출근룩 콘테스트 포스터" loading="lazy" decoding="async"></button>
             <div class="og-box">
               <h3>참여 방법</h3>
               <ul class="og-facts">
@@ -3184,6 +3188,7 @@ function boardView(key){
                 <li><span class="n">3</span>
                   <span class="tx"><b>좋아요 많은 순으로 시상</b><em>순위는 실시간으로 바뀝니다</em></span></li>
               </ol>
+            </div>
             </div>
 
             <div class="og-box og-award">
