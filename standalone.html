@@ -440,16 +440,17 @@
 
   /* 시상 내역 — 시안처럼 표로 */
   /* 표를 내용만큼만 넓혀 가운데에 둡니다 — 양옆에 여백이 생깁니다 */
-  .og-award table{flex:1;width:min(100%,520px);margin:0 auto;border-collapse:collapse}
+  /* 표는 내용만큼만 — 늘어나면 줄 간격이 과하게 벌어집니다 */
+  .og-award table{flex:none;width:min(100%,460px);margin:0 auto;border-collapse:collapse}
   .og-award tr{border-bottom:1px dashed #dceaf6}
   .og-award tr:last-child{border-bottom:0}
   .og-award th,.og-award td{padding:9px 0;vertical-align:middle}
   .og-award h3{font-size:20px}
   .og-award th{text-align:left;font-size:20px;font-weight:900;color:#123a56;white-space:nowrap}
   /* 이모지와 금액만 크게 — 상 이름·인원은 참여 방법과 같은 크기 */
-  .og-award th span{margin-right:11px;font-size:30px;vertical-align:-6px}
+  .og-award th span{margin-right:10px;font-size:26px;vertical-align:-4px}
   .og-award .c{text-align:center;font-size:15px;font-weight:800;color:#5b7892;white-space:nowrap}
-  .og-award .v{text-align:right;font-size:34px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
+  .og-award .v{text-align:right;font-size:27px;font-weight:900;letter-spacing:-.04em;white-space:nowrap}
   .og-award .g .v{color:#9a6c00} .og-award .s .v{color:#44506b}
   .og-award .b .v{color:#90511f} .og-award .p .v{color:#4b3f9e}
   /* 참가상 — 줄 전체를 강조하고, 상품 사진은 표 아래에 칸 너비로 크게 */
@@ -457,7 +458,7 @@
   .og-award tr.gift th{padding-left:10px;color:#1b3fa0}
   .og-award tr.gift .c{color:#d61e5c;font-weight:900;padding-left:12px}
   .og-award tr.gift .v{padding-right:10px;color:#2353c9}
-  .aw-gift{position:relative;flex:none;margin:34px 0 0;padding:18px 16px 16px;
+  .aw-gift{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;margin:34px 0 0;padding:18px 16px 16px;
     border-radius:20px;text-align:center;
     background:linear-gradient(160deg,#eef4ff 0%,#fff6fa 100%);border:2px dashed #b9cdf0}
   .aw-ribbon{position:absolute;top:-22px;left:50%;transform:translateX(-50%);
@@ -477,7 +478,7 @@
     background:linear-gradient(transparent 58%,#ffc9dd 58%,#ff9dbe 92%,transparent 92%)}
   /* 넓은 화면에서는 사진 왼쪽 · 글 오른쪽으로 눕혀 칸이 덜 길어지게 */
   @media (min-width:861px){
-    .aw-gift{display:flex;align-items:center;gap:18px;padding:22px 16px 16px}
+    .aw-gift{flex-direction:row;align-items:center;gap:18px;padding:22px 16px 16px}
     .aw-gift img{flex:none;width:40%;margin:0}
     .aw-gift .tx{min-width:0}
     .aw-gift b{margin-top:0;font-size:40px}
@@ -583,9 +584,9 @@
     .og-steps .n{width:36px;height:36px;font-size:18px}
     .og-award h3{font-size:18px}
     .og-award th{font-size:18px}
-    .og-award th span{font-size:26px;margin-right:8px}
+    .og-award th span{font-size:23px;margin-right:8px}
     .og-award .c{font-size:14px}
-    .og-award .v{font-size:29px}
+    .og-award .v{font-size:24px}
     .og-info li{font-size:14.5px}
     .og-info b{font-size:13px;padding:3px 9px}
     .ootd-top{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
