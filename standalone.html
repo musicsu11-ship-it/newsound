@@ -453,8 +453,6 @@
   /* 참가상 — 줄 전체를 강조하고, 상품 사진은 표 아래에 칸 너비로 크게 */
   .og-award tr.gift th,.og-award tr.gift td{background:#eef4ff}
   .og-award tr.gift th{padding-left:10px;color:#1b3fa0}
-  /* 참가상 리본은 분홍 그림이라, 색만 돌려 민트로 보이게 합니다 */
-  .og-award tr.gift th span{filter:hue-rotate(185deg) saturate(1.15)}
   .og-award tr.gift .c{color:#2353c9;font-weight:900;padding-left:12px}
   .og-award tr.gift .v{padding-right:10px;color:#2353c9}
   .aw-gift{position:relative;flex:none;margin:17px 0 0;padding:18px 16px 16px;
@@ -1523,6 +1521,7 @@
   .op-prizes .g{background:#fffaed;border-color:#f0c64a;color:#8a6200}
   .op-prizes .s{background:#f6f8fb;border-color:#c6cede;color:#48536d}
   .op-prizes .b{background:#fdf2ea;border-color:#dfae8c;color:#8a4f24}
+  .op-prizes .p{background:#eef4ff;border-color:#b9cdf0;color:#1b3fa0}
   .op-sub{margin:0;font-size:13px;color:var(--muted);line-height:1.55;word-break:keep-all}
   .op-sub b{font-weight:900;color:#0a6fb5}
   @media (max-width:560px){
@@ -2167,8 +2166,9 @@ function contestPopup(next){
       <img class="op-poster" src="assets/ootd-poster.webp"
         alt="출근룩 콘테스트 — 고용노동부 패셔니스타를 찾아라!">
       <div class="op-prizes">
-        <span class="g">🥇 10만원</span><span class="s">🥈 5만원</span>
-        <span class="b">🥉 3만원</span><span>🎁 장려상 10명</span>
+        <span class="g">🥇 1등 10만원</span><span class="s">🥈 2등 5만원</span>
+        <span class="b">🥉 3등 3만원</span><span>🎁 장려상 10명</span>
+        <span class="p">💛 참가상 키캡 20명</span>
       </div>
       <p class="op-sub">${joined
         ? '이미 참여하셨어요! 다른 사람 출근룩에도 좋아요를 눌러 주세요.'
@@ -3195,10 +3195,10 @@ function boardView(key){
                 <tr class="s"><th><span aria-hidden="true">🥈</span>2 등</th><td class="c">2명</td><td class="v">5만원</td></tr>
                 <tr class="b"><th><span aria-hidden="true">🥉</span>3 등</th><td class="c">3명</td><td class="v">3만원</td></tr>
                 <tr class="p"><th><span aria-hidden="true">🎁</span>장려상</th><td class="c">10명</td><td class="v">5천원</td></tr>
-                <tr class="gift"><th><span aria-hidden="true">🎀</span>참가상</th><td class="c">추첨 20명</td><td class="v">키캡</td></tr>
+                <tr class="gift"><th><span aria-hidden="true">💛</span>참가상</th><td class="c">추첨 20명</td><td class="v">키캡</td></tr>
               </table>
               <div class="aw-gift">
-                <span class="aw-ribbon">🎀 참가상 선물</span>
+                <span class="aw-ribbon">💛 참가상 선물</span>
                 <img src="assets/prize-keycap.webp" loading="lazy" decoding="async"
                   alt="고드래곤과 새초롱이 그림이 들어간 키캡 6개 키링">
                 <span class="tx"><b>한정판 고드래곤 키캡</b>
