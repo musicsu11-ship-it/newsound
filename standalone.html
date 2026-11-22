@@ -3588,7 +3588,8 @@ function openOotdForm(edit){
       <input id="odFile" type="file" accept="image/*">
       <span class="hint">한 장만 올려 주세요. 자동으로 줄여서 올라갑니다.</span></label>
     <div class="thumbs" id="odThumbs">${img0 ? `<img src="${img0.data}" alt="">` : ''}</div>
-    <p class="hint" style="margin:4px 0 0">올린 사진과 이름은 <b>직원 누구나</b> 볼 수 있습니다.</p>
+    <p class="hint" style="margin:4px 0 0">올린 사진과 소속·이름은 <b>직원 누구나</b> 볼 수 있습니다.<br>
+    부적절한 사진의 경우 검토 후 삭제 처리될 수 있습니다.</p>
     <div class="row-actions"><button class="btn primary" id="odSave">${e0 ? '수정 저장' : '올리기'}</button></div>`);
   let picked = [];
   $('#odFile').addEventListener('change', async ev => {
