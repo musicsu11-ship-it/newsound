@@ -316,7 +316,7 @@
   /* 마스코트 — 오른쪽 아래에 장식으로. 좁은 화면에서는 숨깁니다 */
   .og-mascot{position:absolute;right:8px;bottom:-20px;width:152px;height:auto;
     pointer-events:none;user-select:none;opacity:.95}
-  /* ── 우리 지청 맛집 — 메뉴판 카드 ── */
+  /* ── 맛집여지도 — 메뉴판 카드 ── */
   .fd-menu{background:#f4f4f6;border:1px solid #e6e6ec;border-radius:24px;padding:28px 26px 32px}
   .fd-catch{margin:0 0 6px;text-align:center;font-size:30px;font-weight:900;letter-spacing:-.03em;
     color:#2b2b33;word-break:keep-all}
@@ -335,12 +335,51 @@
     object-fit:cover;border-radius:16px;box-shadow:0 8px 20px rgba(32,30,40,.18)}
   .fd-none{position:relative;z-index:1;display:grid;place-items:center;width:100%;aspect-ratio:1/1;
     border-radius:16px;background:#fff;font-size:46px;box-shadow:0 8px 20px rgba(32,30,40,.12)}
-  /* 지청 고르기 줄 */
-  .fd-offs{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:0 0 22px}
-  .fd-offs button{border:1.5px solid #e0e0e8;background:#fff;color:#55555f;font:inherit;
-    font-size:13px;font-weight:800;padding:7px 15px;border-radius:999px;cursor:pointer}
-  .fd-offs button:hover{border-color:#f08a1c;color:#c2700a}
-  .fd-offs button.on{background:#f08a1c;border-color:#f08a1c;color:#fff}
+  /* ── 맛집여지도 — 소속기관 지도 ────────────────────────────────────────
+     고용노동부 '소속기관' 화면처럼 권역마다 카드를 두고, 그 안에 지방청과
+     지청을 알약으로 늘어놓습니다. 권역 색은 관광지도처럼 서로 다릅니다.
+     --rc 가 그 카드의 권역 색입니다. */
+  .fdm{margin:0 0 24px;padding:24px 20px 20px;border-radius:24px;
+    background:linear-gradient(180deg,#f3f8ff 0%,#fff 72%);border:1px solid #e1e8f7}
+  .fdm-head{text-align:center;margin-bottom:18px}
+  .fdm-head h2{margin:0 0 5px;font-size:20px;font-weight:900;letter-spacing:-.02em;color:#123a56}
+  .fdm-head p{margin:0 0 13px;font-size:13.5px;font-weight:600;color:#5b7892;word-break:keep-all}
+  .fdm-all{border:1.5px solid #c9d6ee;background:#fff;color:#1b3fa0;font:inherit;
+    font-size:13.5px;font-weight:800;padding:8px 22px;border-radius:999px;cursor:pointer}
+  .fdm-all:hover{border-color:#1b3fa0}
+  .fdm-all.on{background:#1b3fa0;border-color:#1b3fa0;color:#fff}
+  .fdm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(232px,100%),1fr));gap:13px}
+  .fdm-reg{border:1px solid #e3e9f6;border-radius:18px;background:#fff;overflow:hidden;
+    box-shadow:0 2px 10px rgba(22,34,92,.05)}
+  .fdm-rh{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:9px 14px;background:var(--rc);color:#fff}
+  .fdm-rh b{font-size:14.5px;font-weight:900;letter-spacing:-.02em}
+  .fdm-rh em{font-style:normal;font-size:11.5px;font-weight:800;opacity:.92;white-space:nowrap}
+  .fdm-chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px}
+  .fdm-chips button{display:inline-flex;align-items:center;gap:5px;
+    border:1.5px solid #e2e6f0;background:#fff;color:#44506b;font:inherit;
+    font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px;cursor:pointer}
+  .fdm-chips button:hover{border-color:var(--rc);color:var(--rc)}
+  .fdm-chips button.on{background:var(--rc);border-color:var(--rc);color:#fff}
+  .fdm-chips button.on:hover{color:#fff}
+  /* 아직 맛집이 없는 기관 — 있다는 것은 보이되 얌전하게 */
+  .fdm-chips button.zero{color:#9aa4b8;border-style:dashed}
+  /* 지방청은 한 줄을 다 쓰는 머리 알약 */
+  .fdm-chips .hd{width:100%;justify-content:center;font-size:13px;font-weight:900;
+    background:#f3f6fd;border-color:#dfe6f5;color:#1b3fa0}
+  .fdm-chips .hd.on{background:var(--rc);border-color:var(--rc);color:#fff}
+  .fdm-n{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;
+    border-radius:999px;background:var(--rc);color:#fff;font-size:10.5px;font-weight:900}
+  .fdm-chips button.on .fdm-n{background:rgba(255,255,255,.32)}
+  /* 지금 고른 기관을 알려 주는 줄 */
+  .fdm-now{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+    margin:0 0 18px}
+  .fdm-now .pin{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:999px;
+    background:var(--rc);color:#fff;font-size:14.5px;font-weight:900}
+  .fdm-now .pin em{font-style:normal;font-size:12.5px;font-weight:800;opacity:.9}
+  .fdm-now button{border:1.5px solid #d8def0;background:#fff;color:#5b7892;font:inherit;
+    font-size:12.5px;font-weight:800;padding:6px 14px;border-radius:999px;cursor:pointer}
+  .fdm-now button:hover{border-color:#5b7892;color:#123a56}
   /* 사진 고르기 — 📷 단추 */
   .fd-pick{display:flex;align-items:center;gap:12px;margin-top:4px}
   .fd-picbtn{flex:none;display:grid;place-items:center;width:64px;height:64px;padding:0;overflow:hidden;
@@ -351,8 +390,9 @@
   .fd-pictx em{display:block;margin-top:2px;font-style:normal;font-size:12px;font-weight:600;color:var(--muted)}
   /* 지청 꼬리표 */
   .fd-tags{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  /* 기관 꼬리표 — 그 기관이 속한 권역 색으로 칠합니다(--rc) */
   .fd-off{display:inline-block;padding:3px 10px;border-radius:999px;
-    background:#e9f1ff;color:#2b5fd9;font-size:11.5px;font-weight:900}
+    background:var(--rc,#2b5fd9);color:#fff;font-size:11.5px;font-weight:900}
   /* 분류 꼬리표 · 별점 · 위치 — 네이버 플레이스처럼 한눈에 */
   .fd-cat{display:inline-block;padding:3px 10px;border-radius:999px;
     background:#fff1e0;color:#c2700a;font-size:11.5px;font-weight:900}
@@ -2432,8 +2472,8 @@ const BOARDS = {
   relief: { label:'멘탈관리.zip', icon:'💛', layout:'list',
             desc:'지칠 때 힘이 된 것들을 나누는 공간입니다. 사진·영상·파일 모두 올릴 수 있어요.', write:OPEN_WRITE },
   /* 맛집 — 사진이 있으면 크게 보이고, 없어도 글만 올릴 수 있습니다(gallery) */
-  food:   { label:'우리 지청 맛집', icon:'🍜', layout:'gallery',
-            desc:'지청 가까운 맛집을 서로 추천하는 공간입니다. 가게 이름·메뉴·위치를 사진과 함께 올려 주세요.', write:OPEN_WRITE },
+  food:   { label:'맛집여지도', icon:'🗺️', layout:'gallery',
+            desc:'서울부터 제주까지, 소속기관 주변 숨은 맛집을 함께 공유해요!', write:OPEN_WRITE },
 };
 /* AI.zip 분야 — 큰 분야(고용·노동·산안·기타) 안에 담당 업무가 들어 있습니다.
    글에는 담당 업무 이름(예: '실업급여')을 저장하고, 큰 분야는 여기서 찾아 씁니다.
@@ -2486,7 +2526,7 @@ const MENUS = [
   { id:'mascot',   icon:'🐉', label:'고드래곤&새초롱이', roles:ALL, group:'라운지' },
   { id:'ai',       icon:'🤖', label:'AI.zip',       roles:ALL,   group:'라운지' },
   { id:'relief',   icon:'💛', label:'멘탈관리.zip',  roles:ALL,   group:'라운지' },
-  { id:'food',     icon:'🍜', label:'우리 지청 맛집', roles:ALL,  group:'라운지' },
+  { id:'food',     icon:'🗺️', label:'맛집여지도', roles:ALL,  group:'라운지' },
   { id:'game',     icon:'🎮', label:'게임',         roles:ALL,   group:'일정' },
 
   /* 공지사항을 이 묶음의 맨 위에 둡니다 — 단원이 가장 먼저 봐야 하는 곳입니다.
@@ -3892,13 +3932,36 @@ function boardView(key){
 
   /* ── 고드래곤&새초롱이: 사진 격자 + 좋아요. 이름은 어디에도 나오지 않습니다.
         사진이 없는 글(zip·hwp 만 올린 글)도 아이콘 칸으로 그대로 보입니다. ── */
-  /* ── 우리 지청 맛집 — 메뉴판처럼 ──
+  /* ── 맛집여지도 — 메뉴판처럼 ──
      사진을 네모로 올리고 그 아래로 주황 카드가 살짝 삐져나오게 둡니다.
      가게 이름(제목)과 한 줄 설명(본문)을 사진 아래에 가운데로 적습니다. */
   if(key === 'food'){
-    /* 지청으로 걸러 보기 — 고른 지청이 있으면 그 지청 맛집만 보여 줍니다 */
-    const offs = foodOffices();
+    /* 기관으로 걸러 보기 — 고른 기관이 있으면 그 둘레 맛집만 보여 줍니다 */
+    const cnt   = foodCounts();
+    const total = S.posts.filter(p => p.board === 'food').length;
     if(FOOD_OFFICE) list = list.filter(p => (placeOf(p).office || '').trim() === FOOD_OFFICE);
+
+    /* 알약 하나 — 기관 이름과 올라온 맛집 수(핀 개수) */
+    const chip = (name, isHead) => { const n = cnt[name] || 0;
+      return `<button type="button" data-off="${esc(name)}"
+        class="${isHead ? 'hd ' : ''}${FOOD_OFFICE === name ? 'on' : ''}${n ? '' : ' zero'}"
+        title="${esc(name)} 둘레 맛집 ${n}곳">${esc(name)}${
+        n ? `<span class="fdm-n">${n}</span>` : ''}</button>`; };
+
+    /* 권역 카드 하나 — 고용노동부 '소속기관' 화면과 같은 묶음 */
+    const regionCard = (r) => {
+      const n = (cnt[r.head] || 0) + r.offices.reduce((s, o) => s + (cnt[o] || 0), 0);
+      return `<div class="fdm-reg" style="--rc:${r.color}">
+        <div class="fdm-rh"><b>${esc(r.name)}</b><em>${n}곳</em></div>
+        <div class="fdm-chips">${chip(r.head, true)}${r.offices.map(o => chip(o)).join('')}</div>
+      </div>`; };
+
+    /* 표에 없는 이름으로 적어 둔 글이 있으면 따로 모아 둡니다 */
+    const etc = foodOtherOffices();
+    const etcCard = etc.length ? `<div class="fdm-reg" style="--rc:#8a8f9c">
+      <div class="fdm-rh"><b>그 밖</b><em>${etc.reduce((s, o) => s + (cnt[o] || 0), 0)}곳</em></div>
+      <div class="fdm-chips">${etc.map(o => chip(o)).join('')}</div></div>` : '';
+
     const card = (p) => { const pl = placeOf(p); return `<article class="fd-card" data-open-post="${p.id}" tabindex="0" role="button">
       <div class="fd-ph">
         <span class="fd-box" aria-hidden="true"></span>
@@ -3906,7 +3969,8 @@ function boardView(key){
           ? `<img src="${esc(photoOf(p))}" alt="${esc(p.title)}" loading="lazy" decoding="async">`
           : '<span class="fd-none" aria-hidden="true">🍽️</span>'}
       </div>
-      <span class="fd-tags">${pl.office ? `<span class="fd-off">${esc(pl.office)}</span>` : ''}${
+      <span class="fd-tags">${pl.office
+        ? `<span class="fd-off" style="--rc:${officeColor(pl.office)}">${esc(pl.office)}</span>` : ''}${
         pl.cat ? `<span class="fd-cat">${esc(pl.cat)}</span>` : ''}</span>
       <h3>${highlight(p.title, Q[key])}</h3>
       ${pl.star ? `<div class="fd-rate">${stars(pl.star)}<em>${Number(pl.star)}.0</em></div>` : ''}
@@ -3929,15 +3993,28 @@ function boardView(key){
       </div>
     </div>
     ${q ? `<div class="search-info">“${esc(Q[key])}” 검색 결과 ${list.length}건</div>` : ''}
+
+    <section class="fdm">
+      <div class="fdm-head">
+        <h2>🗺️ 어느 기관 둘레가 궁금하세요?</h2>
+        <p>기관을 누르면 그 둘레 맛집만 모아서 봅니다. 알약 옆 숫자가 올라온 맛집 수예요.</p>
+        <button type="button" class="fdm-all ${FOOD_OFFICE ? '' : 'on'}" data-off="">전국 모두 보기 · ${total}곳</button>
+      </div>
+      <div class="fdm-grid">${MOF_REGIONS.map(regionCard).join('')}${etcCard}</div>
+    </section>
+
+    ${FOOD_OFFICE ? `<div class="fdm-now" style="--rc:${officeColor(FOOD_OFFICE)}">
+      <span class="pin">📍 ${esc(FOOD_OFFICE)} <em>맛집 ${list.length}곳</em></span>
+      <button type="button" data-off="">전국 모두 보기</button>
+    </div>` : ''}
+
     <section class="fd-menu">
       <h2 class="fd-catch">여러분의 <b>최애 맛집</b>은?</h2>
-      <p class="fd-sub">우리 지청 맛집 프로잘알러는 나.</p>
-      ${offs.length ? `<div class="fd-offs">
-        <button class="${FOOD_OFFICE ? '' : 'on'}" data-off="">전체</button>
-        ${offs.map(o => `<button class="${FOOD_OFFICE === o ? 'on' : ''}" data-off="${esc(o)}">${esc(o)}</button>`).join('')}
-      </div>` : ''}
+      <p class="fd-sub">서울부터 제주까지, 숨은 맛집 프로잘알러는 나.</p>
       ${list.length ? `<div class="fd-grid">${list.map(card).join('')}</div>`
         : `<div class="empty">${q ? '검색 결과가 없습니다.'
+            : FOOD_OFFICE ? `${esc(FOOD_OFFICE)} 둘레에는 아직 올라온 맛집이 없습니다.${
+                canWrite(key) ? '<br>첫 번째 맛집을 추천해 주세요!' : ''}`
             : `아직 올라온 맛집이 없습니다.${canWrite(key) ? '<br>첫 번째 맛집을 추천해 주세요!' : ''}`}</div>`}
     </section>`;
   }
@@ -4350,8 +4427,8 @@ function bindComments(p, after){
 /* 출근룩 사진 콘테스트 — 올리는 칸을 따로 둡니다.
    일반 직원도 올리는 게시판이라 팀 고르기 대신 소속을 직접 적게 했고,
    사진 한 장과 한 줄 소개만 받습니다. 사진은 media 저장소의 ootd 폴더로 갑니다. */
-/* ── 우리 지청 맛집 ──
-   가게 정보(지청·분류·별점·위치·대표 메뉴·가격대)는 posts.place 칸(44절)에 담고,
+/* ── 맛집여지도 ──
+   가게 정보(소속기관·분류·별점·위치·대표 메뉴·가격대)는 posts.place 칸(44절)에 담고,
    본문에는 '한 줄 평' 만 둡니다. 44절을 아직 실행하지 않았으면 가게 정보 칸을
    빼고 가게 이름·한 줄 평·사진만 받습니다(오류 없이 그대로 올라갑니다). */
 const FOOD_CATS  = ['한식','중식','일식','양식','분식','치킨·피자','카페·디저트','술집','기타'];
@@ -4364,20 +4441,67 @@ const stars = (n) => { const s = Math.max(0, Math.min(5, Number(n) || 0));
 const foodOffices = () => [...new Set(S.posts.filter(p => p.board === 'food')
   .map(p => (placeOf(p).office || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ko'));
 
+/* ── 고용노동부 소속기관 — 7개 지방청 · 41개 지청 · 1개 출장소 ──────────────
+   고용노동부 누리집 '기관소개 → 소속기관' 의 묶음과 차례를 그대로 따랐습니다.
+   색은 관광지도처럼 권역마다 다르게 두어, 어느 지역 맛집인지 한눈에 보이게
+   했습니다. 기관이 바뀌면 이 표만 고치면 화면·등록창이 함께 따라갑니다. */
+const MOF_REGIONS = [
+  { name:'서울',      color:'#e8467c', head:'서울지방고용노동청',
+    offices:['서울강남','서울동부','서울서부','서울남부','서울북부','서울관악'] },
+  { name:'경기',      color:'#f0883a', head:'경기지방고용노동청',
+    offices:['의정부','고양','성남','안양','안산','평택'] },
+  { name:'인천·강원', color:'#17a2a2', head:'중부지방고용노동청',
+    offices:['인천북부','부천','강원(前 춘천)','강릉','원주','태백','영월출장소'] },
+  { name:'부산·경남', color:'#8b5cf6', head:'부산지방고용노동청',
+    offices:['부산동부','부산북부','창원','울산','울산동부','양산','진주','통영'] },
+  { name:'대구·경북', color:'#3b82f6', head:'대구지방고용노동청',
+    offices:['대구서부','포항','구미','영주','안동'] },
+  { name:'광주·전라', color:'#45a833', head:'광주지방고용노동청',
+    offices:['전주','익산','군산','목포','여수'] },
+  { name:'대전·충청', color:'#d79500', head:'대전지방고용노동청',
+    offices:['청주','천안','충주','보령','서산'] },
+];
+/* 기관 이름 하나로 그 권역을 찾습니다. 표에 없는 이름(예전에 손으로 적은 것)은
+   null 이 나오고, 화면에서는 '그 밖의 기관' 으로 따로 모읍니다 */
+function officeRegion(name){
+  const n = (name || '').trim();
+  if(!n) return null;
+  return MOF_REGIONS.find(r => r.head === n || r.offices.includes(n)) || null;
+}
+const officeColor = (name) => (officeRegion(name) || {}).color || '#8a8f9c';
+/* 기관별 맛집 수 — 지도 위의 핀 개수에 해당합니다 */
+function foodCounts(){
+  const m = {};
+  S.posts.filter(p => p.board === 'food').forEach(p => {
+    const o = (placeOf(p).office || '').trim();
+    if(o) m[o] = (m[o] || 0) + 1;
+  });
+  return m;
+}
+/* 표에 없는데 글에는 적혀 있는 기관 이름들 */
+const foodOtherOffices = () => foodOffices().filter(o => !officeRegion(o));
+
 function openFoodForm(edit){
   const e0 = edit || null;
   const pl = placeOf(e0);
   const on = POST_COLS.place === true;            // 44절 실행 여부
   const was = e0 ? (e0.author_name || '') : '';
-  openModal(`🍜 우리 지청 맛집 · ${e0 ? '수정' : '맛집 올리기'}`, `
+  const cur = (pl.office || '').trim();           // 지금 골라져 있는 소속기관
+  openModal(`🗺️ 맛집여지도 · ${e0 ? '수정' : '맛집 올리기'}`, `
     <label class="field">가게 이름 <span class="req">*</span>
       <input id="fdName" maxlength="40" placeholder="예) 할매 손칼국수" value="${e0 ? esc(e0.title) : ''}"></label>
 
     ${on ? `<div class="grid c2">
-      <label class="field">지청 <span class="hint" style="display:inline">같은 지청끼리 모아 볼 수 있어요</span>
-        <input id="fdOffice" maxlength="30" list="fdOfficeList" placeholder="예) 서울남부지청"
-          value="${esc(pl.office || '')}">
-        <datalist id="fdOfficeList">${foodOffices().map(o => `<option value="${esc(o)}">`).join('')}</datalist></label>
+      <label class="field">소속기관 <span class="hint" style="display:inline">맛집여지도에서 기관끼리 모아 볼 수 있어요</span>
+        <select id="fdOffice">
+          <option value=""${cur ? '' : ' selected'}>선택 안 함</option>
+          ${MOF_REGIONS.map(r => `<optgroup label="${esc(r.name)}">${
+            [r.head, ...r.offices].map(o =>
+              `<option${o === cur ? ' selected' : ''}>${esc(o)}</option>`).join('')
+          }</optgroup>`).join('')}
+          ${cur && !officeRegion(cur)
+            ? `<optgroup label="예전에 적어 두신 이름"><option selected>${esc(cur)}</option></optgroup>` : ''}
+        </select></label>
       <label class="field">분류
         <select id="fdCat">${FOOD_CATS.map(c =>
           `<option ${pl.cat === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
@@ -4565,7 +4689,7 @@ Object.keys(BOARDS).forEach(key=>{
       key === 'ootd' ? openOotdForm() : key === 'food' ? openFoodForm() : openPostForm(key));
     /* 출근룩 — 한 사람 한 장이라, 이미 올렸으면 바로 수정 창을 엽니다 */
     $('#bdMine')?.addEventListener('click', ()=>{ const m = myOotd(); if(m) openOotdForm(m); });
-    /* 맛집 — 지청 고르기 */
+    /* 맛집 — 기관 고르기 */
     $$('#main [data-off]').forEach(b => b.addEventListener('click', ()=>{
       FOOD_OFFICE = b.dataset.off; go('food');
     }));
@@ -5172,7 +5296,7 @@ const isBalance = (p) => p.kind === 'balance';
    투표한 뒤에 소속·연락처를 남기면 추첨 명단에 들어갑니다.
    명단에는 '어느 쪽을 골랐는지' 를 아예 적지 않아서, 명단을 보는 담당관도
    그 사람이 A 를 골랐는지 B 를 골랐는지 알 수 없습니다(결과는 끝까지 익명). */
-let FOOD_OFFICE = '';                  // 맛집 — 고른 지청('' 이면 전체)
+let FOOD_OFFICE = '';                  // 맛집 — 고른 기관('' 이면 전체)
 let BG_VIEW = 'list';                  // 'list' 목록형 · 'card' 카드형 (게임이 여럿일 때만 고를 수 있음)
 let BG_OPEN = '';                      // 목록에서 눌러 들어간 게임 id
 
