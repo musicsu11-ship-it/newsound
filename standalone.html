@@ -640,6 +640,13 @@
     .fdm{padding:20px 14px 16px}
     .fdm-body{grid-template-columns:minmax(0,1fr);gap:16px}
     .kmap{max-width:290px}
+    /* 의견함 분류 카드 — 두 칸으로 줄여 스크롤을 아낍니다.
+       (기본 규칙이 이 묶음보다 아래에 있어, 선택자를 한 단계 좁혀 둡니다) */
+    section.opb{padding:20px 14px 14px}
+    .opb .opb-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .opb .opb-card{padding:11px 12px 9px}
+    .opb .opb-card b{font-size:13px}
+    .opb .opb-card .n{font-size:17px}
     .ootd-guide{padding:18px 16px 22px;border-radius:20px}
     .og-facts b{font-size:18px}
     .og-facts em{font-size:14px}
@@ -1325,6 +1332,46 @@
 
   /* ---------- Opinion / comments ---------- */
   .op-item{border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px;background:var(--surface)}
+
+  /* ── 의견함 — 분류별로 한눈에 ────────────────────────────────────────
+     분류마다 건수·공감 수와 막대를 두어, 어떤 이야기가 많이 모였는지
+     한눈에 보이게 합니다. --bg/--fg 는 그 분류의 색입니다. */
+  .opb{margin:0 0 22px;padding:22px 20px 18px;border-radius:24px;
+    background:linear-gradient(180deg,#fdf4f8 0%,#fff 72%);border:1px solid #f4e3ea}
+  .opb-head{text-align:center;margin-bottom:16px}
+  .opb-head h2{margin:0 0 5px;font-size:20px;font-weight:900;letter-spacing:-.02em;color:#2b2b33}
+  .opb-head p{margin:0;font-size:13.5px;font-weight:600;color:#8b8b97;word-break:keep-all}
+  .opb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:10px}
+  .opb-card{display:block;text-align:left;border:1.5px solid #ececf2;border-radius:16px;
+    background:#fff;padding:13px 14px 11px;font:inherit;cursor:pointer;
+    transition:transform .14s,border-color .14s,background .14s}
+  .opb-card:hover{transform:translateY(-2px);border-color:var(--fg,#5b6591)}
+  .opb-card.on{border-color:var(--fg,#5b6591);background:var(--bg,#eef1f7);
+    box-shadow:0 4px 14px rgba(22,34,92,.1)}
+  .opb-card b{display:block;margin-bottom:6px;font-size:14px;font-weight:900;
+    color:var(--fg,#2b2b33);word-break:keep-all}
+  .opb-card .n{font-size:19px;font-weight:900;color:#2b2b33}
+  .opb-card .lk{margin-left:7px;font-size:12px;font-weight:800;color:#8b8b97}
+  .opb-card .bar{display:block;margin-top:9px;height:5px;border-radius:999px;background:#f0f0f5}
+  .opb-card .bar i{display:block;height:100%;border-radius:999px;background:var(--fg,#5b6591)}
+  /* 아직 의견이 없는 분류 — 있다는 것은 보이되 얌전하게 */
+  .opb-card.zero{opacity:.55}
+  .opb-card.all{--bg:#e9f1ff;--fg:#2b5fd9}
+  /* 지금 고른 분류를 알려 주는 줄 */
+  .op-now{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+    margin:0 0 16px}
+  .op-now .pick{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:999px;
+    background:var(--bg);color:var(--fg);font-size:14.5px;font-weight:900}
+  .op-now .pick em{font-style:normal;font-size:12.5px;font-weight:800;opacity:.85}
+  .op-now button{border:1.5px solid #e0e0e8;background:#fff;color:#8b8b97;font:inherit;
+    font-size:12.5px;font-weight:800;padding:6px 14px;border-radius:999px;cursor:pointer}
+  .op-now button:hover{border-color:#5b6591;color:#2b2b33}
+  /* 목록에서 분류가 바뀌는 자리에 끼우는 머리줄 */
+  .op-grp{display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+    margin:22px 0 12px;padding:9px 16px;border-radius:12px;
+    background:var(--bg);border-left:5px solid var(--fg)}
+  .op-grp b{font-size:15px;font-weight:900;color:var(--fg)}
+  .op-grp em{font-style:normal;font-size:12.5px;font-weight:800;color:#6b6b78}
   .op-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
   .op-body{margin-top:10px;white-space:pre-wrap;font-size:16px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere}
   .cmt-list{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px}
@@ -4212,6 +4259,44 @@ const OP_CAT_COLORS = {
 const catTag = (cat) => { const [bg,fg] = OP_CAT_COLORS[cat] || OP_CAT_COLORS['기타'];
   return `<span class="tag" style="background:${bg};color:${fg}">${esc(cat)}</span>`; };
 
+/* ── 분류별로 한눈에 보기 ──────────────────────────────────────────────────
+   어떤 이야기가 얼마나 모였는지 분류마다 건수·공감 수를 함께 보여 주고,
+   누르면 그 분류 의견만 모아 봅니다. 아무것도 안 고르면 목록이 분류별로
+   묶여서 나옵니다. */
+let OP_CAT = '';                        // 고른 분류('' 이면 전체)
+/* 목록에 없는 옛 분류는 '기타' 로 묶습니다 */
+const opCatOf = (o) => OP_CATS.includes(o.cat) ? o.cat : '기타';
+
+function opCatStats(all){
+  const m = {};
+  OP_CATS.forEach(c => m[c] = { n:0, likes:0 });
+  all.forEach(o => { const c = opCatOf(o); m[c].n++; m[c].likes += (o.likes || 0); });
+  return m;
+}
+function opCatBoard(all){
+  const st   = opCatStats(all);
+  const max  = Math.max(1, ...OP_CATS.map(c => st[c].n));
+  const totL = all.reduce((s, o) => s + (o.likes || 0), 0);
+  return `<section class="opb">
+    <div class="opb-head">
+      <h2>🗂️ 분류별로 한눈에</h2>
+      <p>어떤 이야기가 많이 모였는지 한눈에 보고, 분류를 누르면 그 의견만 모아서 봅니다.</p>
+    </div>
+    <div class="opb-grid">
+      <button type="button" class="opb-card all${OP_CAT ? '' : ' on'}" data-opcat="">
+        <b>전체</b><span class="n">${all.length}건</span><span class="lk">💗 ${totL}</span>
+        <span class="bar"><i style="width:100%"></i></span>
+      </button>
+      ${OP_CATS.map(c => { const s = st[c], [bg, fg] = OP_CAT_COLORS[c] || OP_CAT_COLORS['기타'];
+        return `<button type="button" class="opb-card${OP_CAT === c ? ' on' : ''}${s.n ? '' : ' zero'}"
+          data-opcat="${esc(c)}" style="--bg:${bg};--fg:${fg}" title="${esc(c)} ${s.n}건 · 공감 ${s.likes}">
+          <b>${esc(c)}</b><span class="n">${s.n}건</span><span class="lk">💗 ${s.likes}</span>
+          <span class="bar"><i style="width:${Math.round(s.n / max * 100)}%"></i></span>
+        </button>`; }).join('')}
+    </div>
+  </section>`;
+}
+
 /* 목록 정렬 — 최신순 · 공감순 · 오래된순 (index.html 과 같은 규칙) */
 let OP_SORT = 'new';
 const OP_SORTS = [['new','🆕 최신순'], ['likes','💗 공감순'], ['old','🕗 오래된순']];
@@ -4225,6 +4310,7 @@ VIEWS.opinion = () => {
   let list = DB.opinions().slice();
   if(q) list = list.filter(o =>
     (o.body + ' ' + o.cat + ' ' + o.alias + ' ' + (o.comments||[]).map(c=>c.body).join(' ')).toLowerCase().includes(q));
+  if(OP_CAT) list = list.filter(o => opCatOf(o) === OP_CAT);
   list = opSorted(list);
   const isAdmin = SESSION.role==='admin';
 
@@ -4268,14 +4354,37 @@ VIEWS.opinion = () => {
       </label>
       <div class="row-actions"><button class="btn primary" id="opSubmit">익명으로 제출</button></div>
     </div>`
+  + opCatBoard(DB.opinions())
   + searchBar('opinion','의견 내용·별칭·더한 의견으로 검색')
   + `<div class="op-sort"><b>정렬</b>
       ${OP_SORTS.map(([k, label]) => `<button class="op-sortbtn${OP_SORT === k ? ' on' : ''}" data-opsort="${k}">${label}</button>`).join('')}
     </div>`
   + (q ? `<div class="search-info">“${esc(Q.opinion)}” 검색 결과 ${list.length}건</div>` : '')
+  + (OP_CAT ? `<div class="op-now" style="--bg:${(OP_CAT_COLORS[OP_CAT]||OP_CAT_COLORS['기타'])[0]};--fg:${(OP_CAT_COLORS[OP_CAT]||OP_CAT_COLORS['기타'])[1]}">
+      <span class="pick">🗂️ ${esc(OP_CAT)} <em>${list.length}건</em></span>
+      <button type="button" data-opcat="">전체 보기</button>
+    </div>` : '')
   + `<div class="card" style="background:transparent;border:0;box-shadow:none;padding:0">
       <h2 style="margin-bottom:12px">접수된 의견 (${list.length})</h2>
-      ${list.length ? list.map(o=>{
+      ${(()=>{
+        if(!list.length) return `<div class="empty">${q ? '검색 결과가 없습니다.'
+          : OP_CAT ? `‘${esc(OP_CAT)}’ 분류에는 아직 접수된 의견이 없습니다.`
+          : '아직 접수된 의견이 없습니다.'}</div>`;
+        /* 분류를 따로 고르지도, 검색하지도 않았으면 분류별로 묶어서 보여 줍니다 */
+        if(OP_CAT || q) return list.map(opCard).join('');
+        return OP_CATS.map(c => {
+          const items = opSorted(list.filter(o => opCatOf(o) === c));
+          if(!items.length) return '';
+          const [bg, fg] = OP_CAT_COLORS[c] || OP_CAT_COLORS['기타'];
+          const lk = items.reduce((s, o) => s + (o.likes || 0), 0);
+          return `<div class="op-grp" style="--bg:${bg};--fg:${fg}">
+            <b>${esc(c)}</b><em>${items.length}건 · 💗 ${lk}</em></div>` + items.map(opCard).join('');
+        }).join('');
+      })()}
+    </div>`;
+
+  /* 의견 카드 한 장 — 위에서 분류별로 묶어 쓰려고 따로 빼 두었습니다 */
+  function opCard(o){
         const mine = isMine(o.id);
         let btns = '';
         if(mine)       btns += `<button class="btn sm danger" data-del="${o.id}">내 글 삭제</button>`;
@@ -4323,14 +4432,18 @@ VIEWS.opinion = () => {
             </div>
           </div>
         </div>`;
-      }).join('') : `<div class="empty">${q?'검색 결과가 없습니다.':'아직 접수된 의견이 없습니다.'}</div>`}
-    </div>`;
+  }
 };
 BIND.opinion = () => {
   bindSearch('opinion');
   /* 정렬 바꾸기 — 보던 위치는 그대로 둡니다 */
   $$('#main [data-opsort]').forEach(b => b.addEventListener('click', ()=>{
     OP_SORT = b.dataset.opsort;
+    const y = window.scrollY; go('opinion'); window.scrollTo(0, y);
+  }));
+  /* 분류 고르기 — 자리를 지켜 주어야 누른 자리에서 화면이 튀지 않습니다 */
+  $$('#main [data-opcat]').forEach(b => b.addEventListener('click', ()=>{
+    OP_CAT = b.dataset.opcat;
     const y = window.scrollY; go('opinion'); window.scrollTo(0, y);
   }));
 
