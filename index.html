@@ -1835,12 +1835,6 @@
   .op-table td{padding:22px 20px;vertical-align:top}
   .op-table tbody tr{cursor:pointer}
   .op-table tbody tr:hover{background:var(--surface-2)}
-  /* 표 안에서 분류가 바뀌는 자리에 끼우는 머리줄 — 누르는 줄이 아닙니다 */
-  .op-table tbody tr.grp,.op-table tbody tr.grp:hover{cursor:default;background:var(--bg)}
-  .op-table tbody tr.grp td{padding:11px 20px;border-top:2px solid var(--fg)}
-  .op-table tbody tr.grp b{display:inline;font-size:14.5px;font-weight:900;color:var(--fg)}
-  .op-table tbody tr.grp em{margin-left:9px;font-style:normal;font-size:12.5px;
-    font-weight:800;color:#6b6b78}
   .op-table .no{color:var(--muted);font-weight:800;width:60px;font-size:15px}
   .op-table .subj b{display:block;font-size:17px;font-weight:800;margin-bottom:8px}
   /* 의견 내용을 자르지 않고 전부 보여 줍니다.
@@ -5265,16 +5259,9 @@ VIEWS.opinion = () => {
         <td class="c-cat">${catTag(o.cat)}</td>
         <td class="c-alias">${esc(o.alias||'익명')}</td>
       </tr>`; };
-      /* 분류를 따로 고르지도, 검색하지도 않았으면 분류별로 묶어서 보여 줍니다 */
-      if(OP_CAT || q) return list.map(rowOf).join('');
-      return OP_CATS.map(c => {
-        const items = opSorted(list.filter(o => opCatOf(o) === c));
-        if(!items.length) return '';
-        const [bg, fg] = OP_CAT_COLORS[c] || OP_CAT_COLORS['기타'];
-        const lk = items.reduce((s, o) => s + (o.likes || 0), 0);
-        return `<tr class="grp" style="--bg:${bg};--fg:${fg}"><td colspan="4">
-          <b>${esc(c)}</b><em>${items.length}건 · 💗 ${lk}</em></td></tr>` + items.map(rowOf).join('');
-      }).join('');
+      /* 표는 묶지 않고 고른 정렬대로 쭉 보여 줍니다.
+         분류별로 모아 보려면 위의 '분류별로 한눈에' 에서 분류를 누르세요 */
+      return list.map(rowOf).join('');
     })()}${tableEnd}</div>`
     : loadBox(q ? '검색 결과가 없습니다.'
         : OP_CAT ? `‘${esc(OP_CAT)}’ 분류에는 아직 접수된 의견이 없습니다.`
