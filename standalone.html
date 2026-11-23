@@ -328,18 +328,31 @@
   .fdm-body{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);
     gap:20px;align-items:start}
   .fdm-map{display:grid;place-items:center}
-  .kmap{display:block;width:100%;max-width:360px;height:auto}
+  /* 미식여행 지도처럼 — 크림색 바다 위에 한 덩어리 노란 땅,
+     경계는 흰 점선, 고른 권역만 그 권역 색으로 물듭니다 */
+  .kmap{display:block;width:100%;max-width:310px;height:auto}
+  .kmap .sea{fill:#fdf4e2}
+  .kmap .wave path{fill:none;stroke:#f0e0bd;stroke-width:3;stroke-linecap:round}
   .kmap .kr{cursor:pointer}
-  .kmap .kr path{fill:var(--rc);stroke:#fff;stroke-width:2.5;stroke-linejoin:round;
-    transition:filter .15s}
-  .kmap .kr:hover path{filter:brightness(1.12)}
+  /* 칠 색과 같은 굵은 테두리 + 둥근 모서리 = 해안선이 부드러워집니다.
+     이웃 조각끼리는 같은 색이라 번져도 티가 나지 않습니다 */
+  .kmap .kr path{fill:#f9d76a;stroke:#f9d76a;stroke-width:4;stroke-linejoin:round;
+    transition:fill .16s,stroke .16s}
+  .kmap .kr:hover path{fill:#f6c93f;stroke:#f6c93f}
+  .kmap .kr.on path{fill:var(--rc);stroke:var(--rc)}
   .kmap .kr:focus{outline:none}
-  .kmap .kr:focus-visible path,.kmap .kr.on path{stroke:#123a56;stroke-width:3.5}
-  .kmap .nm{fill:#fff;font-size:13.5px;font-weight:900;text-anchor:middle;pointer-events:none;
-    paint-order:stroke;stroke:rgba(18,58,86,.25);stroke-width:2.5}
-  .kmap .emo{font-size:25px;text-anchor:middle;pointer-events:none}
-  .kmap .pin circle{fill:#fff;stroke:var(--rc);stroke-width:2.5}
-  .kmap .cnt{fill:var(--rc);font-size:11.5px;font-weight:900;text-anchor:middle;pointer-events:none}
+  .kmap .kr:focus-visible path{fill:#f6c93f;stroke:#f6c93f}
+  .kmap .bord path{fill:none;stroke:#fffaf0;stroke-width:2;stroke-linecap:round;
+    stroke-linejoin:round;stroke-dasharray:5 4.5;pointer-events:none}
+  .kmap .marks{pointer-events:none}
+  .kmap .nm{fill:#9a7a35;font-size:12px;font-weight:900;text-anchor:middle;letter-spacing:-.02em}
+  .kmap .krm.on .nm{fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.14);stroke-width:2.5}
+  .kmap .emo{font-size:23px;text-anchor:middle}
+  /* 맛집 수 — 미식지도의 분홍 이름표처럼 알약 모양으로 */
+  .kmap .pill rect{fill:var(--rc)}
+  .kmap .krm.on .pill rect{fill:#fff}
+  .kmap .cnt{fill:#fff;font-size:12px;font-weight:900;text-anchor:middle}
+  .kmap .krm.on .cnt{fill:var(--rc)}
   /* 지도를 아직 안 눌렀을 때 옆에 두는 안내 */
   .fdm-hint{border:1.5px dashed #c9d6ee;border-radius:18px;background:#fff;
     padding:22px 20px;text-align:center}
@@ -3788,37 +3801,37 @@ const foodOffices = () => [...new Set(DB.posts().filter(p => p.board === 'food')
    색은 관광지도처럼 권역마다 다르게 두어, 어느 지역 맛집인지 한눈에 보이게
    했습니다. 기관이 바뀌면 이 표만 고치면 화면·등록창이 함께 따라갑니다. */
 const MOF_REGIONS = [
-  { name:'서울',      color:'#e8467c', emoji:'🍲', head:'서울지방고용노동청',
+  { name:'서울',      color:'#e8537f', emoji:'🍲', head:'서울지방고용노동청',
     offices:['서울강남','서울동부','서울서부','서울남부','서울북부','서울관악'],
-    z:2, lx:120, ly:116, ex:120, ey:94, px:150, py:78,
-    shapes:['M96,74 L140,70 L152,92 L146,116 L116,128 L92,114 L86,90 Z'] },
-  { name:'경기',      color:'#f0883a', emoji:'🥟', head:'경기지방고용노동청',
+    z:2, lx:105, ly:117, ex:105, ey:103, px:130, py:88, es:14, ns:10,
+    shapes:['M89,104 a16,16 0 1,0 32,0 a16,16 0 1,0 -32,0'] },
+  { name:'경기',      color:'#ee8d3c', emoji:'🥟', head:'경기지방고용노동청',
     offices:['의정부','고양','성남','안양','안산','평택'],
-    lx:160, ly:150, ex:170, ey:126, px:178, py:150,   /* 서울 알약을 피해 오른쪽 아래로 */
-    shapes:['M74,88 L104,62 L140,50 L178,44 L188,58 L190,122 L174,158 L98,158 L78,134 Z'] },
-  { name:'인천·강원', color:'#17a2a2', emoji:'🦀', head:'중부지방고용노동청',
+    lx:118, ly:156, ex:118, ey:138, px:142, py:126,
+    shapes:['M80,77 L88,94 L90,118 L80,134 L76,150 L88,161 L152,162 L140,33 L98,51 L87,67 Z'] },
+  { name:'인천·강원', color:'#22a79a', emoji:'🦀', head:'중부지방고용노동청',
     offices:['인천북부','부천','강원(前 춘천)','강릉','원주','태백','영월출장소'],
-    lx:250, ly:116, ex:250, ey:94,
-    shapes:['M188,58 L218,40 L262,34 L302,44 L310,96 L312,152 L300,172 L240,182 L196,164 L190,122 Z',
-            'M44,116 L74,88 L78,134 L58,152 L42,138 Z'] },
-  { name:'부산·경남', color:'#8b5cf6', emoji:'🐟', head:'부산지방고용노동청',
+    lx:215, ly:99, ex:215, ey:78, px:248, py:64,
+    shapes:['M140,33 L158,34 L192,30 L212,13 L227,45 L242,64 L260,90 L278,130 L286,152 L152,162 Z',
+            'M80,77 L88,94 L90,118 L72,124 L56,104 L58,84 Z'] },
+  { name:'부산·경남', color:'#8b6fd4', emoji:'🐟', head:'부산지방고용노동청',
     offices:['부산동부','부산북부','창원','울산','울산동부','양산','진주','통영'],
-    lx:232, ly:360, ex:232, ey:338,
-    shapes:['M202,302 L250,316 L288,304 L278,348 L256,382 L234,400 L204,410 L172,418 L160,400 L188,352 Z'] },
-  { name:'대구·경북', color:'#3b82f6', emoji:'🍖', head:'대구지방고용노동청',
+    lx:222, ly:326, ex:222, ey:306, px:252, py:300,
+    shapes:['M168,276 L292,276 L286,304 L262,348 L232,374 L212,382 L192,372 L184,384 L168,376 Z'] },
+  { name:'대구·경북', color:'#4b8fe0', emoji:'🍖', head:'대구지방고용노동청',
     offices:['대구서부','포항','구미','영주','안동'],
-    lx:250, ly:244, ex:250, ey:222,
-    shapes:['M196,164 L240,182 L300,172 L306,218 L296,272 L288,304 L250,316 L202,302 L196,258 L200,206 Z'] },
-  { name:'광주·전라', color:'#45a833', emoji:'🍱', head:'광주지방고용노동청',
+    lx:230, ly:222, ex:230, ey:202, px:262, py:196,
+    shapes:['M169,158 L286,152 L290,172 L290,216 L298,250 L292,276 L168,276 Z'] },
+  { name:'광주·전라', color:'#56ae4c', emoji:'🍱', head:'광주지방고용노동청',
     offices:['전주','익산','군산','목포','여수'],
-    lx:112, ly:340, ex:112, ey:318,
-    extra:{ emoji:'🍊', ex:112, ey:459 },     /* 제주 — 광주청 권역이라 같은 색입니다 */
-    shapes:['M54,254 L122,268 L196,258 L200,302 L188,352 L150,420 L104,428 L80,408 L68,380 L50,344 L42,300 Z',
-            'M80,452 a32,13.5 0 1,0 64,0 a32,13.5 0 1,0 -64,0'] },
-  { name:'대전·충청', color:'#d79500', emoji:'🍜', head:'대전지방고용노동청',
+    lx:103, ly:332, ex:103, ey:312, px:134, py:306,
+    extra:{ emoji:'🍊', ex:68, ey:514 },     /* 제주 — 광주청 권역이라 같은 색입니다 */
+    shapes:['M70,248 L77,262 L60,294 L54,326 L52,354 L56,378 L66,416 L88,410 L118,398 L152,392 L168,376 L168,276 L169,252 Z',
+            'M38,508 a30,13 0 1,0 60,0 a30,13 0 1,0 -60,0'] },
+  { name:'대전·충청', color:'#d9a21b', emoji:'🍜', head:'대전지방고용노동청',
     offices:['청주','천안','충주','보령','서산'],
-    lx:124, ly:212, ex:124, ey:190,
-    shapes:['M78,134 L98,158 L174,158 L196,164 L200,206 L196,258 L122,268 L54,254 L44,218 L56,180 L58,152 Z'] },
+    lx:105, ly:216, ex:105, ey:196, px:136, py:190,
+    shapes:['M88,161 L70,168 L52,172 L36,184 L34,200 L52,214 L64,208 L61,230 L70,248 L169,252 L169,158 L152,162 Z'] },
 ];
 /* 기관 이름 하나로 그 권역을 찾습니다. 표에 없는 이름(예전에 손으로 적은 것)은
    null 이 나오고, 화면에서는 '그 밖의 기관' 으로 따로 모읍니다 */
@@ -3842,30 +3855,63 @@ const foodOtherOffices = () => foodOffices().filter(o => !officeRegion(o));
 /* 권역 하나에 올라온 맛집 수 */
 const regionCount = (cnt, r) => (cnt[r.head] || 0) + r.offices.reduce((s, o) => s + (cnt[o] || 0), 0);
 
-/* ── 우리나라 지도 한 장 ────────────────────────────────────────────────────
-   권역마다 색이 다른 조각으로 그립니다(관광지도처럼). 조각을 누르면 그 권역의
-   지방청·지청이 지도 옆에 펼쳐집니다. 동그란 숫자는 그 둘레 맛집 수(핀)입니다.
-   모양은 MOF_REGIONS 의 shapes 에 들어 있어, 고칠 일이 있으면 거기만 보면 됩니다. */
+const KM_BORDERS = [
+  'M80,77 L88,94 L90,118',          // 인천 · 경기
+  'M140,33 L152,162',               // 경기 · 강원
+  'M88,161 L152,162',               // 경기 · 충청
+  'M152,162 L286,152',              // 강원 · 경북
+  'M169,158 L168,276',              // 충청·전라 · 경북
+  'M70,248 L169,252',               // 충청 · 전라
+  'M168,276 L292,276',              // 경북 · 경남
+  'M168,376 L168,276',              // 전라 · 경남
+  'M89,104 a16,16 0 1,0 32,0 a16,16 0 1,0 -32,0',   // 서울
+];
+/* 바다에 흩어 두는 잔물결 — 미식지도처럼 여백을 심심하지 않게 */
+const KM_WAVES = [
+  'M14,250 q7,-6 14,0 t14,0',  'M20,274 q7,-6 14,0 t14,0',
+  'M300,100 q7,-6 14,0 t14,0', 'M294,124 q7,-6 14,0 t14,0',
+  'M218,430 q7,-6 14,0 t14,0', 'M246,456 q7,-6 14,0 t14,0',
+  'M22,40 q7,-6 14,0 t14,0',   'M170,502 q7,-6 14,0 t14,0',
+  'M276,336 q7,-6 14,0 t14,0',
+];
+
 function koreaMap(cnt){
   /* 서울은 경기 위에 얹혀야 하므로 z 가 큰 것을 나중에 그립니다 */
   const draw = [...MOF_REGIONS].sort((a, b) => (a.z || 1) - (b.z || 1));
-  return `<svg class="kmap" viewBox="0 0 340 470" xmlns="http://www.w3.org/2000/svg"
+  const part = (r) => {
+    const n  = regionCount(cnt, r);
+    const on = FOOD_REGION === r.name;
+    return `<g class="kr${on ? ' on' : ''}" data-region="${esc(r.name)}" style="--rc:${r.color}"
+      role="button" tabindex="0" aria-label="${esc(r.name)} · 맛집 ${n}곳">
+      <title>${esc(r.name)} · 맛집 ${n}곳</title>
+      ${r.shapes.map(d => `<path d="${d}"/>`).join('')}
+    </g>`;
+  };
+  /* 글씨·이모지는 땅 위에 따로 얹습니다. 그래야 경계선에 가리지 않습니다 */
+  const mark = (r) => {
+    const n  = regionCount(cnt, r);
+    const on = FOOD_REGION === r.name;
+    const w  = String(n).length > 1 ? 30 : 24;
+    return `<g class="krm${on ? ' on' : ''}" data-region="${esc(r.name)}" style="--rc:${r.color}"
+      aria-hidden="true">
+      <text class="emo" x="${r.ex}" y="${r.ey}"${r.es ? ` style="font-size:${r.es}px"` : ''}>${r.emoji}</text>
+      ${r.extra ? `<text class="emo" x="${r.extra.ex}" y="${r.extra.ey}">${r.extra.emoji}</text>` : ''}
+      <text class="nm" x="${r.lx}" y="${r.ly}"${r.ns ? ` style="font-size:${r.ns}px"` : ''}>${esc(r.name)}</text>
+      ${n ? `<g class="pill">
+        <rect x="${r.px - w / 2}" y="${r.py - 10}" width="${w}" height="20" rx="10"/>
+        <text class="cnt" x="${r.px}" y="${r.py + 4}">${n}</text></g>` : ''}
+    </g>`;
+  };
+  return `<svg class="kmap" viewBox="0 0 330 545" xmlns="http://www.w3.org/2000/svg"
     role="group" aria-label="고용노동부 소속기관 지도">
-    ${draw.map(r => {
-      const n  = regionCount(cnt, r);
-      const on = FOOD_REGION === r.name;
-      return `<g class="kr${on ? ' on' : ''}" data-region="${esc(r.name)}" style="--rc:${r.color}"
-        role="button" tabindex="0" aria-label="${esc(r.name)} · 맛집 ${n}곳">
-        <title>${esc(r.name)} · 맛집 ${n}곳</title>
-        ${r.shapes.map(d => `<path d="${d}"/>`).join('')}
-        <text class="emo" x="${r.ex}" y="${r.ey}">${r.emoji}</text>
-        ${r.extra ? `<text class="emo" x="${r.extra.ex}" y="${r.extra.ey}">${r.extra.emoji}</text>` : ''}
-        <text class="nm"  x="${r.lx}" y="${r.ly}">${esc(r.name)}</text>
-        ${n ? (()=>{ const px = r.px || (r.lx + 26), py = r.py || (r.ly - 28);
-          return `<g class="pin"><circle cx="${px}" cy="${py}" r="11.5"/>
-            <text class="cnt" x="${px}" y="${py + 4}">${n}</text></g>`; })() : ''}
-      </g>`;
-    }).join('')}
+    <defs><filter id="kmLand" x="-8%" y="-5%" width="120%" height="112%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#8a6a2a" flood-opacity=".22"/>
+    </filter></defs>
+    <rect class="sea" x="0" y="0" width="330" height="545" rx="26"/>
+    <g class="wave">${KM_WAVES.map(d => `<path d="${d}"/>`).join('')}</g>
+    <g class="land" filter="url(#kmLand)">${draw.map(part).join('')}</g>
+    <g class="bord">${KM_BORDERS.map(d => `<path d="${d}"/>`).join('')}</g>
+    <g class="marks">${draw.map(mark).join('')}</g>
   </svg>`;
 }
 
