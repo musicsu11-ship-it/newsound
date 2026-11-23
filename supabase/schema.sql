@@ -407,13 +407,17 @@ create policy expenses_delete on public.expenses for delete
 -- ============================================================================
 --  7. 일정 (캘린더)
 -- ============================================================================
+-- end_date · color 는 50절에서 더했습니다. 새로 만드는 경우를 위해 여기에도
+-- 함께 적어 둡니다. (이미 쓰고 있는 데이터베이스는 50절이 처리합니다)
 create table if not exists public.events (
   id          uuid primary key default gen_random_uuid(),
-  ev_date     date not null,
+  ev_date     date not null,                     -- 시작일
+  end_date    date,                              -- 종료일(비우면 하루짜리)
   ev_time     text default '',
   title       text not null,
   place       text default '',
   descr       text default '',
+  color       text not null default 'blue',      -- 달력 띠 색
   author_id   uuid not null default auth.uid() references auth.users on delete cascade,
   author_name text not null default '',
   created_at  timestamptz not null default now()
@@ -2856,4 +2860,43 @@ begin
     execute format('create trigger guard_truncate before truncate on public.%I
       for each statement execute function public.guard_truncate()', t);
   end loop;
+end $$;
+
+-- ============================================================================
+--  50. 일정에 종료일·색상 더하기 (구글 캘린더식 기간 띠)
+--  ---------------------------------------------------------------------------
+--  이미 쓰고 있는 데이터베이스를 위한 절입니다. 7절의 create table 에도 같은
+--  칸을 적어 두었지만, 'create table if not exists' 는 이미 있는 표를 고치지
+--  않으므로 여기서 따로 더합니다.
+--
+--    end_date — 종료일. 비워 두면 지금까지처럼 하루짜리 일정입니다.
+--    color    — 달력에 그려지는 띠 색. 여섯 가지만 받습니다.
+--
+--  기존 일정은 하나도 바뀌지 않습니다. 빈 칸이 붙을 뿐입니다.
+-- ============================================================================
+alter table public.events add column if not exists end_date date;
+alter table public.events add column if not exists color    text not null default 'blue';
+
+-- 색 이름은 여섯 가지만 (오타로 엉뚱한 값이 들어가지 않게)
+do $$
+begin
+  if not exists (select 1 from pg_constraint
+                  where conrelid = 'public.events'::regclass
+                    and conname  = 'events_color_check') then
+    alter table public.events
+      add constraint events_color_check
+      check (color in ('blue','green','orange','pink','purple','gray'));
+  end if;
+end $$;
+
+-- 종료일은 시작일보다 앞설 수 없습니다
+do $$
+begin
+  if not exists (select 1 from pg_constraint
+                  where conrelid = 'public.events'::regclass
+                    and conname  = 'events_range_check') then
+    alter table public.events
+      add constraint events_range_check
+      check (end_date is null or end_date >= ev_date);
+  end if;
 end $$;
